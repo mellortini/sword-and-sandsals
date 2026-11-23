@@ -47,3 +47,9 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
   Integrację walki można zacząć w `src/scenes/arena.ts`. `?shot`, `window.__game` i `window.__act` działają jak wcześniej.
 - Build przeszedł. W przeglądarce sprawdziłem wszystkie sześć widoków, zmianę zbroi, animację szarży z blokiem i zapis PNG przez `?shot`.
 
+### 2026-11-23 20:48 · Codex (współpraca) · #3 / 3-vitest-eslint
+
+- `npm run lint` uruchamia ESLint, a `npm test` uruchamia Vitest w środowisku Node. Obie komendy są też w CI.
+- ESLint 10 analizuje TypeScript 7 przez parser Oxc. Minimum dla Node 22 to 22.13, a CI wciąż używa Node 24.
+- Pierwsze testy sprawdzają wyszukiwanie ekwipunku i pusty slot. Testy walki z #2 można dodać w `src/core/combat.test.ts`.
+

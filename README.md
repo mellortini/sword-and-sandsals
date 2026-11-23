@@ -18,7 +18,7 @@ Plan i projekt: [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/GDD.md`](docs/GDD.m
 | `CLAUDE.md` | jedna linia `@AGENTS.md` (Claude Code czyta te same zasady co Codex) |
 
 ## Wymagania
-- **Node.js ≥ 22.12** (projekt rozwijany na Node 26) i npm
+- **Node.js 22 od 22.13, 24 lub 26+** (projekt rozwijany na Node 26) i npm
 - **Git** + **Git LFS** (grafiki PNG/JPG/.blend idą przez LFS)
 - **GitHub CLI** (`gh`) — zadania i PR-y
 - tylko do generowania grafik: **Blender 5.3** (`D:/blender/blender.exe` u Mateusza; ścieżkę dopasuj) i Python 3.11+

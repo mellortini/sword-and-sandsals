@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "lint": "eslint .",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
@@ -13,11 +15,15 @@
     "pixi.js": "^8.23.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.15.0",
+    "eslint-parser-oxc": "^0.1.1",
     "typescript": "^7.0.2",
-    "vite": "^8.3.8"
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1"
   },
   "engines": {
-    "node": ">=22.12"
+    "node": "^22.13.0 || ^24.0.0 || >=26.0.0"
   },
   "description": "Paper cut-out turn-based gladiator game (TypeScript + Vite + PixiJS, art rendered in Blender)"
 }
