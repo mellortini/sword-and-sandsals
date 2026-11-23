@@ -29,6 +29,6 @@ for (const view of cases) {
       app.render();
     });
 
-    await expect(page.locator('#stage canvas')).toHaveScreenshot(`${view.name}.png`, { animations: 'disabled' });
+    await expect(page).toHaveScreenshot(`${view.name}.png`, { animations: 'disabled' });
   });
 }

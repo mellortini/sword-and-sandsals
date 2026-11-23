@@ -58,3 +58,7 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
 - Playwright porównuje canvas widoków lineup, faces i strip. Testy czekają na wszystkie kukły, ustawiają ziarno wyglądu dla strip i renderują w stałym widoku 1280×720.
 - Osobny job CI pobiera grafiki z Git LFS. Pierwszy przebieg szkicu ma zapisać wzorce na tym samym systemie Linux i Chromium, na których będą wykonywane dalsze porównania.
 
+### 2026-11-23 21:34 · Codex (współpraca) · #95 / 95-visual-tests
+
+- Runner Linux wygenerował lineup i strip, ale faces przekroczył limit oczekiwania Playwright na stabilny element. Zrzut obejmuje teraz cały stały viewport, a limit porównania wynosi 35 sekund.
+

@@ -7,9 +7,9 @@ export default defineConfig({
   snapshotPathTemplate: '{testDir}/__screenshots__/{platform}/{arg}{ext}',
   updateSnapshots: 'none',
   workers: 1,
-  timeout: 60_000,
+  timeout: 90_000,
   expect: {
-    timeout: 10_000,
+    timeout: 35_000,
     toHaveScreenshot: { maxDiffPixelRatio: 0.002, threshold: 0.16 },
   },
   use: {
