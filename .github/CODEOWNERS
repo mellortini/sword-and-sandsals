@@ -1,8 +1,7 @@
 # Właściciele modułów (mapa w ARCHITECTURE.md). Właściciel dostaje prośbę o review przy zmianach w swoich folderach.
-# TODO: po potwierdzeniu loginu kolegi zamienić @KOLEGA na jego login i odkomentować linie oznaczone (kolega).
 
 # --- pliki wspólne: oboje
-*                         @mellortini
+*                         @mellortini @lkaelek
 
 # --- Mateusz: grafika, kukła, animacje, efekty, narzędzia dev
 /blender/                 @mellortini
@@ -11,11 +10,14 @@
 /tools/                   @mellortini
 /src/rig/                 @mellortini
 /src/anim/                @mellortini
-/src/ui/fx.ts             @mellortini
-/src/scenes/dev/          @mellortini
 
-# --- kolega: logika, dane, UI, sceny gry  (kolega)
-# /src/core/              @KOLEGA
-# /src/data/              @KOLEGA
-# /src/ui/                @KOLEGA
-# /src/scenes/            @KOLEGA
+# --- kolega (lkaelek): logika, dane, UI, sceny gry
+/src/core/                @lkaelek
+/src/data/                @lkaelek
+/src/ui/                  @lkaelek
+/src/scenes/              @lkaelek
+
+# --- wyjątki w folderach kolegi (późniejsza reguła wygrywa)
+/src/ui/fx.ts              @mellortini
+/src/scenes/dev/           @mellortini
+/src/scenes/common.ts      @mellortini @lkaelek
