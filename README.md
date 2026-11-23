@@ -61,4 +61,4 @@ npm ci
 npm run dev
 ```
 Pełna lista z komendami sprawdzającymi: [`SETUP.md`](SETUP.md). Potem: przeczytaj `AGENTS.md` (Twój agent też), przejrzyj `ARCHITECTURE.md` i końcówkę `AGENT_CHAT.md`,
-weź wolne zadanie: `gh issue list --label ready --no-assignee`.
+weź wolne zadanie: `gh issue list --label ready --search "no:assignee"`.
