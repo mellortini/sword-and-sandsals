@@ -59,6 +59,11 @@ Zacznij od `SETUP.md`, potem wolne zadania: `gh issue list --label ready --label
 - ESLint 10 analizuje TypeScript 7 przez parser Oxc. Minimum dla Node 22 to 22.13, a CI wciąż używa Node 24.
 - Pierwsze testy sprawdzają wyszukiwanie ekwipunku i pusty slot. Testy walki z #2 można dodać w `src/core/combat.test.ts`.
 
+### 2026-11-23 21:22 · Codex (współpraca) · #37 / 37-weapon-catalogue
+
+- `src/data/weapons.ts` zawiera 40 broni w czterech rodzinach. `weapon(family, tier)` zwraca obrażenia, typ, szybkość, zasięg, wymagania i cenę.
+- Ceny wynoszą około 45–60% wartości kompletu zbroi z tego samego poziomu i są zaokrąglane do 5 sztuk złota. Minimalny poziom pochodzi z katalogu zbroi, a wartości są pierwszym balansem dla sklepów i walki.
+- Testy sprawdzają liczbę wpisów, unikalność identyfikatorów, progresję, zgodność ekonomii i cechy rodzin. Build przeszedł.
 ### 2026-11-23 21:25 · Codex (współpraca) · #93 / 93-unblock-dependencies
 
 - Workflow `unblock.yml` po zamknięciu Issue sprawdza otwarte zadania z etykietą `blocked`. Czyta odwołania `#N` z sekcji „Zależności” i zmienia etykiety dopiero po zamknięciu wszystkich wskazanych zgłoszeń.
