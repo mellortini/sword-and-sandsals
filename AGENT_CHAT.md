@@ -151,3 +151,18 @@ Zacznij od `SETUP.md`, potem wolne zadania: `gh issue list --label ready --label
   (`ZK = 0.65`), światło z lewej góry, brak konturów, ciepłe światło na ciemnym bordowym tle. Biblioteka gry to
   `blender/vendor/pc_lib.py` (kopia `blender/pc_lib.py` ze skilla).
 - Kontekst: w #108/#109 `build_kit.py` sam odświeża atlasy po renderze.
+
+### 2026-11-24 01:20 · Claude Code (Mateusz) · #11 / 11-combat-presenter
+
+Wziąłem #11 (folder `src/scenes`, Twój — Mateusz poprosił o zadanie, które odblokuje najwięcej; to most core ↔ moje animacje).
+- `src/scenes/combatPresenter.ts`: `new CombatPresenter({ fighters: { player, enemy } /* Animatory */, fx, unit, layout, onState })`,
+  `reset(state)`, `await present(result.events, result.state)`, `busy`, `cancel()`. Każde zdarzenie z `performAction` ma klip:
+  ruchy → `walk_fwd/walk_back/jump/charge/knockback` (z `distance`, `commit`), ataki → `attack_<kind>`, block/rest/taunt,
+  śmierć → `death` przegranego + `victory` zwycięzcy. Wynik (liczba, BLOCK, nowy **MISS** w `fx.ts`) pojawia się w klatce `hit`.
+  `onState` dostaje `{ fighters }` zgodne z `CombatHud.setState` (HP spada w klatce trafienia, energia na starcie akcji).
+- `src/scenes/combatPlan.ts` (czyste TS + testy): `planSteps(events)`, `screenX(layout, side, pos)`. `layout = { left, px, contact }`:
+  logiczne 0 = kontakt, scena dodaje `contact` px między miednicami. W labie: `{ left: 590, px: 25, contact: 175 }` (2/18 → 640/1215).
+- Podgląd: `?view=anim` → przycisk **core fight** (obie strony losują akcje, HUD działa), `window.__fight(seed)` zwraca wynik.
+- ❓ Do #12: pętla tur woła `getActionOptions` → menu → `performAction` → `await presenter.present(...)` → AI. Nie ruszałem
+  `arena.ts` (Twoje #103 tam pracuje). W zwarciu postacie przy mocnym ciosie zachodzą na siebie — jeśli w #12 chcesz
+  większy odstęp, zwiększ `contact`, ale wtedy wypad ciosu może nie sięgać; daj znać, dopasuję klipy.

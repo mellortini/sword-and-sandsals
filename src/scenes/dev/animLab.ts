@@ -1,8 +1,12 @@
 import { Container, Sprite } from 'pixi.js';
 import type { Animator } from '../../anim/Animator';
 import type { PaperRig } from '../../rig/PaperRig';
+import { createCombat, getActionOptions, performAction } from '../../core/combat';
+import type { ActionOption, CombatAction, CombatState } from '../../core/types';
+import { CombatHud } from '../../ui/hud';
 import { BlockShield, DamageSplat, FxLayer } from '../../ui/fx';
-import { FEET_Y, PELVIS_ABOVE_FEET, UNIT, groundShadowTexture, randomLook } from '../common';
+import { CombatPresenter } from '../combatPresenter';
+import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from '../common';
 import type { SceneContext, SceneUpdate } from '../common';
 
 export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: SceneContext): Promise<SceneUpdate> {
@@ -61,7 +65,9 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
     });
   };
   const act = (name: string) => {
-    if (pa.busy || ea.busy) return;
+    if (name === 'reset') { fighting = false; presenter.cancel(); }
+    else if (fighting) return; // the core fight owns both fighters until it ends or is reset
+    if (name !== 'reset' && (pa.busy || ea.busy)) return;
     const g = gap();
     switch (name) {
       case 'walk_fwd': pa.play('walk_fwd', { commit: true, distance: Math.min(1.6, Math.max(0, g - MELEE)), onEnd: enemyTurn }); break;
@@ -87,6 +93,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
         pa.play('attack_power', { blend: 1, then: 'victory', onEvent: (e) => { if (e.type === 'hit') { ea.play('death', { then: null }); dmg(E, 24, true); } } });
         break;
       case 'reset':
+        hud.visible = false;
         pa.home.x = 640; ea.home.x = 1290; pa.play('idle'); ea.play('idle'); layer.clear(); break;
       default: pa.play(name, { onEnd: enemyTurn });
     }
@@ -96,15 +103,59 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   ui.innerHTML = `<h3>Animation lab</h3>
     <div class="grid">${btn('walk_back', '&#9664; step')}${btn('walk_fwd', 'step &#9654;')}${btn('jump', 'jump')}${btn('charge', 'charge')}
     ${btn('attack_quick', 'quick')}${btn('attack_normal', 'normal')}${btn('attack_power', 'power')}${btn('block', 'block')}
-    ${btn('taunt', 'taunt')}${btn('rest', 'rest')}${btn('hit', 'hit')}${btn('finish', 'finish')}${btn('victory', 'victory')}${btn('death', 'die')}${btn('reset', 'reset')}</div>
+    ${btn('taunt', 'taunt')}${btn('rest', 'rest')}${btn('hit', 'hit')}${btn('finish', 'finish')}${btn('victory', 'victory')}${btn('death', 'die')}${btn('reset', 'reset')}${btn('fight', 'core fight')}</div>
     <label><input type="checkbox" id="cbBlock"> enemy blocks</label>
     <label><input type="checkbox" id="cbCounter" checked> enemy answers</label>
     <label>speed <select id="sSpeed"><option value="1">1x</option><option value="0.5">0.5x</option><option value="0.25">0.25x</option><option value="0.1">0.1x</option></select></label>
     <div class="small"><a href="?">arena</a> &middot; <a href="?view=wardrobe">wardrobe</a> &middot; <a href="?view=strip&clip=attack_normal">frame strips</a></div>`;
-  ui.addEventListener('click', (e) => { const a = (e.target as HTMLElement).dataset.a; if (a) act(a); });
+  // --- core fight (#11): src/core decides, CombatPresenter animates, HUD follows. Both sides pick at random.
+  // contact 4.6 units, melee range (logical 2) 5.9 units: the attack lunges reach without the bodies overlapping
+  const layout = { left: 640 - 2 * 25, px: 25, contact: 175 };
+  const presenter = new CombatPresenter({
+    fighters: { player: pa, enemy: ea }, fx: layer, unit: UNIT, layout,
+    onState: (s) => hud.setState(s),
+  });
+  const full = { name: '', health: 1, energy: 1, stats: { maxHealth: 1, maxEnergy: 1 } };
+  const hud = new CombatHud({ fighters: { player: full, enemy: full } }, W, H);
+  hud.visible = false;
+  arena.addChild(hud);
+  let fighting = false;
+  const pause = (sec: number) => new Promise<void>((res) => later(sec, res));
+  const choose = (opts: ActionOption[], rnd: () => number): CombatAction => {
+    const attacks = opts.filter((o) => o.hitChance !== undefined);
+    if (attacks.length && rnd() < 0.8) return attacks[Math.floor(rnd() * attacks.length)].action;
+    const moves = opts.filter((o) => ['step_forward', 'jump', 'charge'].includes(o.action));
+    if (moves.length && rnd() < 0.85) return moves[Math.floor(rnd() * moves.length)].action;
+    return opts[Math.floor(rnd() * opts.length)].action;
+  };
+  const coreFight = async (seed = Math.floor(Math.random() * 1e9)) => {
+    if (fighting || presenter.busy) return null;
+    fighting = true;
+    let r = seed;
+    const rnd = () => ((r = (Math.imul(r, 1_664_525) + 1_013_904_223) >>> 0) / 0x1_0000_0000);
+    let state: CombatState = createCombat(seed, { name: 'Player', equipment: L0 }, { name: 'Opponent', equipment: L1 });
+    hud.visible = true;
+    hud.setState(state);
+    presenter.reset(state);
+    const log: string[] = [];
+    while (fighting && state.winner === null) {
+      const action = choose(getActionOptions(state), rnd);
+      const res = performAction(state, action);
+      if (!res.ok) break;
+      log.push(`${state.active}:${action}`);
+      await presenter.present(res.events, res.state);
+      state = res.state;
+      await pause(0.35);
+    }
+    fighting = false;
+    return { seed, winner: state.winner, turns: log.length, log };
+  };
+  (window as unknown as { __fight: unknown }).__fight = coreFight;
+
+  ui.addEventListener('click', (e) => { const a = (e.target as HTMLElement).dataset.a; if (a === 'fight') void coreFight(); else if (a) act(a); });
   (document.getElementById('cbBlock') as HTMLInputElement).onchange = (e) => (state.response = (e.target as HTMLInputElement).checked ? 'block' : 'hit');
   (document.getElementById('cbCounter') as HTMLInputElement).onchange = (e) => (state.counter = (e.target as HTMLInputElement).checked);
   (document.getElementById('sSpeed') as HTMLSelectElement).onchange = (e) => { const v = +(e.target as HTMLSelectElement).value; pa.speed = v; ea.speed = v; };
   (window as unknown as { __act: unknown }).__act = act;
-  return (dt) => layer.update(dt * pa.speed);
+  return (dt) => { layer.update(dt * pa.speed); hud.update(dt * pa.speed); };
 }
