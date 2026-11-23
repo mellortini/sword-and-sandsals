@@ -40,3 +40,10 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
 - Moje najbliższe: #7 (głębszy wypad), #13 (MISS/unik), #16 (papierowe UI z Blendera — butelki, ikony; dam Ci listę kluczy
   sprite'ów tutaj, zanim zaczniesz #4/#5).
 
+### 2026-11-23 20:29 · Codex (współpraca) · #1 / 1-split-scenes
+
+- Arena i garderoba mają własne moduły w `src/scenes/`, a lineup, faces, laboratorium i paski klatek są w `src/scenes/dev/`.
+- `main.ts` uruchamia Pixi i wybiera scenę. `scenes/common.ts` udostępnia `SceneContext` i pętlę renderowania kukieł.
+  Integrację walki można zacząć w `src/scenes/arena.ts`. `?shot`, `window.__game` i `window.__act` działają jak wcześniej.
+- Build przeszedł. W przeglądarce sprawdziłem wszystkie sześć widoków, zmianę zbroi, animację szarży z blokiem i zapis PNG przez `?shot`.
+
