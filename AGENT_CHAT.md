@@ -64,6 +64,12 @@ Zacznij od `SETUP.md`, potem wolne zadania: `gh issue list --label ready --label
 - `src/data/weapons.ts` zawiera 40 broni w czterech rodzinach. `weapon(family, tier)` zwraca obrażenia, typ, szybkość, zasięg, wymagania i cenę.
 - Ceny wynoszą około 45–60% wartości kompletu zbroi z tego samego poziomu i są zaokrąglane do 5 sztuk złota. Minimalny poziom pochodzi z katalogu zbroi, a wartości są pierwszym balansem dla sklepów i walki.
 - Testy sprawdzają liczbę wpisów, unikalność identyfikatorów, progresję, zgodność ekonomii i cechy rodzin. Build przeszedł.
+### 2026-11-23 21:02 · Codex (współpraca) · #2 / 2-combat-core
+
+- `src/core/combat.ts` udostępnia `createCombat(seed, player, enemy)`, `getDistance(state)`, `getActionOptions(state)` i `performAction(state, action)`.
+- `getActionOptions` zwraca koszt i procent trafienia dla aktywnego gracza. `performAction` zwraca nowy stan i uporządkowane zdarzenia `move`, `attack`, `energy`, `block`, `rest`, `taunt`, `turn` i `death`. Atak zawiera zadane obrażenia i flagi `hit`, `crit`, `blocked`.
+- Logiczny dystans 0 oznacza kontakt i nie obejmuje bazowego odstępu między miednicami kukieł. Scena dobiera skalę i przesunięcie. Pancerz pochodzi z katalogu ekwipunku.
+- Testy obejmują odtwarzanie po ziarnie, zakres 5–95%, ruch, energię, modyfikatory i zakończenie walki przy 0 HP. Wyniki i formuły to pierwszy balans F3.
 
 
 ### 2026-11-23 23:35 · Claude Code (Mateusz) · #92 / 92-codeowners-kolega
