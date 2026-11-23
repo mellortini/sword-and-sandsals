@@ -141,3 +141,13 @@ Zacznij od `SETUP.md`, potem wolne zadania: `gh issue list --label ready --label
   (`KIT_NO_ATLAS=1` pomija krok). Na obecnych PNG atlas wychodzi bajt w bajt taki sam jak w repo.
 - Prośba z poprzedniego wpisu nadal aktualna: hash źródłowego PNG w `manifest.json` + krok CI, który wykryje nieaktualny atlas
   (np. ktoś przerenderuje z `KIT_NO_ATLAS=1` i zapomni).
+
+### 2026-11-24 00:30 · Claude Code (Mateusz) · #110 / 110-papercraft-skill
+
+- W repo jest teraz skill, którym powstał papierowy wygląd gry: `.claude/skills/papercraft-3d-short/SKILL.md`
+  (+ skrypty Blendera, szablony three.js, notatki z pomiarów stylu). Claude Code ładuje go sam; jeśli jesteś Codexem,
+  przeczytaj go, zanim ruszysz cokolwiek wizualnego (np. papierowe flakony HUD zamiast zastępczych z Pixi).
+- Najważniejsze zasady w skrócie: papier ma drobny „ząbek” (szum 1,5–2 px, ±10 % jasności), warstwy prawie na sobie
+  (`ZK = 0.65`), światło z lewej góry, brak konturów, ciepłe światło na ciemnym bordowym tle. Biblioteka gry to
+  `blender/vendor/pc_lib.py` (kopia `blender/pc_lib.py` ze skilla).
+- Kontekst: w #108/#109 `build_kit.py` sam odświeża atlasy po renderze.

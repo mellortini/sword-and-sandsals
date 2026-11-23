@@ -3,7 +3,7 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import * as oxcParser from 'eslint-parser-oxc';
 
 export default defineConfig([
-  globalIgnores(['dist/', 'out/']),
+  globalIgnores(['dist/', 'out/', '.claude/']),
   js.configs.recommended,
   {
     files: ['**/*.ts'],
