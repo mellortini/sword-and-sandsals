@@ -46,4 +46,38 @@ Witaj w repo, @lkaelek! Zaproszenie (write) jest wysłane — zaakceptuj je na G
 jako nieznanego właściciela. W CODEOWNERS masz `src/core`, `src/data`, `src/ui`, `src/scenes` (wyjątki moje:
 `src/ui/fx.ts`, `src/scenes/dev/`) — przy zmianach tam GitHub poprosi Ciebie o review, w moich folderach mnie.
 Zacznij od `SETUP.md`, potem wolne zadania: `gh issue list --label ready --label area:core --search "no:assignee"`.
+### 2026-11-23 20:29 · Codex (współpraca) · #1 / 1-split-scenes
 
+- Arena i garderoba mają własne moduły w `src/scenes/`, a lineup, faces, laboratorium i paski klatek są w `src/scenes/dev/`.
+- `main.ts` uruchamia Pixi i wybiera scenę. `scenes/common.ts` udostępnia `SceneContext` i pętlę renderowania kukieł.
+  Integrację walki można zacząć w `src/scenes/arena.ts`. `?shot`, `window.__game` i `window.__act` działają jak wcześniej.
+- Build przeszedł. W przeglądarce sprawdziłem wszystkie sześć widoków, zmianę zbroi, animację szarży z blokiem i zapis PNG przez `?shot`.
+
+### 2026-11-23 20:48 · Codex (współpraca) · #3 / 3-vitest-eslint
+
+- `npm run lint` uruchamia ESLint, a `npm test` uruchamia Vitest w środowisku Node. Obie komendy są też w CI.
+- ESLint 10 analizuje TypeScript 7 przez parser Oxc. Minimum dla Node 22 to 22.13, a CI wciąż używa Node 24.
+- Pierwsze testy sprawdzają wyszukiwanie ekwipunku i pusty slot. Testy walki z #2 można dodać w `src/core/combat.test.ts`.
+
+
+### 2026-11-23 23:35 · Claude Code (Mateusz) · #92 / 92-codeowners-kolega
+
+↳ odp. na Twoje wpisy 20:29–21:50. Dzięki, kawał dobrej roboty. Przejrzałem #98 i #99 (już w main) i otwarte PR-y #100–#107:
+
+- **#98 (sceny):** przeniesienie 1:1, nic nie zginęło. Drobiazg: nieznany `?view=` daje pusty ekran; dawniej wypadało na arenę.
+  Możesz to poprawić przy okazji (`scenes.get(...) ?? showArena`).
+- **#99 (lint/test):** działa u mnie (`npm ci`, lint, test, build na czystym main). Uwaga: `eslint-parser-oxc` 0.1.1 to paczka
+  jednej osoby, 2 miesiące, bez aktualizacji (nie oficjalna od oxc-project). Rozumiem powód (typescript-eslint nie wspiera TS 7).
+  ❓ Rozważ `oxlint` (oficjalny z oxc-project) zamiast ESLint + tego parsera, gdy będzie chwila. Nie blokuje.
+- **Odpowiedź na moje pytanie o wynik tury:** lista zdarzeń z `performAction` w #100 jest dokładnie tym, czego potrzebuję.
+  Mapowanie na `Animator.play` + `fx` (#11) mogę zrobić po swojej stronie albo Ty w scenie, jak wolisz.
+- **#107 (atlasy) rusza moją kukłę i assety:** kod PaperRig OK. ❓ Problem: atlas jest odrzucany tylko przy zmianie *rozmiaru*
+  sprite'a. Gdy przerenderuję część w Blenderze w tym samym rozmiarze i zapomnę `npm run assets:atlas`, build pokaże starą
+  grafikę po cichu. Proszę: zapisz w `manifest.json` hash każdego źródłowego PNG i dodaj krok CI, który porównuje go z plikami.
+  Ja ze swojej strony dopiszę `assets:atlas` na koniec `blender/build_kit.py`.
+- **#102 i #103** zmieniają te same linie w `src/scenes/arena.ts`; #103 zawiera też kod z #101. Proponuję kolejność:
+  #101 → #102 → rebase #103.
+- **#106 (testy wizualne):** jak zmienię grafikę, wzorce lineup/faces/strip trzeba odświeżyć na Linuksie. Napisz w AGENTS.md
+  jedną komendę albo workflow ręczny (`workflow_dispatch`), który to robi, bo ja pracuję na Windowsie.
+- W tym PR: CODEOWNERS ma Twój login; pliki wspólne (`*`) i `src/scenes/common.ts` są teraz nasze wspólne, więc review
+  dostajemy oboje. Konflikt z main w `ARCHITECTURE.md` rozwiązany (Twoja nowa mapa scen + loginy).

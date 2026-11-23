@@ -1,7 +1,8 @@
 # ARCHITECTURE.md
 
 ## Technologia
-TypeScript 7 + Vite 8 + PixiJS 8 (WebGL), Node ≥ 22.12. Grafika: Blender 5.3 (Cycles, skrypty Python) → PNG + JSON.
+TypeScript 7 + Vite 8 + PixiJS 8 (WebGL). Obsługiwane wersje Node.js są w `package.json` (`engines`).
+Grafika: Blender 5.3 (Cycles, skrypty Python) → PNG + JSON.
 Gra to statyczna strona (`npm run build` → `dist/`).
 
 ## Jak to działa
@@ -11,7 +12,9 @@ Gra to statyczna strona (`npm run build` → `dist/`).
    i włosów per piksel (części skóry/włosów są renderowane na neutralnym papierze), miękki cień papieru pod każdą
    warstwą, wszystko do jednej RenderTexture na postać.
 3. **Animator** odtwarza klipy (30 fps, klatki kluczowe obrotów kości + ruch korzenia + zdarzenia `hit`/`block`/…).
-4. **Sceny** (dziś wszystkie w `src/main.ts`) układają arenę, postacie, efekty i HTML-owe panele.
+4. **Sceny** w `src/scenes/` układają arenę, postacie, efekty i HTML-owe panele. `src/main.ts` inicjalizuje Pixi,
+   dopasowuje widok do okna, wybiera scenę z `?view=` i obsługuje `?shot=`. `src/scenes/common.ts` przekazuje scenom
+   kontekst i aktualizuje kukły we wspólnej pętli renderowania.
 
 ## Mapa modułów
 | folder / plik | moduł | właściciel | uwagi |
@@ -26,8 +29,9 @@ Gra to statyczna strona (`npm run build` → `dist/`).
 | `src/core/` *(nowy)* | logika gry bez renderu: walka, tury, AI, statystyki, RNG z ziarnem, zapis | kolega (@lkaelek) | czysty TS, testy (Vitest) |
 | `src/data/` | dane gry: przedmioty, wrogowie, sklepy | kolega (@lkaelek) | `equipment.ts` — 50 przedmiotów, tier 1–10 |
 | `src/ui/` (poza `fx.ts`) *(nowe)* | HUD, menu radialne, panele, ekrany | kolega (@lkaelek) | |
-| `src/scenes/` *(po rozbiciu main.ts)* | sceny gry: arena-walka, miasto, kreator | kolega (@lkaelek) | |
-| `src/scenes/dev/` *(po rozbiciu main.ts)* | narzędzia wizualne: lineup, faces, anim lab, strip | Mateusz | |
+| `src/scenes/` | sceny gry: arena, garderoba | kolega (@lkaelek) | `arena.ts` (`/`), `wardrobe.ts` (`?view=wardrobe`) |
+| `src/scenes/common.ts` | wspólne narzędzia scen | wspólne | wymiary, `SceneContext`, tworzenie i renderowanie kukieł |
+| `src/scenes/dev/` | narzędzia wizualne | Mateusz (@mellortini) | `lineup.ts`, `faces.ts`, `animLab.ts`, `strip.ts` (`?view=lineup`, `faces`, `anim`, `strip`) |
 | `docs/` | projekt gry | wspólne | każdy dopisuje do swoich dokumentów; `ROADMAP.md` = plik wspólny |
 
 ## Pliki wspólne (osobny mały PR, label `shared-files`)

@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      # LFS files are not needed for typecheck/build (saves LFS bandwidth); they stay as small pointer files
+      # CI runs without downloading the graphics stored in Git LFS.
       - uses: actions/checkout@v4
         with:
           lfs: false
@@ -32,5 +32,7 @@ jobs:
           cache: npm
 
       - run: npm ci
+      - run: npm run lint
+      - run: npm test
       - run: npm run typecheck
       - run: npm run build
