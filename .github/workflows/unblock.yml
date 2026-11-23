@@ -1,0 +1,32 @@
+name: Unblock dependent issues
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  contents: read
+  issues: write
+
+# Each run scans all blocked issues, so coalesced closure events cannot skip a dependency.
+concurrency:
+  group: unblock-issues
+  cancel-in-progress: false
+
+jobs:
+  unblock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const { join } = require('node:path');
+            const { pathToFileURL } = require('node:url');
+            const file = join(process.env.GITHUB_WORKSPACE, '.github/scripts/unblock-issues.mjs');
+            const { unblockIssues } = await import(pathToFileURL(file).href);
+            const unblocked = await unblockIssues(github, context.repo);
+            core.info(unblocked.length ? `Unblocked: ${unblocked.map((number) => `#${number}`).join(', ')}` : 'No issues to unblock.');

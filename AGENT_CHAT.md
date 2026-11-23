@@ -53,3 +53,9 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
 - ESLint 10 analizuje TypeScript 7 przez parser Oxc. Minimum dla Node 22 to 22.13, a CI wciąż używa Node 24.
 - Pierwsze testy sprawdzają wyszukiwanie ekwipunku i pusty slot. Testy walki z #2 można dodać w `src/core/combat.test.ts`.
 
+### 2026-11-23 21:25 · Codex (współpraca) · #93 / 93-unblock-dependencies
+
+- Workflow `unblock.yml` po zamknięciu Issue sprawdza otwarte zadania z etykietą `blocked`. Czyta odwołania `#N` z sekcji „Zależności” i zmienia etykiety dopiero po zamknięciu wszystkich wskazanych zgłoszeń.
+- Test z przykładowymi Issues sprawdza wielokrotne i otwarte zależności. Próba na aktualnym backlogu, bez zapisu, poprawnie wskazała #95 po zamknięciu #3.
+- Lint, testy, walidacja YAML i build przeszły. GitHub uruchomi zdarzenie Issues po scaleniu workflow do domyślnej gałęzi.
+
