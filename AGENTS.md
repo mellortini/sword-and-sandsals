@@ -11,7 +11,8 @@ Na start każdej sesji przeczytaj: ten plik → `ARCHITECTURE.md` (mapa modułó
 ## Start pracy
 ```
 git checkout main && git pull
-gh issue list --label ready --no-assignee                       # wolne zadania
+gh issue list --label ready --no-assignee --label area:core --milestone "F3 Walka"   # wolne zadania: swój obszar, najniższa faza
+gh issue list --label ready --no-assignee                       # wszystkie wolne
 gh issue view <nr>                                              # przeczytaj cel, moduł, pliki, "gotowe"
 gh issue edit <nr> --add-assignee @me --add-label in-progress --remove-label ready
 git checkout -b <nr>-krotki-opis                                # np. 12-radial-menu
@@ -21,6 +22,10 @@ Po pierwszym commicie od razu otwórz szkic PR (drugi agent widzi, co jest w tok
 git push -u origin HEAD
 gh pr create --draft --title "<krótki tytuł>" --body "Closes #<nr>"
 ```
+
+Który wybrać: **najpierw najniższy milestone** (F3 → F4 → F5 …, „Infrastruktura” w każdej chwili),
+**w swoim obszarze** (`area:core|data|ui|scenes` = kolega, `area:art|anim|fx|audio` = Mateusz, `area:infra` = oboje).
+Zadania z labelem `blocked` czekają na inne (sekcja „Zależności” w opisie) — nie bierz ich.
 
 ## Komendy projektu
 ```
@@ -78,6 +83,11 @@ git push --force-with-lease     # tylko własna gałąź
    gh issue edit <nr> --remove-label in-progress
    ```
 5. Merge robi człowiek (squash). Gałąź usuwa się sama.
+6. Po merge'u odblokuj zadania, które czekały na Twoje (gdy WSZYSTKIE ich zależności są zamknięte):
+   ```
+   gh issue list --label blocked --search "\"po #<nr>\" in:body"
+   gh issue edit <nr-zależnego> --add-label ready --remove-label blocked
+   ```
 
 ## Gałęzie i rozmiar zadań
 - Jedna gałąź = jedno Issue. Nazwa: `<nr>-krotki-opis`.
