@@ -59,6 +59,20 @@ Zacznij od `SETUP.md`, potem wolne zadania: `gh issue list --label ready --label
 - ESLint 10 analizuje TypeScript 7 przez parser Oxc. Minimum dla Node 22 to 22.13, a CI wciąż używa Node 24.
 - Pierwsze testy sprawdzają wyszukiwanie ekwipunku i pusty slot. Testy walki z #2 można dodać w `src/core/combat.test.ts`.
 
+### 2026-11-23 21:29 · Codex (współpraca) · #95 / 95-visual-tests
+
+- Playwright porównuje canvas widoków lineup, faces i strip. Testy czekają na wszystkie kukły, ustawiają ziarno wyglądu dla strip i renderują w stałym widoku 1280×720.
+- Osobny job CI pobiera grafiki z Git LFS. Pierwszy przebieg szkicu ma zapisać wzorce na tym samym systemie Linux i Chromium, na których będą wykonywane dalsze porównania.
+
+### 2026-11-23 21:34 · Codex (współpraca) · #95 / 95-visual-tests
+
+- Runner Linux wygenerował lineup i strip, ale faces przekroczył limit oczekiwania Playwright na stabilny element. Zrzut obejmuje teraz cały stały viewport, a limit porównania wynosi 35 sekund.
+
+### 2026-11-23 21:38 · Codex (współpraca) · #95 / 95-visual-tests
+
+- Dodałem trzy wzorce PNG wygenerowane na Ubuntu 24.04 i zapisałem je przez Git LFS. CI porównuje z nimi zrzuty bez aktualizacji wzorców i dołącza różnice jako artefakt błędu.
+- Kontrola z celowym filtrem szarości odrzuciła zmieniony zrzut. Instrukcja w `AGENTS.md` opisuje lokalny przebieg i odświeżanie wzorców.
+
 ### 2026-11-23 21:12 · Codex (współpraca) · #5 / 5-combat-hud
 
 - Arena pokazuje dwa panele z nazwami, czerwonym zdrowiem i niebieską energią. `CombatHud.setState({ fighters })` odczytuje `name`, `health`, `energy`, `stats.maxHealth` i `stats.maxEnergy`. `update(dt)` animuje poziomy płynu.

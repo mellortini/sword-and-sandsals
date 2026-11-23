@@ -37,6 +37,9 @@ npm run typecheck          # tsc --noEmit
 npm run build              # typecheck + vite build
 ```
 CI uruchamia lint, testy, typecheck i build po `npm ci`.
+Testy wizualne używają Git LFS i Chromium. Po `npx playwright install --with-deps chromium --only-shell`
+oraz `npm run build` uruchom `npm run test:visual`. Zatwierdzone wzorce Linux są w `tests/visual/__screenshots__/linux/`.
+Przy zamierzonej zmianie wyglądu odśwież je na Ubuntu 24.04 poleceniem `npm run test:visual -- --update-snapshots=changed`.
 Sprawdzanie wizualne: `?view=wardrobe | lineup | faces | anim | strip&clip=<nazwa>`; zrzut kadru: `&shot=nazwa` → `out/nazwa.png`.
 Jeśli okno przeglądarki jest ukryte, requestAnimationFrame stoi — w testach przesuwaj zegar ręcznie
 (`app.ticker.update(t)` co 1/30 s) i renderuj kukły przed `extract`.

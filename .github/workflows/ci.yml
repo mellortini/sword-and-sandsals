@@ -36,3 +36,26 @@ jobs:
       - run: npm test
       - run: npm run typecheck
       - run: npm run build
+
+  visual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium --only-shell
+      - run: npm run build
+      - run: npm run test:visual
+      - uses: actions/upload-artifact@v7
+        if: ${{ failure() }}
+        with:
+          name: visual-diffs
+          path: out/visual/
+          if-no-files-found: ignore
+          retention-days: 7
