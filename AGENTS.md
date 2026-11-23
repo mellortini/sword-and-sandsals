@@ -11,8 +11,8 @@ Na start każdej sesji przeczytaj: ten plik → `ARCHITECTURE.md` (mapa modułó
 ## Start pracy
 ```
 git checkout main && git pull
-gh issue list --label ready --no-assignee --label area:core --milestone "F3 Walka"   # wolne zadania: swój obszar, najniższa faza
-gh issue list --label ready --no-assignee                       # wszystkie wolne
+gh issue list --label ready --label area:core --milestone "F3 Walka" --search "no:assignee"   # wolne: swój obszar, najniższa faza
+gh issue list --label ready --search "no:assignee"                # wszystkie wolne
 gh issue view <nr>                                              # przeczytaj cel, moduł, pliki, "gotowe"
 gh issue edit <nr> --add-assignee @me --add-label in-progress --remove-label ready
 git checkout -b <nr>-krotki-opis                                # np. 12-radial-menu
