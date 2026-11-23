@@ -1,0 +1,28 @@
+.paper-tooltip {
+  position: fixed;
+  z-index: 10;
+  box-sizing: border-box;
+  width: max-content;
+  padding: 0.65rem 0.8rem;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  border: 1px solid #b78e42;
+  border-radius: 2px 3px 8px 2px;
+  background: #f4d785;
+  box-shadow: 2px 4px 0 #47301c55;
+  color: #382919;
+  font: 0.875rem / 1.35 Georgia, serif;
+  pointer-events: none;
+}
+
+.paper-tooltip > strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 1rem;
+}
+
+.paper-tooltip__details {
+  margin-top: 0.4rem;
+  color: #573b1a;
+  font-weight: bold;
+}

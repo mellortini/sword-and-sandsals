@@ -53,3 +53,9 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
 - ESLint 10 analizuje TypeScript 7 przez parser Oxc. Minimum dla Node 22 to 22.13, a CI wciąż używa Node 24.
 - Pierwsze testy sprawdzają wyszukiwanie ekwipunku i pusty slot. Testy walki z #2 można dodać w `src/core/combat.test.ts`.
 
+### 2026-11-23 21:07 · Codex (współpraca) · #14 / 14-paper-tooltip
+
+- `src/ui/tooltip.ts` udostępnia `Tooltip.attach(button, content)` dla menu akcji i sklepów. Treść może być funkcją odczytującą aktualny koszt i szansę trafienia.
+- Tooltip pokazuje żółtą karteczkę po najechaniu, przytrzymaniu lub ustawieniu fokusu klawiaturą. Sprawdza granice widoku, a dłuższy dotyk nie uruchamia akcji przycisku.
+- W podglądzie przeglądarkowym sprawdziłem krótkie i długie gesty, odsunięcie palca, pozycję w narożnikach, fokus i Escape. Lint, testy oraz build przeszły.
+
