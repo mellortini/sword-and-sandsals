@@ -44,6 +44,8 @@ Sprawdzanie wizualne: `?view=wardrobe | lineup | faces | anim | strip&clip=<nazw
 Jeśli okno przeglądarki jest ukryte, requestAnimationFrame stoi — w testach przesuwaj zegar ręcznie
 (`app.ticker.update(t)` co 1/30 s) i renderuj kukły przed `extract`.
 Grafika (Blender, tylko gdy zadanie tego wymaga): patrz README → „Grafika”.
+Styl papierowy (materiały, światło, warstwy, post): skill `.claude/skills/papercraft-3d-short/SKILL.md` —
+Claude Code ładuje go sam, Codex: przeczytaj go przed zadaniem `area:art` / `area:fx` dotyczącym wyglądu.
 
 ## Granice
 - **Zmieniaj tylko pliki modułu z zadania** (mapa w `ARCHITECTURE.md`). Potrzebujesz czegoś w cudzym module →
