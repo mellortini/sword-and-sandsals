@@ -92,6 +92,24 @@ export class BlockShield extends Pop {
   }
 }
 
+/** grey "MISS" slip of paper: pops up, drifts up a little and fades (a miss leaves nothing on screen) */
+export class MissText extends Pop {
+  private word: Text;
+  constructor() {
+    super();
+    this.word = new Text({ text: 'MISS', style: { fill: '#e6ddcf', fontSize: 30, fontFamily: 'Georgia', fontWeight: 'bold', stroke: { color: '#3b3a38', width: 4 } } });
+    this.word.anchor.set(0.5);
+    this.word.scale.set(0);
+    this.addChild(this.word);
+  }
+  protected step() {
+    const t = this.t;
+    if (this.dead || t > 30) { this.alpha -= 0.25; if (this.alpha <= 0) this.destroy(); return; }
+    this.word.scale.set(t < 2 ? t * 0.6 : t < 4 ? 1.2 - (t - 2) * 0.1 : 1.0);
+    this.word.y = -Math.min(t, 20) * 0.8;
+  }
+}
+
 /** keeps at most one pop per fighter slot and ticks them */
 export class FxLayer extends Container {
   private slots = new Map<string, Pop>();
