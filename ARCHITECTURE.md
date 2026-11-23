@@ -16,17 +16,17 @@ Gra to statyczna strona (`npm run build` → `dist/`).
 ## Mapa modułów
 | folder / plik | moduł | właściciel | uwagi |
 |---|---|---|---|
-| `blender/` (+ `blender/vendor/pc_lib.py`) | pipeline grafiki | Mateusz | `sprite_lib` (materiały, render części), `kit` (ciało, twarze, włosy, zarost), `armor` (10 kompletów), `build_kit` (render + kit.json), `arena` (tło) |
+| `blender/` (+ `blender/vendor/pc_lib.py`) | pipeline grafiki | Mateusz (@mellortini) | `sprite_lib` (materiały, render części), `kit` (ciało, twarze, włosy, zarost), `armor` (10 kompletów), `build_kit` (render + kit.json), `arena` (tło) |
 | `art_src/` | źródła grafiki | Mateusz | `blenderkit/*/` poza git (licencja), w git tylko `assets.json`, `tex_stats.json` |
 | `assets/` | wyrenderowane assety | Mateusz | generowane — nie edytować ręcznie; `assets/chars/hero/` = stara kukła z F1 (nieużywana, do usunięcia w przyszłości) |
 | `tools/` | narzędzia | Mateusz | `fetch_blenderkit.py` |
 | `src/rig/` | PaperRig, Kit (składanie postaci) | Mateusz | |
 | `src/anim/` | klipy i Animator | Mateusz | |
 | `src/ui/fx.ts` | efekty walki (liczby obrażeń, BLOCK) | Mateusz | |
-| `src/core/` *(nowy)* | logika gry bez renderu: walka, tury, AI, statystyki, RNG z ziarnem, zapis | kolega | czysty TS, testy (Vitest) |
-| `src/data/` | dane gry: przedmioty, wrogowie, sklepy | kolega | `equipment.ts` — 50 przedmiotów, tier 1–10 |
-| `src/ui/` (poza `fx.ts`) *(nowe)* | HUD, menu radialne, panele, ekrany | kolega | |
-| `src/scenes/` *(po rozbiciu main.ts)* | sceny gry: arena-walka, miasto, kreator | kolega | |
+| `src/core/` *(nowy)* | logika gry bez renderu: walka, tury, AI, statystyki, RNG z ziarnem, zapis | kolega (@lkaelek) | czysty TS, testy (Vitest) |
+| `src/data/` | dane gry: przedmioty, wrogowie, sklepy | kolega (@lkaelek) | `equipment.ts` — 50 przedmiotów, tier 1–10 |
+| `src/ui/` (poza `fx.ts`) *(nowe)* | HUD, menu radialne, panele, ekrany | kolega (@lkaelek) | |
+| `src/scenes/` *(po rozbiciu main.ts)* | sceny gry: arena-walka, miasto, kreator | kolega (@lkaelek) | |
 | `src/scenes/dev/` *(po rozbiciu main.ts)* | narzędzia wizualne: lineup, faces, anim lab, strip | Mateusz | |
 | `docs/` | projekt gry | wspólne | każdy dopisuje do swoich dokumentów; `ROADMAP.md` = plik wspólny |
 
@@ -65,3 +65,4 @@ Gra to statyczna strona (`npm run build` → `dist/`).
 | 2026-11-23 | Git LFS dla grafik; `.blend` jako `lockable`; squash merge; PR + zielone CI do `main`. |
 | 2026-11-23 | Rozmowa agentów w `AGENT_CHAT.md` (dopisywanie na końcu, `merge=union`). |
 | 2026-11-23 | `SETUP.md` = lista instalacji i sprawdzeń dla nowego komputera / agenta (linkowana z README i AGENTS.md). |
+| 2026-11-23 | Kolega = @lkaelek (write); CODEOWNERS: core/data/ui/scenes → @lkaelek, reszta → @mellortini. |

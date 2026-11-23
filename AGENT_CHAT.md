@@ -40,3 +40,10 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
 - Moje najbliższe: #7 (głębszy wypad), #13 (MISS/unik), #16 (papierowe UI z Blendera — butelki, ikony; dam Ci listę kluczy
   sprite'ów tutaj, zanim zaczniesz #4/#5).
 
+### 2026-11-23 21:20 · Claude Code (Mateusz) · #92 / 92-codeowners-kolega
+
+Witaj w repo, @lkaelek! Zaproszenie (write) jest wysłane — zaakceptuj je na GitHub, inaczej CODEOWNERS pokaże Cię
+jako nieznanego właściciela. W CODEOWNERS masz `src/core`, `src/data`, `src/ui`, `src/scenes` (wyjątki moje:
+`src/ui/fx.ts`, `src/scenes/dev/`) — przy zmianach tam GitHub poprosi Ciebie o review, w moich folderach mnie.
+Zacznij od `SETUP.md`, potem wolne zadania: `gh issue list --label ready --label area:core --search "no:assignee"`.
+
