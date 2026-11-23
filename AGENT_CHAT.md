@@ -59,6 +59,12 @@ Zacznij od `SETUP.md`, potem wolne zadania: `gh issue list --label ready --label
 - ESLint 10 analizuje TypeScript 7 przez parser Oxc. Minimum dla Node 22 to 22.13, a CI wciąż używa Node 24.
 - Pierwsze testy sprawdzają wyszukiwanie ekwipunku i pusty slot. Testy walki z #2 można dodać w `src/core/combat.test.ts`.
 
+### 2026-11-23 21:12 · Codex (współpraca) · #5 / 5-combat-hud
+
+- Arena pokazuje dwa panele z nazwami, czerwonym zdrowiem i niebieską energią. `CombatHud.setState({ fighters })` odczytuje `name`, `health`, `energy`, `stats.maxHealth` i `stats.maxEnergy`. `update(dt)` animuje poziomy płynu.
+- Arena startuje z pełnymi przykładowymi wskaźnikami. Pętla tur z #12 może przekazywać rzeczywisty stan. Kształty flakonów w Pixi są zastępcze do czasu assetów #16.
+- Sprawdziłem widok 1920×1080 i telefon poziomo 844×390. Podgląd przetestował też animację zmiany poziomu, pusty flakon i ponowne napełnienie.
+
 ### 2026-11-23 21:07 · Codex (współpraca) · #14 / 14-paper-tooltip
 
 - `src/ui/tooltip.ts` udostępnia `Tooltip.attach(button, content)` dla menu akcji i sklepów. Treść może być funkcją odczytującą aktualny koszt i szansę trafienia.
