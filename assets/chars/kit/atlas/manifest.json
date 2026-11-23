@@ -1,0 +1,1139 @@
+{
+  "version": 1,
+  "frames": {
+    "armor10_bracer": {
+      "page": "gear-10-ef556eb24541.webp",
+      "x": 2,
+      "y": 2,
+      "w": 104,
+      "h": 138
+    },
+    "armor10_skirt": {
+      "page": "gear-10-ef556eb24541.webp",
+      "x": 110,
+      "y": 2,
+      "w": 258,
+      "h": 120
+    },
+    "armor10_torso": {
+      "page": "gear-10-ef556eb24541.webp",
+      "x": 2,
+      "y": 144,
+      "w": 355,
+      "h": 298
+    },
+    "boots10_cuff": {
+      "page": "gear-10-ef556eb24541.webp",
+      "x": 372,
+      "y": 2,
+      "w": 144,
+      "h": 110
+    },
+    "boots10_foot": {
+      "page": "gear-10-ef556eb24541.webp",
+      "x": 2,
+      "y": 446,
+      "w": 179,
+      "h": 85
+    },
+    "greaves10_knee": {
+      "page": "gear-10-ef556eb24541.webp",
+      "x": 372,
+      "y": 116,
+      "w": 89,
+      "h": 86
+    },
+    "greaves10_shin": {
+      "page": "gear-10-ef556eb24541.webp",
+      "x": 361,
+      "y": 206,
+      "w": 115,
+      "h": 177
+    },
+    "helmet10": {
+      "page": "gear-10-ef556eb24541.webp",
+      "x": 520,
+      "y": 2,
+      "w": 399,
+      "h": 330
+    },
+    "shoulders10": {
+      "page": "gear-10-ef556eb24541.webp",
+      "x": 361,
+      "y": 387,
+      "w": 150,
+      "h": 143
+    },
+    "armor1_bracer": {
+      "page": "gear-1-0bc24f948331.webp",
+      "x": 2,
+      "y": 2,
+      "w": 92,
+      "h": 103
+    },
+    "armor1_torso": {
+      "page": "gear-1-0bc24f948331.webp",
+      "x": 98,
+      "y": 2,
+      "w": 283,
+      "h": 339
+    },
+    "boots1_cuff": {
+      "page": "gear-1-0bc24f948331.webp",
+      "x": 2,
+      "y": 109,
+      "w": 90,
+      "h": 61
+    },
+    "boots1_foot": {
+      "page": "gear-1-0bc24f948331.webp",
+      "x": 2,
+      "y": 345,
+      "w": 145,
+      "h": 80
+    },
+    "greaves1_shin": {
+      "page": "gear-1-0bc24f948331.webp",
+      "x": 385,
+      "y": 2,
+      "w": 113,
+      "h": 148
+    },
+    "helmet1": {
+      "page": "gear-1-0bc24f948331.webp",
+      "x": 2,
+      "y": 429,
+      "w": 312,
+      "h": 180
+    },
+    "shoulders1": {
+      "page": "gear-1-0bc24f948331.webp",
+      "x": 318,
+      "y": 345,
+      "w": 144,
+      "h": 125
+    },
+    "armor2_bracer": {
+      "page": "gear-2-4ab464a6e97b.webp",
+      "x": 2,
+      "y": 2,
+      "w": 87,
+      "h": 82
+    },
+    "armor2_torso": {
+      "page": "gear-2-4ab464a6e97b.webp",
+      "x": 2,
+      "y": 88,
+      "w": 305,
+      "h": 280
+    },
+    "boots2_foot": {
+      "page": "gear-2-4ab464a6e97b.webp",
+      "x": 93,
+      "y": 2,
+      "w": 170,
+      "h": 77
+    },
+    "greaves2_shin": {
+      "page": "gear-2-4ab464a6e97b.webp",
+      "x": 311,
+      "y": 2,
+      "w": 109,
+      "h": 132
+    },
+    "helmet2": {
+      "page": "gear-2-4ab464a6e97b.webp",
+      "x": 2,
+      "y": 372,
+      "w": 268,
+      "h": 167
+    },
+    "shoulders2": {
+      "page": "gear-2-4ab464a6e97b.webp",
+      "x": 274,
+      "y": 372,
+      "w": 132,
+      "h": 112
+    },
+    "armor3_bracer": {
+      "page": "gear-3-49158ae9bd5f.webp",
+      "x": 2,
+      "y": 2,
+      "w": 91,
+      "h": 97
+    },
+    "armor3_skirt": {
+      "page": "gear-3-49158ae9bd5f.webp",
+      "x": 97,
+      "y": 2,
+      "w": 240,
+      "h": 93
+    },
+    "armor3_torso": {
+      "page": "gear-3-49158ae9bd5f.webp",
+      "x": 2,
+      "y": 103,
+      "w": 352,
+      "h": 289
+    },
+    "boots3_cuff": {
+      "page": "gear-3-49158ae9bd5f.webp",
+      "x": 358,
+      "y": 2,
+      "w": 85,
+      "h": 102
+    },
+    "boots3_foot": {
+      "page": "gear-3-49158ae9bd5f.webp",
+      "x": 2,
+      "y": 396,
+      "w": 170,
+      "h": 77
+    },
+    "greaves3_shin": {
+      "page": "gear-3-49158ae9bd5f.webp",
+      "x": 447,
+      "y": 2,
+      "w": 109,
+      "h": 156
+    },
+    "helmet3": {
+      "page": "gear-3-49158ae9bd5f.webp",
+      "x": 2,
+      "y": 477,
+      "w": 285,
+      "h": 236
+    },
+    "shoulders3": {
+      "page": "gear-3-49158ae9bd5f.webp",
+      "x": 358,
+      "y": 162,
+      "w": 139,
+      "h": 132
+    },
+    "armor4_bracer": {
+      "page": "gear-4-a5f567001ad8.webp",
+      "x": 2,
+      "y": 2,
+      "w": 91,
+      "h": 96
+    },
+    "armor4_skirt": {
+      "page": "gear-4-a5f567001ad8.webp",
+      "x": 97,
+      "y": 2,
+      "w": 240,
+      "h": 118
+    },
+    "armor4_torso": {
+      "page": "gear-4-a5f567001ad8.webp",
+      "x": 2,
+      "y": 124,
+      "w": 352,
+      "h": 273
+    },
+    "boots4_foot": {
+      "page": "gear-4-a5f567001ad8.webp",
+      "x": 358,
+      "y": 2,
+      "w": 175,
+      "h": 84
+    },
+    "greaves4_shin": {
+      "page": "gear-4-a5f567001ad8.webp",
+      "x": 358,
+      "y": 90,
+      "w": 111,
+      "h": 149
+    },
+    "helmet4": {
+      "page": "gear-4-a5f567001ad8.webp",
+      "x": 2,
+      "y": 401,
+      "w": 274,
+      "h": 178
+    },
+    "shoulders4": {
+      "page": "gear-4-a5f567001ad8.webp",
+      "x": 358,
+      "y": 243,
+      "w": 139,
+      "h": 127
+    },
+    "armor5_bracer": {
+      "page": "gear-5-37e3140144d3.webp",
+      "x": 2,
+      "y": 2,
+      "w": 89,
+      "h": 85
+    },
+    "armor5_skirt": {
+      "page": "gear-5-37e3140144d3.webp",
+      "x": 2,
+      "y": 91,
+      "w": 240,
+      "h": 105
+    },
+    "armor5_torso": {
+      "page": "gear-5-37e3140144d3.webp",
+      "x": 2,
+      "y": 200,
+      "w": 273,
+      "h": 207
+    },
+    "boots5_cuff": {
+      "page": "gear-5-37e3140144d3.webp",
+      "x": 95,
+      "y": 2,
+      "w": 87,
+      "h": 80
+    },
+    "boots5_foot": {
+      "page": "gear-5-37e3140144d3.webp",
+      "x": 279,
+      "y": 2,
+      "w": 177,
+      "h": 84
+    },
+    "greaves5_shin": {
+      "page": "gear-5-37e3140144d3.webp",
+      "x": 279,
+      "y": 90,
+      "w": 113,
+      "h": 166
+    },
+    "helmet5": {
+      "page": "gear-5-37e3140144d3.webp",
+      "x": 2,
+      "y": 411,
+      "w": 282,
+      "h": 227
+    },
+    "shoulders5": {
+      "page": "gear-5-37e3140144d3.webp",
+      "x": 279,
+      "y": 260,
+      "w": 132,
+      "h": 128
+    },
+    "armor6_bracer": {
+      "page": "gear-6-f3f54d607b7b.webp",
+      "x": 2,
+      "y": 2,
+      "w": 93,
+      "h": 98
+    },
+    "armor6_skirt": {
+      "page": "gear-6-f3f54d607b7b.webp",
+      "x": 99,
+      "y": 2,
+      "w": 240,
+      "h": 118
+    },
+    "armor6_torso": {
+      "page": "gear-6-f3f54d607b7b.webp",
+      "x": 2,
+      "y": 124,
+      "w": 362,
+      "h": 294
+    },
+    "boots6_cuff": {
+      "page": "gear-6-f3f54d607b7b.webp",
+      "x": 368,
+      "y": 2,
+      "w": 84,
+      "h": 67
+    },
+    "boots6_foot": {
+      "page": "gear-6-f3f54d607b7b.webp",
+      "x": 2,
+      "y": 422,
+      "w": 179,
+      "h": 83
+    },
+    "greaves6_knee": {
+      "page": "gear-6-f3f54d607b7b.webp",
+      "x": 185,
+      "y": 422,
+      "w": 92,
+      "h": 82
+    },
+    "greaves6_shin": {
+      "page": "gear-6-f3f54d607b7b.webp",
+      "x": 456,
+      "y": 2,
+      "w": 114,
+      "h": 162
+    },
+    "helmet6": {
+      "page": "gear-6-f3f54d607b7b.webp",
+      "x": 2,
+      "y": 509,
+      "w": 324,
+      "h": 222
+    },
+    "shoulders6": {
+      "page": "gear-6-f3f54d607b7b.webp",
+      "x": 368,
+      "y": 168,
+      "w": 150,
+      "h": 153
+    },
+    "armor7_bracer": {
+      "page": "gear-7-28049e469144.webp",
+      "x": 2,
+      "y": 2,
+      "w": 97,
+      "h": 104
+    },
+    "armor7_skirt": {
+      "page": "gear-7-28049e469144.webp",
+      "x": 103,
+      "y": 2,
+      "w": 249,
+      "h": 90
+    },
+    "armor7_torso": {
+      "page": "gear-7-28049e469144.webp",
+      "x": 2,
+      "y": 110,
+      "w": 355,
+      "h": 296
+    },
+    "boots7_cuff": {
+      "page": "gear-7-28049e469144.webp",
+      "x": 361,
+      "y": 2,
+      "w": 85,
+      "h": 77
+    },
+    "boots7_foot": {
+      "page": "gear-7-28049e469144.webp",
+      "x": 2,
+      "y": 410,
+      "w": 179,
+      "h": 85
+    },
+    "greaves7_knee": {
+      "page": "gear-7-28049e469144.webp",
+      "x": 185,
+      "y": 410,
+      "w": 96,
+      "h": 85
+    },
+    "greaves7_shin": {
+      "page": "gear-7-28049e469144.webp",
+      "x": 450,
+      "y": 2,
+      "w": 112,
+      "h": 178
+    },
+    "helmet7": {
+      "page": "gear-7-28049e469144.webp",
+      "x": 2,
+      "y": 499,
+      "w": 298,
+      "h": 309
+    },
+    "shoulders7": {
+      "page": "gear-7-28049e469144.webp",
+      "x": 361,
+      "y": 184,
+      "w": 136,
+      "h": 169
+    },
+    "armor8_bracer": {
+      "page": "gear-8-289cbb6ad7bd.webp",
+      "x": 2,
+      "y": 2,
+      "w": 104,
+      "h": 150
+    },
+    "armor8_skirt": {
+      "page": "gear-8-289cbb6ad7bd.webp",
+      "x": 110,
+      "y": 2,
+      "w": 236,
+      "h": 123
+    },
+    "armor8_torso": {
+      "page": "gear-8-289cbb6ad7bd.webp",
+      "x": 2,
+      "y": 156,
+      "w": 358,
+      "h": 285
+    },
+    "boots8_cuff": {
+      "page": "gear-8-289cbb6ad7bd.webp",
+      "x": 364,
+      "y": 2,
+      "w": 84,
+      "h": 73
+    },
+    "boots8_foot": {
+      "page": "gear-8-289cbb6ad7bd.webp",
+      "x": 2,
+      "y": 445,
+      "w": 172,
+      "h": 76
+    },
+    "greaves8_knee": {
+      "page": "gear-8-289cbb6ad7bd.webp",
+      "x": 452,
+      "y": 2,
+      "w": 96,
+      "h": 85
+    },
+    "greaves8_shin": {
+      "page": "gear-8-289cbb6ad7bd.webp",
+      "x": 364,
+      "y": 91,
+      "w": 113,
+      "h": 168
+    },
+    "helmet8": {
+      "page": "gear-8-289cbb6ad7bd.webp",
+      "x": 2,
+      "y": 525,
+      "w": 372,
+      "h": 312
+    },
+    "shoulders8": {
+      "page": "gear-8-289cbb6ad7bd.webp",
+      "x": 378,
+      "y": 263,
+      "w": 142,
+      "h": 147
+    },
+    "armor9_bracer": {
+      "page": "gear-9-8deb562191aa.webp",
+      "x": 2,
+      "y": 2,
+      "w": 104,
+      "h": 141
+    },
+    "armor9_skirt": {
+      "page": "gear-9-8deb562191aa.webp",
+      "x": 110,
+      "y": 2,
+      "w": 237,
+      "h": 125
+    },
+    "armor9_torso": {
+      "page": "gear-9-8deb562191aa.webp",
+      "x": 2,
+      "y": 147,
+      "w": 355,
+      "h": 298
+    },
+    "boots9_cuff": {
+      "page": "gear-9-8deb562191aa.webp",
+      "x": 361,
+      "y": 2,
+      "w": 120,
+      "h": 115
+    },
+    "boots9_foot": {
+      "page": "gear-9-8deb562191aa.webp",
+      "x": 2,
+      "y": 449,
+      "w": 179,
+      "h": 85
+    },
+    "greaves9_knee": {
+      "page": "gear-9-8deb562191aa.webp",
+      "x": 361,
+      "y": 121,
+      "w": 100,
+      "h": 89
+    },
+    "greaves9_shin": {
+      "page": "gear-9-8deb562191aa.webp",
+      "x": 361,
+      "y": 214,
+      "w": 115,
+      "h": 173
+    },
+    "helmet9": {
+      "page": "gear-9-8deb562191aa.webp",
+      "x": 485,
+      "y": 2,
+      "w": 383,
+      "h": 297
+    },
+    "shoulders9": {
+      "page": "gear-9-8deb562191aa.webp",
+      "x": 361,
+      "y": 391,
+      "w": 142,
+      "h": 122
+    },
+    "beard1": {
+      "page": "look-0-3131fa6ecbfd.webp",
+      "x": 2,
+      "y": 2,
+      "w": 203,
+      "h": 90
+    },
+    "face0_brows": {
+      "page": "look-0-3131fa6ecbfd.webp",
+      "x": 2,
+      "y": 96,
+      "w": 153,
+      "h": 47
+    },
+    "face0_eyes": {
+      "page": "look-0-3131fa6ecbfd.webp",
+      "x": 2,
+      "y": 147,
+      "w": 147,
+      "h": 66
+    },
+    "face0_head": {
+      "page": "look-0-3131fa6ecbfd.webp",
+      "x": 209,
+      "y": 2,
+      "w": 258,
+      "h": 251
+    },
+    "face0_lids": {
+      "page": "look-0-3131fa6ecbfd.webp",
+      "x": 2,
+      "y": 257,
+      "w": 151,
+      "h": 49
+    },
+    "face0_nose": {
+      "page": "look-0-3131fa6ecbfd.webp",
+      "x": 2,
+      "y": 310,
+      "w": 83,
+      "h": 105
+    },
+    "face1_brows": {
+      "page": "look-0-3131fa6ecbfd.webp",
+      "x": 89,
+      "y": 310,
+      "w": 158,
+      "h": 51
+    },
+    "face1_eyes": {
+      "page": "look-0-3131fa6ecbfd.webp",
+      "x": 251,
+      "y": 257,
+      "w": 136,
+      "h": 58
+    },
+    "face1_head": {
+      "page": "look-0-3131fa6ecbfd.webp",
+      "x": 2,
+      "y": 419,
+      "w": 260,
+      "h": 260
+    },
+    "face1_lids": {
+      "page": "look-0-3131fa6ecbfd.webp",
+      "x": 89,
+      "y": 365,
+      "w": 138,
+      "h": 43
+    },
+    "face1_nose": {
+      "page": "look-0-3131fa6ecbfd.webp",
+      "x": 266,
+      "y": 319,
+      "w": 105,
+      "h": 103
+    },
+    "hair1_front": {
+      "page": "look-0-3131fa6ecbfd.webp",
+      "x": 471,
+      "y": 2,
+      "w": 254,
+      "h": 162
+    },
+    "beard2": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 2,
+      "y": 2,
+      "w": 121,
+      "h": 70
+    },
+    "beard3": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 2,
+      "y": 76,
+      "w": 147,
+      "h": 61
+    },
+    "face2_brows": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 2,
+      "y": 141,
+      "w": 146,
+      "h": 43
+    },
+    "face2_eyes": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 153,
+      "y": 2,
+      "w": 155,
+      "h": 77
+    },
+    "face2_head": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 2,
+      "y": 188,
+      "w": 261,
+      "h": 242
+    },
+    "face2_lids": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 312,
+      "y": 2,
+      "w": 160,
+      "h": 37
+    },
+    "face2_nose": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 153,
+      "y": 83,
+      "w": 66,
+      "h": 58
+    },
+    "face3_brows": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 312,
+      "y": 43,
+      "w": 156,
+      "h": 48
+    },
+    "face3_eyes": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 223,
+      "y": 95,
+      "w": 145,
+      "h": 54
+    },
+    "face3_head": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 2,
+      "y": 434,
+      "w": 249,
+      "h": 271
+    },
+    "face3_lids": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 267,
+      "y": 153,
+      "w": 149,
+      "h": 42
+    },
+    "face3_nose": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 267,
+      "y": 199,
+      "w": 86,
+      "h": 110
+    },
+    "hair2_front": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 476,
+      "y": 2,
+      "w": 309,
+      "h": 191
+    },
+    "hair3_back": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 267,
+      "y": 313,
+      "w": 266,
+      "h": 377
+    },
+    "hair3_front": {
+      "page": "look-1-f373c6a8cfa4.webp",
+      "x": 2,
+      "y": 709,
+      "w": 254,
+      "h": 205
+    },
+    "beard4": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 2,
+      "y": 2,
+      "w": 235,
+      "h": 140
+    },
+    "beard5": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 2,
+      "y": 146,
+      "w": 80,
+      "h": 129
+    },
+    "face4_brows": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 86,
+      "y": 146,
+      "w": 148,
+      "h": 47
+    },
+    "face4_eyes": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 86,
+      "y": 197,
+      "w": 149,
+      "h": 68
+    },
+    "face4_head": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 241,
+      "y": 2,
+      "w": 263,
+      "h": 248
+    },
+    "face4_lids": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 2,
+      "y": 279,
+      "w": 153,
+      "h": 38
+    },
+    "face4_nose": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 2,
+      "y": 321,
+      "w": 94,
+      "h": 121
+    },
+    "face5_brows": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 100,
+      "y": 321,
+      "w": 150,
+      "h": 45
+    },
+    "face5_eyes": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 239,
+      "y": 254,
+      "w": 145,
+      "h": 60
+    },
+    "face5_head": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 2,
+      "y": 446,
+      "w": 249,
+      "h": 256
+    },
+    "face5_lids": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 100,
+      "y": 370,
+      "w": 149,
+      "h": 46
+    },
+    "face5_nose": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 388,
+      "y": 254,
+      "w": 70,
+      "h": 130
+    },
+    "hair4_front": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 508,
+      "y": 2,
+      "w": 331,
+      "h": 209
+    },
+    "hair5_back": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 254,
+      "y": 318,
+      "w": 127,
+      "h": 124
+    },
+    "hair5_front": {
+      "page": "look-2-927ccab36466.webp",
+      "x": 508,
+      "y": 215,
+      "w": 246,
+      "h": 160
+    },
+    "beard6": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 2,
+      "y": 2,
+      "w": 226,
+      "h": 124
+    },
+    "beard7": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 2,
+      "y": 130,
+      "w": 230,
+      "h": 120
+    },
+    "face6_brows": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 236,
+      "y": 2,
+      "w": 156,
+      "h": 47
+    },
+    "face6_eyes": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 232,
+      "y": 53,
+      "w": 143,
+      "h": 62
+    },
+    "face6_head": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 2,
+      "y": 254,
+      "w": 254,
+      "h": 253
+    },
+    "face6_lids": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 236,
+      "y": 119,
+      "w": 147,
+      "h": 47
+    },
+    "face6_nose": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 260,
+      "y": 170,
+      "w": 77,
+      "h": 97
+    },
+    "face7_brows": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 396,
+      "y": 2,
+      "w": 163,
+      "h": 51
+    },
+    "face7_eyes": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 379,
+      "y": 57,
+      "w": 138,
+      "h": 58
+    },
+    "face7_head": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 2,
+      "y": 511,
+      "w": 254,
+      "h": 254
+    },
+    "face7_lids": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 387,
+      "y": 119,
+      "w": 141,
+      "h": 44
+    },
+    "face7_nose": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 387,
+      "y": 167,
+      "w": 100,
+      "h": 129
+    },
+    "hair6_front": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 260,
+      "y": 300,
+      "w": 178,
+      "h": 135
+    },
+    "hair7_front": {
+      "page": "look-3-6662e841812e.webp",
+      "x": 563,
+      "y": 2,
+      "w": 344,
+      "h": 214
+    },
+    "beard8": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 2,
+      "y": 2,
+      "w": 231,
+      "h": 277
+    },
+    "beard9": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 237,
+      "y": 2,
+      "w": 232,
+      "h": 125
+    },
+    "face8_brows": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 237,
+      "y": 131,
+      "w": 148,
+      "h": 48
+    },
+    "face8_eyes": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 237,
+      "y": 183,
+      "w": 157,
+      "h": 79
+    },
+    "face8_head": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 2,
+      "y": 283,
+      "w": 256,
+      "h": 246
+    },
+    "face8_lids": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 262,
+      "y": 266,
+      "w": 162,
+      "h": 31
+    },
+    "face8_nose": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 262,
+      "y": 301,
+      "w": 73,
+      "h": 64
+    },
+    "face9_brows": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 262,
+      "y": 369,
+      "w": 148,
+      "h": 39
+    },
+    "face9_eyes": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 262,
+      "y": 412,
+      "w": 145,
+      "h": 64
+    },
+    "face9_head": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 473,
+      "y": 2,
+      "w": 251,
+      "h": 258
+    },
+    "face9_lids": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 262,
+      "y": 480,
+      "w": 154,
+      "h": 45
+    },
+    "face9_nose": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 414,
+      "y": 301,
+      "w": 74,
+      "h": 94
+    },
+    "hair8_back": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 492,
+      "y": 264,
+      "w": 118,
+      "h": 248
+    },
+    "hair8_front": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 2,
+      "y": 533,
+      "w": 254,
+      "h": 163
+    },
+    "hair9_back": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 614,
+      "y": 264,
+      "w": 109,
+      "h": 93
+    },
+    "hair9_front": {
+      "page": "look-4-f9fea1232953.webp",
+      "x": 260,
+      "y": 533,
+      "w": 258,
+      "h": 162
+    },
+    "body_arm_lo": {
+      "page": "base-d3cd2d5bbc63.webp",
+      "x": 2,
+      "y": 2,
+      "w": 91,
+      "h": 224
+    },
+    "body_arm_up": {
+      "page": "base-d3cd2d5bbc63.webp",
+      "x": 97,
+      "y": 2,
+      "w": 119,
+      "h": 269
+    },
+    "body_foot": {
+      "page": "base-d3cd2d5bbc63.webp",
+      "x": 220,
+      "y": 2,
+      "w": 161,
+      "h": 68
+    },
+    "body_hand": {
+      "page": "base-d3cd2d5bbc63.webp",
+      "x": 220,
+      "y": 74,
+      "w": 86,
+      "h": 87
+    },
+    "body_leg_lo": {
+      "page": "base-d3cd2d5bbc63.webp",
+      "x": 2,
+      "y": 275,
+      "w": 103,
+      "h": 267
+    },
+    "body_leg_up": {
+      "page": "base-d3cd2d5bbc63.webp",
+      "x": 220,
+      "y": 165,
+      "w": 130,
+      "h": 303
+    },
+    "body_pelvis": {
+      "page": "base-d3cd2d5bbc63.webp",
+      "x": 385,
+      "y": 2,
+      "w": 242,
+      "h": 193
+    },
+    "body_torso": {
+      "page": "base-d3cd2d5bbc63.webp",
+      "x": 2,
+      "y": 546,
+      "w": 336,
+      "h": 355
+    },
+    "weapon_gladius": {
+      "page": "base-d3cd2d5bbc63.webp",
+      "x": 631,
+      "y": 2,
+      "w": 359,
+      "h": 81
+    }
+  }
+}

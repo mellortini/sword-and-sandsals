@@ -55,13 +55,20 @@ export type Scene = (context: SceneContext) => Promise<void | SceneUpdate>;
 
 export function startRigTicker({ app, kit, rigs }: SceneContext, updateScene?: SceneUpdate) {
   const stance = kit.json.pose_test;
+  app.canvas.addEventListener('webglcontextrestored', () => {
+    for (const { rig } of rigs) rig.invalidateStillFrame();
+  });
   let t = 0;
   app.ticker.add((tk) => {
     const dt = Math.min(0.1, tk.deltaMS / 1000);
     t += dt;
     for (const r of rigs) {
+      if (r.still && !r.anim) {
+        r.rig.renderStill(app.renderer, r.fixed ?? stance);
+        continue;
+      }
       if (r.anim) r.anim.update(dt);
-      else r.rig.pose = r.fixed ?? (r.still ? { ...stance } : idle(stance, t, r.phase));
+      else r.rig.pose = r.fixed ?? idle(stance, t, r.phase);
       r.rig.render(app.renderer);
     }
     updateScene?.(dt);
