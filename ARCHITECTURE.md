@@ -1,7 +1,8 @@
 # ARCHITECTURE.md
 
 ## Technologia
-TypeScript 7 + Vite 8 + PixiJS 8 (WebGL), Node ≥ 22.12. Grafika: Blender 5.3 (Cycles, skrypty Python) → PNG + JSON.
+TypeScript 7 + Vite 8 + PixiJS 8 (WebGL). Obsługiwane wersje Node.js są w `package.json` (`engines`).
+Grafika: Blender 5.3 (Cycles, skrypty Python) → PNG + JSON.
 Gra to statyczna strona (`npm run build` → `dist/`).
 
 ## Jak to działa

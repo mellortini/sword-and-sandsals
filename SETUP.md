@@ -9,7 +9,7 @@ Na koniec dopisz wpis w `AGENT_CHAT.md` (przedstaw się drugiemu agentowi).
 |---|---|---|---|---|---|
 | Git | ≥ 2.40 | repo | `winget install Git.Git` | `brew install git` | `sudo apt install git` |
 | Git LFS | ≥ 3.0 | grafiki PNG/JPG/.blend | w pakiecie Git for Windows | `brew install git-lfs` | `sudo apt install git-lfs` |
-| Node.js | ≥ 22.12 (zalecane 24 LTS) | gra (Vite, TypeScript) | `winget install OpenJS.NodeJS.LTS` | `brew install node@24` | nodesource / nvm |
+| Node.js | 22 od 22.13, 24 lub 26+ (zalecane 24 LTS) | gra (Vite, TypeScript), lint i testy | `winget install OpenJS.NodeJS.LTS` | `brew install node@24` | nodesource / nvm |
 | GitHub CLI | ≥ 2.40 | zadania, PR-y | `winget install GitHub.cli` | `brew install gh` | `sudo apt install gh` |
 
 Sprawdzenie (agent uruchamia i porównuje z tabelą):
@@ -72,7 +72,7 @@ python -I tools/fetch_blenderkit.py                                     # darmow
 | objaw | przyczyna / rozwiązanie |
 |---|---|
 | puste / niewidoczne postacie, błędy dekodowania PNG | grafiki są wskaźnikami LFS → `git lfs install && git lfs pull` |
-| `npm ci` narzeka na wersję | Node < 22.12 → zainstaluj 24 LTS |
+| `npm ci` narzeka na wersję Node.js | sprawdź `engines` w `package.json` albo zainstaluj Node 24 LTS |
 | port 5180 zajęty | zamknij inny `npm run dev` (port jest stały: `vite.config.ts`) |
 | animacje stoją w testach agenta | ukryte okno przeglądarki = stoi requestAnimationFrame; przesuwaj zegar ręcznie (`AGENTS.md`) |
 | `gh: command not found` | zainstaluj GitHub CLI (pkt 1), potem `gh auth login` |

@@ -31,9 +31,12 @@ Zadania z labelem `blocked` czekają na inne (sekcja „Zależności” w opisie
 ```
 npm ci                     # instalacja (zgodna z package-lock.json)
 npm run dev                # serwer dev, http://localhost:5180
+npm run lint               # ESLint
+npm test                   # Vitest, jednorazowe uruchomienie
 npm run typecheck          # tsc --noEmit
-npm run build              # typecheck + vite build (to samo co CI)
+npm run build              # typecheck + vite build
 ```
+CI uruchamia lint, testy, typecheck i build po `npm ci`.
 Sprawdzanie wizualne: `?view=wardrobe | lineup | faces | anim | strip&clip=<nazwa>`; zrzut kadru: `&shot=nazwa` → `out/nazwa.png`.
 Jeśli okno przeglądarki jest ukryte, requestAnimationFrame stoi — w testach przesuwaj zegar ręcznie
 (`app.ticker.update(t)` co 1/30 s) i renderuj kukły przed `extract`.
