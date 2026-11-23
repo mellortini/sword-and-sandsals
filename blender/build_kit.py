@@ -3,8 +3,10 @@
   D:/blender/blender.exe -b --python game/blender/build_kit.py -- [samples] [only_prefix,...]
 
 only_prefix limits the render to keys starting with any of the prefixes (kit.json is merged, not replaced).
+At the end the production atlases are rebuilt (`npm run assets:atlas`), so the WebP pages never lag behind the PNGs.
+Set KIT_NO_ATLAS=1 to skip that step (e.g. quick preview renders); then run `npm run assets:atlas` yourself before a commit.
 """
-import bpy, sys, os, json, math, time
+import bpy, sys, os, json, math, time, shutil, subprocess
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sprite_lib as sl  # noqa: E402
 import kit  # noqa: E402
@@ -146,3 +148,23 @@ kitjson = {
 }
 json.dump(kitjson, open(meta_path, 'w'), indent=1)
 print('KIT', n, 'sprites rendered,', len(sprites), 'in kit.json', f'{time.time() - t0:.0f}s')
+
+
+def rebuild_atlas():
+    """Repack assets/chars/kit/atlas/*.webp from the fresh PNGs (production build reads the atlas, not the PNGs)."""
+    if os.environ.get('KIT_NO_ATLAS') == '1':
+        print('ATLAS skipped (KIT_NO_ATLAS=1) - run `npm run assets:atlas` before committing sprites')
+        return
+    npm = shutil.which('npm')
+    if not npm:
+        print('ATLAS WARNING: npm not found - run `npm run assets:atlas` in game/ before committing sprites')
+        return
+    r = subprocess.run([npm, 'run', 'assets:atlas'], cwd=sl.GAME, capture_output=True, text=True)
+    if r.returncode == 0:
+        print('ATLAS', (r.stdout.strip().splitlines() or [''])[-1])
+    else:
+        print(f'ATLAS FAILED ({r.returncode}) - run `npm run assets:atlas` by hand')
+        print(r.stderr.strip())
+
+
+rebuild_atlas()
