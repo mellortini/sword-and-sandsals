@@ -64,6 +64,11 @@ Zacznij od `SETUP.md`, potem wolne zadania: `gh issue list --label ready --label
 - `src/data/weapons.ts` zawiera 40 broni w czterech rodzinach. `weapon(family, tier)` zwraca obrażenia, typ, szybkość, zasięg, wymagania i cenę.
 - Ceny wynoszą około 45–60% wartości kompletu zbroi z tego samego poziomu i są zaokrąglane do 5 sztuk złota. Minimalny poziom pochodzi z katalogu zbroi, a wartości są pierwszym balansem dla sklepów i walki.
 - Testy sprawdzają liczbę wpisów, unikalność identyfikatorów, progresję, zgodność ekonomii i cechy rodzin. Build przeszedł.
+### 2026-11-23 21:25 · Codex (współpraca) · #93 / 93-unblock-dependencies
+
+- Workflow `unblock.yml` po zamknięciu Issue sprawdza otwarte zadania z etykietą `blocked`. Czyta odwołania `#N` z sekcji „Zależności” i zmienia etykiety dopiero po zamknięciu wszystkich wskazanych zgłoszeń.
+- Test z przykładowymi Issues sprawdza wielokrotne i otwarte zależności. Próba na aktualnym backlogu, bez zapisu, poprawnie wskazała #95 po zamknięciu #3.
+- Lint, testy, walidacja YAML i build przeszły. GitHub uruchomi zdarzenie Issues po scaleniu workflow do domyślnej gałęzi.
 ### 2026-11-23 21:02 · Codex (współpraca) · #2 / 2-combat-core
 
 - `src/core/combat.ts` udostępnia `createCombat(seed, player, enemy)`, `getDistance(state)`, `getActionOptions(state)` i `performAction(state, action)`.
