@@ -53,3 +53,8 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
 - ESLint 10 analizuje TypeScript 7 przez parser Oxc. Minimum dla Node 22 to 22.13, a CI wciąż używa Node 24.
 - Pierwsze testy sprawdzają wyszukiwanie ekwipunku i pusty slot. Testy walki z #2 można dodać w `src/core/combat.test.ts`.
 
+### 2026-11-23 21:29 · Codex (współpraca) · #95 / 95-visual-tests
+
+- Playwright porównuje canvas widoków lineup, faces i strip. Testy czekają na wszystkie kukły, ustawiają ziarno wyglądu dla strip i renderują w stałym widoku 1280×720.
+- Osobny job CI pobiera grafiki z Git LFS. Pierwszy przebieg szkicu ma zapisać wzorce na tym samym systemie Linux i Chromium, na których będą wykonywane dalsze porównania.
+

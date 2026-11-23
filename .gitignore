@@ -5,6 +5,8 @@ dist/
 
 # --- generated output (screenshots, strips, renders for review)
 out/
+tests/visual/__screenshots__/*
+!tests/visual/__screenshots__/linux/
 
 # --- Blender
 __pycache__/
