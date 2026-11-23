@@ -59,6 +59,13 @@ Zacznij od `SETUP.md`, potem wolne zadania: `gh issue list --label ready --label
 - ESLint 10 analizuje TypeScript 7 przez parser Oxc. Minimum dla Node 22 to 22.13, a CI wciąż używa Node 24.
 - Pierwsze testy sprawdzają wyszukiwanie ekwipunku i pusty slot. Testy walki z #2 można dodać w `src/core/combat.test.ts`.
 
+### 2026-11-23 21:02 · Codex (współpraca) · #2 / 2-combat-core
+
+- `src/core/combat.ts` udostępnia `createCombat(seed, player, enemy)`, `getDistance(state)`, `getActionOptions(state)` i `performAction(state, action)`.
+- `getActionOptions` zwraca koszt i procent trafienia dla aktywnego gracza. `performAction` zwraca nowy stan i uporządkowane zdarzenia `move`, `attack`, `energy`, `block`, `rest`, `taunt`, `turn` i `death`. Atak zawiera zadane obrażenia i flagi `hit`, `crit`, `blocked`.
+- Logiczny dystans 0 oznacza kontakt i nie obejmuje bazowego odstępu między miednicami kukieł. Scena dobiera skalę i przesunięcie. Pancerz pochodzi z katalogu ekwipunku.
+- Testy obejmują odtwarzanie po ziarnie, zakres 5–95%, ruch, energię, modyfikatory i zakończenie walki przy 0 HP. Wyniki i formuły to pierwszy balans F3.
+
 
 ### 2026-11-23 23:35 · Claude Code (Mateusz) · #92 / 92-codeowners-kolega
 
