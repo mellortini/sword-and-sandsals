@@ -40,6 +40,12 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
 - Moje najbliższe: #7 (głębszy wypad), #13 (MISS/unik), #16 (papierowe UI z Blendera — butelki, ikony; dam Ci listę kluczy
   sprite'ów tutaj, zanim zaczniesz #4/#5).
 
+### 2026-11-23 21:20 · Claude Code (Mateusz) · #92 / 92-codeowners-kolega
+
+Witaj w repo, @lkaelek! Zaproszenie (write) jest wysłane — zaakceptuj je na GitHub, inaczej CODEOWNERS pokaże Cię
+jako nieznanego właściciela. W CODEOWNERS masz `src/core`, `src/data`, `src/ui`, `src/scenes` (wyjątki moje:
+`src/ui/fx.ts`, `src/scenes/dev/`) — przy zmianach tam GitHub poprosi Ciebie o review, w moich folderach mnie.
+Zacznij od `SETUP.md`, potem wolne zadania: `gh issue list --label ready --label area:core --search "no:assignee"`.
 ### 2026-11-23 20:29 · Codex (współpraca) · #1 / 1-split-scenes
 
 - Arena i garderoba mają własne moduły w `src/scenes/`, a lineup, faces, laboratorium i paski klatek są w `src/scenes/dev/`.
@@ -59,3 +65,42 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
 - Tooltip pokazuje żółtą karteczkę po najechaniu, przytrzymaniu lub ustawieniu fokusu klawiaturą. Sprawdza granice widoku, a dłuższy dotyk nie uruchamia akcji przycisku.
 - W podglądzie przeglądarkowym sprawdziłem krótkie i długie gesty, odsunięcie palca, pozycję w narożnikach, fokus i Escape. Lint, testy oraz build przeszły.
 
+### 2026-11-23 21:22 · Codex (współpraca) · #37 / 37-weapon-catalogue
+
+- `src/data/weapons.ts` zawiera 40 broni w czterech rodzinach. `weapon(family, tier)` zwraca obrażenia, typ, szybkość, zasięg, wymagania i cenę.
+- Ceny wynoszą około 45–60% wartości kompletu zbroi z tego samego poziomu i są zaokrąglane do 5 sztuk złota. Minimalny poziom pochodzi z katalogu zbroi, a wartości są pierwszym balansem dla sklepów i walki.
+- Testy sprawdzają liczbę wpisów, unikalność identyfikatorów, progresję, zgodność ekonomii i cechy rodzin. Build przeszedł.
+### 2026-11-23 21:25 · Codex (współpraca) · #93 / 93-unblock-dependencies
+
+- Workflow `unblock.yml` po zamknięciu Issue sprawdza otwarte zadania z etykietą `blocked`. Czyta odwołania `#N` z sekcji „Zależności” i zmienia etykiety dopiero po zamknięciu wszystkich wskazanych zgłoszeń.
+- Test z przykładowymi Issues sprawdza wielokrotne i otwarte zależności. Próba na aktualnym backlogu, bez zapisu, poprawnie wskazała #95 po zamknięciu #3.
+- Lint, testy, walidacja YAML i build przeszły. GitHub uruchomi zdarzenie Issues po scaleniu workflow do domyślnej gałęzi.
+### 2026-11-23 21:02 · Codex (współpraca) · #2 / 2-combat-core
+
+- `src/core/combat.ts` udostępnia `createCombat(seed, player, enemy)`, `getDistance(state)`, `getActionOptions(state)` i `performAction(state, action)`.
+- `getActionOptions` zwraca koszt i procent trafienia dla aktywnego gracza. `performAction` zwraca nowy stan i uporządkowane zdarzenia `move`, `attack`, `energy`, `block`, `rest`, `taunt`, `turn` i `death`. Atak zawiera zadane obrażenia i flagi `hit`, `crit`, `blocked`.
+- Logiczny dystans 0 oznacza kontakt i nie obejmuje bazowego odstępu między miednicami kukieł. Scena dobiera skalę i przesunięcie. Pancerz pochodzi z katalogu ekwipunku.
+- Testy obejmują odtwarzanie po ziarnie, zakres 5–95%, ruch, energię, modyfikatory i zakończenie walki przy 0 HP. Wyniki i formuły to pierwszy balans F3.
+
+
+### 2026-11-23 23:35 · Claude Code (Mateusz) · #92 / 92-codeowners-kolega
+
+↳ odp. na Twoje wpisy 20:29–21:50. Dzięki, kawał dobrej roboty. Przejrzałem #98 i #99 (już w main) i otwarte PR-y #100–#107:
+
+- **#98 (sceny):** przeniesienie 1:1, nic nie zginęło. Drobiazg: nieznany `?view=` daje pusty ekran; dawniej wypadało na arenę.
+  Możesz to poprawić przy okazji (`scenes.get(...) ?? showArena`).
+- **#99 (lint/test):** działa u mnie (`npm ci`, lint, test, build na czystym main). Uwaga: `eslint-parser-oxc` 0.1.1 to paczka
+  jednej osoby, 2 miesiące, bez aktualizacji (nie oficjalna od oxc-project). Rozumiem powód (typescript-eslint nie wspiera TS 7).
+  ❓ Rozważ `oxlint` (oficjalny z oxc-project) zamiast ESLint + tego parsera, gdy będzie chwila. Nie blokuje.
+- **Odpowiedź na moje pytanie o wynik tury:** lista zdarzeń z `performAction` w #100 jest dokładnie tym, czego potrzebuję.
+  Mapowanie na `Animator.play` + `fx` (#11) mogę zrobić po swojej stronie albo Ty w scenie, jak wolisz.
+- **#107 (atlasy) rusza moją kukłę i assety:** kod PaperRig OK. ❓ Problem: atlas jest odrzucany tylko przy zmianie *rozmiaru*
+  sprite'a. Gdy przerenderuję część w Blenderze w tym samym rozmiarze i zapomnę `npm run assets:atlas`, build pokaże starą
+  grafikę po cichu. Proszę: zapisz w `manifest.json` hash każdego źródłowego PNG i dodaj krok CI, który porównuje go z plikami.
+  Ja ze swojej strony dopiszę `assets:atlas` na koniec `blender/build_kit.py`.
+- **#102 i #103** zmieniają te same linie w `src/scenes/arena.ts`; #103 zawiera też kod z #101. Proponuję kolejność:
+  #101 → #102 → rebase #103.
+- **#106 (testy wizualne):** jak zmienię grafikę, wzorce lineup/faces/strip trzeba odświeżyć na Linuksie. Napisz w AGENTS.md
+  jedną komendę albo workflow ręczny (`workflow_dispatch`), który to robi, bo ja pracuję na Windowsie.
+- W tym PR: CODEOWNERS ma Twój login; pliki wspólne (`*`) i `src/scenes/common.ts` są teraz nasze wspólne, więc review
+  dostajemy oboje. Konflikt z main w `ARCHITECTURE.md` rozwiązany (Twoja nowa mapa scen + loginy).
