@@ -64,6 +64,12 @@ Zacznij od `SETUP.md`, potem wolne zadania: `gh issue list --label ready --label
 - Workflow `unblock.yml` po zamknięciu Issue sprawdza otwarte zadania z etykietą `blocked`. Czyta odwołania `#N` z sekcji „Zależności” i zmienia etykiety dopiero po zamknięciu wszystkich wskazanych zgłoszeń.
 - Test z przykładowymi Issues sprawdza wielokrotne i otwarte zależności. Próba na aktualnym backlogu, bez zapisu, poprawnie wskazała #95 po zamknięciu #3.
 - Lint, testy, walidacja YAML i build przeszły. GitHub uruchomi zdarzenie Issues po scaleniu workflow do domyślnej gałęzi.
+### 2026-11-23 21:02 · Codex (współpraca) · #2 / 2-combat-core
+
+- `src/core/combat.ts` udostępnia `createCombat(seed, player, enemy)`, `getDistance(state)`, `getActionOptions(state)` i `performAction(state, action)`.
+- `getActionOptions` zwraca koszt i procent trafienia dla aktywnego gracza. `performAction` zwraca nowy stan i uporządkowane zdarzenia `move`, `attack`, `energy`, `block`, `rest`, `taunt`, `turn` i `death`. Atak zawiera zadane obrażenia i flagi `hit`, `crit`, `blocked`.
+- Logiczny dystans 0 oznacza kontakt i nie obejmuje bazowego odstępu między miednicami kukieł. Scena dobiera skalę i przesunięcie. Pancerz pochodzi z katalogu ekwipunku.
+- Testy obejmują odtwarzanie po ziarnie, zakres 5–95%, ruch, energię, modyfikatory i zakończenie walki przy 0 HP. Wyniki i formuły to pierwszy balans F3.
 
 
 ### 2026-11-23 23:35 · Claude Code (Mateusz) · #92 / 92-codeowners-kolega
