@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Folded Glory</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #2e1b20; overflow: hidden; font-family: Georgia, serif; }
+    #stage { position: fixed; inset: 0; }
+    #ui { position: fixed; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 4px; padding: 8px 10px;
+          background: rgba(46, 27, 32, 0.72); color: #f3e6d6; font-size: 13px; border-radius: 6px; }
+    #ui label { display: flex; align-items: center; gap: 6px; }
+    #ui a { color: #e8be4c; }
+    #ui.wardrobe { left: auto; right: 2vw; top: 4vh; width: min(30vw, 430px); font-size: 15px; gap: 6px; padding: 14px 16px;
+                   background: rgba(46, 27, 32, 0.86); border: 1px solid #6b4a3a; }
+    #ui h3 { margin: 0 0 4px; font-weight: normal; letter-spacing: 0.05em; color: #e8be4c; }
+    #ui .row { display: grid; grid-template-columns: 7.5em 2em 1fr 2em; align-items: center; gap: 6px; }
+    #ui .row .v { text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #ui button { font: inherit; background: #6b4a3a; color: #f3e6d6; border: 0; border-radius: 4px; padding: 3px 0; cursor: pointer; }
+    #ui button:hover { background: #8a5f48; }
+    #ui #rand { grid-column: 1 / -1; padding: 6px; }
+    #ui #stats { margin-top: 6px; line-height: 1.45; }
+    #ui .it { font-size: 13px; color: #cdb99a; }
+    #ui .it.gold { color: #e8be4c; }
+    #ui .small { font-size: 13px; display: block; }
+    #ui.lab { width: 360px; font-size: 14px; gap: 6px; padding: 12px 14px; background: rgba(46, 27, 32, 0.86); border: 1px solid #6b4a3a; }
+    #ui.lab .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+    #ui.lab .grid button { padding: 6px 0; }
+    #ui select { font: inherit; background: #6b4a3a; color: #f3e6d6; border: 0; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div id="stage"></div>
+  <div id="ui"></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

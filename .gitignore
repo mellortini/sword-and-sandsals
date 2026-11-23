@@ -1,0 +1,39 @@
+# --- dependencies / build
+node_modules/
+dist/
+*.tsbuildinfo
+
+# --- generated output (screenshots, strips, renders for review)
+out/
+
+# --- Blender
+__pycache__/
+*.pyc
+*.blend1
+*.blend2
+
+# --- third-party textures (BlenderKit licence: do not redistribute raw assets)
+# download them locally with: python -I tools/fetch_blenderkit.py  (see README)
+art_src/blenderkit/*/
+art_src/blenderkit/*.jpg
+!art_src/blenderkit/assets.json
+!art_src/blenderkit/tex_stats.json
+
+# --- secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- editors / OS
+.vscode/
+.idea/
+.vs/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- agent / tool local settings
+.claude/settings.local.json

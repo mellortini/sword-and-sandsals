@@ -1,0 +1,23 @@
+{
+  "name": "folded-glory",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "pixi.js": "^8.23.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  },
+  "engines": {
+    "node": ">=22.12"
+  },
+  "description": "Paper cut-out turn-based gladiator game (TypeScript + Vite + PixiJS, art rendered in Blender)"
+}

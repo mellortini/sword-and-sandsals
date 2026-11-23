@@ -1,0 +1,304 @@
+/**
+ * PaperRig — modular cut-out gladiator made of Cycles-rendered paper parts (game/assets/chars/kit).
+ *
+ * - kit.json: skeleton (bones with joint offsets, units, y up), ordered layers (bone + slot + piece), sprites (size, pivot, tint group)
+ * - Look = skin / face / hair / hair colour / beard + equipment tier per slot (0 = nothing, 1..10)
+ * - skin and hair parts are rendered on neutral paper and coloured here per pixel (gain may exceed 1, unlike sprite.tint)
+ * - every part gets a soft paper shadow drawn right before it; 'multiply' is patched so shadows only darken paper that
+ *   is already in the puppet texture (like canvas source-atop)
+ */
+import { Assets, Container, Rectangle, Renderer, RenderTexture, Sprite, Texture } from 'pixi.js';
+
+export interface KitJson {
+  ppu: number;
+  sun_dir: [number, number];
+  head_scale: number;
+  neutral: number;
+  jaw_center: [number, number];
+  ref_jaw: [number, number];
+  bones: { name: string; parent: string | null; x: number; y: number }[];
+  layers: { bone: string; slot: string; piece: string; back?: boolean }[];
+  pose_test: Record<string, number>;
+  skins: { name: string; color: string }[];
+  hair_colors: { name: string; color: string }[];
+  faces: { name: string; jaw: [number, number] }[];
+  hairs: string[];
+  hair_top_back: number[];
+  hood_helmets: number[];
+  beards: string[];
+  sets: string[];
+  sprites: Record<string, { w: number; h: number; pivot: [number, number]; tint: 'skin' | 'hair' | null; alpha?: number }>;
+}
+
+export type Pose = Record<string, number>;
+export const EQUIP_SLOTS = ['helmet', 'armor', 'shoulders', 'greaves', 'boots'] as const;
+export type EquipSlot = (typeof EQUIP_SLOTS)[number];
+
+export interface Look {
+  skin: number; face: number; hair: number; hairColor: number; beard: number;
+  helmet: number; armor: number; shoulders: number; greaves: number; boots: number;
+  weapon: string;
+}
+
+export const DEFAULT_LOOK: Look = { skin: 3, face: 0, hair: 1, hairColor: 1, beard: 2, helmet: 0, armor: 0, shoulders: 0, greaves: 0, boots: 0, weapon: 'gladius' };
+
+export interface ShadowStyle { enabled: boolean; depth: number; blur: number; strength: number; color: [number, number, number] }
+export const DEFAULT_SHADOW: ShadowStyle = { enabled: true, depth: 0.3, blur: 7, strength: 0.5, color: [0.42, 0.2, 0.22] };
+
+const SHADOW_PAD = 24;
+const BACK_TINT = 0xdcdcdc;
+
+// ------------------------------------------------------------------ shared kit + texture caches
+export class Kit {
+  readonly json: KitJson;
+  readonly base: string;
+  private images = new Map<string, HTMLImageElement>();
+  private tinted = new Map<string, Texture>();
+  private shadows = new Map<string, Texture>();
+  private plain = new Map<string, Texture>();
+
+  private constructor(base: string, json: KitJson) { this.base = base; this.json = json; }
+
+  static async load(base: string): Promise<Kit> {
+    const json: KitJson = await (await fetch(`${base}/kit.json`)).json();
+    return new Kit(base, json);
+  }
+
+  has(key: string) { return key in this.json.sprites; }
+
+  async ensure(keys: string[]) {
+    await Promise.all(keys.filter((k) => this.has(k) && !this.images.has(k)).map(async (k) => {
+      const tex: Texture = await Assets.load(`${this.base}/sprites/${k}.png`);
+      this.plain.set(k, tex);
+      this.images.set(k, tex.source.resource as HTMLImageElement);
+    }));
+  }
+
+  /** texture for a sprite, coloured for its tint group */
+  texture(key: string, color: string | null): Texture {
+    if (!color) return this.plain.get(key)!;
+    const id = `${key}|${color}`;
+    let t = this.tinted.get(id);
+    if (t) return t;
+    const img = this.images.get(key)!;
+    const c = document.createElement('canvas');
+    c.width = img.width; c.height = img.height;
+    const g = c.getContext('2d', { willReadFrequently: true })!;
+    g.drawImage(img, 0, 0);
+    const d = g.getImageData(0, 0, c.width, c.height);
+    const n = this.json.neutral;
+    const lin = (h: number) => parseInt(color.slice(h, h + 2), 16) / 255 / n;
+    const kr = lin(1), kg = lin(3), kb = lin(5);
+    const a = d.data;
+    for (let i = 0; i < a.length; i += 4) {
+      a[i] = Math.min(255, a[i] * kr);
+      a[i + 1] = Math.min(255, a[i + 1] * kg);
+      a[i + 2] = Math.min(255, a[i + 2] * kb);
+    }
+    g.putImageData(d, 0, 0);
+    t = Texture.from(c);
+    this.tinted.set(id, t);
+    return t;
+  }
+
+  shadow(key: string, blur: number): Texture {
+    let t = this.shadows.get(key);
+    if (t) return t;
+    const img = this.images.get(key)!;
+    const c = document.createElement('canvas');
+    c.width = img.width + SHADOW_PAD * 2;
+    c.height = img.height + SHADOW_PAD * 2;
+    const g = c.getContext('2d')!;
+    g.filter = `blur(${blur}px)`;
+    g.drawImage(img, SHADOW_PAD, SHADOW_PAD);
+    g.filter = 'none';
+    g.globalCompositeOperation = 'source-in';
+    g.fillStyle = '#fff';
+    g.fillRect(0, 0, c.width, c.height);
+    t = Texture.from(c);
+    this.shadows.set(key, t);
+    return t;
+  }
+
+  /** sprite key for a layer under a look (null = nothing drawn) */
+  resolve(layer: KitJson['layers'][number], look: Look): string | null {
+    const p = layer.piece;
+    switch (layer.slot) {
+      case 'body': return `body_${p}`;
+      case 'face': return `face${look.face}_${p}`;
+      case 'hair':
+        if (look.helmet > 0) {
+          if (p === 'front') return null;
+          if (this.json.hood_helmets?.includes(look.helmet) || this.json.hair_top_back?.includes(look.hair)) return null;
+        }
+        return `hair${look.hair}_${p}`;
+      case 'beard': return look.beard > 0 ? `beard${look.beard}` : null;
+      case 'weapon': return look.weapon ? `weapon_${look.weapon}` : null;
+      default: {
+        const tier = look[layer.slot as EquipSlot] ?? 0;
+        if (!tier) return null;
+        return `${layer.slot}${tier}${p ? '_' + p : ''}`;
+      }
+    }
+  }
+
+  keysFor(look: Look): string[] {
+    return this.json.layers.map((l) => this.resolve(l, look)).filter((k): k is string => !!k && this.has(k));
+  }
+}
+
+interface Part { bone: string; sprite: Sprite; shadow: Sprite; sx: number; sy: number; ox: number; oy: number; flat: boolean }
+
+export class PaperRig {
+  readonly view: Sprite;
+  readonly kit: Kit;
+  pose: Pose;
+  facing: 1 | -1;
+  scale: number;
+  shadow: ShadowStyle;
+  look: Look = { ...DEFAULT_LOOK };
+
+  private inner = new Container();
+  private parts: Part[] = [];
+  private rt: RenderTexture;
+  private origin: { x: number; y: number };
+
+  constructor(kit: Kit, opts: { scale: number; facing: 1 | -1; shadow?: ShadowStyle }) {
+    this.kit = kit;
+    this.scale = opts.scale;
+    this.facing = opts.facing;
+    this.shadow = { ...(opts.shadow ?? DEFAULT_SHADOW) };
+    this.pose = { ...kit.json.pose_test };
+    const wU = 15, hU = 18;
+    this.origin = { x: 6.5 * this.scale, y: 11.8 * this.scale };
+    this.rt = RenderTexture.create({ width: Math.ceil(wU * this.scale), height: Math.ceil(hU * this.scale), resolution: 2, antialias: true });
+    this.view = new Sprite(this.rt);
+    this.setFacing(opts.facing);
+  }
+
+  setFacing(f: 1 | -1) {
+    this.facing = f;
+    this.view.scale.x = f;
+    this.view.anchor.set(this.origin.x / this.rt.width, this.origin.y / this.rt.height);
+  }
+
+  /** show only a window of the puppet (units around the pelvis, y up) - portraits without masks */
+  crop(x0: number, y0: number, x1: number, y1: number) {
+    const k = this.scale;
+    const frame = new Rectangle(this.origin.x + x0 * k, this.origin.y - y1 * k, (x1 - x0) * k, (y1 - y0) * k);
+    this.view.texture = new Texture({ source: this.rt.source, frame });
+    this.view.anchor.set(0, 0);
+  }
+
+  /** rebuild the sprite list for a look (loads missing textures) */
+  async setLook(look: Partial<Look>) {
+    this.look = { ...this.look, ...look };
+    const L = this.look;
+    await this.kit.ensure(this.kit.keysFor(L));
+    this.inner.removeChildren();
+    this.parts = [];
+    const J = this.kit.json;
+    const skin = J.skins[L.skin]?.color ?? J.skins[3].color;
+    const hair = J.hair_colors[L.hairColor]?.color ?? J.hair_colors[1].color;
+    const face = J.faces[L.face] ?? J.faces[0];
+    for (const layer of J.layers) {
+      const key = this.kit.resolve(layer, L);
+      if (!key || !this.kit.has(key)) continue;
+      const m = J.sprites[key];
+      const color = m.tint === 'skin' ? skin : m.tint === 'hair' ? hair : null;
+      const s = new Sprite(this.kit.texture(key, color));
+      s.anchor.set(m.pivot[0] / m.w, m.pivot[1] / m.h);
+      if (layer.back) s.tint = BACK_TINT;
+      const flat = (m.alpha ?? 1) < 1;
+      if (flat) s.alpha = m.alpha!;
+      const sh = new Sprite(this.kit.shadow(key, this.shadow.blur));
+      sh.anchor.set((m.pivot[0] + SHADOW_PAD) / (m.w + SHADOW_PAD * 2), (m.pivot[1] + SHADOW_PAD) / (m.h + SHADOW_PAD * 2));
+      sh.blendMode = 'multiply';
+      // beards are drawn on the reference jaw: stretch them to this face's jaw around the jaw centre
+      let sx = 1, sy = 1, ox = 0, oy = 0;
+      if (layer.slot === 'beard') {
+        sx = face.jaw[0] / J.ref_jaw[0];
+        sy = face.jaw[1] / J.ref_jaw[1];
+        ox = J.jaw_center[0] * (1 - sx);
+        oy = J.jaw_center[1] * (1 - sy);
+      }
+      this.inner.addChild(sh, s);
+      this.parts.push({ bone: layer.bone, sprite: s, shadow: sh, sx, sy, ox, oy, flat });
+    }
+  }
+
+  /** forward kinematics in rig units (y up, pelvis joint at its rest place), rotations in radians CCW */
+  fk(pose: Pose): Map<string, { x: number; y: number; r: number }> {
+    const out = new Map<string, { x: number; y: number; r: number }>();
+    for (const b of this.kit.json.bones) {
+      const rot = ((pose[b.name] ?? 0) * Math.PI) / 180;
+      if (!b.parent) { out.set(b.name, { x: b.x, y: b.y, r: rot }); continue; }
+      const p = out.get(b.parent)!;
+      const c = Math.cos(p.r), s = Math.sin(p.r);
+      out.set(b.name, { x: p.x + b.x * c - b.y * s, y: p.y + b.x * s + b.y * c, r: p.r + rot });
+    }
+    return out;
+  }
+
+  /** lowest point of both soles (heel / toe), rig units */
+  soleLow(pose: Pose): number {
+    const J = this.fk(pose);
+    let low = Infinity;
+    for (const f of ['foot_b', 'foot_f']) {
+      const t = J.get(f)!;
+      const c = Math.cos(t.r), s = Math.sin(t.r);
+      for (const [px, py] of [[-0.38, -0.42], [1.05, -0.42]]) low = Math.min(low, t.y + px * s + py * c);
+    }
+    return low;
+  }
+
+  private solve(): Map<string, { x: number; y: number; r: number }> {
+    const out = new Map<string, { x: number; y: number; r: number }>();
+    const k = this.scale;
+    for (const b of this.kit.json.bones) {
+      const rot = ((this.pose[b.name] ?? 0) * Math.PI) / 180;
+      if (!b.parent) { out.set(b.name, { x: this.origin.x, y: this.origin.y, r: -rot }); continue; }
+      const p = out.get(b.parent)!;
+      const lx = b.x * k, ly = -b.y * k;
+      const c = Math.cos(p.r), s = Math.sin(p.r);
+      out.set(b.name, { x: p.x + lx * c - ly * s, y: p.y + lx * s + ly * c, r: p.r - rot });
+    }
+    return out;
+  }
+
+  render(renderer: Renderer) {
+    const W = this.solve();
+    const tex = this.scale / this.kit.json.ppu;
+    const sh = this.shadow;
+    const sun = this.kit.json.sun_dir;
+    const ox = sun[0] * sh.depth * this.scale * this.facing;
+    const oy = -sun[1] * sh.depth * this.scale;
+    const ch = (i: number) => Math.round((1 - sh.strength * (1 - sh.color[i])) * 255);
+    const tint = (ch(0) << 16) | (ch(1) << 8) | ch(2);
+    const k = this.scale;
+    for (const p of this.parts) {
+      const t = W.get(p.bone)!;
+      // local offset (bone units, y up) -> screen
+      const lx = p.ox * k, ly = -p.oy * k;
+      const c = Math.cos(t.r), s = Math.sin(t.r);
+      const x = t.x + lx * c - ly * s, y = t.y + lx * s + ly * c;
+      for (const [spr, dx, dy] of [[p.sprite, 0, 0], [p.shadow, ox, oy]] as const) {
+        spr.position.set(x + dx, y + dy);
+        spr.rotation = t.r;
+        spr.scale.set(tex * p.sx, tex * p.sy);
+      }
+      p.shadow.visible = sh.enabled && !p.flat;
+      p.shadow.tint = tint;
+    }
+    renderer.render({ container: this.inner, target: this.rt, clear: true });
+  }
+}
+
+/** make 'multiply' keep destination alpha (srcA*0 + dstA*1): shadows only darken paper already drawn */
+export function patchShadowBlend(renderer: Renderer) {
+  const r = renderer as unknown as { gl?: WebGL2RenderingContext; state?: { blendModesMap: Record<string, number[]> } };
+  if (!r.gl || !r.state) return false;
+  const gl = r.gl;
+  r.state.blendModesMap.multiply = [gl.DST_COLOR, gl.ONE_MINUS_SRC_ALPHA, gl.ZERO, gl.ONE];
+  return true;
+}

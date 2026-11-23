@@ -1,0 +1,434 @@
+{
+ "cold_pressed/tex/Cold_Pressed_Paper_01_Image-bump_jpg.png": {
+  "mean": [
+   0.5375,
+   0.5375,
+   0.5375
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0948
+ },
+ "cold_pressed/tex/Cold_Pressed_Paper_01_Image-diffuse_jpg.png": {
+  "mean": [
+   0.9842,
+   0.9836,
+   0.9468
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0003
+ },
+ "cold_pressed/tex/Cold_Pressed_Paper_01_Image-normal_jpg.png": {
+  "mean": [
+   0.5004,
+   0.5004,
+   0.9882
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0441
+ },
+ "corrugated_flute/tex/Cardboard_Stripes_Base_Color_jpg.png": {
+  "mean": [
+   0.5974,
+   0.4864,
+   0.3795
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0474
+ },
+ "corrugated_flute/tex/Cardboard_Stripes_Glossiness_jpg.png": {
+  "mean": [
+   0.1301,
+   0.1301,
+   0.1301
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0218
+ },
+ "corrugated_flute/tex/Cardboard_Stripes_Height_jpg.png": {
+  "mean": [
+   0.4459,
+   0.4459,
+   0.4459
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.1293
+ },
+ "corrugated_flute/tex/Cardboard_Stripes_Metallic_jpg.png": {
+  "mean": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0
+ },
+ "corrugated_flute/tex/Cardboard_Stripes_Normal_jpg.png": {
+  "mean": [
+   0.5003,
+   0.5002,
+   0.9046
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0915
+ },
+ "corrugated_flute/tex/Cardboard_Stripes_Specular_jpg.png": {
+  "mean": [
+   0.2366,
+   0.2366,
+   0.2366
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0
+ },
+ "craft_paper/tex/carftpaper_ambientocclusion_tga.png": {
+  "mean": [
+   0.9689,
+   0.9689,
+   0.9689
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.045
+ },
+ "craft_paper/tex/carftpaper_basecolor_tga.png": {
+  "mean": [
+   0.7328,
+   0.5979,
+   0.4979
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0252
+ },
+ "craft_paper/tex/carftpaper_height_tga.png": {
+  "mean": [
+   0.7559,
+   0.7559,
+   0.7559
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0146
+ },
+ "craft_paper/tex/carftpaper_metallic_tga.png": {
+  "mean": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0
+ },
+ "craft_paper/tex/carftpaper_normal_tga.png": {
+  "mean": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0092
+ },
+ "craft_paper/tex/carftpaper_roughness_tga.png": {
+  "mean": [
+   0.9446,
+   0.9446,
+   0.9446
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0211
+ },
+ "kraft_cardboard/tex/hairy_cardboard_Base_Color_jpg.png": {
+  "mean": [
+   0.5895,
+   0.4666,
+   0.2989
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0302
+ },
+ "kraft_cardboard/tex/hairy_cardboard_Glossiness_jpg.png": {
+  "mean": [
+   0.192,
+   0.192,
+   0.192
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0
+ },
+ "kraft_cardboard/tex/hairy_cardboard_Height_jpg.png": {
+  "mean": [
+   0.5,
+   0.5,
+   0.5
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0081
+ },
+ "kraft_cardboard/tex/hairy_cardboard_Metallic_jpg.png": {
+  "mean": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0
+ },
+ "kraft_cardboard/tex/hairy_cardboard_Normal_jpg.png": {
+  "mean": [
+   0.5,
+   0.5,
+   0.83
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0693
+ },
+ "kraft_cardboard/tex/hairy_cardboard_Specular_jpg.png": {
+  "mean": [
+   0.2366,
+   0.2366,
+   0.2366
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0
+ },
+ "recycled_cardboard_brown/tex/Recycled_Brown_Cardboard_Color_jpg.png": {
+  "mean": [
+   0.6523,
+   0.5173,
+   0.3997
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.021
+ },
+ "recycled_cardboard_brown/tex/Recycled_Brown_Cardboard_Displacement_jpg.png": {
+  "mean": [
+   0.5838,
+   0.5838,
+   0.5838
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0375
+ },
+ "recycled_cardboard_brown/tex/Recycled_Brown_Cardboard_NormalGL_jpg.png": {
+  "mean": [
+   0.5001,
+   0.4999,
+   1.0
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0017
+ },
+ "recycled_cardboard_brown/tex/Recycled_Brown_Cardboard_Roughness_jpg.png": {
+  "mean": [
+   0.4378,
+   0.4378,
+   0.4378
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0366
+ },
+ "recycled_white/tex/Paper_Color_jpg.png": {
+  "mean": [
+   0.9987,
+   0.9987,
+   0.9987
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.011
+ },
+ "recycled_white/tex/Paper_Displacement_jpg.png": {
+  "mean": [
+   0.5837,
+   0.5837,
+   0.5837
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0389
+ },
+ "recycled_white/tex/Paper_NormalGL_jpg.png": {
+  "mean": [
+   0.5001,
+   0.4999,
+   1.0
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0016
+ },
+ "recycled_white/tex/Paper_Roughness_jpg.png": {
+  "mean": [
+   0.4377,
+   0.4377,
+   0.4377
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0345
+ },
+ "washi/tex/ao_png.png": {
+  "mean": [
+   0.8826,
+   0.8828,
+   0.8836
+  ],
+  "size": [
+   1254,
+   1254
+  ],
+  "lstd": 0.0562
+ },
+ "washi/tex/base_color.png": {
+  "mean": [
+   0.9443,
+   0.9227,
+   0.8693
+  ],
+  "size": [
+   1414,
+   1414
+  ],
+  "lstd": 0.039
+ },
+ "washi/tex/normal_png.png": {
+  "mean": [
+   0.5166,
+   0.5427,
+   0.818
+  ],
+  "size": [
+   1254,
+   1254
+  ],
+  "lstd": 0.0527
+ },
+ "washi/tex/roug_png.png": {
+  "mean": [
+   0.6192,
+   0.619,
+   0.6199
+  ],
+  "size": [
+   1254,
+   1254
+  ],
+  "lstd": 0.0742
+ },
+ "watercolour_hot/tex/Watercolour_Paper_01-bump_jpg.png": {
+  "mean": [
+   0.4966,
+   0.4966,
+   0.4966
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0093
+ },
+ "watercolour_hot/tex/Watercolour_Paper_01-diffuse_jpg.png": {
+  "mean": [
+   0.8544,
+   0.9042,
+   0.8393
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0229
+ },
+ "watercolour_hot/tex/Watercolour_Paper_01-normal_jpg.png": {
+  "mean": [
+   0.5003,
+   0.5003,
+   0.9975
+  ],
+  "size": [
+   2048,
+   2048
+  ],
+  "lstd": 0.0206
+ }
+}

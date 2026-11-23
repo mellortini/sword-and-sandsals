@@ -1,0 +1,74 @@
+{
+ "cold_pressed": {
+  "id": "4c01965a-c6db-422b-959e-72531c4d3f67",
+  "name": "Cold Pressed Paper - 01",
+  "license": "cc_zero",
+  "author": "Adam McAnderson",
+  "file": "resolution_2K",
+  "bytes": 2246609
+ },
+ "watercolour_hot": {
+  "id": "c908499c-576c-425a-bd25-dfd4fae3202b",
+  "name": "Hot Pressed Water Colour Paper.",
+  "license": "royalty_free",
+  "author": "Adam McAnderson",
+  "file": "resolution_2K",
+  "bytes": 1195663
+ },
+ "kraft_cardboard": {
+  "id": "df1e801a-1d23-4306-bbe4-810d6c0c5fb8",
+  "name": "Natural Kraft Cardboard",
+  "license": "royalty_free",
+  "author": "Jair Del Real",
+  "file": "resolution_2K",
+  "bytes": 3776291
+ },
+ "corrugated_flute": {
+  "id": "fa732caa-f269-4492-a587-f34247c9deb7",
+  "name": "Corrugated Cardboard Flute",
+  "license": "royalty_free",
+  "author": "Jair Del Real",
+  "file": "resolution_2K",
+  "bytes": 4148040
+ },
+ "washi": {
+  "id": "c67e5c0f-7b90-40af-8356-c8522e691bab",
+  "name": "Washi Paper",
+  "license": "royalty_free",
+  "author": "Yuriy Madar",
+  "file": "blend",
+  "bytes": 13488461
+ },
+ "recycled_white": {
+  "id": "0d7640cd-85a0-4684-a3d6-63974a49d9cb",
+  "name": "White Recycled Paper",
+  "license": "royalty_free",
+  "author": "KID ",
+  "file": "resolution_2K",
+  "bytes": 3143686
+ },
+ "craft_paper": {
+  "id": "c0ffbe97-2d92-4983-8b9b-447dafc38649",
+  "name": "Craft paper",
+  "license": "royalty_free",
+  "author": "Anna C",
+  "file": "resolution_2K",
+  "bytes": 19543457
+ },
+ "old_paper": {
+  "id": "53088ddd-78df-4855-a7a6-baee8dd8c60e",
+  "name": "Old Paper",
+  "license": "royalty_free",
+  "author": "Paco Salas",
+  "file": "blend",
+  "bytes": 221819
+ },
+ "recycled_cardboard_brown": {
+  "id": "d0366dbb-3b90-4f12-9f03-0101f9be33f1",
+  "name": "Recycled Brown Cardboard",
+  "license": "royalty_free",
+  "author": "KID ",
+  "file": "resolution_2K",
+  "bytes": 3541140
+ }
+}

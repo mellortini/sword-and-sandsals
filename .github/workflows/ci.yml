@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # LFS files are not needed for typecheck/build (saves LFS bandwidth); they stay as small pointer files
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Block files > 50 MB that are not in Git LFS
+        run: |
+          big=$(find . -path ./.git -prune -o -type f -size +50M -print)
+          if [ -n "$big" ]; then
+            echo "::error::Files over 50 MB committed without Git LFS:"
+            echo "$big"
+            exit 1
+          fi
+          echo "no large non-LFS files"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
