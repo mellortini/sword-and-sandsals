@@ -8,6 +8,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "assets:atlas": "node tools/atlas.mjs",
+    "test:visual": "playwright test",
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
@@ -17,6 +18,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.1",
     "eslint": "^10.15.0",
     "eslint-parser-oxc": "^0.1.1",
     "maxrects-packer": "^3.0.0",

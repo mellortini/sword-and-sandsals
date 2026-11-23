@@ -1,5 +1,6 @@
 import { Container, Sprite } from 'pixi.js';
-import { FEET_Y, PELVIS_ABOVE_FEET, UNIT, groundShadowTexture, randomLook } from './common';
+import { CombatHud } from '../ui/hud';
+import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from './common';
 import type { SceneContext } from './common';
 
 export async function showArena({ world, bgTex, params, ui, add }: SceneContext) {
@@ -17,5 +18,12 @@ export async function showArena({ world, bgTex, params, ui, add }: SceneContext)
     arena.addChild(g);
     await add(looks[i], x, FEET_Y - PELVIS_ABOVE_FEET * UNIT, UNIT, i ? -1 : 1, arena, i * 0.7);
   }
+  // The arena preview opens with full meters. The turn loop will pass live fighter state to the same HUD.
+  const full = { health: 70, energy: 40, stats: { maxHealth: 70, maxEnergy: 40 } };
+  const hud = new CombatHud({
+    fighters: { player: { ...full, name: 'Player' }, enemy: { ...full, name: 'Opponent' } },
+  }, W, H);
+  arena.addChild(hud);
   ui.innerHTML = '<a href="?view=wardrobe">garderoba</a> · <a href="?view=lineup">10 zestawów</a> · <a href="?view=faces">twarze</a> · <a href="?">losuj</a>';
+  return (dt: number) => hud.update(dt);
 }
