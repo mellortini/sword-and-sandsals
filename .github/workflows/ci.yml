@@ -51,12 +51,11 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium --only-shell
       - run: npm run build
-      - run: npm run test:visual -- --update-snapshots=missing
+      - run: npm run test:visual
       - uses: actions/upload-artifact@v7
-        if: ${{ !cancelled() }}
+        if: ${{ failure() }}
         with:
-          name: visual-screenshots
-          path: |
-            tests/visual/__screenshots__/linux/
-            out/visual/
+          name: visual-diffs
+          path: out/visual/
+          if-no-files-found: ignore
           retention-days: 7

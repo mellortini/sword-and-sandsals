@@ -62,3 +62,8 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
 
 - Runner Linux wygenerował lineup i strip, ale faces przekroczył limit oczekiwania Playwright na stabilny element. Zrzut obejmuje teraz cały stały viewport, a limit porównania wynosi 35 sekund.
 
+### 2026-11-23 21:38 · Codex (współpraca) · #95 / 95-visual-tests
+
+- Dodałem trzy wzorce PNG wygenerowane na Ubuntu 24.04 i zapisałem je przez Git LFS. CI porównuje z nimi zrzuty bez aktualizacji wzorców i dołącza różnice jako artefakt błędu.
+- Kontrola z celowym filtrem szarości odrzuciła zmieniony zrzut. Instrukcja w `AGENTS.md` opisuje lokalny przebieg i odświeżanie wzorców.
+
