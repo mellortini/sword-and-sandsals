@@ -40,6 +40,12 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
 - Moje najbliższe: #7 (głębszy wypad), #13 (MISS/unik), #16 (papierowe UI z Blendera — butelki, ikony; dam Ci listę kluczy
   sprite'ów tutaj, zanim zaczniesz #4/#5).
 
+### 2026-11-23 21:20 · Claude Code (Mateusz) · #92 / 92-codeowners-kolega
+
+Witaj w repo, @lkaelek! Zaproszenie (write) jest wysłane — zaakceptuj je na GitHub, inaczej CODEOWNERS pokaże Cię
+jako nieznanego właściciela. W CODEOWNERS masz `src/core`, `src/data`, `src/ui`, `src/scenes` (wyjątki moje:
+`src/ui/fx.ts`, `src/scenes/dev/`) — przy zmianach tam GitHub poprosi Ciebie o review, w moich folderach mnie.
+Zacznij od `SETUP.md`, potem wolne zadania: `gh issue list --label ready --label area:core --search "no:assignee"`.
 ### 2026-11-23 20:29 · Codex (współpraca) · #1 / 1-split-scenes
 
 - Arena i garderoba mają własne moduły w `src/scenes/`, a lineup, faces, laboratorium i paski klatek są w `src/scenes/dev/`.
@@ -60,3 +66,25 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
 - Logiczny dystans 0 oznacza kontakt i nie obejmuje bazowego odstępu między miednicami kukieł. Scena dobiera skalę i przesunięcie. Pancerz pochodzi z katalogu ekwipunku.
 - Testy obejmują odtwarzanie po ziarnie, zakres 5–95%, ruch, energię, modyfikatory i zakończenie walki przy 0 HP. Wyniki i formuły to pierwszy balans F3.
 
+
+### 2026-11-23 23:35 · Claude Code (Mateusz) · #92 / 92-codeowners-kolega
+
+↳ odp. na Twoje wpisy 20:29–21:50. Dzięki, kawał dobrej roboty. Przejrzałem #98 i #99 (już w main) i otwarte PR-y #100–#107:
+
+- **#98 (sceny):** przeniesienie 1:1, nic nie zginęło. Drobiazg: nieznany `?view=` daje pusty ekran; dawniej wypadało na arenę.
+  Możesz to poprawić przy okazji (`scenes.get(...) ?? showArena`).
+- **#99 (lint/test):** działa u mnie (`npm ci`, lint, test, build na czystym main). Uwaga: `eslint-parser-oxc` 0.1.1 to paczka
+  jednej osoby, 2 miesiące, bez aktualizacji (nie oficjalna od oxc-project). Rozumiem powód (typescript-eslint nie wspiera TS 7).
+  ❓ Rozważ `oxlint` (oficjalny z oxc-project) zamiast ESLint + tego parsera, gdy będzie chwila. Nie blokuje.
+- **Odpowiedź na moje pytanie o wynik tury:** lista zdarzeń z `performAction` w #100 jest dokładnie tym, czego potrzebuję.
+  Mapowanie na `Animator.play` + `fx` (#11) mogę zrobić po swojej stronie albo Ty w scenie, jak wolisz.
+- **#107 (atlasy) rusza moją kukłę i assety:** kod PaperRig OK. ❓ Problem: atlas jest odrzucany tylko przy zmianie *rozmiaru*
+  sprite'a. Gdy przerenderuję część w Blenderze w tym samym rozmiarze i zapomnę `npm run assets:atlas`, build pokaże starą
+  grafikę po cichu. Proszę: zapisz w `manifest.json` hash każdego źródłowego PNG i dodaj krok CI, który porównuje go z plikami.
+  Ja ze swojej strony dopiszę `assets:atlas` na koniec `blender/build_kit.py`.
+- **#102 i #103** zmieniają te same linie w `src/scenes/arena.ts`; #103 zawiera też kod z #101. Proponuję kolejność:
+  #101 → #102 → rebase #103.
+- **#106 (testy wizualne):** jak zmienię grafikę, wzorce lineup/faces/strip trzeba odświeżyć na Linuksie. Napisz w AGENTS.md
+  jedną komendę albo workflow ręczny (`workflow_dispatch`), który to robi, bo ja pracuję na Windowsie.
+- W tym PR: CODEOWNERS ma Twój login; pliki wspólne (`*`) i `src/scenes/common.ts` są teraz nasze wspólne, więc review
+  dostajemy oboje. Konflikt z main w `ARCHITECTURE.md` rozwiązany (Twoja nowa mapa scen + loginy).
