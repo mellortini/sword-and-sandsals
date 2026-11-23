@@ -51,6 +51,9 @@ D:/blender/blender.exe -b --python blender/build_kit.py -- 32 helmet9,face3  # t
 D:/blender/blender.exe -b --python blender/arena.py -- assets/bg/arena.png 1920 1080 128
 ```
 
+Po zmianie sprite'ów zestawu odśwież atlasy produkcyjne przez `npm run assets:atlas`. Serwer dev korzysta z PNG,
+a build produkcyjny pobiera odpowiednie strony WebP i może wrócić do PNG, jeśli atlas jest niedostępny.
+
 ## Start dla współpracownika
 ```
 git lfs install

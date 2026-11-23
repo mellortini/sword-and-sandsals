@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 /**
  * PaperRig — modular cut-out gladiator made of Cycles-rendered paper parts (game/assets/chars/kit).
  *
@@ -48,30 +50,66 @@ export const DEFAULT_SHADOW: ShadowStyle = { enabled: true, depth: 0.3, blur: 7,
 const SHADOW_PAD = 24;
 const BACK_TINT = 0xdcdcdc;
 
+interface AtlasFrame { page: string; x: number; y: number; w: number; h: number }
+interface AtlasManifest { version: number; frames: Record<string, AtlasFrame> }
+interface SpritePixels { image: CanvasImageSource; frame: Rectangle }
+
 // ------------------------------------------------------------------ shared kit + texture caches
 export class Kit {
   readonly json: KitJson;
   readonly base: string;
-  private images = new Map<string, HTMLImageElement>();
+  private images = new Map<string, SpritePixels>();
+  private atlasPages = new Map<string, Promise<Texture | null>>();
   private tinted = new Map<string, Texture>();
   private shadows = new Map<string, Texture>();
   private plain = new Map<string, Texture>();
 
-  private constructor(base: string, json: KitJson) { this.base = base; this.json = json; }
+  private constructor(base: string, json: KitJson, private readonly frames: Record<string, AtlasFrame> = {}) {
+    this.base = base;
+    this.json = json;
+  }
 
   static async load(base: string): Promise<Kit> {
     const json: KitJson = await (await fetch(`${base}/kit.json`)).json();
-    return new Kit(base, json);
+    // The renderer can iterate on individual PNGs in dev without rebuilding atlases.
+    if (!import.meta.env.PROD) return new Kit(base, json);
+
+    const manifest = await fetch(`${base}/atlas/manifest.json`)
+      .then((response): Promise<AtlasManifest | null> => response.ok ? response.json() : Promise.resolve(null))
+      .catch(() => null);
+    return new Kit(base, json, manifest?.version === 1 ? manifest.frames : undefined);
   }
 
   has(key: string) { return key in this.json.sprites; }
 
   async ensure(keys: string[]) {
-    await Promise.all(keys.filter((k) => this.has(k) && !this.images.has(k)).map(async (k) => {
-      const tex: Texture = await Assets.load(`${this.base}/sprites/${k}.png`);
+    await Promise.all([...new Set(keys)].filter((k) => this.has(k) && !this.images.has(k)).map(async (k) => {
+      const tex = await this.atlasTexture(k) ?? await Assets.load<Texture>(`${this.base}/sprites/${k}.png`);
       this.plain.set(k, tex);
-      this.images.set(k, tex.source.resource as HTMLImageElement);
+      this.images.set(k, { image: tex.source.resource as CanvasImageSource, frame: tex.frame });
     }));
+  }
+
+  private async atlasTexture(key: string): Promise<Texture | null> {
+    const frame = this.frames[key];
+    const sprite = this.json.sprites[key];
+    if (!frame || frame.w !== sprite.w || frame.h !== sprite.h) return null;
+
+    let pending = this.atlasPages.get(frame.page);
+    if (!pending) {
+      pending = Assets.load<Texture>(`${this.base}/atlas/${frame.page}`).catch(() => null);
+      this.atlasPages.set(frame.page, pending);
+    }
+    const page = await pending;
+    if (!page || frame.x < 0 || frame.y < 0 || frame.x + frame.w > page.width || frame.y + frame.h > page.height) {
+      return null;
+    }
+    return new Texture({ source: page.source, frame: new Rectangle(frame.x, frame.y, frame.w, frame.h) });
+  }
+
+  private drawSprite(key: string, context: CanvasRenderingContext2D, x: number, y: number) {
+    const { image, frame } = this.images.get(key)!;
+    context.drawImage(image, frame.x, frame.y, frame.width, frame.height, x, y, frame.width, frame.height);
   }
 
   /** texture for a sprite, coloured for its tint group */
@@ -80,11 +118,11 @@ export class Kit {
     const id = `${key}|${color}`;
     let t = this.tinted.get(id);
     if (t) return t;
-    const img = this.images.get(key)!;
+    const { frame } = this.images.get(key)!;
     const c = document.createElement('canvas');
-    c.width = img.width; c.height = img.height;
+    c.width = frame.width; c.height = frame.height;
     const g = c.getContext('2d', { willReadFrequently: true })!;
-    g.drawImage(img, 0, 0);
+    this.drawSprite(key, g, 0, 0);
     const d = g.getImageData(0, 0, c.width, c.height);
     const n = this.json.neutral;
     const lin = (h: number) => parseInt(color.slice(h, h + 2), 16) / 255 / n;
@@ -104,13 +142,13 @@ export class Kit {
   shadow(key: string, blur: number): Texture {
     let t = this.shadows.get(key);
     if (t) return t;
-    const img = this.images.get(key)!;
+    const { frame } = this.images.get(key)!;
     const c = document.createElement('canvas');
-    c.width = img.width + SHADOW_PAD * 2;
-    c.height = img.height + SHADOW_PAD * 2;
+    c.width = frame.width + SHADOW_PAD * 2;
+    c.height = frame.height + SHADOW_PAD * 2;
     const g = c.getContext('2d')!;
     g.filter = `blur(${blur}px)`;
-    g.drawImage(img, SHADOW_PAD, SHADOW_PAD);
+    this.drawSprite(key, g, SHADOW_PAD, SHADOW_PAD);
     g.filter = 'none';
     g.globalCompositeOperation = 'source-in';
     g.fillStyle = '#fff';
@@ -149,6 +187,13 @@ export class Kit {
 
 interface Part { bone: string; sprite: Sprite; shadow: Sprite; sx: number; sy: number; ox: number; oy: number; flat: boolean }
 
+interface StillFrame {
+  pose: Pose;
+  facing: 1 | -1;
+  scale: number;
+  shadow: ShadowStyle;
+}
+
 export class PaperRig {
   readonly view: Sprite;
   readonly kit: Kit;
@@ -162,6 +207,7 @@ export class PaperRig {
   private parts: Part[] = [];
   private rt: RenderTexture;
   private origin: { x: number; y: number };
+  private stillFrame?: StillFrame;
 
   constructor(kit: Kit, opts: { scale: number; facing: 1 | -1; shadow?: ShadowStyle }) {
     this.kit = kit;
@@ -171,7 +217,8 @@ export class PaperRig {
     this.pose = { ...kit.json.pose_test };
     const wU = 15, hU = 18;
     this.origin = { x: 6.5 * this.scale, y: 11.8 * this.scale };
-    this.rt = RenderTexture.create({ width: Math.ceil(wU * this.scale), height: Math.ceil(hU * this.scale), resolution: 2, antialias: true });
+    const resolution = window.matchMedia('(pointer: coarse)').matches ? 1 : 2;
+    this.rt = RenderTexture.create({ width: Math.ceil(wU * this.scale), height: Math.ceil(hU * this.scale), resolution, antialias: true });
     this.view = new Sprite(this.rt);
     this.setFacing(opts.facing);
   }
@@ -225,6 +272,22 @@ export class PaperRig {
       this.inner.addChild(sh, s);
       this.parts.push({ bone: layer.bone, sprite: s, shadow: sh, sx, sy, ox, oy, flat });
     }
+    this.invalidateStillFrame();
+  }
+
+  invalidateStillFrame() { this.stillFrame = undefined; }
+
+  renderStill(renderer: Renderer, pose: Pose) {
+    this.pose = pose;
+    const frame = this.stillFrame;
+    const shadow = this.shadow;
+    if (frame && frame.facing === this.facing && frame.scale === this.scale
+      && frame.shadow.enabled === shadow.enabled && frame.shadow.depth === shadow.depth
+      && frame.shadow.strength === shadow.strength && frame.shadow.color.every((value, index) => value === shadow.color[index])
+      && this.kit.json.bones.every(({ name }) => (frame.pose[name] ?? 0) === (pose[name] ?? 0))) return;
+
+    this.render(renderer);
+    this.stillFrame = { pose: { ...pose }, facing: this.facing, scale: this.scale, shadow: { ...shadow, color: [...shadow.color] } };
   }
 
   /** forward kinematics in rig units (y up, pelvis joint at its rest place), rotations in radians CCW */
@@ -267,6 +330,7 @@ export class PaperRig {
   }
 
   render(renderer: Renderer) {
+    this.invalidateStillFrame();
     const W = this.solve();
     const tex = this.scale / this.kit.json.ppu;
     const sh = this.shadow;

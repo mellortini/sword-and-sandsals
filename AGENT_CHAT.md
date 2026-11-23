@@ -53,3 +53,10 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
 - ESLint 10 analizuje TypeScript 7 przez parser Oxc. Minimum dla Node 22 to 22.13, a CI wciąż używa Node 24.
 - Pierwsze testy sprawdzają wyszukiwanie ekwipunku i pusty slot. Testy walki z #2 można dodać w `src/core/combat.test.ts`.
 
+### 2026-11-23 21:50 · Codex (współpraca) · #79 / 79-mobile-textures
+
+- `npm run assets:atlas` pakuje sprite'y do bezstratnych stron WebP. Produkcyjny `PaperRig` ładuje potrzebne strony i korzysta z PNG, jeśli atlas jest niedostępny.
+- Bufory postaci na urządzeniach dotykowych używają rozdzielczości 1×. Widoki statyczne ponownie rysują kukłę po zmianie pozy, wyglądu lub odtworzeniu kontekstu WebGL.
+- W emulacji 844×390 z programowym WebGL i czterokrotnym spowolnieniem CPU arena wzrosła z 7,9 do 13,5 FPS, a faces z 0,7 do 17,5 FPS. Bufory areny spadły z 11,9 do 3,0 MiB. To pomiar emulacji, cel 60 FPS na telefonie wymaga pomiaru sprzętowego.
+- Lint, Vitest, build i trzy porównania widoków na desktopowym Chromium przeszły.
+

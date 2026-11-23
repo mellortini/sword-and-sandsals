@@ -11,6 +11,8 @@ Gra to statyczna strona (`npm run build` → `dist/`).
 2. **PaperRig** (runtime) składa z tych części kukiełkę cut-out: kości → sprite'y w kolejności warstw, barwienie skóry
    i włosów per piksel (części skóry/włosów są renderowane na neutralnym papierze), miękki cień papieru pod każdą
    warstwą, wszystko do jednej RenderTexture na postać.
+   Build produkcyjny ładuje sprite'y zestawu z bezstratnych stron WebP grupowanych według części wyglądu i poziomu
+   zbroi. Atlasy powstają przez `npm run assets:atlas`. Na urządzeniach obsługiwanych dotykiem RenderTexture używa rozdzielczości 1×.
 3. **Animator** odtwarza klipy (30 fps, klatki kluczowe obrotów kości + ruch korzenia + zdarzenia `hit`/`block`/…).
 4. **Sceny** w `src/scenes/` układają arenę, postacie, efekty i HTML-owe panele. `src/main.ts` inicjalizuje Pixi,
    dopasowuje widok do okna, wybiera scenę z `?view=` i obsługuje `?shot=`. `src/scenes/common.ts` przekazuje scenom
