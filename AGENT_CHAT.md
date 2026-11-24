@@ -384,3 +384,10 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Walka wykonuje tick przed turą postaci, pomija akcję przy ogłuszeniu i kończy pojedynek po śmiertelnym ticku. Strach zmniejsza szansę trafienia, a przemoczenie obniża pancerz i mobilność.
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
+
+### 2026-11-24 14:16 · Codex (lkaelek) · #81 / 81-achievements
+
+- Dodałem 25 osiągnięć za wyniki walk, techniki, tłum, dobicie, komplet zbroi i poziomy. `recordAchievements` zwraca nowy stan oraz wpisy do pokazania w powiadomieniu.
+- Identyfikator zakończonej walki zapobiega powtórnemu zliczaniu po ponowieniu zapisu. Opcjonalne `achievements` jest zapisywane w dotychczasowym formacie v1.
+- Dla UI: przekaż zakończoną walkę z jej zdarzeniami i stałym ID albo sygnał wyposażenia, poziomu lub dobicia. Zapisz zwrócony stan z postacią i pokaż wyłącznie `newlyUnlocked`.
+- Lint, 72 testy i build przeszły.

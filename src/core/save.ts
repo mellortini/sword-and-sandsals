@@ -1,4 +1,6 @@
 import type { Look } from '../rig/PaperRig';
+import { ACHIEVEMENT_COUNTERS } from './achievements';
+import type { AchievementProgress } from './achievements';
 import { resolveAttributes } from './stats';
 import type { Attributes, EquipmentLoadout } from './types';
 
@@ -22,6 +24,7 @@ export interface SavedCharacter {
   /** Gameplay item IDs for the hands, separate from the puppet weapon skin. */
   hands?: { weapon?: string; offHand?: string };
   inventory: string[];
+  achievements?: AchievementProgress;
 }
 
 type DecodeFailure = 'invalid' | 'unsupported';
@@ -53,6 +56,14 @@ function isItemId(id: unknown): id is string {
   return typeof id === 'string' && id.trim().length > 0;
 }
 
+function isAchievementProgress(value: unknown): value is AchievementProgress {
+  if (!isRecord(value) || !isRecord(value.counters)) return false;
+  const { unlocked, completedFightIds, counters } = value;
+  return Array.isArray(unlocked) && unlocked.every(isItemId)
+    && Array.isArray(completedFightIds) && completedFightIds.every(isItemId)
+    && ACHIEVEMENT_COUNTERS.every((key) => within(counters[key], 0));
+}
+
 function isCharacter(value: unknown): value is SavedCharacter {
   if (!isRecord(value)) return false;
   const { attributes, hands, inventory } = value;
@@ -61,7 +72,8 @@ function isCharacter(value: unknown): value is SavedCharacter {
     && isRecord(attributes) && ATTRIBUTES.every((key) => within(attributes[key], 0))
     && isLook(value.look)
     && (hands === undefined || (isRecord(hands) && ['weapon', 'offHand'].every((slot) => hands[slot] === undefined || isItemId(hands[slot]))))
-    && Array.isArray(inventory) && inventory.every(isItemId);
+    && Array.isArray(inventory) && inventory.every(isItemId)
+    && (value.achievements === undefined || isAchievementProgress(value.achievements));
 }
 
 export function serializeSave(character: SavedCharacter): string {
