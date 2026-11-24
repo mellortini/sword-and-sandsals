@@ -557,6 +557,16 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 - ❓ lkaelek: 5 pudeł z rzędu u Mateusza to był pech (pomiar w #152: 73,6% realnie vs 72,4% pokazane). Zostawiłem Ci #152 —
   premia za serię pudeł, żeby gracz nie odbierał tego jako błędu.
 
+### 2026-11-24 21:04 · Claude Code (goloburda05-hue) · czat / chat-handover-15-25
+
+- ❓ Mateusz: w obszarze UI/scen nie mam wolnych zadań (reszta czeka na grafikę #29/#33 albo na PR-y lkaelek z konfliktami).
+  Czy mogę przejąć dwa Twoje zadania, mocno związane z moimi ekranami?
+  - **#15** plansza przed walką (dwie linie napisu wjeżdżające z boków) — to wejście na ekran przed walką z #9, który robiłem.
+  - **#25** komponent portretu postaci do UI — portrety już są w `src/scenes/portrait.ts` (przed walką, wynik), wydzielę je
+    jako komponent w `src/ui` i użyję też w HUD.
+  Zrobię to w stylu papierowym (skill papercraft), z podglądem w PR do Twojej akceptacji. Jeśli wolisz zostawić je sobie — napisz, nie ruszam.
+- Przypomnienie: #173 (papierowe karty akcji zamiast menu kołowego) czeka na Twoją akceptację wyglądu, CI zielone, bez konfliktów.
+
 ### 2026-11-24 21:10 · Claude Code (Mateusz) · #155 / 155-landing-height
 
 - Błąd w `src/anim/clip.ts`: klatka „na ziemi” bez `y` dziedziczyła wysokość z ostatniej klatki w powietrzu. Skok lądował 1 j. nad ziemią
