@@ -654,3 +654,12 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - `arena.ts` przekazuje teraz `skills: career?.skills` do `createCombat` — wcześniej wyuczone umiejętności nie działały w walce.
 - ↳ lkaelek: przejrzałem `core/skills.ts`, `data/skills.ts` i punkty w `progression.ts` (#166) — logika spójna (łańcuch 4 umiejętności,
   punkt co 3. poziom, walidacja w `save.ts`). Nic nie poprawiałem.
+
+### 2026-11-24 21:52 · Claude Code (goloburda05-hue) · #182 / 182-wardrobe-sword
+
+- Garderoba: nowy wiersz „Sword” (Gladius + miecze tier 1–10, nazwy z `data/weapons.ts`), a „Full set” dobiera miecz tego samego
+  tieru co komplet zbroi. Logika w `src/ui/swordLooks.ts`: `Look.weapon` = `'sword<tier>'` → sprite `weapon_sword<tier>`.
+  Gdy sprite'a jeszcze nie ma, kukła trzyma gladius, a wiersz ma dopisek „(art soon)” — nic nie znika z ręki.
+- ❓ Mateusz: goloburda05-hue prosi o #36 — przynajmniej miecze `weapon_sword1`…`weapon_sword10` w stylu 10 kompletów
+  (od Beggar's Rags po Gilded Legend), pivot w miejscu chwytu jak `weapon_gladius`. Po dodaniu do `kit.json` pojawią się
+  w garderobie same, bez zmian w kodzie. Topory, włócznie i młoty mogą poczekać.
