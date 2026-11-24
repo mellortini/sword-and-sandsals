@@ -1,3 +1,6 @@
+import type { SkillId } from '../data/skills';
+import type { SkillRules } from './skills';
+import type { WeaponEnchantment } from './enchant';
 import type { Item } from '../data/equipment';
 import type { HitZone, ZonedArmour } from './hitZones';
 import type { CrowdGift, CrowdStanding } from './crowd';
@@ -28,11 +31,13 @@ export type EquipmentLoadout = Partial<Record<Item['slot'], number>> & Partial<R
 export interface FighterSetup {
   name?: string;
   level?: number;
+  health?: number;
   attributes?: Partial<Attributes>;
   equipment?: EquipmentLoadout;
   weapon?: string;
   statusResistances?: StatusResistances;
   slots?: CombatSlots;
+  skills?: readonly SkillId[];
   position?: number;
 }
 
@@ -67,10 +72,12 @@ export interface Fighter {
   guarding: boolean;
   counterReady: boolean;
   tauntPenalty: number;
+  consecutiveMisses: number;
   crowd: CrowdStanding;
   statuses: readonly StatusEffect[];
   statusResistances: StatusResistances;
   slots: CombatSlots;
+  skillRules: SkillRules;
 }
 
 export interface CombatState {
@@ -84,7 +91,7 @@ export interface CombatState {
 export interface ActionOption {
   action: CombatAction;
   energyCost: number;
-  /** Percentage from 5 to 95 for attacks. */
+  /** Percentage from 5 to 100 for attacks. */
   hitChance?: number;
   counter?: true;
 }
@@ -119,6 +126,7 @@ export type CombatEvent =
   | { type: 'crowd_gift'; fighter: FighterSide; gift: CrowdGift; amount: number }
   | ({ type: 'status'; fighter: FighterSide } & StatusTick)
   | { type: 'slot'; actor: FighterSide; target: FighterSide; slot: number; item: CombatItemId; healthDelta: number }
+  | ({ type: 'elemental'; actor: FighterSide; target: FighterSide; damage: number } & WeaponEnchantment)
   | { type: 'death'; fighter: FighterSide; winner: FighterSide }
   | { type: 'turn'; fighter: FighterSide };
 

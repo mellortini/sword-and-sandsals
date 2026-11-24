@@ -1,5 +1,7 @@
 import { WEAPONS } from '../data/weapons';
 import type { Weapon } from '../data/weapons';
+import { readWeaponEnchantment } from './enchant';
+import type { WeaponEnchantment } from './enchant';
 import type { StatusKind } from './status';
 import type { AttackKind } from './types';
 
@@ -8,6 +10,7 @@ export interface CombatWeapon {
   readonly family: Weapon['family'] | 'daggers';
   readonly damage: number;
   readonly range: number;
+  readonly enchantment?: WeaponEnchantment;
 }
 
 interface WeaponMove {
@@ -24,7 +27,10 @@ export const DEFAULT_WEAPON_REACH = 2;
 const STANDARD: WeaponMove = { strikes: 1, damageMultiplier: 1, armourMultiplier: 1, knockback: 0 };
 
 export function combatWeapon(id?: string): CombatWeapon | undefined {
-  return id === DAGGERS.id ? DAGGERS : WEAPONS.find((entry) => entry.id === id);
+  if (id === DAGGERS.id) return DAGGERS;
+  const { baseId, enchantment } = readWeaponEnchantment(id);
+  const weapon = WEAPONS.find((entry) => entry.id === baseId);
+  return weapon && enchantment && id ? { ...weapon, id, enchantment } : weapon;
 }
 
 export function weaponReach(weapon?: CombatWeapon): number {

@@ -19,6 +19,7 @@ export class PaperMenu extends Container {
   readonly menuHeight: number;
   selected: number;
   private readonly rows: Graphics[] = [];
+  private readonly notes: (Text | undefined)[] = [];
 
   /** `initial` picks the entry selected first (when enabled); otherwise the first enabled one */
   constructor(private readonly entries: readonly PaperMenuEntry[], private readonly onChoose: (index: number) => void, width = 480, initial?: number) {
@@ -47,6 +48,7 @@ export class PaperMenu extends Container {
         note.anchor.set(0.5);
         note.position.set(width / 2, y + ROW_H / 2 + 22);
         this.addChild(note);
+        this.notes[i] = note;
       }
       if (entry.enabled) {
         row.eventMode = 'static';
@@ -69,6 +71,12 @@ export class PaperMenu extends Container {
 
   move(step: 1 | -1) {
     if (this.selected >= 0) this.select(moveSelection(this.entries, this.selected, step));
+  }
+
+  /** Change an entry's note (an entry that is a setting shows its value there). */
+  setNote(index: number, text: string) {
+    const note = this.notes[index];
+    if (note) note.text = text;
   }
 
   choose() {
