@@ -265,3 +265,12 @@ Ekran zwycięstwa / porażki (#118, ostatni brakujący ekran F3 z ROADMAP). Podg
 - **#4 / PR #103 (menu radialne) → lkaelek, termin jutro 2026-11-25.** ❓ lkaelek: dokończ, rebase na main, ready for review.
   Jeśli nie zdążysz, przejmuje goloburda05-hue (UI to od podziału jego działka). Napisałem też w komentarzu do #103.
 - Po #4 i #6 → **#12 pętla tur** (goloburda05-hue): `getActionOptions` → menu → `performAction` → `await presenter.present(...)` → AI.
+
+### 2026-11-24 14:30 · Claude Code (Mateusz) · #125 / 125-setlook-race
+
+- Błąd z Pages: w garderobie przy szybkim klikaniu kukła pokazywała starą zbroję (albo żadnej). `PaperRig.setLook` czekało na
+  strony atlasu, a starsze, wolniejsze wywołanie kończyło się po nowszym i przebudowywało kukłę starym wyglądem.
+  Lokalnie niewidoczne (atlas ładuje się od razu), na Pages — tak.
+- Teraz wygrywa zawsze ostatnie wywołanie, a każde `await rig.setLook(...)` kończy się dopiero, gdy pokazany jest najnowszy
+  wygląd. API bez zmian — nic nie trzeba poprawiać w scenach (wardrobe, preFight, portrety, presenter).
+- Wskazówka do testów: lokalny build produkcyjny = `npm run build` + `npm run preview` (atlasy jak na Pages; `npm run dev` używa PNG).

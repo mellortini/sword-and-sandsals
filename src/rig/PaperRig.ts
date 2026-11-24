@@ -208,6 +208,8 @@ export class PaperRig {
   private rt: RenderTexture;
   private origin: { x: number; y: number };
   private stillFrame?: StillFrame;
+  private lookGen = 0;
+  private lookReady: Promise<void> = Promise.resolve();
 
   constructor(kit: Kit, opts: { scale: number; facing: 1 | -1; shadow?: ShadowStyle }) {
     this.kit = kit;
@@ -237,11 +239,27 @@ export class PaperRig {
     this.view.anchor.set(0, 0);
   }
 
-  /** rebuild the sprite list for a look (loads missing textures) */
-  async setLook(look: Partial<Look>) {
+  /**
+   * rebuild the sprite list for a look (loads missing textures).
+   * Loading atlas pages can take seconds on a slow network, so calls may overlap. The newest call always wins:
+   * an older call that finishes later does not rebuild the puppet, and every call resolves once the newest look is shown.
+   */
+  setLook(look: Partial<Look>): Promise<void> {
     this.look = { ...this.look, ...look };
     const L = this.look;
-    await this.kit.ensure(this.kit.keysFor(L));
+    const gen = ++this.lookGen;
+    this.lookReady = this.kit.ensure(this.kit.keysFor(L)).then(() => {
+      if (gen === this.lookGen) this.build(L);
+    });
+    return this.lookSettled();
+  }
+
+  private async lookSettled() {
+    let p: Promise<void>;
+    do { p = this.lookReady; await p; } while (p !== this.lookReady);
+  }
+
+  private build(L: Look) {
     this.inner.removeChildren();
     this.parts = [];
     const J = this.kit.json;
