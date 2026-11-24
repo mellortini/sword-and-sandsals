@@ -13,6 +13,7 @@ import { showArena } from './arena';
 import { H, W, randomLook } from './common';
 import { loadSavedGladiator } from './savedGladiator';
 import type { SceneContext, SceneUpdate } from './common';
+import { ENEMY_NAMES } from './opponents';
 import { PORTRAIT_W, portraitCard } from './portrait';
 
 export interface PreFightFighter extends ComparedFighter {
@@ -80,7 +81,6 @@ export async function openPreFight(context: SceneContext, player: PreFightFighte
   });
 }
 
-const ENEMY_NAMES = ['Crixus Fold', 'Varro the Creased', 'Spiculus', 'Flamma Pulp', 'Tetraites', 'Priscus Vellum'];
 
 /** Placeholder opponent until the enemy generator (#41): gear tier sets the level, a few extra attribute points. */
 function randomEnemy(tier: number): PreFightFighter {

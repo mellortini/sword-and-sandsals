@@ -24,6 +24,7 @@ import { aiPicker, runFight } from './turnLoop';
 import type { ActionPicker } from './turnLoop';
 import { arenaBackdrop } from './backdrop';
 import { FIGHT_LAYOUT } from './combatPlan';
+import { nextOpponent } from './opponents';
 
 export interface ArenaFighter {
   readonly look: Look;
@@ -62,8 +63,9 @@ export async function showArena(
 
   const tp = params.get('tier');
   const tier = tp ? +tp : undefined;
-  const [player, enemy]: readonly [ArenaFighter, ArenaFighter] = fighters
+  const [player, firstEnemy]: readonly [ArenaFighter, ArenaFighter] = fighters
     ?? [{ name: 'Player', look: randomLook(tier) }, { name: 'Opponent', look: randomLook(tier) }];
+  let enemy: ArenaFighter = firstEnemy;
   const asked = params.get('ai');
   const profile: AiProfile = asked === 'aggressor' || asked === 'defender' ? asked : PROFILES[Math.floor(Math.random() * PROFILES.length)];
 
@@ -127,6 +129,7 @@ export async function showArena(
         },
         { name: enemy.name, attributes: enemy.attributes, level: enemy.level, equipment: loadoutFromLook(enemy.look) });
       presenter.reset(start);
+      menu.setVisible(true);
       fighting = true;
       const outcome = await runFight(start, {
         pickers: { player: playerPicker, enemy: aiPicker(profile, seed ^ 0x85ebca6b) },
@@ -135,6 +138,7 @@ export async function showArena(
       });
       fighting = false;
       menu.close();
+      menu.setVisible(false);
       // let the death and victory poses land before the result covers them
       await pause(1.2);
       let progress: FightProgress | undefined;
@@ -146,10 +150,16 @@ export async function showArena(
       }
       const choice = await openFightResult(context, {
         player, enemy, summary: summarizeFight(outcome.events), progress, spendPoints: career ? spendPoints : undefined,
+        nextOpponent: true,
       });
       if (choice === 'leave') {
         location.search = '?view=title';
         return;
+      }
+      if (choice === 'next') {
+        // #187: same gear, at most 5% stronger, at most one level above the player
+        enemy = nextOpponent(enemy, career?.level ?? player.level ?? 1);
+        await E.setLook(enemy.look);
       }
       seed++;
     }
