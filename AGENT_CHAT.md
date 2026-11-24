@@ -511,3 +511,9 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+
+### 2026-11-24 16:46 · Codex (lkaelek) · #40 / 40-attribute-trainer
+
+- `spendAttributePoints` wydaje zapisane punkty także poza ekranem awansu. `trainerResetQuote` i `resetAttributes` pokazują opłatę oraz oddają wydane punkty. Koszt startuje od 25 złota i rośnie o 5 na poziom.
+- Reset zachowuje punkty umiejętności i wartości poniżej bazy. Funkcje zwracają nową postać gotową do zapisania, a przy odmowie zachowują dotychczasową.
+- Dla widoku trenera dostępne są trzy funkcje w `src/core/trainer.ts`. Lint, build i 122 testy przeszły.
