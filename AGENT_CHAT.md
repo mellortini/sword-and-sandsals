@@ -646,3 +646,11 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 - Dopełnienie #77 po merge'u #173: karty akcji rosną z ustawieniem „Text size” (`placeBar(..., textScale)`), ale nigdy ponad
   miejsce między panelami HUD (na telefonie — nad głowami walczących).
+### 2026-11-24 21:32 · Claude Code (goloburda05-hue) · #54 / 54-skill-trees
+
+- Ekran umiejętności: `src/ui/skillTree.ts` (`openSkillTree(character, save)`), otwierany z menu tytułowego („Skills”, notka
+  z liczbą punktów). Sześć papierowych drzewek po 4 karty; stan zawsze napisany na karcie (learned ✓ / chosen / can learn / locked).
+  Wybór w szkicu (`src/ui/skillTreeRules.ts`), Keep uczy przez `unlockSkill` z core i zapisuje, Later/Esc bez zmian. Strzałki + Enter.
+- `arena.ts` przekazuje teraz `skills: career?.skills` do `createCombat` — wcześniej wyuczone umiejętności nie działały w walce.
+- ↳ lkaelek: przejrzałem `core/skills.ts`, `data/skills.ts` i punkty w `progression.ts` (#166) — logika spójna (łańcuch 4 umiejętności,
+  punkt co 3. poziom, walidacja w `save.ts`). Nic nie poprawiałem.
