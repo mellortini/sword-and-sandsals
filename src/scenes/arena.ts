@@ -13,8 +13,8 @@ import { openLevelUp } from '../ui/levelUp';
 import { applyFightExperience } from '../ui/levelUpRules';
 import type { FightProgress } from '../ui/levelUpRules';
 import { CombatHud } from '../ui/hud';
+import { ActionBar } from '../ui/actionBar';
 import { leaveFightOnEscape } from '../ui/leaveFight';
-import { RadialMenu } from '../ui/radialMenu';
 import { CombatPresenter } from './combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from './common';
 import type { SceneContext, SceneUpdate } from './common';
@@ -41,11 +41,13 @@ const LAYOUT = FIGHT_LAYOUT;
 /** seconds before the opponent answers */
 const ENEMY_PAUSE = 0.5;
 
+/** Feet to plume of the tallest look, in stage pixels: the action bar stays above it on phones. */
+const FIGHTER_HEIGHT = 11.5 * UNIT;
 const PROFILES: readonly AiProfile[] = ['aggressor', 'defender'];
 const pause = (sec: number) => new Promise<void>((r) => setTimeout(r, sec * 1000));
 
 /**
- * The arena fight (#12): the player picks from the radial menu, the opponent's AI (#6) answers after a short pause,
+ * The arena fight (#12): the player picks from the action bar (#147), the opponent's AI (#6) answers after a short pause,
  * CombatPresenter animates every action and the HUD follows. The menu opens only when the player's action can be chosen,
  * never during an animation. At 0 HP the result screen offers a rematch or the way back to the title.
  * Pre-fight passes the two gladiators it showed; a direct visit (`?view=arena[&tier=N][&ai=aggressor|defender]`) uses random ones.
@@ -90,7 +92,7 @@ export async function showArena(
 
   // the player's turn: open the menu with the options the core allows and wait for a click
   let choose: ((action: CombatAction) => void) | null = null;
-  const menu = new RadialMenu((action) => {
+  const menu = new ActionBar((action) => {
     const resolve = choose;
     choose = null;
     resolve?.(action);
@@ -155,8 +157,14 @@ export async function showArena(
     hud.setPanelScale(Math.min(1.6, hudScaleFor(world.scale.x) * textScale()));
     hud.update(dt);
     fx.update(dt); // damage numbers, MISS and BLOCK animate and fade only while ticked
-    const { x, y } = P.view.getGlobalPosition();
-    menu.setAnchor(x, y, world.scale.x, world.position.y + hud.panelTop * world.scale.x);
+    const gap = hud.panelGap;
+    const s = world.scale.x;
+    const links = ui.getBoundingClientRect();
+    menu.place({
+      left: world.position.x + gap.left * s, right: world.position.x + gap.right * s, bottom: world.position.y + gap.bottom * s,
+      ceiling: (links.top < 60 ? links.bottom : 0) + 6,
+      floor: world.position.y + (FEET_Y - FIGHTER_HEIGHT) * s,
+    });
     for (const [rig, g] of [[P, shadows[0]], [E, shadows[1]]] as const) {
       const lift = Math.max(0, (pelvisY - rig.view.y) / UNIT);
       g.position.set(rig.view.x + 0.35 * UNIT * rig.facing, FEET_Y);

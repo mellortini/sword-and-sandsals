@@ -65,9 +65,19 @@ export class CombatHud extends Container {
     this.enemy.position.set(this.stageWidth - PANEL_WIDTH * scale - SIDE_MARGIN, y);
   }
 
-  /** stage y of the panels' top edge, crowd strip included (the radial menu stays above it) */
+  /** stage y of the panels' top edge, crowd strip included (the action bar goes above it when it does not fit between the panels) */
   get panelTop(): number {
     return this.player.y + CROWD_STRIP_TOP * this.panelScale;
+  }
+
+  /** Stage-space room between the two panels, from the crowd strips' top to the panels' bottom: the action bar's slot (#147). */
+  get panelGap(): { left: number; right: number; top: number; bottom: number } {
+    return {
+      left: this.player.x + PANEL_WIDTH * this.panelScale,
+      right: this.enemy.x,
+      top: this.panelTop,
+      bottom: this.stageHeight - BOTTOM_MARGIN,
+    };
   }
 
   setState(state: HudState) {

@@ -26,7 +26,7 @@ const profileParam = (v: string | null): AiProfile | undefined => (v === 'aggres
 /**
  * `?view=aifight[&tier=N][&seed=S][&player=aggressor|defender][&enemy=…]`: both gladiators are driven by the enemy AI (#6)
  * through the fight loop, animated by CombatPresenter with the HUD; the result screen follows.
- * Fight again → a rematch with new seeds; Leave → title. The arena turn loop (#12) swaps the player's AI for the radial menu.
+ * Fight again → a rematch with new seeds; Leave → title. The arena turn loop (#12) swaps the player's AI for the action bar (#147).
  */
 export async function showAiFight(context: SceneContext): Promise<SceneUpdate> {
   const { world, bgTex, params, ui, add, rigs } = context;
