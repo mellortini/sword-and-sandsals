@@ -1,4 +1,5 @@
 import { expect, it, vi } from 'vitest';
+import { recordAchievements } from './achievements';
 import { deserializeSave, importGame, loadGame, serializeSave } from './save';
 import type { SavedCharacter } from './save';
 import { resolveAttributes } from './stats';
@@ -22,6 +23,14 @@ it('round-trips a versioned character with independent armour slots', () => {
 it('round-trips gameplay hand items and unspent advancement points', () => {
   const equipped = { ...character, hands: { weapon: 'sword1', offHand: 'axe2' }, attributePoints: 5, skillPoints: 1 };
   expect(deserializeSave(serializeSave(equipped))).toEqual({ ok: true, character: equipped });
+});
+
+it('round-trips achievement progress and keeps old saves readable', () => {
+  const unlocked = { ...character, achievements: recordAchievements({ type: 'finisher' }).progress };
+  expect(deserializeSave(serializeSave(unlocked))).toEqual({ ok: true, character: unlocked });
+  expect(deserializeSave(serializeSave(character))).toEqual({ ok: true, character });
+  const counters = { ...unlocked.achievements.counters, wins: -1 };
+  expect(() => serializeSave({ ...unlocked, achievements: { ...unlocked.achievements, counters } })).toThrow(TypeError);
 });
 
 it('rejects malformed or incomplete data and unsupported versions', () => {
