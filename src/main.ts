@@ -8,11 +8,13 @@ import { showFaces } from './scenes/dev/faces';
 import { showLineup } from './scenes/dev/lineup';
 import { showStrip } from './scenes/dev/strip';
 import { showPreFight } from './scenes/preFight';
+import { showTitle } from './scenes/title';
 import { showWardrobe } from './scenes/wardrobe';
 
 const scenes = new Map<string, Scene>([
   ['arena', showArena],
   ['prefight', showPreFight],
+  ['title', showTitle],
   ['wardrobe', showWardrobe],
   ['lineup', showLineup],
   ['faces', showFaces],
