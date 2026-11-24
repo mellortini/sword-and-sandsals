@@ -35,19 +35,39 @@ const SIDE_MARGIN = 44;
 const BOTTOM_MARGIN = 22;
 const LIQUID_HEIGHT = 71;
 const FILL_DURATION = 0.24;
+/** the crowd strip sits this far above a panel's origin */
+const CROWD_STRIP_TOP = -38;
 
 export class CombatHud extends Container {
   private readonly player = new FighterPanel();
   private readonly enemy = new FighterPanel();
+  private panelScale = 0;
 
-  constructor(state: HudState, width: number, height: number) {
+  constructor(state: HudState, private readonly stageWidth: number, private readonly stageHeight: number) {
     super();
-    const y = height - PANEL_HEIGHT - BOTTOM_MARGIN;
-    this.player.position.set(SIDE_MARGIN, y);
-    this.enemy.position.set(width - PANEL_WIDTH - SIDE_MARGIN, y);
     this.addChild(this.player, this.enemy);
+    this.setPanelScale(1);
     this.player.setState(state.fighters.player, true);
     this.enemy.setState(state.fighters.enemy, true);
+  }
+
+  /**
+   * Enlarge both panels (1 = as drawn) so they stay readable on a small screen; each keeps its bottom corner.
+   * Scenes pass `hudScaleFor(world.scale.x)` from src/ui/phone.ts every frame.
+   */
+  setPanelScale(scale: number) {
+    if (scale === this.panelScale) return;
+    this.panelScale = scale;
+    const y = this.stageHeight - PANEL_HEIGHT * scale - BOTTOM_MARGIN;
+    this.player.scale.set(scale);
+    this.enemy.scale.set(scale);
+    this.player.position.set(SIDE_MARGIN, y);
+    this.enemy.position.set(this.stageWidth - PANEL_WIDTH * scale - SIDE_MARGIN, y);
+  }
+
+  /** stage y of the panels' top edge, crowd strip included (the radial menu stays above it) */
+  get panelTop(): number {
+    return this.player.y + CROWD_STRIP_TOP * this.panelScale;
   }
 
   setState(state: HudState) {
@@ -86,7 +106,7 @@ class FighterPanel extends Container {
     this.nameText.position.set(PANEL_WIDTH / 2, 22);
     this.health.position.set(44, 104);
     this.energy.position.set(230, 104);
-    this.crowd.position.set(18, -38);
+    this.crowd.position.set(18, CROWD_STRIP_TOP);
     this.crowd.visible = false;
     this.addChild(this.crowd, plate, this.nameText, this.health, this.energy);
   }
