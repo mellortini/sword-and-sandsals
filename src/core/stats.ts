@@ -1,4 +1,4 @@
-import { ITEMS } from '../data/equipment';
+import { equipmentTotals } from './inventory';
 import type { AttackKind, Attributes, CombatAction, EquipmentLoadout, FighterStats } from './types';
 
 const DEFAULT_ATTRIBUTES: Readonly<Attributes> = {
@@ -32,15 +32,12 @@ export function resolveAttributes(overrides: Partial<Attributes> = {}): Attribut
 }
 
 export function deriveStats(attributes: Readonly<Attributes>, equipment: EquipmentLoadout = {}): FighterStats {
-  const equipped = ITEMS.filter(({ slot, tier }) => equipment[slot] === tier);
-  const armour = equipped.reduce((total, item) => total + item.armor, 0);
-  const weight = equipped.reduce((total, item) => total + item.weight, 0);
-  const fullSet = equipped.length === 5 && equipped.every(({ tier }) => tier === equipped[0].tier);
+  const { armour, weight } = equipmentTotals(equipment);
 
   return {
     maxHealth: 40 + attributes.vitality * 6,
     maxEnergy: 20 + attributes.stamina * 4,
-    armour: Math.round(armour * (fullSet ? 1.1 : 1)),
+    armour,
     weight,
     attackPower: 4 + attributes.might,
     accuracyBonus: 3 * attributes.precision + 2 * DEFAULT_ATTRIBUTES.agility,

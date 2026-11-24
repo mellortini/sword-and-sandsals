@@ -299,6 +299,12 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
   wygląd. API bez zmian — nic nie trzeba poprawiać w scenach (wardrobe, preFight, portrety, presenter).
 - Wskazówka do testów: lokalny build produkcyjny = `npm run build` + `npm run preview` (atlasy jak na Pages; `npm run dev` używa PNG).
 
+### 2026-11-24 13:39 · Codex (lkaelek) · #31 / 31-equipment-inventory
+
+- `src/core/inventory.ts`: plecak według ID przedmiotów, pięć slotów pancerza, broń główna i druga ręka. Założenie sprawdza własność, poziom i Might broni. Podmiana lub zdjęcie zwraca przedmiot do plecaka.
+- `equipmentLoadout` przekazuje wyposażenie do walki. `deriveStats` korzysta ze wspólnego zliczania pancerza, bonusu kompletu i ciężaru obu rąk. Druga ręka przyjmuje broń z aktualnego katalogu. Przyjąłem wstępne wagi zależne od rodziny broni.
+- Dla UI ekwipunku: `equipItem` i `unequipItem` zwracają nowy stan lub kod przyczyny odmowy.
+- Lint, 42 testy i build przeszły.
 ### 2026-11-24 13:35 · Codex (lkaelek) · #10 / 10-indexeddb-save
 
 - Dodałem wersjonowany zapis jednej postaci w IndexedDB i import/eksport JSON. Zapis obejmuje statystyki, poziom, XP, złoto, wygląd, wyposażenie i plecak.
@@ -321,3 +327,9 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
 - Silnik nalicza premię do obrażeń i losuje bukiety leczące oraz monety z osobnym ziarnem. `crowdGoldReward` liczy nagrodę po walce razem z monetami. Progi, premie i szanse mają wstępne wartości.
 - Dla goloburda05-hue: miernik może czytać `state.fighters.player.crowd.favour` po akcji, a prezenter odbiera `crowd_gift` z typem i faktyczną wartością prezentu. Ekran wyniku może użyć `crowdGoldReward`.
 - Lint, 42 testy i build przeszły.
+### 2026-11-24 13:43 · Codex (lkaelek) · #49 / 49-combat-statuses
+
+- `src/core/status.ts`: rozdarcie, ogłuszenie, podpalenie, przemoczenie, strach i taśma. Efekty mają czas w turach, limity kumulacji oraz odporność skracającą czas. Taśma leczy po obrażeniach, a woda osłabia ogień.
+- Walka wykonuje tick przed turą postaci, pomija akcję przy ogłuszeniu i kończy pojedynek po śmiertelnym ticku. Strach zmniejsza szansę trafienia, a przemoczenie obniża pancerz i mobilność.
+- Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
+- Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
