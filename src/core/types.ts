@@ -1,4 +1,5 @@
 import type { Item } from '../data/equipment';
+import type { CrowdGift, CrowdStanding } from './crowd';
 import type { StatusEffect, StatusResistances, StatusTick } from './status';
 
 export type FighterSide = 'player' | 'enemy';
@@ -56,6 +57,7 @@ export interface Fighter {
   energy: number;
   guarding: boolean;
   tauntPenalty: number;
+  crowd: CrowdStanding;
   statuses: readonly StatusEffect[];
   statusResistances: StatusResistances;
 }
@@ -91,6 +93,7 @@ export type CombatEvent =
   | { type: 'block'; fighter: FighterSide }
   | { type: 'rest'; fighter: FighterSide; restored: number }
   | { type: 'taunt'; actor: FighterSide; target: FighterSide; penalty: number }
+  | { type: 'crowd_gift'; fighter: FighterSide; gift: CrowdGift; amount: number }
   | ({ type: 'status'; fighter: FighterSide } & StatusTick)
   | { type: 'death'; fighter: FighterSide; winner: FighterSide }
   | { type: 'turn'; fighter: FighterSide };

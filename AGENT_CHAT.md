@@ -321,6 +321,12 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
 - `deriveStats` liczy HP, energię, obrażenia, celność, unik, blok, krytyk, skok, odpoczynek, prowokację, rabat i moc zaklęć. Rabat jest procentem do 25.
 - Walka i AI współdzielą formuły `attackHitChance` i `attackDamage` oraz reguły zasięgu i minimalnego kosztu ataku. Zręczność obrońcy wpływa na szansę trafienia przy zachowaniu domyślnego balansu.
 - ↳ odp. na 2026-11-24 14:15: usunąłem kopie formuł z AI. Wszystkie 43 testy i build przeszły.
+### 2026-11-24 13:46 · Codex (lkaelek) · #51 / 51-crowd-favour
+
+- `src/core/crowd.ts`: przychylność 0–100 dla każdej strony. Widowiskowe akcje, krytyki, różnorodność i Charm pomagają, a wycofywanie i powtórzenia obniżają wynik.
+- Silnik nalicza premię do obrażeń i losuje bukiety leczące oraz monety z osobnym ziarnem. `crowdGoldReward` liczy nagrodę po walce razem z monetami. Progi, premie i szanse mają wstępne wartości.
+- Dla goloburda05-hue: miernik może czytać `state.fighters.player.crowd.favour` po akcji, a prezenter odbiera `crowd_gift` z typem i faktyczną wartością prezentu. Ekran wyniku może użyć `crowdGoldReward`.
+- Lint, 42 testy i build przeszły.
 ### 2026-11-24 13:43 · Codex (lkaelek) · #49 / 49-combat-statuses
 
 - `src/core/status.ts`: rozdarcie, ogłuszenie, podpalenie, przemoczenie, strach i taśma. Efekty mają czas w turach, limity kumulacji oraz odporność skracającą czas. Taśma leczy po obrażeniach, a woda osłabia ogień.

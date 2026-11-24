@@ -1,3 +1,4 @@
+import { createCrowdStanding, crowdDamageMultiplier, scoreCrowdAction } from './crowd';
 import { nextRandom } from './rng';
 import { attackDamage, attackHitChance, deriveStats, isAttack, resolveAttributes } from './stats';
 import { advanceStatusDurations, applyStatus, statusModifiers, tickStatuses } from './status';
@@ -37,8 +38,8 @@ const forwardDirection = (side: FighterSide) => side === 'player' ? 1 : -1;
 export function createCombat(seed: number, player: FighterSetup = {}, enemy: FighterSetup = {}): CombatState {
   if (!Number.isSafeInteger(seed)) throw new RangeError('Combat seed must be a safe integer.');
   const fighters = {
-    player: createFighter(player, 'Player', 2),
-    enemy: createFighter(enemy, 'Opponent', 18),
+    player: createFighter(player, 'Player', 2, seed ^ 0x6e684e35),
+    enemy: createFighter(enemy, 'Opponent', 18, seed ^ 0x87e4cff8),
   };
   if (fighters.player.position > fighters.enemy.position) {
     throw new RangeError('The player must start to the left of or next to the opponent.');
@@ -47,7 +48,7 @@ export function createCombat(seed: number, player: FighterSetup = {}, enemy: Fig
   return { fighters, active: 'player', winner: null, rngState: seed >>> 0 };
 }
 
-function createFighter(setup: FighterSetup, defaultName: string, defaultPosition: number): Fighter {
+function createFighter(setup: FighterSetup, defaultName: string, defaultPosition: number, crowdSeed: number): Fighter {
   const position = setup.position ?? defaultPosition;
   if (!Number.isFinite(position) || position < 0 || position > ARENA_LENGTH) {
     throw new RangeError('Combat positions must be within the arena.');
@@ -64,6 +65,7 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     energy: stats.maxEnergy,
     guarding: false,
     tauntPenalty: 0,
+    crowd: createCrowdStanding(crowdSeed),
     statuses: [],
     statusResistances: { ...setup.statusResistances },
   };
@@ -179,12 +181,23 @@ export function performAction(state: CombatState, action: CombatAction): ActionR
       break;
   }
 
-  if (isAttack(action)) {
-    const attack = resolveAttack(action, side, fighter, opponent, roll);
+  const attack = isAttack(action) ? resolveAttack(action, side, fighter, opponent, roll) : undefined;
+  if (attack) {
     events.push(attack);
     if (action === 'charge' && attack.damage > 0 && opponent.health > 0) {
       move(other, opponent, 'knockback', opponent.position + direction * KNOCKBACK_DISTANCE, events);
     }
+  }
+
+  const previousCrowd = fighter.crowd;
+  const crowd = scoreCrowdAction(previousCrowd, action, fighter.attributes.charm, attack?.hit, attack?.crit);
+  fighter.crowd = crowd.standing;
+  if (crowd.gift) {
+    const amount = crowd.gift === 'bouquet'
+      ? Math.min(8, fighter.stats.maxHealth - fighter.health)
+      : crowd.standing.giftGold - previousCrowd.giftGold;
+    if (crowd.gift === 'bouquet') fighter.health += amount;
+    events.push({ type: 'crowd_gift', fighter: side, gift: crowd.gift, amount });
   }
 
   fighter.tauntPenalty = 0;
@@ -249,9 +262,11 @@ function resolveAttack(
   const crit = hit && !blocked && roll() < attacker.stats.criticalChance;
   let damage = 0;
   if (hit && !blocked) {
+    // crowd favour raises the attacker's power, soaking weakens the defender's armour
+    const offense = { ...attacker.stats, attackPower: attacker.stats.attackPower * crowdDamageMultiplier(attacker.crowd) };
     const { armourMultiplier } = statusModifiers(defender.statuses);
     const defense = { ...defender.stats, armour: defender.stats.armour * armourMultiplier };
-    damage = Math.min(defender.health, attackDamage(kind, attacker.stats, defense, crit));
+    damage = Math.min(defender.health, attackDamage(kind, offense, defense, crit));
     defender.health -= damage;
   }
 
