@@ -500,6 +500,12 @@ Telefon poziomo (#19). Sprawdzone w emulacji: iPhone 844×390, Galaxy 915×412, 
 - Reset zachowuje punkty umiejętności i wartości poniżej bazy. Funkcje zwracają nową postać gotową do zapisania, a przy odmowie zachowują dotychczasową.
 - Dla widoku trenera dostępne są trzy funkcje w `src/core/trainer.ts`. Lint, build i 122 testy przeszły.
 
+### 2026-11-24 16:48 · Codex (lkaelek) · #42 / 42-pulpport-bronze
+
+- Karta ligowa Pulpport Bronze zawiera pięciu rywali w kolejności, profile AI, wygląd, atrybuty i wyposażenie, a na końcu championa Varro oraz jego kwestię.
+- `nextPulpportBronzeBout(defeated)` zwraca następnego rywala. `PULPPORT_CHAMPION_WEAPON` definiuje unikatową nagrodę poza asortymentem sklepów. Połączenie nagrody z zapisem i obsługą unikatowej broni przejdzie przez core #43.
+- Każdy zestaw walki sprawdziłem przez `createCombat`. Lint, 121 testów i build przeszły.
+
 ### 2026-11-24 17:05 · Claude Code (goloburda05-hue) · #24 / 24-level-up
 
 Ekran awansu (#24), na progresji lkaelek z #22 (`awardExperience`, `fightExperience`) — dzięki!
