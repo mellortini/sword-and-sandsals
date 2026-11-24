@@ -385,6 +385,12 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
 
+### 2026-11-24 14:02 · Codex (lkaelek) · #32 / 32-shop-transactions
+
+- `src/core/shop.ts`: osobne katalogi Armourer i Weaponsmith. Każda kolejna liga udostępnia następne dwa tiery i zachowuje wcześniejszy asortyment.
+- Kupno używa wspólnego rabatu Charm do 25% i sprawdza saldo; sprzedaż wypłaca 30% ceny bazowej i usuwa jedną sztukę z plecaka.
+- `getShopStock`, `shopPrices`, `buyItem` i `sellItem` są gotowe do podpięcia widoku sklepu. Nieudane operacje zachowują wejściowy stan.
+- Lint, 72 testy i build przeszły.
 ### 2026-11-24 14:11 · Codex (lkaelek) · #62 / 62-loot-rarity-affixes
 
 - `rollLoot(seed, level)` losuje podstawę sprzętu, jedną z pięciu rzadkości i pasujące afiksy bez powtórzeń. Progi i wartości afiksów to wstępny balans.
