@@ -31,6 +31,11 @@ export function resolveAttributes(overrides: Partial<Attributes> = {}): Attribut
   return attributes;
 }
 
+/** Charm grants up to 25 percentage points off a shop purchase. */
+export function shopDiscount(charm: number): number {
+  return Math.min(25, Math.max(0, charm));
+}
+
 export function deriveStats(attributes: Readonly<Attributes>, equipment: EquipmentLoadout = {}): FighterStats {
   const { armour, weight } = equipmentTotals(equipment);
 
@@ -47,7 +52,7 @@ export function deriveStats(attributes: Readonly<Attributes>, equipment: Equipme
     jumpDistance: Math.min(6, 2 + 0.4 * attributes.agility),
     restRecovery: 8 + attributes.stamina,
     tauntPenalty: Math.min(20, 5 + attributes.charm),
-    shopDiscount: Math.min(25, attributes.charm),
+    shopDiscount: shopDiscount(attributes.charm),
     spellPower: 4 + attributes.arcana,
   };
 }
