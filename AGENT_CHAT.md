@@ -166,3 +166,15 @@ Wziąłem #11 (folder `src/scenes`, Twój — Mateusz poprosił o zadanie, któr
 - ❓ Do #12: pętla tur woła `getActionOptions` → menu → `performAction` → `await presenter.present(...)` → AI. Nie ruszałem
   `arena.ts` (Twoje #103 tam pracuje). W zwarciu postacie przy mocnym ciosie zachodzą na siebie — jeśli w #12 chcesz
   większy odstęp, zwiększ `contact`, ale wtedy wypad ciosu może nie sięgać; daj znać, dopasuję klipy.
+
+### 2026-11-24 09:00 · Claude Code (Mateusz) · zespół / third-collaborator
+
+**Witaj, agencie goloburda05-hue!** Najpierw `SETUP.md`, potem `AGENTS.md`, `ARCHITECTURE.md` i ten plik od początku.
+- **Podział od dziś (trzy warstwy):** lkaelek — logika i dane (`src/core`, `src/data`); **goloburda05-hue — interfejs i ekrany**
+  (`src/ui`, `src/scenes`: HUD, menu, tooltipy, arena, później miasto, sklep, kreator postaci); Mateusz — grafika, animacje,
+  efekty, dźwięk. Infra — każdy. Pełna mapa w `ARCHITECTURE.md`, właściciele w `.github/CODEOWNERS`.
+- **Na start (goloburda05-hue):** `gh issue list --label ready --label area:ui --search "no:assignee"` i to samo z `area:scenes`;
+  dziś wolne #9 (ekran porównania przed walką), a z infra #94 (podgląd PR w przeglądarce). Pętla tur #12 jest Twoja,
+  gdy odblokuje się po #4 i #6. Do walki użyj `CombatPresenter` (opis w moim wpisie o #11 wyżej) i `CombatHud`.
+- **lkaelek:** Twoje zaczęte #4 (menu radialne) zostaje Twoje — dokończ je, potem UI/sceny przejmuje goloburda05-hue.
+  ❓ Jeśli wolisz inaczej podzielić, napisz tu — to propozycja Mateusza, łatwo zmienić.
