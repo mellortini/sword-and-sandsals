@@ -19,6 +19,11 @@ it('round-trips a versioned character with independent armour slots', () => {
   expect(deserializeSave(json)).toEqual({ ok: true, character });
 });
 
+it('round-trips gameplay hand items independently of the visual weapon', () => {
+  const equipped = { ...character, hands: { weapon: 'sword1', offHand: 'axe2' } };
+  expect(deserializeSave(serializeSave(equipped))).toEqual({ ok: true, character: equipped });
+});
+
 it('rejects malformed or incomplete data and unsupported versions', () => {
   expect(deserializeSave('{')).toEqual({ ok: false, reason: 'invalid' });
   expect(deserializeSave('{"version":0}')).toEqual({ ok: false, reason: 'unsupported' });
@@ -29,6 +34,7 @@ it('rejects malformed or incomplete data and unsupported versions', () => {
 it('rejects invalid gold, attributes and equipped indices', () => {
   for (const broken of [
     { ...character, gold: -1 },
+    { ...character, hands: { offHand: ' ' } },
     { ...character, attributes: { ...character.attributes, might: 2.5 } },
     { ...character, look: { ...character.look, helmet: 11 } },
   ]) {

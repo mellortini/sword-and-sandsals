@@ -19,6 +19,8 @@ export interface SavedCharacter {
   attributes: Attributes;
   /** Appearance, equipped weapon and five independent armour slots. */
   look: Look;
+  /** Gameplay item IDs for the hands, separate from the puppet weapon skin. */
+  hands?: { weapon?: string; offHand?: string };
   inventory: string[];
 }
 
@@ -47,14 +49,19 @@ function isLook(value: unknown): value is Look {
     && typeof value.weapon === 'string';
 }
 
+function isItemId(id: unknown): id is string {
+  return typeof id === 'string' && id.trim().length > 0;
+}
+
 function isCharacter(value: unknown): value is SavedCharacter {
   if (!isRecord(value)) return false;
-  const { attributes, inventory } = value;
+  const { attributes, hands, inventory } = value;
   return typeof value.name === 'string' && value.name.trim().length > 0
     && within(value.level, 1) && within(value.experience, 0) && within(value.gold, 0)
     && isRecord(attributes) && ATTRIBUTES.every((key) => within(attributes[key], 0))
     && isLook(value.look)
-    && Array.isArray(inventory) && inventory.every((id: unknown) => typeof id === 'string' && id.trim().length > 0);
+    && (hands === undefined || (isRecord(hands) && ['weapon', 'offHand'].every((slot) => hands[slot] === undefined || isItemId(hands[slot]))))
+    && Array.isArray(inventory) && inventory.every(isItemId);
 }
 
 export function serializeSave(character: SavedCharacter): string {
