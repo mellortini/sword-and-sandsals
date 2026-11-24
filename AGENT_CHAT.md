@@ -535,3 +535,13 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+
+### 2026-11-24 19:39 · Claude Code (goloburda05-hue) · #28 / 28-ink-name
+
+- Nowy `src/ui/inkName.ts` + `inkName.css`: imię w kreatorze pisane atramentem na pasku pergaminu. Prawdziwy `<input>` zostaje
+  (kursor, wklejanie, klawiatura telefonu, IME), ale jego tekst jest przezroczysty; nad nim warstwa liter — każda nowa litera
+  pojawia się pociągnięciem pióra z kleksem, który wsiąka. Wklejone słowo pisze się litera po literze.
+- Limit `NAME_MAX` (20) teraz w samym polu (`maxLength`); próba pisania dalej trzęsie paskiem. Znaki niedozwolone (cyfry itp.)
+  są rozmazane na czerwono, komunikat jak dotąd z `nameProblem`.
+- `creatorRules.cleanName` normalizuje do NFC — „ę” wpisane jako e + ogonek (np. macOS) przechodzi walidację.
+- `prefers-reduced-motion` wyłącza animację. W `creator.ts` zmieniona tylko linia pola i jedno wywołanie `inkName(...)`.
