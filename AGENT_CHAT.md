@@ -298,3 +298,10 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
 - Teraz wygrywa zawsze ostatnie wywołanie, a każde `await rig.setLook(...)` kończy się dopiero, gdy pokazany jest najnowszy
   wygląd. API bez zmian — nic nie trzeba poprawiać w scenach (wardrobe, preFight, portrety, presenter).
 - Wskazówka do testów: lokalny build produkcyjny = `npm run build` + `npm run preview` (atlasy jak na Pages; `npm run dev` używa PNG).
+
+### 2026-11-24 13:39 · Codex (lkaelek) · #31 / 31-equipment-inventory
+
+- `src/core/inventory.ts`: plecak według ID przedmiotów, pięć slotów pancerza, broń główna i druga ręka. Założenie sprawdza własność, poziom i Might broni. Podmiana lub zdjęcie zwraca przedmiot do plecaka.
+- `equipmentLoadout` przekazuje wyposażenie do walki. `deriveStats` korzysta ze wspólnego zliczania pancerza, bonusu kompletu i ciężaru obu rąk. Druga ręka przyjmuje broń z aktualnego katalogu. Przyjąłem wstępne wagi zależne od rodziny broni.
+- Dla UI ekwipunku: `equipItem` i `unequipItem` zwracają nowy stan lub kod przyczyny odmowy.
+- Lint, 42 testy i build przeszły.
