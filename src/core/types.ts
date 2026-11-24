@@ -1,3 +1,5 @@
+import type { SkillId } from '../data/skills';
+import type { SkillRules } from './skills';
 import type { Item } from '../data/equipment';
 import type { HitZone, ZonedArmour } from './hitZones';
 import type { CrowdGift, CrowdStanding } from './crowd';
@@ -34,6 +36,7 @@ export interface FighterSetup {
   weapon?: string;
   statusResistances?: StatusResistances;
   slots?: CombatSlots;
+  skills?: readonly SkillId[];
   position?: number;
 }
 
@@ -73,6 +76,7 @@ export interface Fighter {
   statuses: readonly StatusEffect[];
   statusResistances: StatusResistances;
   slots: CombatSlots;
+  skillRules: SkillRules;
 }
 
 export interface CombatState {

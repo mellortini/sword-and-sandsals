@@ -511,6 +511,12 @@ Telefon poziomo (#19). Sprawdzone w emulacji: iPhone 844×390, Galaxy 915×412, 
 - Symulator wykonał 4 000 walk, z zamianą stron w każdej parze. Raport w `docs/BALANS.md` porównuje AI, pancerz i ceny sprzętu z wpływami.
 - Przy założonej wypłacie zestawy kosztują w przykładach 3, 9, 41 i 124 zwycięstwa. Pomiar sąsiednich tierów jest w #164, a strojenie złota w #163.
 
+### 2026-11-24 16:57 · Codex (lkaelek) · #53 / 53-skill-trees
+
+- Sześć drzewek zawiera po cztery działające pasywy. Wydawanie punktów sprawdza poprzednią umiejętność, a zapis przechowuje wybrane ID.
+- Do walki przekaż `FighterSetup.skills`. Pasywy zmieniają m.in. celność, pancerz strefowy, kontry, ruch, tłum, zaklęcia i odporności. Beastmaster ma osobiste pasywy bojowe do czasu dodania towarzyszy.
+- Dla drzewa UI dostępne są `SKILL_TREES` i `unlockSkill`. Lint, 123 testy i build przeszły.
+
 ### 2026-11-24 17:05 · Claude Code (goloburda05-hue) · #24 / 24-level-up
 
 Ekran awansu (#24), na progresji lkaelek z #22 (`awardExperience`, `fightExperience`) — dzięki!
@@ -554,6 +560,10 @@ Uwagi Mateusza po pierwszej grze: tło za pstrokate (ten sam kontrast co postaci
   Okno łapie wszystkie klawisze, więc klawisze kart akcji (#147) nic pod nim nie wybiorą. Na ekranie wyniku Esc działa jak dotąd (Leave).
 - Każda nowa scena otwierana z menu: dodaj `onEscape(goToTitle)`.
 
+### 2026-11-24 20:14 · Codex (lkaelek) · #44 / 44-balance-simulator
+
+- Po synchronizacji z main powtórzyłem 4 000 walk z ochroną przed serią pudeł z #158. Zaktualizowałem tabele, w szczególności 123 wygrane na komplet tieru 9 i 98,8% wygranych w skrajnym porównaniu pancerza. Wnioski #163 i #164 nadal obowiązują.
+
 ### 2026-11-24 20:24 · Claude Code (goloburda05-hue) · #77 / 77-accessibility
 
 - **Rozmiar tekstu:** nowa pozycja „Text size” w menu tytułowym (Normal / Large / Largest, Enter albo ←/→), zapis w localStorage
@@ -596,7 +606,3 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
-
-### 2026-11-24 20:14 · Codex (lkaelek) · #44 / 44-balance-simulator
-
-- Po synchronizacji z main powtórzyłem 4 000 walk z ochroną przed serią pudeł z #158. Zaktualizowałem tabele, w szczególności 123 wygrane na komplet tieru 9 i 98,8% wygranych w skrajnym porównaniu pancerza. Wnioski #163 i #164 nadal obowiązują.

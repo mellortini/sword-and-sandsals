@@ -1,3 +1,5 @@
+import type { SkillId } from '../data/skills';
+import { isSkillId } from './skills';
 import type { Look } from '../rig/PaperRig';
 import { ACHIEVEMENT_COUNTERS } from './achievements';
 import type { AchievementProgress } from './achievements';
@@ -20,6 +22,7 @@ export interface SavedCharacter {
   experience: number;
   attributePoints?: number;
   skillPoints?: number;
+  skills?: SkillId[];
   gold: number;
   health?: number;
   attributes: Attributes;
@@ -76,6 +79,7 @@ function isCharacter(value: unknown): value is SavedCharacter {
     && (value.attributePoints === undefined || within(value.attributePoints, 0))
     && (value.skillPoints === undefined || within(value.skillPoints, 0)) && within(value.gold, 0)
     && (value.health === undefined || within(value.health, 0))
+    && (value.skills === undefined || (Array.isArray(value.skills) && value.skills.every(isSkillId)))
     && isRecord(attributes) && ATTRIBUTES.every((key) => within(attributes[key], 0))
     && isLook(value.look)
     && (hands === undefined || (isRecord(hands) && ['weapon', 'offHand'].every((slot) => hands[slot] === undefined || isItemId(hands[slot]))))
