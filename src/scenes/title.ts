@@ -1,5 +1,7 @@
 import { Container, Graphics, Sprite, Text } from 'pixi.js';
+import { saveGame } from '../core/save';
 import type { SavedCharacter } from '../core/save';
+import { openSkillTree } from '../ui/skillTree';
 import { PaperMenu } from '../ui/paperMenu';
 import { TEXT_SIZES, cycleTextSize, textSizeIndex } from '../ui/textSize';
 import type { PaperMenuEntry } from '../ui/paperMenu';
@@ -12,7 +14,14 @@ interface TitleEntry extends PaperMenuEntry {
   readonly view?: string;
   /** a setting changed in place (Enter, ←/→) instead of a screen */
   readonly setting?: 'textSize';
+  /** a panel opened over the title (#54) */
+  readonly panel?: 'skills';
 }
+
+const skillNote = (c: SavedCharacter) => {
+  const n = c.skillPoints ?? 0;
+  return n > 0 ? `${n} skill ${n === 1 ? 'point' : 'points'} to spend` : `${c.skills?.length ?? 0} learned`;
+};
 
 function entries(saved: SavedCharacter | null): TitleEntry[] {
   return [
@@ -20,6 +29,9 @@ function entries(saved: SavedCharacter | null): TitleEntry[] {
     saved
       ? { label: 'Continue', enabled: true, view: 'prefight', note: `${saved.name} · level ${saved.level}` }
       : { label: 'Continue', enabled: false, note: 'no saved game yet' },
+    saved
+      ? { label: 'Skills', enabled: true, panel: 'skills', note: skillNote(saved) }
+      : { label: 'Skills', enabled: false, note: 'no saved game yet' },
     { label: 'Quick bout', enabled: true, view: 'prefight&gladiator=random' },
     { label: 'Wardrobe', enabled: true, view: 'wardrobe' },
     { label: 'Text size', enabled: true, setting: 'textSize', note: TEXT_SIZES[textSizeIndex()].name },
@@ -51,7 +63,7 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
 
   // a dark vignette band behind the title and the menu keeps the text readable over the busy stands
   root.addChild(new Graphics()
-    .roundRect(W / 2 - 520, 60, 1040, 860, 40)
+    .roundRect(W / 2 - 520, 60, 1040, 880, 40)
     .fill({ color: 0x1c1013, alpha: 0.55 }));
 
   const title = new Text({
@@ -75,17 +87,24 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
   const changeSetting = (i: number, step: 1 | -1) => {
     if (items[i].setting === 'textSize') menu.setNote(i, TEXT_SIZES[cycleTextSize(step)].name);
   };
+  let gladiator = saved;
   const menu = new PaperMenu(items, (i) => {
     const view = items[i].view;
     if (view) location.search = `?view=${view}`;
-    else changeSetting(i, 1);
+    else if (items[i].panel === 'skills' && gladiator) {
+      void openSkillTree(gladiator, saveGame).then((c) => {
+        gladiator = c;
+        menu.setNote(i, skillNote(c));
+      });
+    } else changeSetting(i, 1);
   }, undefined, saved ? 1 : 0);
-  menu.position.set((W - menu.menuWidth) / 2, 380);
+  const menuY = 330;
+  menu.position.set((W - menu.menuWidth) / 2, menuY);
   root.addChild(menu);
 
   const hint = new Text({ text: '↑ ↓  choose    Enter  confirm    ← →  change text size', style: { fontFamily: 'Georgia', fontSize: 22, fill: '#cdb99a' } });
   hint.anchor.set(0.5);
-  hint.position.set(W / 2, 380 + menu.menuHeight + 44);
+  hint.position.set(W / 2, menuY + menu.menuHeight + 40);
   root.addChild(hint);
 
   window.addEventListener('keydown', (e) => {

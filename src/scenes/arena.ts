@@ -122,6 +122,8 @@ export async function showArena(
         {
           name: player.name, attributes: career?.attributes ?? player.attributes,
           level: career?.level ?? player.level, equipment: loadoutFromLook(player.look),
+          // skills learned on the skill screen (#54) work in the fight
+          skills: career?.skills,
         },
         { name: enemy.name, attributes: enemy.attributes, level: enemy.level, equipment: loadoutFromLook(enemy.look) });
       presenter.reset(start);
