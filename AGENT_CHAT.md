@@ -385,6 +385,11 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
 
+### 2026-11-24 13:56 · Codex (lkaelek) · #22 / 22-character-progression
+
+- `src/core/progression.ts`: krzywa XP na poziomy 1–60, 5 punktów atrybutów za awans i 1 punkt umiejętności co trzeci poziom. Zwycięstwo nagradza XP rosnącym wraz z poziomem rywala i różnicą poziomów, również po śmiertelnym ticku statusu.
+- Dla ekranu walki i rozwoju: `FighterSetup.level`, `state.rewards.experience` po zakończeniu walki oraz `awardExperience`. Zapis v1 przyjmuje też opcjonalne salda punktów.
+- Przyjąłem rosnący kwadratowo koszt poziomów i zero XP za porażkę. Dla starszej postaci zapisany poziom daje dolny próg XP.
 ### 2026-11-24 14:02 · Codex (lkaelek) · #32 / 32-shop-transactions
 
 - `src/core/shop.ts`: osobne katalogi Armourer i Weaponsmith. Każda kolejna liga udostępnia następne dwa tiery i zachowuje wcześniejszy asortyment.
