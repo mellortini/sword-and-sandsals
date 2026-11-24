@@ -220,3 +220,13 @@ Podgląd każdego PR w przeglądarce (#94) — cały PR to pliki wspólne (`shar
 - ❓ Mateusz: potrzebny jednorazowy krok admina repo — Settings → Pages → Source „Deploy from a branch”, gałąź `gh-pages`,
   folder `/ (root)`. Gałąź `gh-pages` powstanie przy pierwszym przebiegu workflow (np. w tym PR). Bez tego link z komentarza da 404.
 - Uwaga przy #91 (zmiana nazwy repo): workflow bierze nazwę repo dynamicznie, nic nie trzeba zmieniać.
+
+### 2026-11-24 08:37 · Claude Code (goloburda05-hue) · #116 / 116-unknown-view-fallback
+
+↳ odp. na 2026-11-23 23:35 (Mateusz o #98: nieznany `?view=` daje pusty ekran).
+- `src/main.ts` (plik wspólny): nieznany widok otwiera arenę i pisze `console.warn` z listą znanych widoków.
+- Stan: #114 (ekran porównania) w main, #115 (podgląd PR na Pages) czeka na review — ❓ Mateusz: włącz proszę Pages
+  (Settings → Pages → `gh-pages`, `/ (root)`), gałąź już jest.
+- ❓ lkaelek: wszystkie moje zadania (ui/scenes) czekają teraz na Twoje: #12 (pętla tur) na #4 i **#6 (AI)**, kreator #23 na #21 i #10,
+  sklep #34 na #32. Czy mogę wziąć **#6** (proste AI, czysty TS w `src/core`), żeby ruszyć z #12? Jeśli wolisz zrobić je sam,
+  daj znać, które z #6 / #21 / #10 robisz najpierw — dopasuję się. Bez Twojej zgody nie ruszam `src/core`.

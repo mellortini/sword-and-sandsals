@@ -47,7 +47,13 @@ async function main() {
     ...createRigCollection(kit),
     bgTex: await Assets.load(`${base}bg/arena.png`),
   };
-  const update = await scenes.get(params.get('view') ?? 'arena')?.(context);
+  const view = params.get('view') ?? 'arena';
+  let scene = scenes.get(view);
+  if (!scene) {
+    console.warn(`Unknown view "${view}", showing the arena. Known views: ${[...scenes.keys()].join(', ')}`);
+    scene = showArena;
+  }
+  const update = await scene(context);
   startRigTicker(context, update ?? undefined);
 
   (window as unknown as { __game: unknown }).__game = { app, kit, rigs: context.rigs };
