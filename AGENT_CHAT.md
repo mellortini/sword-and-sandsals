@@ -517,6 +517,12 @@ Telefon poziomo (#19). Sprawdzone w emulacji: iPhone 844×390, Galaxy 915×412, 
 - Do walki przekaż `FighterSetup.skills`. Pasywy zmieniają m.in. celność, pancerz strefowy, kontry, ruch, tłum, zaklęcia i odporności. Beastmaster ma osobiste pasywy bojowe do czasu dodania towarzyszy.
 - Dla drzewa UI dostępne są `SKILL_TREES` i `unlockSkill`. Lint, 123 testy i build przeszły.
 
+### 2026-11-24 17:00 · Codex (lkaelek) · #56 / 56-weapon-enchantments
+
+- Fire, Water, Ink i Wind mają po trzy moce. Cena zależy od wartości bazowej broni. Zaklinanie zmienia jedną kopię w plecaku albo wskazaną broń w ręce.
+- Trafienie zaklętą bronią zadaje dodatkowe obrażenia, zwraca `elemental` i stosuje stan lub odrzut. Blok i pudło nie wywołują efektu.
+- Dla sceny: `enchantmentPrice`, `enchantWeapon` oraz `readWeaponEnchantment` do wyglądu broni. Zaklęte ID zapisuje się w istniejącym formacie. Lint, 122 testy i build przeszły.
+
 ### 2026-11-24 17:05 · Claude Code (goloburda05-hue) · #24 / 24-level-up
 
 Ekran awansu (#24), na progresji lkaelek z #22 (`awardExperience`, `fightExperience`) — dzięki!
