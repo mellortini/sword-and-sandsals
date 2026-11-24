@@ -65,6 +65,8 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
   const attributes = resolveAttributes(setup.attributes);
   const weapon = combatWeapon(setup.weapon) ?? combatWeapon(setup.equipment?.weapon);
   const stats = deriveStats(attributes, setup.equipment, weapon?.damage);
+  const health = setup.health ?? stats.maxHealth;
+  if (!Number.isInteger(health) || health < 1) throw new RangeError('Combat requires a positive starting health.');
 
   return {
     name: setup.name ?? defaultName,
@@ -74,7 +76,7 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     armourByZone: armourByZone(setup.equipment),
     weapon,
     position: roundPosition(position),
-    health: stats.maxHealth,
+    health: Math.min(health, stats.maxHealth),
     energy: stats.maxEnergy,
     guarding: false,
     counterReady: false,
@@ -182,6 +184,7 @@ function performSlotAction(state: CombatState, action: CombatSlotAction): Action
   changeEnergy(side, fighter, -option.energyCost, events);
   fighter.slots = consumeSlotItem(fighter.slots, option.slot);
   target.health = health;
+  if (item.clears) target.statuses = target.statuses.filter(({ kind }) => kind !== item.clears);
   if (item.status && health > 0) target.statuses = applyStatus(target.statuses, item.status, target.statusResistances);
   events.push({ type: 'slot', actor: side, target: option.target, slot: option.slot, item: option.id, healthDelta });
 

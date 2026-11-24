@@ -28,6 +28,7 @@ export type EquipmentLoadout = Partial<Record<Item['slot'], number>> & Partial<R
 export interface FighterSetup {
   name?: string;
   level?: number;
+  health?: number;
   attributes?: Partial<Attributes>;
   equipment?: EquipmentLoadout;
   weapon?: string;
