@@ -1,5 +1,6 @@
 import type { Item } from '../data/equipment';
 import type { CrowdGift, CrowdStanding } from './crowd';
+import type { CombatItemId, CombatSlots } from './spells';
 import type { StatusEffect, StatusResistances, StatusTick } from './status';
 import type { CombatWeapon } from './weapons';
 
@@ -25,10 +26,12 @@ export type EquipmentLoadout = Partial<Record<Item['slot'], number>> & Partial<R
 
 export interface FighterSetup {
   name?: string;
+  level?: number;
   attributes?: Partial<Attributes>;
   equipment?: EquipmentLoadout;
   weapon?: string;
   statusResistances?: StatusResistances;
+  slots?: CombatSlots;
   position?: number;
 }
 
@@ -52,6 +55,7 @@ export interface FighterStats {
 
 export interface Fighter {
   name: string;
+  level: number;
   attributes: Readonly<Attributes>;
   stats: Readonly<FighterStats>;
   weapon?: CombatWeapon;
@@ -59,16 +63,19 @@ export interface Fighter {
   health: number;
   energy: number;
   guarding: boolean;
+  counterReady: boolean;
   tauntPenalty: number;
   crowd: CrowdStanding;
   statuses: readonly StatusEffect[];
   statusResistances: StatusResistances;
+  slots: CombatSlots;
 }
 
 export interface CombatState {
   readonly fighters: Readonly<Record<FighterSide, Readonly<Fighter>>>;
   readonly active: FighterSide;
   readonly winner: FighterSide | null;
+  readonly rewards?: { readonly experience: number };
   readonly rngState: number;
 }
 
@@ -77,6 +84,7 @@ export interface ActionOption {
   energyCost: number;
   /** Percentage from 5 to 95 for attacks. */
   hitChance?: number;
+  counter?: true;
 }
 
 export interface AttackStrike {
@@ -97,6 +105,7 @@ export type CombatEvent =
       hit: boolean;
       crit: boolean;
       blocked: boolean;
+      counter?: true;
       damage: number;
       strikes?: readonly AttackStrike[];
     }
@@ -106,6 +115,7 @@ export type CombatEvent =
   | { type: 'taunt'; actor: FighterSide; target: FighterSide; penalty: number }
   | { type: 'crowd_gift'; fighter: FighterSide; gift: CrowdGift; amount: number }
   | ({ type: 'status'; fighter: FighterSide } & StatusTick)
+  | { type: 'slot'; actor: FighterSide; target: FighterSide; slot: number; item: CombatItemId; healthDelta: number }
   | { type: 'death'; fighter: FighterSide; winner: FighterSide }
   | { type: 'turn'; fighter: FighterSide };
 

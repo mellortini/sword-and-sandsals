@@ -1,5 +1,8 @@
 import { createCrowdStanding, crowdDamageMultiplier, scoreCrowdAction } from './crowd';
+import { experienceForLevel, fightExperience } from './progression';
 import { nextRandom } from './rng';
+import { COMBAT_ITEMS, combatSlotOptions, consumeSlotItem, createCombatSlots } from './spells';
+import type { CombatSlotAction, CombatSlotOption } from './spells';
 import { attackDamage, attackHitChance, deriveStats, isAttack, resolveAttributes } from './stats';
 import { advanceStatusDurations, applyStatus, statusModifiers, tickStatuses } from './status';
 import type { StatusKind } from './status';
@@ -50,6 +53,8 @@ export function createCombat(seed: number, player: FighterSetup = {}, enemy: Fig
 }
 
 function createFighter(setup: FighterSetup, defaultName: string, defaultPosition: number, crowdSeed: number): Fighter {
+  const level = setup.level ?? 1;
+  experienceForLevel(level);
   const position = setup.position ?? defaultPosition;
   if (!Number.isFinite(position) || position < 0 || position > ARENA_LENGTH) {
     throw new RangeError('Combat positions must be within the arena.');
@@ -60,6 +65,7 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
 
   return {
     name: setup.name ?? defaultName,
+    level,
     attributes,
     stats,
     weapon,
@@ -67,10 +73,12 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     health: stats.maxHealth,
     energy: stats.maxEnergy,
     guarding: false,
+    counterReady: false,
     tauntPenalty: 0,
     crowd: createCrowdStanding(crowdSeed),
     statuses: [],
     statusResistances: { ...setup.statusResistances },
+    slots: createCombatSlots(setup.slots),
   };
 }
 
@@ -100,11 +108,12 @@ export function getActionOptions(state: CombatState): ActionOption[] {
   const { movementMultiplier } = statusModifiers(fighter.statuses);
 
   for (const action of ACTIONS) {
-    const energyCost = ENERGY_COSTS[action];
+    const counter = action === 'quick' && fighter.counterReady;
+    const energyCost = counter ? 0 : ENERGY_COSTS[action];
     if (energyCost > fighter.energy || !isInRange(action, active, fighter.position, distance, meleeRange, movementMultiplier)) continue;
 
     options.push(isAttack(action)
-      ? { action, energyCost, hitChance: hitChance(action, fighter, opponent) }
+      ? { action, energyCost, hitChance: hitChance(action, fighter, opponent), ...(counter ? { counter: true } : {}) }
       : { action, energyCost });
   }
   return options;
@@ -133,8 +142,40 @@ function hitChance(kind: AttackKind, attacker: Readonly<Fighter>, defender: Read
   return attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty + accuracyPenalty);
 }
 
-export function performAction(state: CombatState, action: CombatAction): ActionResult {
+export function getCombatSlotOptions(state: CombatState): CombatSlotOption[] {
+  if (state.winner !== null) return [];
+  const { active } = state;
+  const fighter = state.fighters[active];
+  return combatSlotOptions(fighter.slots, active, opposingSide(active), fighter.energy, fighter.attributes.arcana);
+}
+
+function performSlotAction(state: CombatState, action: CombatSlotAction): ActionResult {
+  const option = getCombatSlotOptions(state).find((entry) => entry.slot === action.slot && entry.target === action.target);
+  if (!option || option.unavailable) return { ok: false, state, events: [], reason: 'unavailable' };
+
+  const side = state.active;
+  const other = opposingSide(side);
+  const fighters = { player: { ...state.fighters.player }, enemy: { ...state.fighters.enemy } };
+  const fighter = fighters[side];
+  const target = fighters[option.target];
+  const item = COMBAT_ITEMS[option.id];
+  const events: CombatEvent[] = [];
+  const strength = item.health === 'spellPower' ? -fighter.stats.spellPower : item.health ?? 0;
+  const health = clamp(target.health + strength, 0, target.stats.maxHealth);
+  const healthDelta = health - target.health;
+
+  changeEnergy(side, fighter, -option.energyCost, events);
+  fighter.slots = consumeSlotItem(fighter.slots, option.slot);
+  target.health = health;
+  if (item.status && health > 0) target.statuses = applyStatus(target.statuses, item.status, target.statusResistances);
+  events.push({ type: 'slot', actor: side, target: option.target, slot: option.slot, item: option.id, healthDelta });
+
+  return endTurn(fighters, side, other, state.rngState, events);
+}
+
+export function performAction(state: CombatState, action: CombatAction | CombatSlotAction): ActionResult {
   if (state.winner !== null) return { ok: false, state, events: [], reason: 'finished' };
+  if (typeof action !== 'string') return performSlotAction(state, action);
   const option = getActionOptions(state).find((entry) => entry.action === action);
   if (!option) return { ok: false, state, events: [], reason: 'unavailable' };
 
@@ -189,6 +230,7 @@ export function performAction(state: CombatState, action: CombatAction): ActionR
   if (isAttack(action)) {
     const traits = weaponMove(action, fighter.weapon);
     attack = resolveAttack(action, side, fighter, opponent, traits, roll);
+    if (option.counter) attack.counter = true;
     events.push(attack);
     if (attack.damage > 0 && opponent.health > 0) {
       if (traits.status) opponent.statuses = applyStatus(opponent.statuses, traits.status, opponent.statusResistances);
@@ -208,12 +250,18 @@ export function performAction(state: CombatState, action: CombatAction): ActionR
     events.push({ type: 'crowd_gift', fighter: side, gift: crowd.gift, amount });
   }
 
+  return endTurn(fighters, side, other, rngState, events);
+}
+
+function endTurn(
+  fighters: Record<FighterSide, Fighter>, side: FighterSide, other: FighterSide, rngState: number, events: CombatEvent[],
+): ActionResult {
+  const fighter = fighters[side];
+  const opponent = fighters[other];
   fighter.tauntPenalty = 0;
   fighter.statuses = fighter.statuses.filter((effect) => effect.turns > 0);
-  if (opponent.health === 0) {
-    events.push({ type: 'death', fighter: other, winner: side });
-    return { ok: true, state: { fighters, active: side, winner: side, rngState }, events };
-  }
+  fighter.counterReady = false;
+  if (opponent.health === 0) return finishCombat(fighters, side, rngState, events);
 
   return startNextTurn(fighters, other, rngState, events);
 }
@@ -227,11 +275,7 @@ function startNextTurn(
     const tick = tickStatuses(fighter.statuses, fighter.health, fighter.stats.maxHealth);
     fighter.health = tick.health;
     for (const effect of tick.ticks) events.push({ type: 'status', fighter: active, ...effect });
-    if (fighter.health === 0) {
-      const winner = opposingSide(active);
-      events.push({ type: 'death', fighter: active, winner });
-      return { ok: true, state: { fighters, active: winner, winner, rngState }, events };
-    }
+    if (fighter.health === 0) return finishCombat(fighters, opposingSide(active), rngState, events);
     // Keep effects with zero turns through this action so their modifiers still apply.
     fighter.statuses = advanceStatusDurations(fighter.statuses);
     if (!tick.skip) {
@@ -240,8 +284,17 @@ function startNextTurn(
     }
     fighter.statuses = fighter.statuses.filter((effect) => effect.turns > 0);
     fighter.tauntPenalty = 0;
+    fighter.counterReady = false;
     active = opposingSide(active);
   }
+}
+
+function finishCombat(
+  fighters: Record<FighterSide, Fighter>, winner: FighterSide, rngState: number, events: CombatEvent[],
+): ActionResult {
+  events.push({ type: 'death', fighter: opposingSide(winner), winner });
+  const rewards = { experience: fightExperience(winner, fighters.player.level, fighters.enemy.level) };
+  return { ok: true, state: { fighters, active: winner, winner, rngState, rewards }, events };
 }
 
 function move(side: FighterSide, fighter: Fighter, kind: MoveKind, position: number, events: CombatEvent[]) {
@@ -258,6 +311,11 @@ function changeEnergy(side: FighterSide, fighter: Fighter, amount: number, event
   if (from === to) return;
   fighter.energy = to;
   events.push({ type: 'energy', fighter: side, from, to });
+}
+
+/** Chance in percentage points after a successful block. */
+export function counterChance(guard: number): number {
+  return guard < 8 ? 0 : Math.min(60, 20 + 5 * (guard - 8));
 }
 
 function resolveAttack(
@@ -277,7 +335,12 @@ function resolveAttack(
 
   for (let i = 0; i < traits.strikes && defender.health > 0; i++) {
     const hit = roll() < chance;
+    // A defensive stance can block an incoming strike; a skilled block may earn a free counter. Crits need an unblocked hit.
     const blocked = hit && defender.guarding && roll() < defender.stats.blockChance;
+    if (blocked && !defender.counterReady) {
+      const chanceToCounter = counterChance(defender.attributes.guard);
+      if (chanceToCounter > 0 && roll() < chanceToCounter) defender.counterReady = true;
+    }
     const crit = hit && !blocked && roll() < attacker.stats.criticalChance;
     const damage = hit && !blocked ? Math.min(defender.health, attackDamage(kind, offense, defense, crit)) : 0;
     defender.health -= damage;
