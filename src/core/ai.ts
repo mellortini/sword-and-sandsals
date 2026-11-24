@@ -1,7 +1,8 @@
-import { getActionOptions, getDistance, MELEE_RANGE, MIN_MELEE_ENERGY } from './combat';
+import { getActionOptions, getDistance, MIN_MELEE_ENERGY } from './combat';
 import { nextRandom } from './rng';
 import { attackDamage, isAttack } from './stats';
 import type { ActionOption, CombatAction, CombatState } from './types';
+import { weaponReach } from './weapons';
 
 /** Fighting style: the aggressor charges and swings hard, the defender guards, rests and picks safe hits. */
 export type AiProfile = 'aggressor' | 'defender';
@@ -53,10 +54,11 @@ export function chooseAction(state: CombatState, profile: AiProfile, rngState: n
 function situationalScore(state: CombatState, option: ActionOption): number {
   const me = state.fighters[state.active];
   const foe = state.fighters[state.active === 'player' ? 'enemy' : 'player'];
-  const inMelee = getDistance(state) <= MELEE_RANGE;
+  const distance = getDistance(state);
+  const inMelee = distance <= weaponReach(me.weapon);
   const health = me.health / me.stats.maxHealth;
   const energy = me.energy / me.stats.maxEnergy;
-  const foeCanStrike = inMelee && foe.energy >= MIN_MELEE_ENERGY;
+  const foeCanStrike = distance <= weaponReach(foe.weapon) && foe.energy >= MIN_MELEE_ENERGY;
 
   if (option.hitChance !== undefined && isAttack(option.action)) {
     const damage = attackDamage(option.action, me.stats, foe.stats);
