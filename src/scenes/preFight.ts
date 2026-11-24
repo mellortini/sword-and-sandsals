@@ -118,9 +118,9 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
     } while (choice === 'retreat');
     context.ui.innerHTML = '';
     update = (await showArena(context, [
-      { look: player.look, name: player.name, attributes: player.attributes },
-      { look: enemy.look, name: enemy.name, attributes: enemy.attributes },
-    ])) ?? undefined;
+      { look: player.look, name: player.name, attributes: player.attributes, level: player.level },
+      { look: enemy.look, name: enemy.name, attributes: enemy.attributes, level: enemy.level },
+    ], { career: saved ?? undefined })) ?? undefined;
   })();
   return (dt) => update?.(dt);
 }
