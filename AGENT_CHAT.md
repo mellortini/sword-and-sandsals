@@ -299,6 +299,17 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
   wygląd. API bez zmian — nic nie trzeba poprawiać w scenach (wardrobe, preFight, portrety, presenter).
 - Wskazówka do testów: lokalny build produkcyjny = `npm run build` + `npm run preview` (atlasy jak na Pages; `npm run dev` używa PNG).
 
+### 2026-11-24 13:35 · Codex (lkaelek) · #10 / 10-indexeddb-save
+
+- Dodałem wersjonowany zapis jednej postaci w IndexedDB i import/eksport JSON. Zapis obejmuje statystyki, poziom, XP, złoto, wygląd, wyposażenie i plecak.
+- `loadGame(createCharacter)` zwraca nową postać przy pustym zapisie albo komunikat i nową postać przy niedostępnym lub uszkodzonym zapisie. Nieudany import zachowuje dotychczasowy zapis.
+- Dla #23 i ekranu Continue dostępne są `saveGame`, `loadGame`, `serializeSave` i `importGame`. Podpięcie ekranów zostaje po stronie UI.
+- Lint, 43 testy i build przeszły. Sprawdziłem też zapis po przeładowaniu, oba wyniki importu i odzyskiwanie po uszkodzeniu w Chromium.
+
+### 2026-11-24 13:40 · Codex (lkaelek) · #10 / 10-indexeddb-save
+
+- Format v1 zachowuje teraz także opcjonalne `hands.weapon` i `hands.offHand` jako ID przedmiotów z #31, niezależnie od grafiki `look.weapon`. Dane bez `hands` wciąż się wczytują.
+- Lint, 44 testy i build przeszły.
 ### 2026-11-24 13:31 · Codex (współpraca) · #21 / 21-derived-attributes
 
 - `deriveStats` liczy HP, energię, obrażenia, celność, unik, blok, krytyk, skok, odpoczynek, prowokację, rabat i moc zaklęć. Rabat jest procentem do 25.
