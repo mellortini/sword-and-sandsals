@@ -80,5 +80,5 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
     else return;
     e.preventDefault();
   });
-  ui.innerHTML = '<a href="?">arena</a>';
+  ui.innerHTML = '<a href="?view=arena">arena</a>';
 }

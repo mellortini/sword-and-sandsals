@@ -107,7 +107,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
     <label><input type="checkbox" id="cbBlock"> enemy blocks</label>
     <label><input type="checkbox" id="cbCounter" checked> enemy answers</label>
     <label>speed <select id="sSpeed"><option value="1">1x</option><option value="0.5">0.5x</option><option value="0.25">0.25x</option><option value="0.1">0.1x</option></select></label>
-    <div class="small"><a href="?">arena</a> &middot; <a href="?view=wardrobe">wardrobe</a> &middot; <a href="?view=strip&clip=attack_normal">frame strips</a></div>`;
+    <div class="small"><a href="?view=arena">arena</a> &middot; <a href="?view=wardrobe">wardrobe</a> &middot; <a href="?view=strip&clip=attack_normal">frame strips</a></div>`;
   // --- core fight (#11): src/core decides, CombatPresenter animates, HUD follows. Both sides pick at random.
   // contact 4.6 units, melee range (logical 2) 5.9 units: the attack lunges reach without the bodies overlapping
   const layout = { left: 640 - 2 * 25, px: 25, contact: 175 };

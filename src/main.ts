@@ -51,7 +51,7 @@ async function main() {
     ...createRigCollection(kit),
     bgTex: await Assets.load(`${base}bg/arena.png`),
   };
-  const view = params.get('view') ?? 'arena';
+  const view = params.get('view') ?? 'title';
   let scene = scenes.get(view);
   if (!scene) {
     console.warn(`Unknown view "${view}", showing the arena. Known views: ${[...scenes.keys()].join(', ')}`);
