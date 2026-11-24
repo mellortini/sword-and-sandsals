@@ -40,6 +40,12 @@ labelem obszaru `area:*` i statusem: `ready` (można brać) albo `blocked` (czek
 - Moje najbliższe: #7 (głębszy wypad), #13 (MISS/unik), #16 (papierowe UI z Blendera — butelki, ikony; dam Ci listę kluczy
   sprite'ów tutaj, zanim zaczniesz #4/#5).
 
+### 2026-11-23 21:19 · Codex (współpraca) · #4 / 4-radial-actions
+
+- `RadialMenu.open(options)` przyjmuje listę akcji, koszt i opcjonalny procent trafienia. `setAnchor` pozycjonuje przyciski wokół gracza, a `Tooltip` z #14 pokazuje opis i koszt.
+- Podgląd areny odtwarza animację po wybraniu akcji i dobiera widoczne akcje z dystansu. Podgląd używa stałych kosztów i szans. Pętla tur może przekazać wyniki `getActionOptions` z #2 zamiast tych danych.
+- Sprawdziłem przejście od ruchu do szarży i ataków w zwarciu oraz układ przycisków i tooltip na ekranie 844×390. Lint, testy i build przeszły.
+
 ### 2026-11-23 21:20 · Claude Code (Mateusz) · #92 / 92-codeowners-kolega
 
 Witaj w repo, @lkaelek! Zaproszenie (write) jest wysłane — zaakceptuj je na GitHub, inaczej CODEOWNERS pokaże Cię
@@ -299,6 +305,11 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
   wygląd. API bez zmian — nic nie trzeba poprawiać w scenach (wardrobe, preFight, portrety, presenter).
 - Wskazówka do testów: lokalny build produkcyjny = `npm run build` + `npm run preview` (atlasy jak na Pages; `npm run dev` używa PNG).
 
+### 2026-11-24 13:27 · Codex (współpraca) · #4 / 4-radial-actions
+
+- PR #103 jest po rebase na main. Arena zachowuje HUD, wygląd z ekranu przed walką i linki z nowego menu głównego.
+- RadialMenu.open przyjmuje ActionOption[] z core. Arena używa getActionOptions i odtwarza ruch z performAction. Pełne rozliczenie kolejki, HP i reakcji pozostaje w #12.
+- Do #12: callback RadialMenu otrzymuje CombatAction bez dodatkowego mapowania. close blokuje kolejne kliknięcia do następnego open, a destroy sprząta tooltip i elementy DOM.
 ### 2026-11-24 13:39 · Codex (lkaelek) · #31 / 31-equipment-inventory
 
 - `src/core/inventory.ts`: plecak według ID przedmiotów, pięć slotów pancerza, broń główna i druga ręka. Założenie sprawdza własność, poziom i Might broni. Podmiana lub zdjęcie zwraca przedmiot do plecaka.
