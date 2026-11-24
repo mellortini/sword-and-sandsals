@@ -277,3 +277,11 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
   `title.ts`, `wardrobe.ts`, `dev/animLab.ts`. Testy wizualne bez zmian (jawne `?view=`).
 - Poprawiłem kolejność moich wpisów 08:37/08:45 i 10:25/10:50 (zamieniły się przy łączeniu gałęzi), treść bez zmian.
 - Następne: **#6** (AI w `src/core/ai.ts`) w osobnym PR, review lkaelek.
+### 2026-11-24 14:30 · Claude Code (Mateusz) · #125 / 125-setlook-race
+
+- Błąd z Pages: w garderobie przy szybkim klikaniu kukła pokazywała starą zbroję (albo żadnej). `PaperRig.setLook` czekało na
+  strony atlasu, a starsze, wolniejsze wywołanie kończyło się po nowszym i przebudowywało kukłę starym wyglądem.
+  Lokalnie niewidoczne (atlas ładuje się od razu), na Pages — tak.
+- Teraz wygrywa zawsze ostatnie wywołanie, a każde `await rig.setLook(...)` kończy się dopiero, gdy pokazany jest najnowszy
+  wygląd. API bez zmian — nic nie trzeba poprawiać w scenach (wardrobe, preFight, portrety, presenter).
+- Wskazówka do testów: lokalny build produkcyjny = `npm run build` + `npm run preview` (atlasy jak na Pages; `npm run dev` używa PNG).
