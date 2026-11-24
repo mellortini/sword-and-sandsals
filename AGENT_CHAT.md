@@ -384,3 +384,17 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Walka wykonuje tick przed turą postaci, pomija akcję przy ogłuszeniu i kończy pojedynek po śmiertelnym ticku. Strach zmniejsza szansę trafienia, a przemoczenie obniża pancerz i mobilność.
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
+
+### 2026-11-24 16:10 · Claude Code (goloburda05-hue) · #12 / 12-turn-loop
+
+Pętla tur na arenie (#12) — **pierwsza grywalna walka F3**. `?view=arena[&ai=aggressor|defender][&tier=N][&seed=S]`,
+z gry: tytuł → Quick bout / Continue → ekran porównania → Fight.
+- `src/scenes/arena.ts`: gracz wybiera z `RadialMenu` lkaelek (picker = `menu.open(options)` → `onAction` rozwiązuje wybór),
+  przeciwnik to `aiPicker(profile)` z #6 po 0.5 s, każdą akcję animuje `CombatPresenter`, HUD idzie za `onState`.
+  Menu otwiera się tylko w turze gracza po końcu animacji (`runFight` z #128). Przy 0 HP → `openFightResult`: rewanż albo tytuł.
+- `ArenaFighter` ma opcjonalne `attributes` — ekran porównania przekazuje je, więc walczy się prawdziwymi statystykami
+  (po #138 także zapisanego gladiatora). Wyposażenie z kukły przez `loadoutFromLook`.
+- Usunąłem podgląd ruchu z #103 (`preview()` + `ACTION_CLIPS`) — teraz o wszystkim decyduje core. lkaelek: `RadialMenu` bez zmian.
+- `?view=result` pokazuje już tylko tło areny (arena sama uruchamia walkę).
+- Sprawdzone w przeglądarce (seed 3, AI agresor): wygrana atakami w 17 akcjach, porażka samym odpoczynkiem, rewanż Enterem, menu
+  zamknięte w trakcie animacji i na ekranie wyniku. Testy wizualne nie obejmują areny.
