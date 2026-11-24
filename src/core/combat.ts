@@ -1,12 +1,12 @@
 import { nextRandom } from './rng';
-import { deriveStats, resolveAttributes } from './stats';
+import { attackDamage, attackHitChance, deriveStats, isAttack, resolveAttributes } from './stats';
 import type {
   ActionOption, ActionResult, AttackKind, CombatAction, CombatEvent, CombatState,
   Fighter, FighterSetup, FighterSide, MoveKind,
 } from './types';
 
 export const ARENA_LENGTH = 20;
-const MELEE_RANGE = 2;
+export const MELEE_RANGE = 2;
 const CHARGE_RANGE = 8;
 const STEP_DISTANCE = 1.6;
 const KNOCKBACK_DISTANCE = 2;
@@ -25,18 +25,12 @@ const ENERGY_COSTS: Record<CombatAction, number> = {
 };
 
 const ACTIONS = Object.keys(ENERGY_COSTS) as CombatAction[];
-const ATTACKS: Record<AttackKind, { hit: number; damage: number }> = {
-  quick: { hit: 80, damage: 0.7 },
-  normal: { hit: 70, damage: 1 },
-  power: { hit: 55, damage: 1.6 },
-  charge: { hit: 70, damage: 1.2 },
-};
+export const MIN_MELEE_ENERGY = Math.min(ENERGY_COSTS.quick, ENERGY_COSTS.normal, ENERGY_COSTS.power);
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const roundPosition = (value: number) => Math.round(value * 10) / 10;
 const opposingSide = (side: FighterSide): FighterSide => side === 'player' ? 'enemy' : 'player';
 const forwardDirection = (side: FighterSide) => side === 'player' ? 1 : -1;
-const isAttack = (action: CombatAction): action is AttackKind => Object.hasOwn(ATTACKS, action);
 
 export function createCombat(seed: number, player: FighterSetup = {}, enemy: FighterSetup = {}): CombatState {
   if (!Number.isSafeInteger(seed)) throw new RangeError('Combat seed must be a safe integer.');
@@ -90,7 +84,7 @@ export function getActionOptions(state: CombatState): ActionOption[] {
     if (energyCost > fighter.energy || !isInRange(action, active, fighter.position, distance)) continue;
 
     options.push(isAttack(action)
-      ? { action, energyCost, hitChance: hitChance(action, fighter, opponent) }
+      ? { action, energyCost, hitChance: attackHitChance(action, fighter.stats, opponent.stats, fighter.tauntPenalty) }
       : { action, energyCost });
   }
   return options;
@@ -112,11 +106,6 @@ function isInRange(action: CombatAction, side: FighterSide, position: number, di
     default:
       return true;
   }
-}
-
-function hitChance(kind: AttackKind, attacker: Readonly<Fighter>, defender: Readonly<Fighter>): number {
-  // Each point of Precision over the opponent's Guard adds 3 percentage points.
-  return clamp(ATTACKS[kind].hit + 3 * (attacker.attributes.precision - defender.attributes.guard) - attacker.tauntPenalty, 5, 95);
 }
 
 export function performAction(state: CombatState, action: CombatAction): ActionResult {
@@ -148,11 +137,9 @@ export function performAction(state: CombatState, action: CombatAction): ActionR
     case 'step_back':
       move(side, fighter, action, fighter.position - direction * STEP_DISTANCE, events);
       break;
-    case 'jump': {
-      const reach = clamp(2 + 0.4 * fighter.attributes.agility, 2, 6);
-      move(side, fighter, action, fighter.position + direction * Math.min(reach, distance), events);
+    case 'jump':
+      move(side, fighter, action, fighter.position + direction * Math.min(fighter.stats.jumpDistance, distance), events);
       break;
-    }
     case 'charge':
       move(side, fighter, action, opponent.position - direction, events);
       break;
@@ -161,13 +148,13 @@ export function performAction(state: CombatState, action: CombatAction): ActionR
       events.push({ type: 'block', fighter: side });
       break;
     case 'rest': {
-      const restored = Math.min(8 + fighter.attributes.stamina, fighter.stats.maxEnergy - fighter.energy);
+      const restored = Math.min(fighter.stats.restRecovery, fighter.stats.maxEnergy - fighter.energy);
       events.push({ type: 'rest', fighter: side, restored });
       changeEnergy(side, fighter, restored, events);
       break;
     }
     case 'taunt':
-      opponent.tauntPenalty = Math.min(20, 5 + fighter.attributes.charm);
+      opponent.tauntPenalty = fighter.stats.tauntPenalty;
       events.push({ type: 'taunt', actor: side, target: other, penalty: opponent.tauntPenalty });
       break;
   }
@@ -210,17 +197,14 @@ function changeEnergy(side: FighterSide, fighter: Fighter, amount: number, event
 function resolveAttack(
   kind: AttackKind, side: FighterSide, attacker: Readonly<Fighter>, defender: Fighter, roll: () => number,
 ): Extract<CombatEvent, { type: 'attack' }> {
-  const chance = hitChance(kind, attacker, defender);
+  const chance = attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty);
   const hit = roll() < chance;
   // A defensive stance can block one incoming attack. Crits require an unblocked hit.
-  const blocked = hit && defender.guarding && roll() < Math.min(80, 25 + 4 * defender.attributes.guard);
-  const crit = hit && !blocked && roll() < Math.min(40, 5 + attacker.attributes.precision);
+  const blocked = hit && defender.guarding && roll() < defender.stats.blockChance;
+  const crit = hit && !blocked && roll() < attacker.stats.criticalChance;
   let damage = 0;
   if (hit && !blocked) {
-    const raw = (4 + attacker.attributes.might) * ATTACKS[kind].damage * (crit ? 1.5 : 1);
-    // Armour has diminishing returns. A landed, unblocked hit always removes at least 1 HP.
-    const mitigated = Math.max(1, Math.round(raw * 30 / (30 + defender.stats.armour)));
-    damage = Math.min(defender.health, mitigated);
+    damage = Math.min(defender.health, attackDamage(kind, attacker.stats, defender.stats, crit));
     defender.health -= damage;
   }
 

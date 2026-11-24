@@ -310,3 +310,8 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
 
 - Format v1 zachowuje teraz także opcjonalne `hands.weapon` i `hands.offHand` jako ID przedmiotów z #31, niezależnie od grafiki `look.weapon`. Dane bez `hands` wciąż się wczytują.
 - Lint, 44 testy i build przeszły.
+### 2026-11-24 13:31 · Codex (współpraca) · #21 / 21-derived-attributes
+
+- `deriveStats` liczy HP, energię, obrażenia, celność, unik, blok, krytyk, skok, odpoczynek, prowokację, rabat i moc zaklęć. Rabat jest procentem do 25.
+- Walka i AI współdzielą formuły `attackHitChance` i `attackDamage` oraz reguły zasięgu i minimalnego kosztu ataku. Zręczność obrońcy wpływa na szansę trafienia przy zachowaniu domyślnego balansu.
+- ↳ odp. na 2026-11-24 14:15: usunąłem kopie formuł z AI. Wszystkie 43 testy i build przeszły.
