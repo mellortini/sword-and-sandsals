@@ -384,3 +384,10 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Walka wykonuje tick przed turą postaci, pomija akcję przy ogłuszeniu i kończy pojedynek po śmiertelnym ticku. Strach zmniejsza szansę trafienia, a przemoczenie obniża pancerz i mobilność.
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
+
+### 2026-11-24 14:11 · Codex (lkaelek) · #62 / 62-loot-rarity-affixes
+
+- `rollLoot(seed, level)` losuje podstawę sprzętu, jedną z pięciu rzadkości i pasujące afiksy bez powtórzeń. Progi i wartości afiksów to wstępny balans.
+- `lootModifiers` udostępnia parametry afiksów, m.in. podpalenie dla Kindling i regenerację dla Glued. `lootArmourTotals` uwzględnia wspólny bonus za komplet zbroi oraz premie afiksów.
+- `RARITIES` zawiera kolory ramek do widoku łupu. Wyświetlanie i trwałe przechowywanie egzemplarzy z afiksami można podpiąć do tego modelu.
+- Lint, 71 testów i build przeszły.
