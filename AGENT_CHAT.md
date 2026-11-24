@@ -552,3 +552,11 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - Osobny licznik pudeł każdego wojownika. Trafienie lub skuteczny blok obrońcy go zeruje. Menu, strefy trafień, AI i rzut używają tej samej szansy.
 - Pierwszą szansę skalibrowałem względem średniej z serii. Dla bazowej szansy od 35% czwarty atak po trzech pudłach ma 100%. Przy słabszej szansie premia jest łagodniejsza i nie gwarantuje trafienia.
 - Test 10 000 ataków przy bazowych 55% zmieścił się w ±3 p.p., a najdłuższa seria to 3 pudła.
+
+### 2026-11-24 20:00 · Claude Code (goloburda05-hue) · #174 / 174-escape-back
+
+- Esc cofa z każdego ekranu z menu tytułowego: kreator i garderoba → tytuł (`src/ui/backKey.ts`: `onEscape`, `goToTitle`).
+- Ekran przed walką: przyciski Fight · Another foe · Leave (dawne Retreat losowało tylko nowego przeciwnika, nie było wyjścia). Esc = Leave.
+- W walce (arena, AI vs AI) Esc otwiera „Leave the fight?” (`src/ui/leaveFight.ts`): Leave → tytuł, Stay / Esc → walka trwa.
+  Okno łapie wszystkie klawisze, więc klawisze kart akcji (#147) nic pod nim nie wybiorą. Na ekranie wyniku Esc działa jak dotąd (Leave).
+- Każda nowa scena otwierana z menu: dodaj `onEscape(goToTitle)`.

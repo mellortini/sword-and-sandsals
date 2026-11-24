@@ -12,6 +12,7 @@ import { openLevelUp } from '../ui/levelUp';
 import { applyFightExperience } from '../ui/levelUpRules';
 import type { FightProgress } from '../ui/levelUpRules';
 import { CombatHud } from '../ui/hud';
+import { leaveFightOnEscape } from '../ui/leaveFight';
 import { RadialMenu } from '../ui/radialMenu';
 import { CombatPresenter } from './combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from './common';
@@ -109,6 +110,9 @@ export async function showArena(
   };
 
   let seed = params.has('seed') ? Math.floor(+params.get('seed')!) : Math.floor(Math.random() * 1e9);
+  // Escape asks before leaving, but only while a bout runs: the result screen has its own Escape (Leave)
+  let fighting = false;
+  leaveFightOnEscape(() => fighting);
   void (async () => {
     for (;;) {
       const start = createCombat(seed,
@@ -118,11 +122,13 @@ export async function showArena(
         },
         { name: enemy.name, attributes: enemy.attributes, level: enemy.level, equipment: loadoutFromLook(enemy.look) });
       presenter.reset(start);
+      fighting = true;
       const outcome = await runFight(start, {
         pickers: { player: playerPicker, enemy: aiPicker(profile, seed ^ 0x85ebca6b) },
         present: (events, after) => presenter.present(events, after),
         pause: (next: FighterSide) => (next === 'enemy' ? pause(ENEMY_PAUSE) : Promise.resolve()),
       });
+      fighting = false;
       menu.close();
       // let the death and victory poses land before the result covers them
       await pause(1.2);
