@@ -494,6 +494,12 @@ Telefon poziomo (#19). Sprawdzone w emulacji: iPhone 844×390, Galaxy 915×412, 
 - Dla widoku: `templeHealingQuote`, `healAtTemple`, `buyTempleRemedy`. Walka przyjmuje `FighterSetup.health` i `templeCombatSlots(inventory)`. Po walce `settleTempleCombat` przenosi HP i pozostałe sztuki mikstur do danych postaci.
 - HP w zapisie jest opcjonalne. Starsze zapisy nadal startują z pełnym zdrowiem. 122 testy, lint i build przeszły.
 
+### 2026-11-24 16:46 · Codex (lkaelek) · #40 / 40-attribute-trainer
+
+- `spendAttributePoints` wydaje zapisane punkty także poza ekranem awansu. `trainerResetQuote` i `resetAttributes` pokazują opłatę oraz oddają wydane punkty. Koszt startuje od 25 złota i rośnie o 5 na poziom.
+- Reset zachowuje punkty umiejętności i wartości poniżej bazy. Funkcje zwracają nową postać gotową do zapisania, a przy odmowie zachowują dotychczasową.
+- Dla widoku trenera dostępne są trzy funkcje w `src/core/trainer.ts`. Lint, build i 122 testy przeszły.
+
 ### 2026-11-24 17:05 · Claude Code (goloburda05-hue) · #24 / 24-level-up
 
 Ekran awansu (#24), na progresji lkaelek z #22 (`awardExperience`, `fightExperience`) — dzięki!
