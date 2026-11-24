@@ -3,7 +3,7 @@ import { firstEnabled, moveSelection } from './menuNav';
 import type { MenuEntry } from './menuNav';
 
 export interface PaperMenuEntry extends MenuEntry {
-  /** small line under a disabled entry saying what it waits for */
+  /** small line under the label: what a disabled entry waits for, or a detail (the saved gladiator's name) */
   readonly note?: string;
 }
 
@@ -20,7 +20,8 @@ export class PaperMenu extends Container {
   selected: number;
   private readonly rows: Graphics[] = [];
 
-  constructor(private readonly entries: readonly PaperMenuEntry[], private readonly onChoose: (index: number) => void, width = 480) {
+  /** `initial` picks the entry selected first (when enabled); otherwise the first enabled one */
+  constructor(private readonly entries: readonly PaperMenuEntry[], private readonly onChoose: (index: number) => void, width = 480, initial?: number) {
     super();
     this.menuWidth = width;
     this.menuHeight = PAD * 2 + entries.length * ROW_H;
@@ -39,10 +40,10 @@ export class PaperMenu extends Container {
         style: { fontFamily: 'Georgia', fontSize: 36, fontWeight: 'bold', fill: entry.enabled ? '#fff0cb' : '#8f7b70' },
       });
       label.anchor.set(0.5);
-      label.position.set(width / 2, y + (entry.note && !entry.enabled ? ROW_H / 2 - 12 : ROW_H / 2));
+      label.position.set(width / 2, y + (entry.note ? ROW_H / 2 - 12 : ROW_H / 2));
       this.addChild(row, label);
-      if (entry.note && !entry.enabled) {
-        const note = new Text({ text: entry.note, style: { fontFamily: 'Georgia', fontSize: 19, fontStyle: 'italic', fill: '#a8907e' } });
+      if (entry.note) {
+        const note = new Text({ text: entry.note, style: { fontFamily: 'Georgia', fontSize: 19, fontStyle: 'italic', fill: entry.enabled ? '#f4d3a7' : '#a8907e' } });
         note.anchor.set(0.5);
         note.position.set(width / 2, y + ROW_H / 2 + 22);
         this.addChild(note);
@@ -56,7 +57,7 @@ export class PaperMenu extends Container {
       }
     });
 
-    this.selected = firstEnabled(entries);
+    this.selected = initial !== undefined && entries[initial]?.enabled ? initial : firstEnabled(entries);
     this.redraw();
   }
 

@@ -1,22 +1,26 @@
 import { Container, Graphics, Sprite, Text } from 'pixi.js';
+import type { SavedCharacter } from '../core/save';
 import { PaperMenu } from '../ui/paperMenu';
 import type { PaperMenuEntry } from '../ui/paperMenu';
 import { FEET_Y, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from './common';
 import type { SceneContext } from './common';
+import { loadSavedGladiator } from './savedGladiator';
 
 interface TitleEntry extends PaperMenuEntry {
   /** `?view=` the entry opens */
   readonly view?: string;
 }
 
-const ENTRIES: TitleEntry[] = [
-  // unlocks with the character creator (#23)
-  { label: 'New game', enabled: false, note: 'coming soon' },
-  // unlocks with saved games (#10)
-  { label: 'Continue', enabled: false, note: 'no saved game yet' },
-  { label: 'Quick bout', enabled: true, view: 'prefight' },
-  { label: 'Wardrobe', enabled: true, view: 'wardrobe' },
-];
+function entries(saved: SavedCharacter | null): TitleEntry[] {
+  return [
+    { label: 'New game', enabled: true, view: 'creator' },
+    saved
+      ? { label: 'Continue', enabled: true, view: 'prefight', note: `${saved.name} · level ${saved.level}` }
+      : { label: 'Continue', enabled: false, note: 'no saved game yet' },
+    { label: 'Quick bout', enabled: true, view: 'prefight&gladiator=random' },
+    { label: 'Wardrobe', enabled: true, view: 'wardrobe' },
+  ];
+}
 
 /**
  * `?view=title`: game title over the dimmed arena, two idle gladiators facing each other and the main menu.
@@ -29,6 +33,8 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
   bg.tint = 0x8a7470;
   root.addChild(bg);
 
+  // the saved gladiator (if any) stands on the left
+  const saved = await loadSavedGladiator();
   const gsh = groundShadowTexture();
   for (const [i, x] of [[0, 330], [1, 1590]] as const) {
     const g = new Sprite(gsh);
@@ -36,7 +42,7 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
     g.width = 5.2 * UNIT; g.height = 1.3 * UNIT;
     g.position.set(x + 0.35 * UNIT * (i ? -1 : 1), FEET_Y);
     root.addChild(g);
-    await add(randomLook(), x, FEET_Y - PELVIS_ABOVE_FEET * UNIT, UNIT, i ? -1 : 1, root, i * 0.7);
+    await add(i === 0 && saved ? saved.look : randomLook(), x, FEET_Y - PELVIS_ABOVE_FEET * UNIT, UNIT, i ? -1 : 1, root, i * 0.7);
   }
 
   // a dark vignette band behind the title and the menu keeps the text readable over the busy stands
@@ -61,10 +67,11 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
   tagline.position.set(W / 2, 290);
   root.addChild(title, tagline);
 
-  const menu = new PaperMenu(ENTRIES, (i) => {
-    const view = ENTRIES[i].view;
+  const items = entries(saved);
+  const menu = new PaperMenu(items, (i) => {
+    const view = items[i].view;
     if (view) location.search = `?view=${view}`;
-  });
+  }, undefined, saved ? 1 : 0);
   menu.position.set((W - menu.menuWidth) / 2, 380);
   root.addChild(menu);
 
