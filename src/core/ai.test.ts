@@ -36,7 +36,7 @@ describe('enemy AI', () => {
     for (let seed = 1; seed <= 1000; seed++) {
       const [p, e] = pairs[seed % pairs.length];
       const { state, actions } = fight(seed, { player: p, enemy: e },
-        { attributes: { might: 3 + (seed % 7), guard: 3 + (seed % 5) }, equipment: { chest: seed % 4 } },
+        { attributes: { might: 3 + (seed % 7), guard: 3 + (seed % 5) }, equipment: { armor: seed % 4 } },
         { attributes: { agility: 3 + (seed % 6), stamina: 3 + (seed % 4) }, equipment: { helmet: seed % 3 } });
       expect(state.winner).not.toBeNull();
       longest = Math.max(longest, actions);
