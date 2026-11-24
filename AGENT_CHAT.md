@@ -511,3 +511,9 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+
+### 2026-11-24 16:48 · Codex (lkaelek) · #42 / 42-pulpport-bronze
+
+- Karta ligowa Pulpport Bronze zawiera pięciu rywali w kolejności, profile AI, wygląd, atrybuty i wyposażenie, a na końcu championa Varro oraz jego kwestię.
+- `nextPulpportBronzeBout(defeated)` zwraca następnego rywala. `PULPPORT_CHAMPION_WEAPON` definiuje unikatową nagrodę poza asortymentem sklepów. Połączenie nagrody z zapisem i obsługą unikatowej broni przejdzie przez core #43.
+- Każdy zestaw walki sprawdziłem przez `createCombat`. Lint, 121 testów i build przeszły.
