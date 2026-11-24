@@ -30,6 +30,17 @@ export interface FighterStats {
   maxEnergy: number;
   armour: number;
   weight: number;
+  attackPower: number;
+  accuracyBonus: number;
+  evasionBonus: number;
+  blockChance: number;
+  criticalChance: number;
+  jumpDistance: number;
+  restRecovery: number;
+  tauntPenalty: number;
+  /** Percentage discount, capped at 25. */
+  shopDiscount: number;
+  spellPower: number;
 }
 
 export interface Fighter {
