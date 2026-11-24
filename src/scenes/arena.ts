@@ -1,96 +1,125 @@
 import { Container, Sprite } from 'pixi.js';
-import { ARENA_LENGTH, createCombat, getActionOptions, performAction } from '../core/combat';
-import type { CombatAction } from '../core/types';
+import type { AiProfile } from '../core/ai';
+import { createCombat } from '../core/combat';
+import type { Attributes, CombatAction, FighterSide } from '../core/types';
 import type { Look } from '../rig/PaperRig';
+import { summarizeFight } from '../ui/fightSummary';
+import { FxLayer } from '../ui/fx';
 import { CombatHud } from '../ui/hud';
 import { RadialMenu } from '../ui/radialMenu';
+import { CombatPresenter } from './combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from './common';
-import type { SceneContext } from './common';
+import type { SceneContext, SceneUpdate } from './common';
+import { openFightResult } from './fightResult';
+import { loadoutFromLook } from './preFight';
+import { aiPicker, runFight } from './turnLoop';
+import type { ActionPicker } from './turnLoop';
 
 export interface ArenaFighter {
   readonly look: Look;
   readonly name: string;
+  readonly attributes?: Partial<Attributes>;
 }
 
-const CONTACT = 5;
+/** melee contact without the bodies overlapping (same staging as the animation lab and ?view=aifight) */
+const LAYOUT = { left: 590, px: 25, contact: 175 };
+/** seconds before the opponent answers */
+const ENEMY_PAUSE = 0.5;
 
-const ACTION_CLIPS: Record<CombatAction, string> = {
-  step_forward: 'walk_fwd',
-  step_back: 'walk_back',
-  jump: 'jump',
-  charge: 'charge',
-  quick: 'attack_quick',
-  normal: 'attack_normal',
-  power: 'attack_power',
-  block: 'block',
-  rest: 'rest',
-  taunt: 'taunt',
-};
+const PROFILES: readonly AiProfile[] = ['aggressor', 'defender'];
+const pause = (sec: number) => new Promise<void>((r) => setTimeout(r, sec * 1000));
 
-/** Pre-fight can pass the two gladiators it displayed. Direct visits use random looks. */
-export async function showArena({ world, bgTex, params, ui, add, rigs }: SceneContext, fighters?: readonly [ArenaFighter, ArenaFighter]) {
+/**
+ * The arena fight (#12): the player picks from the radial menu, the opponent's AI (#6) answers after a short pause,
+ * CombatPresenter animates every action and the HUD follows. The menu opens only when the player's action can be chosen,
+ * never during an animation. At 0 HP the result screen offers a rematch or the way back to the title.
+ * Pre-fight passes the two gladiators it showed; a direct visit (`?view=arena[&tier=N][&ai=aggressor|defender]`) uses random ones.
+ */
+export async function showArena(context: SceneContext, fighters?: readonly [ArenaFighter, ArenaFighter]): Promise<SceneUpdate> {
+  const { world, bgTex, params, ui, add, rigs } = context;
   const arena = new Container();
   world.addChild(arena);
   arena.addChild(new Sprite(bgTex));
-  const gsh = groundShadowTexture();
+
   const tp = params.get('tier');
-  const looks = fighters?.map((f) => f.look) ?? [randomLook(tp ? +tp : undefined), randomLook(tp ? +tp : undefined)];
-  const firstRig = rigs.length;
-  const shadows: Sprite[] = [];
-  for (const [i, x] of [[0, 640], [1, 1290]] as const) {
+  const tier = tp ? +tp : undefined;
+  const [player, enemy]: readonly [ArenaFighter, ArenaFighter] = fighters
+    ?? [{ name: 'Player', look: randomLook(tier) }, { name: 'Opponent', look: randomLook(tier) }];
+  const asked = params.get('ai');
+  const profile: AiProfile = asked === 'aggressor' || asked === 'defender' ? asked : PROFILES[Math.floor(Math.random() * PROFILES.length)];
+
+  const pelvisY = FEET_Y - PELVIS_ABOVE_FEET * UNIT;
+  const gsh = groundShadowTexture();
+  const shadows = [0, 1].map(() => {
     const g = new Sprite(gsh);
     g.anchor.set(0.5); g.blendMode = 'multiply'; g.tint = 0x8a5a48;
     g.width = 5.2 * UNIT; g.height = 1.3 * UNIT;
-    g.position.set(x + 0.35 * UNIT * (i ? -1 : 1), FEET_Y);
     arena.addChild(g);
-    shadows.push(g);
-    await add(looks[i], x, FEET_Y - PELVIS_ABOVE_FEET * UNIT, UNIT, i ? -1 : 1, arena, i * 0.7);
-  }
+    return g;
+  });
+  const P = await add(player.look, LAYOUT.left, pelvisY, UNIT, 1, arena, 0);
+  const E = await add(enemy.look, W - LAYOUT.left, pelvisY, UNIT, -1, arena, 0.7);
+  const fx = new FxLayer();
+  arena.addChild(fx);
 
-  const player = rigs[firstRig].anim!;
-  const enemy = rigs[firstRig + 1].anim!;
-  const preview = () => {
-    const gap = (enemy.home.x - player.home.x) / UNIT - CONTACT;
-    return createCombat(0, {
-      name: fighters?.[0].name, equipment: looks[0],
-      position: Math.max(0, Math.min(ARENA_LENGTH, ARENA_LENGTH - gap)),
-    }, { name: fighters?.[1].name, equipment: looks[1], position: ARENA_LENGTH });
-  };
-  const hud = new CombatHud(preview(), W, H);
+  const empty = { name: '', health: 1, energy: 1, stats: { maxHealth: 1, maxEnergy: 1 } };
+  const hud = new CombatHud({ fighters: { player: empty, enemy: empty } }, W, H);
   arena.addChild(hud);
-
-  // Preview movement with the same rules as the menu. The turn loop will present the full action result.
-  const menu = new RadialMenu((action) => {
-    const result = performAction(preview(), action);
-    if (!result.ok) {
-      openMenu();
-      return;
-    }
-    const movement = result.events.find((event) => event.type === 'move' && event.fighter === 'player');
-    const motion = movement?.type === 'move' ? { commit: true, distance: movement.to - movement.from } : {};
-    player.play(ACTION_CLIPS[action], { ...motion, onEnd: openMenu });
+  const presenter = new CombatPresenter({
+    fighters: { player: rigs.find((r) => r.rig === P)!.anim!, enemy: rigs.find((r) => r.rig === E)!.anim! },
+    fx, unit: UNIT, layout: LAYOUT,
+    onState: (s) => hud.setState(s),
   });
 
-  function openMenu() {
-    menu.open(getActionOptions(preview()));
-  }
-
-  const updateMenuPosition = () => {
-    const { x, y } = player.rig.view.getGlobalPosition();
-    menu.setAnchor(x, y, world.scale.x);
-  };
+  // the player's turn: open the menu with the options the core allows and wait for a click
+  let choose: ((action: CombatAction) => void) | null = null;
+  const menu = new RadialMenu((action) => {
+    const resolve = choose;
+    choose = null;
+    resolve?.(action);
+  });
   arena.on('destroyed', () => menu.destroy());
-  updateMenuPosition();
-  openMenu();
+  const playerPicker: ActionPicker = (_state, options) => new Promise((resolve) => {
+    choose = resolve;
+    menu.open(options);
+  });
 
-  ui.innerHTML = '<a href="?view=wardrobe">garderoba</a> · <a href="?view=lineup">10 zestawów</a> · <a href="?view=faces">twarze</a> · <a href="?view=arena">losuj</a>';
-  return (dt: number) => {
-    const p = player.rig.view.position;
-    const lift = Math.max(0, (player.home.y - p.y) / UNIT);
-    shadows[0].position.x = p.x + 0.35 * UNIT;
-    shadows[0].alpha = Math.max(0.25, 1 - lift * 0.18);
-    shadows[0].width = 5.2 * UNIT * Math.max(0.6, 1 - lift * 0.08);
-    updateMenuPosition();
+  ui.innerHTML = '<a href="?view=title">title</a> · <a href="?view=prefight">new opponent</a> · '
+    + '<a href="?view=arena&ai=aggressor">vs aggressor</a> · <a href="?view=arena&ai=defender">vs defender</a>';
+
+  let seed = params.has('seed') ? Math.floor(+params.get('seed')!) : Math.floor(Math.random() * 1e9);
+  void (async () => {
+    for (;;) {
+      const start = createCombat(seed,
+        { name: player.name, attributes: player.attributes, equipment: loadoutFromLook(player.look) },
+        { name: enemy.name, attributes: enemy.attributes, equipment: loadoutFromLook(enemy.look) });
+      presenter.reset(start);
+      const outcome = await runFight(start, {
+        pickers: { player: playerPicker, enemy: aiPicker(profile, seed ^ 0x85ebca6b) },
+        present: (events, after) => presenter.present(events, after),
+        pause: (next: FighterSide) => (next === 'enemy' ? pause(ENEMY_PAUSE) : Promise.resolve()),
+      });
+      menu.close();
+      // let the death and victory poses land before the result covers them
+      await pause(1.2);
+      const choice = await openFightResult(context, { player, enemy, summary: summarizeFight(outcome.events) });
+      if (choice === 'leave') {
+        location.search = '?view=title';
+        return;
+      }
+      seed++;
+    }
+  })();
+
+  return (dt) => {
     hud.update(dt);
+    const { x, y } = P.view.getGlobalPosition();
+    menu.setAnchor(x, y, world.scale.x);
+    for (const [rig, g] of [[P, shadows[0]], [E, shadows[1]]] as const) {
+      const lift = Math.max(0, (pelvisY - rig.view.y) / UNIT);
+      g.position.set(rig.view.x + 0.35 * UNIT * rig.facing, FEET_Y);
+      g.alpha = Math.max(0.25, 1 - lift * 0.18);
+      g.width = 5.2 * UNIT * Math.max(0.6, 1 - lift * 0.08);
+    }
   };
 }

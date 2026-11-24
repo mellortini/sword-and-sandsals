@@ -1,4 +1,4 @@
-export type StatusKind = 'torn' | 'stunned' | 'burning' | 'soaked' | 'feared' | 'taped';
+export type StatusKind = 'torn' | 'stunned' | 'burning' | 'soaked' | 'feared' | 'taped' | 'slowed';
 
 export interface StatusTick {
   kind: StatusKind;
@@ -23,6 +23,7 @@ const RULES: Readonly<Record<StatusKind, { turns: number; maxStacks: number }>> 
   soaked: { turns: 2, maxStacks: 2 },
   feared: { turns: 2, maxStacks: 2 },
   taped: { turns: 3, maxStacks: 3 },
+  slowed: { turns: 2, maxStacks: 1 },
 };
 
 export function applyStatus(
@@ -50,7 +51,12 @@ export function statusModifiers(statuses: readonly StatusEffect[]): {
 } {
   const soaked = statuses.find((effect) => effect.kind === 'soaked')?.stacks ?? 0;
   const feared = statuses.find((effect) => effect.kind === 'feared')?.stacks ?? 0;
-  return { armourMultiplier: 1 - 0.2 * soaked, movementMultiplier: 1 - 0.2 * soaked, accuracyPenalty: 10 * feared };
+  const slowed = statuses.some((effect) => effect.kind === 'slowed');
+  return {
+    armourMultiplier: 1 - 0.2 * soaked,
+    movementMultiplier: (1 - 0.2 * soaked) * (slowed ? 0.75 : 1),
+    accuracyPenalty: 10 * feared,
+  };
 }
 
 /** Damage ticks precede healing; tape cannot revive a fallen fighter. */
@@ -60,7 +66,7 @@ export function tickStatuses(statuses: readonly StatusEffect[], health: number, 
   const soaked = statuses.some((effect) => effect.kind === 'soaked');
   const ticks: StatusTick[] = [];
   let skip = false;
-  for (const kind of ['torn', 'burning', 'taped', 'stunned', 'soaked', 'feared'] as const) {
+  for (const kind of ['torn', 'burning', 'taped', 'stunned', 'soaked', 'feared', 'slowed'] as const) {
     const effect = statuses.find((entry) => entry.kind === kind);
     if (!effect || health === 0) continue;
     let delta = 0;
