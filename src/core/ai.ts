@@ -1,6 +1,7 @@
-import { getActionOptions, getDistance } from './combat';
+import { getActionOptions, getDistance, MELEE_RANGE, MIN_MELEE_ENERGY } from './combat';
 import { nextRandom } from './rng';
-import type { ActionOption, CombatAction, CombatState, Fighter } from './types';
+import { attackDamage, isAttack } from './stats';
+import type { ActionOption, CombatAction, CombatState } from './types';
 
 /** Fighting style: the aggressor charges and swings hard, the defender guards, rests and picks safe hits. */
 export type AiProfile = 'aggressor' | 'defender';
@@ -22,13 +23,6 @@ const PROFILE_WEIGHTS: Record<AiProfile, Record<CombatAction, number>> = {
     step_forward: 0.7, jump: 0.4, step_back: 0.5, block: 1.2, rest: 1, taunt: 0.15,
   },
 };
-
-/** damage multipliers of the attacks, as in the combat core (normal = 1) */
-const ATTACK_POWER: Partial<Record<CombatAction, number>> = { quick: 0.7, normal: 1, power: 1.6, charge: 1.2 };
-/** melee reach of the combat core (MELEE_RANGE in combat.ts) */
-const MELEE_RANGE = 2;
-/** cheapest melee attack; below this the fighter cannot hurt anyone */
-const MIN_ATTACK_ENERGY = 3;
 
 /**
  * Picks an action for the side whose turn it is (`state.active`).
@@ -62,10 +56,10 @@ function situationalScore(state: CombatState, option: ActionOption): number {
   const inMelee = getDistance(state) <= MELEE_RANGE;
   const health = me.health / me.stats.maxHealth;
   const energy = me.energy / me.stats.maxEnergy;
-  const foeCanStrike = inMelee && foe.energy >= MIN_ATTACK_ENERGY;
+  const foeCanStrike = inMelee && foe.energy >= MIN_MELEE_ENERGY;
 
-  if (option.hitChance !== undefined) {
-    const damage = expectedDamage(me, foe, option.action);
+  if (option.hitChance !== undefined && isAttack(option.action)) {
+    const damage = attackDamage(option.action, me.stats, foe.stats);
     // hit chance times damage, measured against the foe's remaining health; a likely kill is worth a lot more
     const value = (option.hitChance / 100) * (damage / Math.max(1, foe.health)) * 10 + (option.hitChance / 100) * 2;
     return damage >= foe.health ? value * 3 : value;
@@ -82,7 +76,7 @@ function situationalScore(state: CombatState, option: ActionOption): number {
       return foeCanStrike ? (health < 0.5 ? 1.6 : 0.8) : 0.15;
     case 'rest': {
       // out of breath: nothing else helps
-      if (me.energy < MIN_ATTACK_ENERGY) return 20;
+      if (me.energy < MIN_MELEE_ENERGY) return 20;
       const tired = (1 - energy) ** 2 * 3;
       // resting at a distance is safe, resting in the foe's reach is a gamble
       return foeCanStrike ? tired * 0.5 : tired * 1.5;
@@ -92,10 +86,4 @@ function situationalScore(state: CombatState, option: ActionOption): number {
     default:
       return 0.1;
   }
-}
-
-/** rough damage of an unblocked, non-critical hit (same formula shape as the combat core) */
-function expectedDamage(attacker: Readonly<Fighter>, defender: Readonly<Fighter>, action: CombatAction): number {
-  const raw = (4 + attacker.attributes.might) * (ATTACK_POWER[action] ?? 1);
-  return Math.max(1, Math.round(raw * 30 / (30 + defender.stats.armour)));
 }

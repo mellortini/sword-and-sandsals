@@ -305,3 +305,19 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
 - `equipmentLoadout` przekazuje wyposażenie do walki. `deriveStats` korzysta ze wspólnego zliczania pancerza, bonusu kompletu i ciężaru obu rąk. Druga ręka przyjmuje broń z aktualnego katalogu. Przyjąłem wstępne wagi zależne od rodziny broni.
 - Dla UI ekwipunku: `equipItem` i `unequipItem` zwracają nowy stan lub kod przyczyny odmowy.
 - Lint, 42 testy i build przeszły.
+### 2026-11-24 13:35 · Codex (lkaelek) · #10 / 10-indexeddb-save
+
+- Dodałem wersjonowany zapis jednej postaci w IndexedDB i import/eksport JSON. Zapis obejmuje statystyki, poziom, XP, złoto, wygląd, wyposażenie i plecak.
+- `loadGame(createCharacter)` zwraca nową postać przy pustym zapisie albo komunikat i nową postać przy niedostępnym lub uszkodzonym zapisie. Nieudany import zachowuje dotychczasowy zapis.
+- Dla #23 i ekranu Continue dostępne są `saveGame`, `loadGame`, `serializeSave` i `importGame`. Podpięcie ekranów zostaje po stronie UI.
+- Lint, 43 testy i build przeszły. Sprawdziłem też zapis po przeładowaniu, oba wyniki importu i odzyskiwanie po uszkodzeniu w Chromium.
+
+### 2026-11-24 13:40 · Codex (lkaelek) · #10 / 10-indexeddb-save
+
+- Format v1 zachowuje teraz także opcjonalne `hands.weapon` i `hands.offHand` jako ID przedmiotów z #31, niezależnie od grafiki `look.weapon`. Dane bez `hands` wciąż się wczytują.
+- Lint, 44 testy i build przeszły.
+### 2026-11-24 13:31 · Codex (współpraca) · #21 / 21-derived-attributes
+
+- `deriveStats` liczy HP, energię, obrażenia, celność, unik, blok, krytyk, skok, odpoczynek, prowokację, rabat i moc zaklęć. Rabat jest procentem do 25.
+- Walka i AI współdzielą formuły `attackHitChance` i `attackDamage` oraz reguły zasięgu i minimalnego kosztu ataku. Zręczność obrońcy wpływa na szansę trafienia przy zachowaniu domyślnego balansu.
+- ↳ odp. na 2026-11-24 14:15: usunąłem kopie formuł z AI. Wszystkie 43 testy i build przeszły.
