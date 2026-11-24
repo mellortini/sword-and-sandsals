@@ -2,6 +2,7 @@ import { Application, Assets, Container } from 'pixi.js';
 import { Kit, patchShadowBlend } from './rig/PaperRig';
 import { showAiFight } from './scenes/aiFight';
 import { showArena } from './scenes/arena';
+import { showCreator } from './scenes/creator';
 import { H, W, createRigCollection, startRigTicker } from './scenes/common';
 import type { Scene, SceneContext } from './scenes/common';
 import { showAnimLab } from './scenes/dev/animLab';
@@ -19,6 +20,7 @@ const scenes = new Map<string, Scene>([
   ['result', showFightResult],
   ['aifight', showAiFight],
   ['title', showTitle],
+  ['creator', showCreator],
   ['wardrobe', showWardrobe],
   ['lineup', showLineup],
   ['faces', showFaces],
