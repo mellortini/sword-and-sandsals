@@ -1,3 +1,4 @@
+import { PULPPORT_CHAMPION_WEAPON } from '../data/leagues';
 import { WEAPONS } from '../data/weapons';
 import type { Weapon } from '../data/weapons';
 import type { StatusKind } from './status';
@@ -23,8 +24,12 @@ const DAGGERS: CombatWeapon = { id: 'daggers', family: 'daggers', damage: 4, ran
 export const DEFAULT_WEAPON_REACH = 2;
 const STANDARD: WeaponMove = { strikes: 1, damageMultiplier: 1, armourMultiplier: 1, knockback: 0 };
 
+export function findWeapon(id?: string): Weapon | undefined {
+  return id === PULPPORT_CHAMPION_WEAPON.id ? PULPPORT_CHAMPION_WEAPON : WEAPONS.find((entry) => entry.id === id);
+}
+
 export function combatWeapon(id?: string): CombatWeapon | undefined {
-  return id === DAGGERS.id ? DAGGERS : WEAPONS.find((entry) => entry.id === id);
+  return id === DAGGERS.id ? DAGGERS : findWeapon(id);
 }
 
 export function weaponReach(weapon?: CombatWeapon): number {

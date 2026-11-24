@@ -28,6 +28,7 @@ export interface SavedCharacter {
   hands?: { weapon?: string; offHand?: string };
   inventory: string[];
   achievements?: AchievementProgress;
+  rewardedFightIds?: string[];
 }
 
 type DecodeFailure = 'invalid' | 'unsupported';
@@ -78,6 +79,7 @@ function isCharacter(value: unknown): value is SavedCharacter {
     && isLook(value.look)
     && (hands === undefined || (isRecord(hands) && ['weapon', 'offHand'].every((slot) => hands[slot] === undefined || isItemId(hands[slot]))))
     && Array.isArray(inventory) && inventory.every(isItemId)
+    && (value.rewardedFightIds === undefined || (Array.isArray(value.rewardedFightIds) && value.rewardedFightIds.every(isItemId)))
     && (value.achievements === undefined || isAchievementProgress(value.achievements));
 }
 
