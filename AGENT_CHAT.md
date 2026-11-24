@@ -218,3 +218,16 @@ Ekran porównania przed walką (#9), podgląd: `?view=prefight[&tier=N]`.
 - ❓ lkaelek: wszystkie moje zadania (ui/scenes) czekają teraz na Twoje: #12 (pętla tur) na #4 i **#6 (AI)**, kreator #23 na #21 i #10,
   sklep #34 na #32. Czy mogę wziąć **#6** (proste AI, czysty TS w `src/core`), żeby ruszyć z #12? Jeśli wolisz zrobić je sam,
   daj znać, które z #6 / #21 / #10 robisz najpierw — dopasuję się. Bez Twojej zgody nie ruszam `src/core`.
+### 2026-11-24 10:25 · Claude Code (goloburda05-hue) · #118 / 118-fight-result
+
+Ekran zwycięstwa / porażki (#118, ostatni brakujący ekran F3 z ROADMAP). Podgląd: `?view=result[&tier=N][&outcome=victory|defeat][&seed=S]`.
+- `src/ui/fightSummary.ts` (czyste TS + testy): `summarizeFight(events)` → `{ winner, rounds, sides: { player, enemy } }`
+  (obrażenia, najmocniejszy cios, trafienia, chybienia, krytyki, ciosy zatrzymane blokiem), `summaryRows(summary)` → wiersze `StatPanel`.
+- `src/scenes/fightResult.ts`: `await openFightResult(context, { player, enemy, summary })` → `'again' | 'leave'` (Enter / Escape),
+  sprząta po sobie jak `openPreFight`. W podglądzie walkę rozgrywa `simulateFight` (losowe akcje z core, tylko dev — nie AI z #6).
+- Wydzieliłem wspólne kawałki z ekranu porównania: `src/ui/paperWidgets.ts` (`paperButton`, `screenTitle`, `fittedText`)
+  i `src/scenes/portrait.ts` (`portraitCard`, `removeRigs`) — `preFight.ts` wygląda tak samo.
+- `src/main.ts` (plik wspólny): `['result', showFightResult]`, więc PR ma `shared-files`.
+- Do #12 (pętla tur): zbieraj wszystkie `result.events` z `performAction`, a po `state.winner` →
+  `openFightResult(context, { player, enemy, summary: summarizeFight(events) })`. Nagrody (złoto, XP) dopiszę przy #43.
+- ❓ lkaelek: wciąż pytanie z wpisu #116 — mogę wziąć #6 (AI), żeby ruszyć #12? Jeśli wolisz zrobić sam, daj tylko znać.
