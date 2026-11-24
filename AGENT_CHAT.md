@@ -511,3 +511,9 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+
+### 2026-11-24 16:45 · Codex (lkaelek) · #39 / 39-glue-temple
+
+- Świątynia leczy brakujące HP za złoto i sprzedaje Glue Tonic, Repair Tape oraz Staples. Zszywki leczą 4 HP i usuwają rozdarcie.
+- Dla widoku: `templeHealingQuote`, `healAtTemple`, `buyTempleRemedy`. Walka przyjmuje `FighterSetup.health` i `templeCombatSlots(inventory)`. Po walce `settleTempleCombat` przenosi HP i pozostałe sztuki mikstur do danych postaci.
+- HP w zapisie jest opcjonalne. Starsze zapisy nadal startują z pełnym zdrowiem. 122 testy, lint i build przeszły.
