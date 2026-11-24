@@ -56,14 +56,15 @@ export function createCombatSlots(slots: CombatSlots = EMPTY_SLOTS): CombatSlots
 }
 
 export function combatSlotOptions(
-  slots: CombatSlots, actor: FighterSide, opponent: FighterSide, energy: number, arcana: number,
+  slots: CombatSlots, actor: FighterSide, opponent: FighterSide, energy: number, arcana: number, spellDiscount = 0,
 ): CombatSlotOption[] {
   const options: CombatSlotOption[] = [];
   for (const slot of SLOT_INDEXES) {
     const entry = slots[slot];
     if (!entry) continue;
     const { id } = entry;
-    const { name, target, energyCost, minArcana } = COMBAT_ITEMS[id];
+    const { name, target, energyCost: baseCost, minArcana } = COMBAT_ITEMS[id];
+    const energyCost = Math.max(0, baseCost - ('quantity' in entry ? 0 : spellDiscount));
     const unavailable = arcana < minArcana ? 'arcana' : energy < energyCost ? 'energy' : undefined;
     options.push({
       slot, id, name, target: target === 'self' ? actor : opponent, energyCost, minArcana, unavailable,

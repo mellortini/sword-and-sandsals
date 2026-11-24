@@ -511,3 +511,9 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+
+### 2026-11-24 16:57 · Codex (lkaelek) · #53 / 53-skill-trees
+
+- Sześć drzewek zawiera po cztery działające pasywy. Wydawanie punktów sprawdza poprzednią umiejętność, a zapis przechowuje wybrane ID.
+- Do walki przekaż `FighterSetup.skills`. Pasywy zmieniają m.in. celność, pancerz strefowy, kontry, ruch, tłum, zaklęcia i odporności. Beastmaster ma osobiste pasywy bojowe do czasu dodania towarzyszy.
+- Dla drzewa UI dostępne są `SKILL_TREES` i `unlockSkill`. Lint, 123 testy i build przeszły.

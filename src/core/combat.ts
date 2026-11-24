@@ -1,3 +1,4 @@
+import { skillBonuses } from './skills';
 import { createCrowdStanding, crowdDamageMultiplier, scoreCrowdAction } from './crowd';
 import { armourByZone, HIT_ZONES, ZONE_ACCURACY_PENALTY } from './hitZones';
 import type { AttackZoneOption, HitZone, TargetedAttack } from './hitZones';
@@ -11,7 +12,7 @@ import type { StatusKind } from './status';
 import { combatWeapon, weaponMove, weaponReach } from './weapons';
 import type {
   ActionOption, ActionResult, AttackKind, AttackStrike, CombatAction, CombatEvent, CombatState,
-  Fighter, FighterSetup, FighterSide, MoveKind,
+  Attributes, Fighter, FighterSetup, FighterSide, FighterStats, MoveKind,
 } from './types';
 
 export const ARENA_LENGTH = 20;
@@ -61,16 +62,30 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
   if (!Number.isFinite(position) || position < 0 || position > ARENA_LENGTH) {
     throw new RangeError('Combat positions must be within the arena.');
   }
+  const bonuses = skillBonuses(setup.skills);
   const attributes = resolveAttributes(setup.attributes);
+  for (const key of Object.keys(bonuses.attributes) as (keyof Attributes)[]) {
+    attributes[key] = Math.min(Number.MAX_SAFE_INTEGER, attributes[key] + (bonuses.attributes[key] ?? 0));
+  }
   const weapon = combatWeapon(setup.weapon) ?? combatWeapon(setup.equipment?.weapon);
   const stats = deriveStats(attributes, setup.equipment, weapon?.damage);
+  for (const key of Object.keys(bonuses.stats) as (keyof FighterStats)[]) stats[key] += bonuses.stats[key] ?? 0;
+  stats.blockChance = Math.min(90, stats.blockChance);
+  stats.criticalChance = Math.min(50, stats.criticalChance);
+  const crowd = createCrowdStanding(crowdSeed);
+  const zoneArmour = armourByZone(setup.equipment);
+  const zoneBonus = bonuses.stats.armour ?? 0;
+  const statusResistances = { ...setup.statusResistances };
+  for (const key of Object.keys(bonuses.resistance) as StatusKind[]) {
+    statusResistances[key] = Math.min(100, (statusResistances[key] ?? 0) + (bonuses.resistance[key] ?? 0));
+  }
 
   return {
     name: setup.name ?? defaultName,
     level,
     attributes,
     stats,
-    armourByZone: armourByZone(setup.equipment),
+    armourByZone: { head: zoneArmour.head + zoneBonus, torso: zoneArmour.torso + zoneBonus, legs: zoneArmour.legs + zoneBonus },
     weapon,
     position: roundPosition(position),
     health: stats.maxHealth,
@@ -78,9 +93,10 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     guarding: false,
     counterReady: false,
     tauntPenalty: 0,
-    crowd: createCrowdStanding(crowdSeed),
+    crowd: { ...crowd, favour: crowd.favour + bonuses.rules.crowdStart },
     statuses: [],
-    statusResistances: { ...setup.statusResistances },
+    statusResistances,
+    skillRules: bonuses.rules,
     slots: createCombatSlots(setup.slots),
   };
 }
@@ -112,7 +128,8 @@ export function getActionOptions(state: CombatState): ActionOption[] {
 
   for (const action of ACTIONS) {
     const counter = action === 'quick' && fighter.counterReady;
-    const energyCost = counter ? 0 : ENERGY_COSTS[action];
+    const movement = action === 'step_forward' || action === 'step_back' || action === 'jump' || action === 'charge';
+    const energyCost = counter ? 0 : Math.max(0, ENERGY_COSTS[action] - (movement ? fighter.skillRules.moveDiscount : 0));
     if (energyCost > fighter.energy || !isInRange(action, active, fighter.position, distance, meleeRange, movementMultiplier)) continue;
 
     options.push(isAttack(action)
@@ -158,7 +175,7 @@ export function getCombatSlotOptions(state: CombatState): CombatSlotOption[] {
   if (state.winner !== null) return [];
   const { active } = state;
   const fighter = state.fighters[active];
-  return combatSlotOptions(fighter.slots, active, opposingSide(active), fighter.energy, fighter.attributes.arcana);
+  return combatSlotOptions(fighter.slots, active, opposingSide(active), fighter.energy, fighter.attributes.arcana, fighter.skillRules.spellDiscount);
 }
 
 function performSlotAction(state: CombatState, action: CombatSlotAction): ActionResult {
@@ -344,7 +361,8 @@ function resolveAttack(
   const chance = hitChance(kind, attacker, defender, zone);
   const offense = {
     ...attacker.stats,
-    attackPower: attacker.stats.attackPower * traits.damageMultiplier * crowdDamageMultiplier(attacker.crowd),
+    attackPower: attacker.stats.attackPower * traits.damageMultiplier * crowdDamageMultiplier(attacker.crowd)
+      * (kind === 'charge' ? 1 + attacker.skillRules.chargePower / 100 : 1),
   };
   const defense = {
     ...defender.stats,
@@ -359,7 +377,7 @@ function resolveAttack(
     // A defensive stance can block an incoming strike; a skilled block may earn a free counter. Crits need an unblocked hit.
     const blocked = hit && defender.guarding && roll() < defender.stats.blockChance;
     if (blocked && !defender.counterReady) {
-      const chanceToCounter = counterChance(defender.attributes.guard);
+      const chanceToCounter = Math.min(70, counterChance(defender.attributes.guard) + defender.skillRules.counterBonus);
       if (chanceToCounter > 0 && roll() < chanceToCounter) defender.counterReady = true;
     }
     const crit = hit && !blocked && roll() < attacker.stats.criticalChance;
