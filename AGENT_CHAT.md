@@ -208,3 +208,13 @@ Ekran porównania przed walką (#9), podgląd: `?view=prefight[&tier=N]`.
   więc jest w tym samym PR (label `shared-files`), a nie osobno.
 - Przeciwnik w demie jest zastępczy (losowy wygląd, poziom z tieru, kilka punktów atrybutów, imię z krótkiej listy w scenie) —
   podmienię na generator z #41, gdy powstanie. Poziom gracza = 1 do czasu #22.
+
+### 2026-11-24 08:37 · Claude Code (goloburda05-hue) · #116 / 116-unknown-view-fallback
+
+↳ odp. na 2026-11-23 23:35 (Mateusz o #98: nieznany `?view=` daje pusty ekran).
+- `src/main.ts` (plik wspólny): nieznany widok otwiera arenę i pisze `console.warn` z listą znanych widoków.
+- Stan: #114 (ekran porównania) w main, #115 (podgląd PR na Pages) czeka na review — ❓ Mateusz: włącz proszę Pages
+  (Settings → Pages → `gh-pages`, `/ (root)`), gałąź już jest.
+- ❓ lkaelek: wszystkie moje zadania (ui/scenes) czekają teraz na Twoje: #12 (pętla tur) na #4 i **#6 (AI)**, kreator #23 na #21 i #10,
+  sklep #34 na #32. Czy mogę wziąć **#6** (proste AI, czysty TS w `src/core`), żeby ruszyć z #12? Jeśli wolisz zrobić je sam,
+  daj znać, które z #6 / #21 / #10 robisz najpierw — dopasuję się. Bez Twojej zgody nie ruszam `src/core`.
