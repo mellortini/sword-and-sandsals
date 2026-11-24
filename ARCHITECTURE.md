@@ -27,12 +27,13 @@ Gra to statyczna strona (`npm run build` → `dist/`).
 | `tools/` | narzędzia | Mateusz | `fetch_blenderkit.py` |
 | `src/rig/` | PaperRig, Kit (składanie postaci) | Mateusz | |
 | `src/anim/` | klipy i Animator | Mateusz | |
-| `src/ui/fx.ts` | efekty walki (liczby obrażeń, BLOCK) | Mateusz | |
+| `src/ui/fx.ts` | efekty walki (liczby obrażeń, BLOCK, MISS) | Mateusz | |
+| `src/audio/` *(nowe)* | dźwięk: foley, muzyka, mikser | Mateusz | |
 | `src/core/` *(nowy)* | logika gry bez renderu: walka, tury, AI, statystyki, RNG z ziarnem, zapis | kolega (@lkaelek) | czysty TS, testy (Vitest) |
 | `src/data/` | dane gry: przedmioty, wrogowie, sklepy | kolega (@lkaelek) | `equipment.ts` — 50 przedmiotów, tier 1–10 |
-| `src/ui/` (poza `fx.ts`) *(nowe)* | HUD, menu radialne, panele, ekrany | kolega (@lkaelek) | |
-| `src/scenes/` | sceny gry: arena, garderoba | kolega (@lkaelek) | `arena.ts` (`/`), `wardrobe.ts` (`?view=wardrobe`) |
-| `src/scenes/common.ts` | wspólne narzędzia scen | wspólne | wymiary, `SceneContext`, tworzenie i renderowanie kukieł |
+| `src/ui/` (poza `fx.ts`) | HUD, menu radialne, tooltip, panele | goloburda05-hue (@goloburda05-hue) | `hud.ts`, `tooltip.ts`; #4 menu radialne kończy @lkaelek |
+| `src/scenes/` | sceny gry: arena, garderoba, później miasto, sklep, kreator | goloburda05-hue (@goloburda05-hue) | `arena.ts` (`/`), `wardrobe.ts` (`?view=wardrobe`), `combatPresenter.ts` + `combatPlan.ts` (zdarzenia core → animacje) |
+| `src/scenes/common.ts` | wspólne narzędzia scen | Mateusz + goloburda05-hue | wymiary, `SceneContext`, tworzenie i renderowanie kukieł |
 | `src/scenes/dev/` | narzędzia wizualne | Mateusz (@mellortini) | `lineup.ts`, `faces.ts`, `animLab.ts`, `strip.ts` (`?view=lineup`, `faces`, `anim`, `strip`) |
 | `docs/` | projekt gry | wspólne | każdy dopisuje do swoich dokumentów; `ROADMAP.md` = plik wspólny |
 
@@ -72,3 +73,4 @@ Gra to statyczna strona (`npm run build` → `dist/`).
 | 2026-11-23 | Rozmowa agentów w `AGENT_CHAT.md` (dopisywanie na końcu, `merge=union`). |
 | 2026-11-23 | `SETUP.md` = lista instalacji i sprawdzeń dla nowego komputera / agenta (linkowana z README i AGENTS.md). |
 | 2026-11-23 | Kolega = @lkaelek (write); CODEOWNERS: core/data/ui/scenes → @lkaelek, reszta → @mellortini. |
+| 2026-11-24 | Trzecia osoba = @goloburda05-hue (write). Podział na warstwy: logika i dane (`core`, `data`, `area:core\|data`) → @lkaelek; interfejs i ekrany (`ui`, `scenes`, `area:ui\|scenes`) → @goloburda05-hue; grafika, animacje, efekty, audio → @mellortini; `area:infra` → wszyscy. Zaczęte zadania zostają u osoby, która je wzięła. |

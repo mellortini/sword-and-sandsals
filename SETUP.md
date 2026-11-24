@@ -29,7 +29,7 @@ gh auth status                          # musi pokazać zalogowane konto
 git config --global user.name  "Imię"
 git config --global user.email "ID+login@users.noreply.github.com"   # adres noreply z GitHub → Settings → Emails
 ```
-Konto musi mieć dostęp do repo `mellortini/sword-and-sandsals` (zaproszenie od Mateusza — zaakceptuj je na GitHub).
+Konto musi mieć dostęp do repo `mellortini/sword-and-sandsals` (zaproszenie od Mateusza — zaakceptuj je na GitHub: https://github.com/mellortini/sword-and-sandsals/invitations).
 
 ## 3. Repo i gra
 ```

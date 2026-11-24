@@ -1,23 +1,27 @@
 # Właściciele modułów (mapa w ARCHITECTURE.md). Właściciel dostaje prośbę o review przy zmianach w swoich folderach.
 
-# --- pliki wspólne: oboje
-*                         @mellortini @lkaelek
+# --- pliki wspólne: wszyscy
+*                         @mellortini @lkaelek @goloburda05-hue
 
-# --- Mateusz: grafika, kukła, animacje, efekty, narzędzia dev
+# --- Mateusz: grafika, kukła, animacje, efekty, audio, narzędzia dev
 /blender/                 @mellortini
 /art_src/                 @mellortini
 /assets/                  @mellortini
 /tools/                   @mellortini
 /src/rig/                 @mellortini
 /src/anim/                @mellortini
+/src/audio/               @mellortini
 
-# --- kolega (lkaelek): logika, dane, UI, sceny gry
+# --- lkaelek: logika gry i dane
 /src/core/                @lkaelek
 /src/data/                @lkaelek
-/src/ui/                  @lkaelek
-/src/scenes/              @lkaelek
 
-# --- wyjątki w folderach kolegi (późniejsza reguła wygrywa)
+# --- goloburda05-hue: interfejs i ekrany gry
+/src/ui/                  @goloburda05-hue
+/src/scenes/              @goloburda05-hue
+
+# --- wyjątki (późniejsza reguła wygrywa)
 /src/ui/fx.ts              @mellortini
 /src/scenes/dev/           @mellortini
-/src/scenes/common.ts      @mellortini @lkaelek
+/src/scenes/common.ts      @mellortini @goloburda05-hue
+/src/scenes/combatPlan.ts  @goloburda05-hue @lkaelek

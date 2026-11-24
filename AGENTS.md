@@ -1,6 +1,6 @@
 # AGENTS.md — zasady dla agentów AI (Claude Code, Codex) i ludzi
 
-Dwie osoby (Mateusz + kolega), każda ze swoim agentem, rozwijają grę równolegle. Te zasady są po to,
+Trzy osoby (Mateusz, lkaelek, goloburda05-hue), każda ze swoim agentem, rozwijają grę równolegle. Te zasady są po to,
 żeby nie wchodzić sobie w drogę. Jeden plik prawdy: `CLAUDE.md` tylko importuje ten plik.
 
 **Pierwsza sesja na nowym komputerze?** Najpierw `SETUP.md` — co zainstalować i jak sprawdzić, że wszystko działa.
@@ -24,7 +24,10 @@ gh pr create --draft --title "<krótki tytuł>" --body "Closes #<nr>"
 ```
 
 Który wybrać: **najpierw najniższy milestone** (F3 → F4 → F5 …, „Infrastruktura” w każdej chwili),
-**w swoim obszarze** (`area:core|data|ui|scenes` = kolega, `area:art|anim|fx|audio` = Mateusz, `area:infra` = oboje).
+**w swoim obszarze**: `area:core|data` = lkaelek (logika, dane), `area:ui|scenes` = goloburda05-hue (interfejs, ekrany),
+`area:art|anim|fx|audio` = Mateusz (grafika, animacje, efekty, dźwięk), `area:infra` = wszyscy.
+Zadanie z dwoma obszarami (np. `area:core` + `area:ui`) bierze właściciel pierwszej części, drugą robi właściciel drugiej
+(osobne Issue albo wpis w `AGENT_CHAT.md`).
 Zadania z labelem `blocked` czekają na inne (sekcja „Zależności” w opisie) — nie bierz ich.
 
 ## Komendy projektu
