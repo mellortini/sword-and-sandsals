@@ -31,6 +31,6 @@ export async function showArena({ world, bgTex, params, ui, add }: SceneContext,
     fighters: { player: { ...full, name: fighters?.[0].name ?? 'Player' }, enemy: { ...full, name: fighters?.[1].name ?? 'Opponent' } },
   }, W, H);
   arena.addChild(hud);
-  ui.innerHTML = '<a href="?view=wardrobe">garderoba</a> · <a href="?view=lineup">10 zestawów</a> · <a href="?view=faces">twarze</a> · <a href="?">losuj</a>';
+  ui.innerHTML = '<a href="?view=wardrobe">garderoba</a> · <a href="?view=lineup">10 zestawów</a> · <a href="?view=faces">twarze</a> · <a href="?view=arena">losuj</a>';
   return (dt: number) => hud.update(dt);
 }

@@ -133,7 +133,7 @@ export async function showFightResult(context: SceneContext): Promise<SceneUpdat
   const player = { name: 'Player', look: randomLook(tier) };
   const enemy = { name: 'Varro the Creased', look: randomLook(tier) };
   const update = await showArena(context, [player, enemy]);
-  context.ui.innerHTML = '<a href="?">arena</a> · <a href="?view=prefight">przed walką</a> · '
+  context.ui.innerHTML = '<a href="?view=arena">arena</a> · <a href="?view=prefight">przed walką</a> · '
     + '<a href="?view=result&outcome=victory">wygrana</a> · <a href="?view=result&outcome=defeat">przegrana</a>';
 
   const fight = (seed: number) => simulateFight(seed, createCombat(seed,
@@ -148,7 +148,7 @@ export async function showFightResult(context: SceneContext): Promise<SceneUpdat
       for (let i = 0; want && i < 200 && run.state.winner !== (want === 'defeat' ? 'enemy' : 'player'); i++) run = fight(++seed);
       const choice = await openFightResult(context, { player, enemy, summary: summarizeFight(run.events) });
       if (choice === 'leave') {
-        location.search = '';
+        location.search = '?view=arena';
         return;
       }
       seed++;

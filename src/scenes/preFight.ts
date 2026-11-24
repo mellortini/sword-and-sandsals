@@ -100,7 +100,7 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
   const tp = context.params.get('tier');
   const tier = tp ? Math.min(10, Math.max(1, +tp)) : 1 + Math.floor(Math.random() * 10);
   const player = preFightFighter('Player', 1, randomLook(tier));
-  context.ui.innerHTML = '<a href="?">arena</a> · <a href="?view=wardrobe">garderoba</a>';
+  context.ui.innerHTML = '<a href="?view=arena">arena</a> · <a href="?view=wardrobe">garderoba</a>';
 
   let update: SceneUpdate | undefined;
   void (async () => {

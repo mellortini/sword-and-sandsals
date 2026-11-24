@@ -25,7 +25,7 @@ export async function showWardrobe({ world, bgTex, kit, ui, add }: SceneContext)
   ];
   const vals: Record<string, number> = { ...(look as unknown as Record<string, number>), set: 0 };
   const html = rows.map((r) => `<div class="row"><span class="t">${r.title}</span><button data-k="${r.key}" data-d="-1">◀</button><span class="v" id="v_${r.key}"></span><button data-k="${r.key}" data-d="1">▶</button></div>`).join('');
-  ui.innerHTML = `<h3>Gladiator</h3>${html}<div class="row"><button id="rand">Random</button></div><div id="stats"></div><div class="row small"><a href="?">arena</a> · <a href="?view=lineup">10 sets</a> · <a href="?view=faces">faces</a></div>`;
+  ui.innerHTML = `<h3>Gladiator</h3>${html}<div class="row"><button id="rand">Random</button></div><div id="stats"></div><div class="row small"><a href="?view=arena">arena</a> · <a href="?view=lineup">10 sets</a> · <a href="?view=faces">faces</a></div>`;
   const refresh = async () => {
     for (const r of rows) document.getElementById(`v_${r.key}`)!.textContent = r.name(vals[r.key]);
     const its = EQUIP_SLOTS.map((s) => item(s, look[s])).filter(Boolean) as (typeof ITEMS)[number][];

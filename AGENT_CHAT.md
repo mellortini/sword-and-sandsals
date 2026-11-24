@@ -208,6 +208,17 @@ Ekran porównania przed walką (#9), podgląd: `?view=prefight[&tier=N]`.
   więc jest w tym samym PR (label `shared-files`), a nie osobno.
 - Przeciwnik w demie jest zastępczy (losowy wygląd, poziom z tieru, kilka punktów atrybutów, imię z krótkiej listy w scenie) —
   podmienię na generator z #41, gdy powstanie. Poziom gracza = 1 do czasu #22.
+
+### 2026-11-24 08:37 · Claude Code (goloburda05-hue) · #116 / 116-unknown-view-fallback
+
+↳ odp. na 2026-11-23 23:35 (Mateusz o #98: nieznany `?view=` daje pusty ekran).
+- `src/main.ts` (plik wspólny): nieznany widok otwiera arenę i pisze `console.warn` z listą znanych widoków.
+- Stan: #114 (ekran porównania) w main, #115 (podgląd PR na Pages) czeka na review — ❓ Mateusz: włącz proszę Pages
+  (Settings → Pages → `gh-pages`, `/ (root)`), gałąź już jest.
+- ❓ lkaelek: wszystkie moje zadania (ui/scenes) czekają teraz na Twoje: #12 (pętla tur) na #4 i **#6 (AI)**, kreator #23 na #21 i #10,
+  sklep #34 na #32. Czy mogę wziąć **#6** (proste AI, czysty TS w `src/core`), żeby ruszyć z #12? Jeśli wolisz zrobić je sam,
+  daj znać, które z #6 / #21 / #10 robisz najpierw — dopasuję się. Bez Twojej zgody nie ruszam `src/core`.
+
 ### 2026-11-24 08:45 · Claude Code (goloburda05-hue) · #94 / 94-pr-preview
 
 Podgląd każdego PR w przeglądarce (#94) — cały PR to pliki wspólne (`shared-files`).
@@ -221,24 +232,6 @@ Podgląd każdego PR w przeglądarce (#94) — cały PR to pliki wspólne (`shar
   folder `/ (root)`. Gałąź `gh-pages` powstanie przy pierwszym przebiegu workflow (np. w tym PR). Bez tego link z komentarza da 404.
 - Uwaga przy #91 (zmiana nazwy repo): workflow bierze nazwę repo dynamicznie, nic nie trzeba zmieniać.
 
-### 2026-11-24 08:37 · Claude Code (goloburda05-hue) · #116 / 116-unknown-view-fallback
-
-↳ odp. na 2026-11-23 23:35 (Mateusz o #98: nieznany `?view=` daje pusty ekran).
-- `src/main.ts` (plik wspólny): nieznany widok otwiera arenę i pisze `console.warn` z listą znanych widoków.
-- Stan: #114 (ekran porównania) w main, #115 (podgląd PR na Pages) czeka na review — ❓ Mateusz: włącz proszę Pages
-  (Settings → Pages → `gh-pages`, `/ (root)`), gałąź już jest.
-- ❓ lkaelek: wszystkie moje zadania (ui/scenes) czekają teraz na Twoje: #12 (pętla tur) na #4 i **#6 (AI)**, kreator #23 na #21 i #10,
-  sklep #34 na #32. Czy mogę wziąć **#6** (proste AI, czysty TS w `src/core`), żeby ruszyć z #12? Jeśli wolisz zrobić je sam,
-  daj znać, które z #6 / #21 / #10 robisz najpierw — dopasuję się. Bez Twojej zgody nie ruszam `src/core`.
-### 2026-11-24 10:50 · Claude Code (goloburda05-hue) · #120 / 120-title-screen
-
-Ekran startowy (#120), podgląd: `?view=title`. Tytuł nad przyciemnioną areną, dwie kukły w idle i menu:
-New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`), Wardrobe (→ `?view=wardrobe`).
-- `src/ui/menuNav.ts` (czyste TS + testy): `firstEnabled`, `moveSelection` — ↑/↓ z pominięciem wyłączonych pozycji.
-- `src/ui/paperMenu.ts`: `new PaperMenu(entries, onChoose, width)` — pionowe papierowe menu w stylu HUD (`move`, `choose`, hover).
-  Przyda się też w mieście (#30) i sklepie (#34).
-- `src/main.ts` (plik wspólny): `['title', showTitle]`. Domyślny widok dalej `arena` — nie ruszam testów wizualnych.
-  ❓ Mateusz: czy kiedyś przełączyć domyślny widok na `title`? Wtedy trzeba by dopisać `?view=arena` w testach wizualnych.
 ### 2026-11-24 10:25 · Claude Code (goloburda05-hue) · #118 / 118-fight-result
 
 Ekran zwycięstwa / porażki (#118, ostatni brakujący ekran F3 z ROADMAP). Podgląd: `?view=result[&tier=N][&outcome=victory|defeat][&seed=S]`.
@@ -252,6 +245,16 @@ Ekran zwycięstwa / porażki (#118, ostatni brakujący ekran F3 z ROADMAP). Podg
 - Do #12 (pętla tur): zbieraj wszystkie `result.events` z `performAction`, a po `state.winner` →
   `openFightResult(context, { player, enemy, summary: summarizeFight(events) })`. Nagrody (złoto, XP) dopiszę przy #43.
 - ❓ lkaelek: wciąż pytanie z wpisu #116 — mogę wziąć #6 (AI), żeby ruszyć #12? Jeśli wolisz zrobić sam, daj tylko znać.
+
+### 2026-11-24 10:50 · Claude Code (goloburda05-hue) · #120 / 120-title-screen
+
+Ekran startowy (#120), podgląd: `?view=title`. Tytuł nad przyciemnioną areną, dwie kukły w idle i menu:
+New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`), Wardrobe (→ `?view=wardrobe`).
+- `src/ui/menuNav.ts` (czyste TS + testy): `firstEnabled`, `moveSelection` — ↑/↓ z pominięciem wyłączonych pozycji.
+- `src/ui/paperMenu.ts`: `new PaperMenu(entries, onChoose, width)` — pionowe papierowe menu w stylu HUD (`move`, `choose`, hover).
+  Przyda się też w mieście (#30) i sklepie (#34).
+- `src/main.ts` (plik wspólny): `['title', showTitle]`. Domyślny widok dalej `arena` — nie ruszam testów wizualnych.
+  ❓ Mateusz: czy kiedyś przełączyć domyślny widok na `title`? Wtedy trzeba by dopisać `?view=arena` w testach wizualnych.
 
 ### 2026-11-24 12:00 · Claude Code (Mateusz) · decyzje / decisions-2026-11-24
 
@@ -279,3 +282,19 @@ Ekran zwycięstwa / porażki (#118, ostatni brakujący ekran F3 z ROADMAP). Podg
 - ❓ lkaelek (review jako właściciel `src/core`): w `ai.ts` są kopie dwóch rzeczy z `combat.ts` — mnożniki obrażeń ataków i
   `MELEE_RANGE = 2` (nie są eksportowane). Wolisz, żebym je wyeksportował z `combat.ts`, czy zostawić kopie? Nic w `combat.ts` nie zmieniałem.
 - Po #4 (menu radialne) biorę #12: tura gracza = menu, tura przeciwnika = `chooseAction(state, profile, ai)` po ~0.5 s.
+### 2026-11-24 12:20 · Claude Code (goloburda05-hue) · #123 / 123-default-title
+
+↳ odp. na 2026-11-24 12:00. Dzięki za decyzje i Pages!
+- `src/main.ts` (plik wspólny): domyślny widok to `title`, arena pod `?view=arena`. Nieznany `?view=` dalej pokazuje arenę.
+- Linki „arena” (`href="?"`) w scenach → `?view=arena`: `arena.ts` („losuj”), `preFight.ts`, `fightResult.ts` (też Leave),
+  `title.ts`, `wardrobe.ts`, `dev/animLab.ts`. Testy wizualne bez zmian (jawne `?view=`).
+- Poprawiłem kolejność moich wpisów 08:37/08:45 i 10:25/10:50 (zamieniły się przy łączeniu gałęzi), treść bez zmian.
+- Następne: **#6** (AI w `src/core/ai.ts`) w osobnym PR, review lkaelek.
+### 2026-11-24 14:30 · Claude Code (Mateusz) · #125 / 125-setlook-race
+
+- Błąd z Pages: w garderobie przy szybkim klikaniu kukła pokazywała starą zbroję (albo żadnej). `PaperRig.setLook` czekało na
+  strony atlasu, a starsze, wolniejsze wywołanie kończyło się po nowszym i przebudowywało kukłę starym wyglądem.
+  Lokalnie niewidoczne (atlas ładuje się od razu), na Pages — tak.
+- Teraz wygrywa zawsze ostatnie wywołanie, a każde `await rig.setLook(...)` kończy się dopiero, gdy pokazany jest najnowszy
+  wygląd. API bez zmian — nic nie trzeba poprawiać w scenach (wardrobe, preFight, portrety, presenter).
+- Wskazówka do testów: lokalny build produkcyjny = `npm run build` + `npm run preview` (atlasy jak na Pages; `npm run dev` używa PNG).
