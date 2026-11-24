@@ -4,7 +4,7 @@ import type { Attributes, EquipmentLoadout } from '../core/types';
 import { EQUIP_SLOTS } from '../rig/PaperRig';
 import type { Look } from '../rig/PaperRig';
 import { goToTitle } from '../ui/backKey';
-import { paperButton, screenTitle } from '../ui/paperWidgets';
+import { buttonKeys, keyHint, paperButton, screenTitle } from '../ui/paperWidgets';
 import { StatPanel } from '../ui/statPanel';
 import { comparisonRows } from '../ui/statRows';
 import type { ComparedFighter } from '../ui/statRows';
@@ -38,7 +38,8 @@ const TOP = 170;
 /**
  * Pre-fight comparison: two portraits, names, levels and a stat table, with Fight / Retreat.
  * Draws into `context.world`, resolves with the choice and removes everything it added.
- * Fight · Another foe (Retreat: a new opponent) · Leave (back to the title, #174). Keyboard: Enter = Fight, Escape = Leave.
+ * Fight · Another foe (Retreat: a new opponent) · Leave (back to the title, #174).
+ * Keyboard (#77): ←/→ choose, Enter presses (Fight first), Escape = Leave.
  */
 export async function openPreFight(context: SceneContext, player: PreFightFighter, enemy: PreFightFighter): Promise<PreFightChoice> {
   const { world, bgTex, rigs, add } = context;
@@ -69,14 +70,15 @@ export async function openPreFight(context: SceneContext, player: PreFightFighte
       root.destroy({ children: true });
       resolve(choice);
     };
-    root.addChild(
+    const buttons = [
       paperButton('Fight', W / 2 - 290, buttonsY, true, () => done('fight')),
       paperButton('Another foe', W / 2, buttonsY, false, () => done('retreat')),
       paperButton('Leave', W / 2 + 290, buttonsY, false, () => done('leave')),
-    );
+    ];
+    root.addChild(...buttons, keyHint('← →  choose    Enter  confirm    Esc  leave', W / 2, buttonsY + 112));
+    buttonKeys(keys.signal).add(...buttons);
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') done('fight');
-      else if (e.key === 'Escape') done('leave');
+      if (e.key === 'Escape') done('leave');
     }, { signal: keys.signal });
   });
 }

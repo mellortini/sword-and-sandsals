@@ -7,7 +7,8 @@ import { summarizeFight, summaryRows } from '../ui/fightSummary';
 import { xpSweeps } from '../ui/levelUpRules';
 import type { FightProgress } from '../ui/levelUpRules';
 import type { FightSummary } from '../ui/fightSummary';
-import { paperButton, screenTitle } from '../ui/paperWidgets';
+import { buttonKeys, keyHint, paperButton, screenTitle } from '../ui/paperWidgets';
+import type { PaperButton } from '../ui/paperWidgets';
 import { StatPanel } from '../ui/statPanel';
 import { XpBar } from '../ui/xpBar';
 import { H, W, randomLook } from './common';
@@ -66,6 +67,16 @@ export async function openFightResult(context: SceneContext, result: FightResult
   root.addChild(panel);
 
   const buttonsY = TOP + PORTRAIT_H + 160;
+  // keyboard (#77): ←/→ choose, Enter presses (Fight again first), Escape = Leave
+  const listening = new AbortController();
+  const keys = buttonKeys(listening.signal);
+  let finish: (choice: FightResultChoice) => void = () => {};
+  const buttons = [
+    paperButton('Fight again', W / 2 - 160, buttonsY, true, () => finish('again'), 280),
+    paperButton('Leave', W / 2 + 160, buttonsY, false, () => finish('leave'), 280),
+  ];
+  root.addChild(...buttons, keyHint('← →  choose    Enter  confirm    Esc  leave', W / 2, buttonsY + 112));
+  keys.add(...buttons);
 
   // XP bar under the numbers, then a button to place new attribute points once the bar reaches the new level
   let bar: XpBar | null = null;
@@ -82,7 +93,7 @@ export async function openFightResult(context: SceneContext, result: FightResult
     tick = () => ticker.remove(onTick);
 
     const spendY = TOP + panel.panelHeight + 120;
-    let spend: Container | null = null;
+    let spend: PaperButton | null = null;
     const offer = () => {
       spend?.destroy({ children: true });
       spend = null;
@@ -94,6 +105,7 @@ export async function openFightResult(context: SceneContext, result: FightResult
         offer();
       }, 360);
       root.addChild(spend);
+      keys.add(spend);
     };
     // points left from earlier fights can be spent at once; new ones appear with the LEVEL UP flash
     if ((progress.before.attributePoints ?? 0) > 0 || progress.after.level === progress.before.level) offer();
@@ -101,22 +113,16 @@ export async function openFightResult(context: SceneContext, result: FightResult
   }
 
   return new Promise<FightResultChoice>((resolve) => {
-    const keys = new AbortController();
-    const done = (choice: FightResultChoice) => {
-      keys.abort();
+    finish = (choice: FightResultChoice) => {
+      listening.abort();
       tick?.();
       removeRigs(rigs, added);
       root.destroy({ children: true });
       resolve(choice);
     };
-    root.addChild(
-      paperButton('Fight again', W / 2 - 160, buttonsY, true, () => done('again'), 280),
-      paperButton('Leave', W / 2 + 160, buttonsY, false, () => done('leave'), 280),
-    );
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') done('again');
-      else if (e.key === 'Escape') done('leave');
-    }, { signal: keys.signal });
+      if (e.key === 'Escape') finish('leave');
+    }, { signal: listening.signal });
   });
 }
 

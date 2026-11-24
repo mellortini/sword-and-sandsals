@@ -7,6 +7,7 @@ import { FxLayer } from '../ui/fx';
 import { CombatHud } from '../ui/hud';
 import { leaveFightOnEscape } from '../ui/leaveFight';
 import { hudScaleFor } from '../ui/phone';
+import { textScale } from '../ui/textSize';
 import { CombatPresenter } from './combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from './common';
 import type { SceneContext, SceneUpdate } from './common';
@@ -100,7 +101,7 @@ export async function showAiFight(context: SceneContext): Promise<SceneUpdate> {
   })();
 
   return (dt) => {
-    hud.setPanelScale(hudScaleFor(world.scale.x));
+    hud.setPanelScale(Math.min(1.6, hudScaleFor(world.scale.x) * textScale()));
     hud.update(dt);
     fx.update(dt); // damage numbers, MISS and BLOCK animate and fade only while ticked
     for (const [rig, g] of [[P, shadows[0]], [E, shadows[1]]] as const) {

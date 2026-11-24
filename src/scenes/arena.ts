@@ -8,6 +8,7 @@ import type { Look } from '../rig/PaperRig';
 import { summarizeFight } from '../ui/fightSummary';
 import { FxLayer } from '../ui/fx';
 import { hudScaleFor } from '../ui/phone';
+import { textScale } from '../ui/textSize';
 import { openLevelUp } from '../ui/levelUp';
 import { applyFightExperience } from '../ui/levelUpRules';
 import type { FightProgress } from '../ui/levelUpRules';
@@ -151,7 +152,7 @@ export async function showArena(
   })();
 
   return (dt) => {
-    hud.setPanelScale(hudScaleFor(world.scale.x));
+    hud.setPanelScale(Math.min(1.6, hudScaleFor(world.scale.x) * textScale()));
     hud.update(dt);
     fx.update(dt); // damage numbers, MISS and BLOCK animate and fade only while ticked
     const { x, y } = P.view.getGlobalPosition();
