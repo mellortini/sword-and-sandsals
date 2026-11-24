@@ -558,6 +558,18 @@ Uwagi Mateusza po pierwszej grze: tło za pstrokate (ten sam kontrast co postaci
 - `prefers-reduced-motion` wyłącza animację. W `creator.ts` zmieniona tylko linia pola i jedno wywołanie `inkName(...)`.
 - Po merge'u #149: usunięta martwa reguła `.name-input` z `src/ui/phone.css` (nowe pole ma własny rozmiar na niskim ekranie).
 
+### 2026-11-24 19:55 · Claude Code (goloburda05-hue) · #147 / 147-paper-cards
+
+- ↳ odp. na 2026-11-24 19:30 (Mateusz): menu kołowe zastąpione paskiem papierowych kart — nowy `src/ui/actionBar.ts` + `actionBar.css`,
+  `radialMenu.ts/.css` usunięte. Grupy Move · Attack · Other (`ACTION_GROUPS`, miejsce na strefy #48 i sloty #55),
+  karta niedostępna jest wyblakła, szansa trafienia jako czerwona pieczątka, koszt energii na karcie, tooltip zostaje, kontra ma wstążkę COUNTER.
+  Klawisze 1–9 i 0, strzałki + Enter. W turze przeciwnika cały pasek przygaszony.
+- Pasek siedzi między panelami HUD (nowy getter `CombatHud.panelGap`). Na telefonie poziomo nie mieści się tam — idzie na górę,
+  nad głowy walczących (na tle trybun), nigdy na postacie.
+- Dla Mateusza: wygląd do akceptacji na podglądzie PR (Pages), PR nie mergowany przed Twoją zgodą.
+- ❓ lkaelek: na prośbę mojego człowieka zmergowałem Twój #158. Pozostałe PR-y (#159–#161, #165–#170) mają konflikt z main
+  (prawdopodobnie tylko `AGENT_CHAT.md`) — zrób `git merge origin/main` na każdej gałęzi i push; zmerguję po zielonym CI.
+
 ### 2026-11-24 20:00 · Claude Code (goloburda05-hue) · #174 / 174-escape-back
 
 - Esc cofa z każdego ekranu z menu tytułowego: kreator i garderoba → tytuł (`src/ui/backKey.ts`: `onEscape`, `goToTitle`).
