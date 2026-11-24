@@ -3,6 +3,7 @@ import { deriveStats, resolveAttributes } from '../core/stats';
 import type { Attributes, EquipmentLoadout } from '../core/types';
 import { EQUIP_SLOTS } from '../rig/PaperRig';
 import type { Look } from '../rig/PaperRig';
+import { goToTitle } from '../ui/backKey';
 import { paperButton, screenTitle } from '../ui/paperWidgets';
 import { StatPanel } from '../ui/statPanel';
 import { comparisonRows } from '../ui/statRows';
@@ -17,7 +18,7 @@ export interface PreFightFighter extends ComparedFighter {
   readonly look: Look;
 }
 
-export type PreFightChoice = 'fight' | 'retreat';
+export type PreFightChoice = 'fight' | 'retreat' | 'leave';
 
 /** Equipment tiers worn on the puppet are the same numbers the combat core reads. */
 export function loadoutFromLook(look: Look): EquipmentLoadout {
@@ -37,7 +38,7 @@ const TOP = 170;
 /**
  * Pre-fight comparison: two portraits, names, levels and a stat table, with Fight / Retreat.
  * Draws into `context.world`, resolves with the choice and removes everything it added.
- * Keyboard: Enter = Fight, Escape = Retreat.
+ * Fight · Another foe (Retreat: a new opponent) · Leave (back to the title, #174). Keyboard: Enter = Fight, Escape = Leave.
  */
 export async function openPreFight(context: SceneContext, player: PreFightFighter, enemy: PreFightFighter): Promise<PreFightChoice> {
   const { world, bgTex, rigs, add } = context;
@@ -69,12 +70,13 @@ export async function openPreFight(context: SceneContext, player: PreFightFighte
       resolve(choice);
     };
     root.addChild(
-      paperButton('Fight', W / 2 - 150, buttonsY, true, () => done('fight')),
-      paperButton('Retreat', W / 2 + 150, buttonsY, false, () => done('retreat')),
+      paperButton('Fight', W / 2 - 290, buttonsY, true, () => done('fight')),
+      paperButton('Another foe', W / 2, buttonsY, false, () => done('retreat')),
+      paperButton('Leave', W / 2 + 290, buttonsY, false, () => done('leave')),
     );
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') done('fight');
-      else if (e.key === 'Escape') done('retreat');
+      else if (e.key === 'Escape') done('leave');
     }, { signal: keys.signal });
   });
 }
@@ -95,7 +97,7 @@ function randomEnemy(tier: number): PreFightFighter {
 
 /**
  * `?view=prefight[&tier=N]`: player (default attributes) against a random opponent.
- * Fight → arena with the same two gladiators; Retreat → a new opponent.
+ * Fight → arena with the same two gladiators; Another foe → a new opponent; Leave → title.
  */
 export async function showPreFight(context: SceneContext): Promise<SceneUpdate> {
   // the saved gladiator fights unless the title's Quick bout asks for a random one
@@ -116,6 +118,10 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
       enemy = randomEnemy(tier);
       choice = await openPreFight(context, player, enemy);
     } while (choice === 'retreat');
+    if (choice === 'leave') {
+      goToTitle();
+      return;
+    }
     context.ui.innerHTML = '';
     update = (await showArena(context, [
       { look: player.look, name: player.name, attributes: player.attributes, level: player.level },

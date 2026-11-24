@@ -5,6 +5,7 @@ import type { FighterSide } from '../core/types';
 import { summarizeFight } from '../ui/fightSummary';
 import { FxLayer } from '../ui/fx';
 import { CombatHud } from '../ui/hud';
+import { leaveFightOnEscape } from '../ui/leaveFight';
 import { hudScaleFor } from '../ui/phone';
 import { CombatPresenter } from './combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from './common';
@@ -71,17 +72,22 @@ export async function showAiFight(context: SceneContext): Promise<SceneUpdate> {
 
   const pause = (sec: number) => new Promise<void>((r) => setTimeout(r, sec * 1000));
   let seed = params.has('seed') ? Math.floor(+params.get('seed')!) : Math.floor(Math.random() * 1e9);
+  // Escape asks before leaving, but only while a bout runs: the result screen has its own Escape (Leave)
+  let fighting = false;
+  leaveFightOnEscape(() => fighting);
   void (async () => {
     for (;;) {
       const start = createCombat(seed,
         { name: fighters.player.name, equipment: loadoutFromLook(fighters.player.look) },
         { name: fighters.enemy.name, equipment: loadoutFromLook(fighters.enemy.look) });
       presenter.reset(start);
+      fighting = true;
       const outcome = await runFight(start, {
         pickers: { player: aiPicker(profiles.player, seed ^ 0x9e3779b9), enemy: aiPicker(profiles.enemy, seed ^ 0x85ebca6b) },
         present: (events, after) => presenter.present(events, after),
         pause: () => pause(TURN_PAUSE),
       });
+      fighting = false;
       // let the death and victory poses land before the result covers them
       await pause(1.2);
       const choice = await openFightResult(context, { ...fighters, summary: summarizeFight(outcome.events) });

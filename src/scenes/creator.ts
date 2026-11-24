@@ -8,6 +8,7 @@ import {
   ATTRIBUTE_BASE, ATTRIBUTE_INFO, NAME_MAX, canLower, canRaise, lower, nameProblem, newCharacter, raise, randomSpread, startSpread,
 } from '../ui/creatorRules';
 import type { Appearance, AttributeKey, PointSpread } from '../ui/creatorRules';
+import { goToTitle, onEscape } from '../ui/backKey';
 import { inkName } from '../ui/inkName';
 import { PELVIS_ABOVE_FEET } from './common';
 import type { SceneContext } from './common';
@@ -66,7 +67,7 @@ export async function showCreator({ world, bgTex, kit, ui, add }: SceneContext) 
     <div class="derived" id="cDerived"></div>
     ${replacing ? `<div class="warn">Begin replaces your saved gladiator ${escape(replacing.name)} (level ${replacing.level}).</div>` : ''}
     <div class="actions"><button id="cRandom">Random</button><button id="cReset">Reset points</button><button class="begin" id="cBegin">Begin</button></div>
-    <div class="small"><a href="?view=title">back to title</a></div>`;
+    <div class="small"><a href="?view=title">back to title</a> <span class="key">(Esc)</span></div>`;
 
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   const nameInput = $<HTMLInputElement>('cName');
@@ -132,4 +133,5 @@ export async function showCreator({ world, bgTex, kit, ui, add }: SceneContext) 
 
   refresh();
   nameInput.focus();
+  onEscape(goToTitle);
 }
