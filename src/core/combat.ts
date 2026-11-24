@@ -1,5 +1,8 @@
+import { createCrowdStanding, crowdDamageMultiplier, scoreCrowdAction } from './crowd';
 import { nextRandom } from './rng';
 import { attackDamage, attackHitChance, deriveStats, isAttack, resolveAttributes } from './stats';
+import { advanceStatusDurations, applyStatus, statusModifiers, tickStatuses } from './status';
+import type { StatusKind } from './status';
 import type {
   ActionOption, ActionResult, AttackKind, CombatAction, CombatEvent, CombatState,
   Fighter, FighterSetup, FighterSide, MoveKind,
@@ -35,8 +38,8 @@ const forwardDirection = (side: FighterSide) => side === 'player' ? 1 : -1;
 export function createCombat(seed: number, player: FighterSetup = {}, enemy: FighterSetup = {}): CombatState {
   if (!Number.isSafeInteger(seed)) throw new RangeError('Combat seed must be a safe integer.');
   const fighters = {
-    player: createFighter(player, 'Player', 2),
-    enemy: createFighter(enemy, 'Opponent', 18),
+    player: createFighter(player, 'Player', 2, seed ^ 0x6e684e35),
+    enemy: createFighter(enemy, 'Opponent', 18, seed ^ 0x87e4cff8),
   };
   if (fighters.player.position > fighters.enemy.position) {
     throw new RangeError('The player must start to the left of or next to the opponent.');
@@ -45,7 +48,7 @@ export function createCombat(seed: number, player: FighterSetup = {}, enemy: Fig
   return { fighters, active: 'player', winner: null, rngState: seed >>> 0 };
 }
 
-function createFighter(setup: FighterSetup, defaultName: string, defaultPosition: number): Fighter {
+function createFighter(setup: FighterSetup, defaultName: string, defaultPosition: number, crowdSeed: number): Fighter {
   const position = setup.position ?? defaultPosition;
   if (!Number.isFinite(position) || position < 0 || position > ARENA_LENGTH) {
     throw new RangeError('Combat positions must be within the arena.');
@@ -62,7 +65,19 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     energy: stats.maxEnergy,
     guarding: false,
     tauntPenalty: 0,
+    crowd: createCrowdStanding(crowdSeed),
+    statuses: [],
+    statusResistances: { ...setup.statusResistances },
   };
+}
+
+/** Modifiers take effect immediately. Damage, healing and stun tick at the recipient's next turn. */
+export function applyCombatStatus(state: CombatState, side: FighterSide, kind: StatusKind): CombatState {
+  if (state.winner !== null) return state;
+  const fighter = state.fighters[side];
+  const statuses = applyStatus(fighter.statuses, kind, fighter.statusResistances);
+  if (statuses === fighter.statuses) return state;
+  return { ...state, fighters: { ...state.fighters, [side]: { ...fighter, statuses } } };
 }
 
 export function getDistance(state: CombatState): number {
@@ -78,19 +93,20 @@ export function getActionOptions(state: CombatState): ActionOption[] {
   const opponent = state.fighters[opposingSide(active)];
   const distance = getDistance(state);
   const options: ActionOption[] = [];
+  const { movementMultiplier } = statusModifiers(fighter.statuses);
 
   for (const action of ACTIONS) {
     const energyCost = ENERGY_COSTS[action];
-    if (energyCost > fighter.energy || !isInRange(action, active, fighter.position, distance)) continue;
+    if (energyCost > fighter.energy || !isInRange(action, active, fighter.position, distance, movementMultiplier)) continue;
 
     options.push(isAttack(action)
-      ? { action, energyCost, hitChance: attackHitChance(action, fighter.stats, opponent.stats, fighter.tauntPenalty) }
+      ? { action, energyCost, hitChance: hitChance(action, fighter, opponent) }
       : { action, energyCost });
   }
   return options;
 }
 
-function isInRange(action: CombatAction, side: FighterSide, position: number, distance: number): boolean {
+function isInRange(action: CombatAction, side: FighterSide, position: number, distance: number, movementMultiplier: number): boolean {
   switch (action) {
     case 'step_forward':
     case 'jump':
@@ -98,7 +114,7 @@ function isInRange(action: CombatAction, side: FighterSide, position: number, di
     case 'step_back':
       return side === 'player' ? position > 0 : position < ARENA_LENGTH;
     case 'charge':
-      return distance > MELEE_RANGE && distance <= CHARGE_RANGE;
+      return distance > MELEE_RANGE && distance <= CHARGE_RANGE * movementMultiplier;
     case 'quick':
     case 'normal':
     case 'power':
@@ -106,6 +122,11 @@ function isInRange(action: CombatAction, side: FighterSide, position: number, di
     default:
       return true;
   }
+}
+
+function hitChance(kind: AttackKind, attacker: Readonly<Fighter>, defender: Readonly<Fighter>): number {
+  const { accuracyPenalty } = statusModifiers(attacker.statuses);
+  return attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty + accuracyPenalty);
 }
 
 export function performAction(state: CombatState, action: CombatAction): ActionResult {
@@ -121,6 +142,7 @@ export function performAction(state: CombatState, action: CombatAction): ActionR
   const events: CombatEvent[] = [];
   const distance = getDistance(state);
   const direction = forwardDirection(side);
+  const { movementMultiplier } = statusModifiers(fighter.statuses);
   let rngState = state.rngState;
 
   function roll(): number {
@@ -132,13 +154,13 @@ export function performAction(state: CombatState, action: CombatAction): ActionR
   changeEnergy(side, fighter, -option.energyCost, events);
   switch (action) {
     case 'step_forward':
-      move(side, fighter, action, fighter.position + direction * Math.min(STEP_DISTANCE, distance), events);
+      move(side, fighter, action, fighter.position + direction * Math.min(STEP_DISTANCE * movementMultiplier, distance), events);
       break;
     case 'step_back':
-      move(side, fighter, action, fighter.position - direction * STEP_DISTANCE, events);
+      move(side, fighter, action, fighter.position - direction * STEP_DISTANCE * movementMultiplier, events);
       break;
     case 'jump':
-      move(side, fighter, action, fighter.position + direction * Math.min(fighter.stats.jumpDistance, distance), events);
+      move(side, fighter, action, fighter.position + direction * Math.min(fighter.stats.jumpDistance * movementMultiplier, distance), events);
       break;
     case 'charge':
       move(side, fighter, action, opponent.position - direction, events);
@@ -159,23 +181,59 @@ export function performAction(state: CombatState, action: CombatAction): ActionR
       break;
   }
 
-  if (isAttack(action)) {
-    const attack = resolveAttack(action, side, fighter, opponent, roll);
+  const attack = isAttack(action) ? resolveAttack(action, side, fighter, opponent, roll) : undefined;
+  if (attack) {
     events.push(attack);
     if (action === 'charge' && attack.damage > 0 && opponent.health > 0) {
       move(other, opponent, 'knockback', opponent.position + direction * KNOCKBACK_DISTANCE, events);
     }
   }
 
+  const previousCrowd = fighter.crowd;
+  const crowd = scoreCrowdAction(previousCrowd, action, fighter.attributes.charm, attack?.hit, attack?.crit);
+  fighter.crowd = crowd.standing;
+  if (crowd.gift) {
+    const amount = crowd.gift === 'bouquet'
+      ? Math.min(8, fighter.stats.maxHealth - fighter.health)
+      : crowd.standing.giftGold - previousCrowd.giftGold;
+    if (crowd.gift === 'bouquet') fighter.health += amount;
+    events.push({ type: 'crowd_gift', fighter: side, gift: crowd.gift, amount });
+  }
+
   fighter.tauntPenalty = 0;
+  fighter.statuses = fighter.statuses.filter((effect) => effect.turns > 0);
   if (opponent.health === 0) {
     events.push({ type: 'death', fighter: other, winner: side });
     return { ok: true, state: { fighters, active: side, winner: side, rngState }, events };
   }
 
-  opponent.guarding = false;
-  events.push({ type: 'turn', fighter: other });
-  return { ok: true, state: { fighters, active: other, winner: null, rngState }, events };
+  return startNextTurn(fighters, other, rngState, events);
+}
+
+function startNextTurn(
+  fighters: Record<FighterSide, Fighter>, active: FighterSide, rngState: number, events: CombatEvent[],
+): ActionResult {
+  while (true) {
+    const fighter = fighters[active];
+    fighter.guarding = false;
+    const tick = tickStatuses(fighter.statuses, fighter.health, fighter.stats.maxHealth);
+    fighter.health = tick.health;
+    for (const effect of tick.ticks) events.push({ type: 'status', fighter: active, ...effect });
+    if (fighter.health === 0) {
+      const winner = opposingSide(active);
+      events.push({ type: 'death', fighter: active, winner });
+      return { ok: true, state: { fighters, active: winner, winner, rngState }, events };
+    }
+    // Keep effects with zero turns through this action so their modifiers still apply.
+    fighter.statuses = advanceStatusDurations(fighter.statuses);
+    if (!tick.skip) {
+      events.push({ type: 'turn', fighter: active });
+      return { ok: true, state: { fighters, active, winner: null, rngState }, events };
+    }
+    fighter.statuses = fighter.statuses.filter((effect) => effect.turns > 0);
+    fighter.tauntPenalty = 0;
+    active = opposingSide(active);
+  }
 }
 
 function move(side: FighterSide, fighter: Fighter, kind: MoveKind, position: number, events: CombatEvent[]) {
@@ -197,14 +255,18 @@ function changeEnergy(side: FighterSide, fighter: Fighter, amount: number, event
 function resolveAttack(
   kind: AttackKind, side: FighterSide, attacker: Readonly<Fighter>, defender: Fighter, roll: () => number,
 ): Extract<CombatEvent, { type: 'attack' }> {
-  const chance = attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty);
+  const chance = hitChance(kind, attacker, defender);
   const hit = roll() < chance;
   // A defensive stance can block one incoming attack. Crits require an unblocked hit.
   const blocked = hit && defender.guarding && roll() < defender.stats.blockChance;
   const crit = hit && !blocked && roll() < attacker.stats.criticalChance;
   let damage = 0;
   if (hit && !blocked) {
-    damage = Math.min(defender.health, attackDamage(kind, attacker.stats, defender.stats, crit));
+    // crowd favour raises the attacker's power, soaking weakens the defender's armour
+    const offense = { ...attacker.stats, attackPower: attacker.stats.attackPower * crowdDamageMultiplier(attacker.crowd) };
+    const { armourMultiplier } = statusModifiers(defender.statuses);
+    const defense = { ...defender.stats, armour: defender.stats.armour * armourMultiplier };
+    damage = Math.min(defender.health, attackDamage(kind, offense, defense, crit));
     defender.health -= damage;
   }
 
