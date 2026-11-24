@@ -1,0 +1,30 @@
+/* Character creator panel (src/scenes/creator.ts), on the right like the wardrobe. */
+#ui.creator {
+  left: auto; right: 2vw; top: 3vh; width: min(34vw, 470px); max-height: 94vh; overflow-y: auto;
+  font-size: 15px; gap: 8px; padding: 14px 18px;
+}
+#ui.creator h3 { font-size: 22px; }
+#ui.creator .section { margin-top: 6px; color: #e8be4c; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; }
+#ui.creator .name-input {
+  font: 20px Georgia, serif; color: #fff0cb; background: #3a2629; border: 2px solid #815a46; border-radius: 6px;
+  padding: 6px 10px; outline: none;
+}
+#ui.creator .name-input:focus { border-color: #f2c14e; }
+#ui.creator .problem { min-height: 1.2em; color: #e0866f; font-size: 13px; font-style: italic; }
+#ui.creator .look-row { display: grid; grid-template-columns: 7.5em 2em 1fr 2em; align-items: center; gap: 6px; }
+#ui.creator .look-row .v { text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#ui.creator .attr-row { display: grid; grid-template-columns: 6.2em 2em 2.2em 2em 1fr; align-items: center; gap: 6px; }
+#ui.creator .attr-row .v { text-align: center; font-weight: bold; font-size: 17px; }
+#ui.creator .attr-row .v.up { color: #f2c14e; }
+#ui.creator .attr-row .hint { color: #b9a28c; font-size: 12.5px; font-style: italic; }
+#ui.creator button:disabled { opacity: 0.35; cursor: default; background: #6b4a3a; }
+#ui.creator .points { display: flex; justify-content: space-between; align-items: baseline; }
+#ui.creator .points b { color: #f2c14e; font-size: 18px; }
+#ui.creator .points b.done { color: #9ec27a; }
+#ui.creator .derived { color: #e8cfa8; }
+#ui.creator .derived b { color: #fff0cb; }
+#ui.creator .actions { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 8px; margin-top: 6px; }
+#ui.creator .actions button { padding: 8px 0; }
+#ui.creator .actions .begin { background: #9a6a2e; font-weight: bold; font-size: 17px; }
+#ui.creator .actions .begin:not(:disabled):hover { background: #b98238; }
+#ui.creator .warn { color: #e0b46f; font-size: 13px; font-style: italic; }

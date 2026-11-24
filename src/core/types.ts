@@ -24,6 +24,7 @@ export type EquipmentLoadout = Partial<Record<Item['slot'], number>> & Partial<R
 
 export interface FighterSetup {
   name?: string;
+  level?: number;
   attributes?: Partial<Attributes>;
   equipment?: EquipmentLoadout;
   statusResistances?: StatusResistances;
@@ -50,6 +51,7 @@ export interface FighterStats {
 
 export interface Fighter {
   name: string;
+  level: number;
   attributes: Readonly<Attributes>;
   stats: Readonly<FighterStats>;
   position: number;
@@ -66,6 +68,7 @@ export interface CombatState {
   readonly fighters: Readonly<Record<FighterSide, Readonly<Fighter>>>;
   readonly active: FighterSide;
   readonly winner: FighterSide | null;
+  readonly rewards?: { readonly experience: number };
   readonly rngState: number;
 }
 
