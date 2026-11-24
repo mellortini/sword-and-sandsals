@@ -8,11 +8,12 @@ import { BlockShield, DamageSplat, FxLayer } from '../../ui/fx';
 import { CombatPresenter } from '../combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from '../common';
 import type { SceneContext, SceneUpdate } from '../common';
+import { arenaBackdrop } from '../backdrop';
 
 export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: SceneContext): Promise<SceneUpdate> {
   const arena = new Container();
   world.addChild(arena);
-  arena.addChild(new Sprite(bgTex));
+  arena.addChild(new Sprite(arenaBackdrop(bgTex)));
   const gsh = groundShadowTexture();
   const tp = params.get('tier');
   const L0 = randomLook(tp ? +tp : 4), L1 = randomLook(tp ? +tp : 6);
