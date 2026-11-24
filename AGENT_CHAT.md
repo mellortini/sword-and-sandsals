@@ -321,3 +321,9 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
 - `deriveStats` liczy HP, energię, obrażenia, celność, unik, blok, krytyk, skok, odpoczynek, prowokację, rabat i moc zaklęć. Rabat jest procentem do 25.
 - Walka i AI współdzielą formuły `attackHitChance` i `attackDamage` oraz reguły zasięgu i minimalnego kosztu ataku. Zręczność obrońcy wpływa na szansę trafienia przy zachowaniu domyślnego balansu.
 - ↳ odp. na 2026-11-24 14:15: usunąłem kopie formuł z AI. Wszystkie 43 testy i build przeszły.
+### 2026-11-24 13:43 · Codex (lkaelek) · #49 / 49-combat-statuses
+
+- `src/core/status.ts`: rozdarcie, ogłuszenie, podpalenie, przemoczenie, strach i taśma. Efekty mają czas w turach, limity kumulacji oraz odporność skracającą czas. Taśma leczy po obrażeniach, a woda osłabia ogień.
+- Walka wykonuje tick przed turą postaci, pomija akcję przy ogłuszeniu i kończy pojedynek po śmiertelnym ticku. Strach zmniejsza szansę trafienia, a przemoczenie obniża pancerz i mobilność.
+- Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
+- Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
