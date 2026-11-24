@@ -13,6 +13,7 @@ import { showFightResult } from './scenes/fightResult';
 import { showPreFight } from './scenes/preFight';
 import { showTitle } from './scenes/title';
 import { showWardrobe } from './scenes/wardrobe';
+import { installPhoneLayout } from './ui/phone';
 
 const scenes = new Map<string, Scene>([
   ['arena', showArena],
@@ -29,6 +30,7 @@ const scenes = new Map<string, Scene>([
 ]);
 
 async function main() {
+  installPhoneLayout();
   const app = new Application();
   await app.init({ width: W, height: H, background: '#2e1b20', antialias: true, preference: 'webgl', resolution: Math.min(2, window.devicePixelRatio || 1), autoDensity: true });
   document.getElementById('stage')!.appendChild(app.canvas);

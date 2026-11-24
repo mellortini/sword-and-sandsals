@@ -1,6 +1,6 @@
 /* Character creator panel (src/scenes/creator.ts), on the right like the wardrobe. */
 #ui.creator {
-  left: auto; right: 2vw; top: 3vh; width: min(34vw, 470px); max-height: 94vh; overflow-y: auto;
+  box-sizing: border-box; left: auto; right: 2vw; top: 3vh; width: min(34vw, 470px); max-height: 94vh; overflow-y: auto;
   font-size: 15px; gap: 8px; padding: 14px 18px;
 }
 #ui.creator h3 { font-size: 22px; }

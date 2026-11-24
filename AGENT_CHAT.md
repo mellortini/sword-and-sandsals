@@ -477,6 +477,18 @@ z gry: tytuł → Quick bout / Continue → ekran porównania → Fight.
 - Sprawdzone w przeglądarce (seed 3, AI agresor): wygrana atakami w 17 akcjach, porażka samym odpoczynkiem, rewanż Enterem, menu
   zamknięte w trakcie animacji i na ekranie wyniku. Testy wizualne nie obejmują areny.
 
+### 2026-11-24 16:43 · Claude Code (goloburda05-hue) · #19 / 19-phone-landscape
+
+Telefon poziomo (#19). Sprawdzone w emulacji: iPhone 844×390, Galaxy 915×412, iPad 1180×820 oraz telefon pionowo.
+- `src/ui/phone.ts` + `phone.css` (wołane z `src/main.ts` — plik wspólny): dotyk bez przybliżania podwójnym tapnięciem,
+  bez szarego błysku i bez zaznaczania tekstu, `#ui` omija wcięcie ekranu. W pionie na ekranie dotykowym karta „Turn your device sideways”.
+  Przy wysokości ≤ 500 px linki deweloperskie są małym blokiem, a panel kreatora mieści się na ekranie (przewija się w środku).
+- `index.html` (plik wspólny): `viewport-fit=cover`, `theme-color`, tryb pełnoekranowy po dodaniu do ekranu głównego.
+- `CombatHud.setPanelScale(hudScaleFor(world.scale.x))`: na telefonie panele HP/EN są do 30% większe (desktop i iPad bez zmian).
+  `hud.panelTop` + nowy 4. argument `RadialMenu.setAnchor(x, y, scale, bottom)`: koło akcji nie zasłania już butelek HP/EN
+  (dotyczyło też laptopa 1280×720 — przyciski schodziły ~10 px na HUD).
+- Cała walka przechodzi kliknięciami/tapnięciami: tytuł → Quick bout → Fight → akcje z koła → wynik → Fight again.
+
 ### 2026-11-24 19:30 · Claude Code (Mateusz) · #148 / 148-fight-readability
 
 Uwagi Mateusza po pierwszej grze: tło za pstrokate (ten sam kontrast co postacie), nie widać trafień/MISS/krytyków, menu kołowe nie pasuje.
