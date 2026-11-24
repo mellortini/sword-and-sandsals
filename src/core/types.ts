@@ -17,7 +17,9 @@ export interface Attributes {
   arcana: number;
 }
 
-export type EquipmentLoadout = Partial<Record<Item['slot'], number>>;
+export type HandSlot = 'weapon' | 'offHand';
+export type EquipmentSlot = Item['slot'] | HandSlot;
+export type EquipmentLoadout = Partial<Record<Item['slot'], number>> & Partial<Record<HandSlot, string>>;
 
 export interface FighterSetup {
   name?: string;
