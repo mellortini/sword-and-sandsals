@@ -14,6 +14,7 @@ import { openFightResult } from './fightResult';
 import { loadoutFromLook } from './preFight';
 import { aiPicker, runFight } from './turnLoop';
 import type { ActionPicker } from './turnLoop';
+import { arenaBackdrop } from './backdrop';
 
 export interface ArenaFighter {
   readonly look: Look;
@@ -39,7 +40,7 @@ export async function showArena(context: SceneContext, fighters?: readonly [Aren
   const { world, bgTex, params, ui, add, rigs } = context;
   const arena = new Container();
   world.addChild(arena);
-  arena.addChild(new Sprite(bgTex));
+  arena.addChild(new Sprite(arenaBackdrop(bgTex)));
 
   const tp = params.get('tier');
   const tier = tp ? +tp : undefined;
@@ -113,6 +114,7 @@ export async function showArena(context: SceneContext, fighters?: readonly [Aren
 
   return (dt) => {
     hud.update(dt);
+    fx.update(dt); // damage numbers, MISS and BLOCK animate and fade only while ticked
     const { x, y } = P.view.getGlobalPosition();
     menu.setAnchor(x, y, world.scale.x);
     for (const [rig, g] of [[P, shadows[0]], [E, shadows[1]]] as const) {

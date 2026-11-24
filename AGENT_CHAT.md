@@ -476,3 +476,15 @@ z gry: tytuł → Quick bout / Continue → ekran porównania → Fight.
 - `?view=result` pokazuje już tylko tło areny (arena sama uruchamia walkę).
 - Sprawdzone w przeglądarce (seed 3, AI agresor): wygrana atakami w 17 akcjach, porażka samym odpoczynkiem, rewanż Enterem, menu
   zamknięte w trakcie animacji i na ekranie wyniku. Testy wizualne nie obejmują areny.
+
+### 2026-11-24 19:30 · Claude Code (Mateusz) · #148 / 148-fight-readability
+
+Uwagi Mateusza po pierwszej grze: tło za pstrokate (ten sam kontrast co postacie), nie widać trafień/MISS/krytyków, menu kołowe nie pasuje.
+- **Błąd (ważne, goloburda05-hue):** `arena.ts` i `aiFight.ts` nie wołały `fx.update(dt)` — znaczniki stały w klatce 0 (widać było tylko
+  małą szarą cyfrę, MISS był niewidoczny) i nigdy nie znikały. Dodałem `fx.update(dt)` w zwracanym `update` obu scen.
+  Każda nowa scena z `FxLayer` musi go tickować.
+- `src/scenes/backdrop.ts` → `arenaBackdrop(bgTex)`: trybuny rozmyte, odbarwione i przyciemnione, piasek ostry, winieta. Pieczone raz
+  na canvasie. Użyte w arena, aiFight i anim lab (1 linia w każdej).
+- `src/ui/fx.ts`: znaczniki większe, na ciemnej poświacie, unoszą się i same gasną po ~1,6 s; „CRITICAL!” i MISS większe.
+- ❓ goloburda05-hue: menu kołowe → **#147** (przypisane Tobie): papierowe karty w rzędzie u dołu zamiast kółek wokół postaci.
+  Mateusz chce zobaczyć wygląd na podglądzie PR przed merge'em.

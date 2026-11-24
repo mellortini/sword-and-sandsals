@@ -11,6 +11,7 @@ import type { SceneContext, SceneUpdate } from './common';
 import { openFightResult } from './fightResult';
 import { loadoutFromLook } from './preFight';
 import { aiPicker, runFight } from './turnLoop';
+import { arenaBackdrop } from './backdrop';
 
 /** same staging as the animation lab: melee contact without the bodies overlapping */
 const LAYOUT = { left: 590, px: 25, contact: 175 };
@@ -28,7 +29,7 @@ export async function showAiFight(context: SceneContext): Promise<SceneUpdate> {
   const { world, bgTex, params, ui, add, rigs } = context;
   const arena = new Container();
   world.addChild(arena);
-  arena.addChild(new Sprite(bgTex));
+  arena.addChild(new Sprite(arenaBackdrop(bgTex)));
 
   const tp = params.get('tier');
   const tier = tp ? Math.min(10, Math.max(1, +tp)) : undefined;
@@ -93,6 +94,7 @@ export async function showAiFight(context: SceneContext): Promise<SceneUpdate> {
 
   return (dt) => {
     hud.update(dt);
+    fx.update(dt); // damage numbers, MISS and BLOCK animate and fade only while ticked
     for (const [rig, g] of [[P, shadows[0]], [E, shadows[1]]] as const) {
       const lift = Math.max(0, (pelvisY - rig.view.y) / UNIT);
       g.position.set(rig.view.x + 0.35 * UNIT * rig.facing, FEET_Y);

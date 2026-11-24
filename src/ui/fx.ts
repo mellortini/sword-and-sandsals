@@ -1,10 +1,38 @@
 /**
  * Combat pop-ups in paper style. Timing from the reference: the number appears on the hit frame small and grey,
- * bursts into a red splat in 2-3 frames with an overshoot, and STAYS above the head until the next hit.
+ * bursts into a red splat in 2-3 frames with an overshoot and hangs above the head.
+ * Readability over the busy crowd (#148): every pop sits on a soft dark halo, drifts up a little and fades out after
+ * ~1.6 s, so an old number never sits next to a new one.
  */
-import { Container, Graphics, Text } from 'pixi.js';
+import { Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 
 const FPS = 30;
+/** frames a pop stays before it fades on its own */
+const LIFE = 48;
+/** px the pop rises over its life */
+const RISE = 26;
+
+let haloTex: Texture | null = null;
+/** soft dark disc behind a pop: lifts it off the crowd without a hard frame */
+function halo(radius: number, alpha = 0.6): Sprite {
+  if (!haloTex) {
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const g = c.getContext('2d')!;
+    const r = g.createRadialGradient(64, 64, 6, 64, 64, 64);
+    r.addColorStop(0, 'rgba(24,10,12,1)');
+    r.addColorStop(0.55, 'rgba(24,10,12,0.75)');
+    r.addColorStop(1, 'rgba(24,10,12,0)');
+    g.fillStyle = r;
+    g.fillRect(0, 0, 128, 128);
+    haloTex = Texture.from(c);
+  }
+  const s = new Sprite(haloTex);
+  s.anchor.set(0.5);
+  s.width = s.height = radius * 2;
+  s.alpha = alpha;
+  return s;
+}
 
 function star(g: Graphics, r0: number, r1: number, n: number, seed: number, color: number) {
   const pts: number[] = [];
@@ -21,7 +49,16 @@ function star(g: Graphics, r0: number, r1: number, n: number, seed: number, colo
 abstract class Pop extends Container {
   protected t = 0;
   dead = false;
-  update(dt: number) { this.t += dt * FPS; this.step(); }
+  private baseY: number | null = null;
+  update(dt: number) {
+    this.t += dt * FPS;
+    if (this.t > LIFE) this.dead = true;
+    this.baseY ??= this.y;
+    // ease-out drift upwards
+    const k = Math.min(1, this.t / LIFE);
+    this.y = this.baseY - RISE * (1 - (1 - k) * (1 - k));
+    this.step();
+  }
   protected abstract step(): void;
   fadeOut() { this.dead = true; }
 }
@@ -33,19 +70,20 @@ export class DamageSplat extends Pop {
     super();
     const sh = new Graphics();
     star(sh, 34, 56, 9, 7, 0x5a1612);
+    this.burst.addChild(halo(crit ? 96 : 84));
     sh.position.set(4, 5);
     sh.alpha = 0.55;
     const g = new Graphics();
     star(g, 34, 56, 9, 7, crit ? 0xd8452c : 0xb8302a);
     const inner = new Graphics();
     star(inner, 22, 36, 9, 3, crit ? 0xe8683e : 0xc93a30);
-    const num = new Text({ text: String(value), style: { fill: '#fbf3e6', fontSize: 42, fontFamily: 'Georgia', fontWeight: 'bold', stroke: { color: '#5a1612', width: 4 } } });
+    const num = new Text({ text: String(value), style: { fill: '#fbf3e6', fontSize: 46, fontFamily: 'Georgia', fontWeight: 'bold', stroke: { color: '#3a0e0b', width: 6 } } });
     num.anchor.set(0.5);
     this.burst.addChild(sh, g, inner, num);
     if (crit) {
-      const c = new Text({ text: 'CRITICAL', style: { fill: '#e8be4c', fontSize: 20, fontFamily: 'Georgia', fontWeight: 'bold', stroke: { color: '#3a1a10', width: 4 } } });
+      const c = new Text({ text: 'CRITICAL!', style: { fill: '#f2c14e', fontSize: 28, fontFamily: 'Georgia', fontWeight: 'bold', letterSpacing: 2, stroke: { color: '#2a1008', width: 6 } } });
       c.anchor.set(0.5);
-      c.position.set(0, -58);
+      c.position.set(0, -64);
       this.burst.addChild(c);
     }
     this.small = new Text({ text: String(value), style: { fill: '#d9d2c6', fontSize: 30, fontFamily: 'Georgia', fontWeight: 'bold' } });
@@ -63,7 +101,7 @@ export class DamageSplat extends Pop {
       return;
     }
     const s = t < 1 ? 0 : t < 3 ? 0.4 + (t - 1) * 0.45 : t < 5 ? 1.3 - (t - 3) * 0.15 : 1.0;
-    this.burst.scale.set(s);
+    this.burst.scale.set(s * 1.15);
   }
 }
 
@@ -81,14 +119,14 @@ export class BlockShield extends Pop {
     const tx = new Text({ text: 'BLOCK', style: { fill: '#f3e6d6', fontSize: 13, fontFamily: 'Georgia', fontWeight: 'bold', stroke: { color: '#3b3a38', width: 3 } } });
     tx.anchor.set(0.5);
     tx.position.set(0, -3);
-    this.icon.addChild(sh, g, inner, tx);
+    this.icon.addChild(halo(62), sh, g, inner, tx);
     this.icon.scale.set(0);
     this.addChild(this.icon);
   }
   protected step() {
     if (this.dead) { this.icon.scale.set(Math.max(0, this.icon.scale.x - 0.25)); if (this.icon.scale.x <= 0) this.destroy(); return; }
     const t = this.t;
-    this.icon.scale.set(t < 2 ? t * 0.65 : t < 4 ? 1.3 - (t - 2) * 0.15 : 1.0);
+    this.icon.scale.set((t < 2 ? t * 0.65 : t < 4 ? 1.3 - (t - 2) * 0.15 : 1.0) * 1.4);
   }
 }
 
@@ -97,16 +135,15 @@ export class MissText extends Pop {
   private word: Text;
   constructor() {
     super();
-    this.word = new Text({ text: 'MISS', style: { fill: '#e6ddcf', fontSize: 30, fontFamily: 'Georgia', fontWeight: 'bold', stroke: { color: '#3b3a38', width: 4 } } });
+    this.word = new Text({ text: 'MISS', style: { fill: '#efe6d8', fontSize: 40, fontFamily: 'Georgia', fontWeight: 'bold', letterSpacing: 3, stroke: { color: '#24191a', width: 6 } } });
     this.word.anchor.set(0.5);
     this.word.scale.set(0);
-    this.addChild(this.word);
+    this.addChild(halo(70, 0.55), this.word);
   }
   protected step() {
     const t = this.t;
-    if (this.dead || t > 30) { this.alpha -= 0.25; if (this.alpha <= 0) this.destroy(); return; }
+    if (this.dead) { this.alpha -= 0.2; if (this.alpha <= 0) this.destroy(); return; }
     this.word.scale.set(t < 2 ? t * 0.6 : t < 4 ? 1.2 - (t - 2) * 0.1 : 1.0);
-    this.word.y = -Math.min(t, 20) * 0.8;
   }
 }
 
