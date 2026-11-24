@@ -5,11 +5,6 @@
 }
 #ui.creator h3 { font-size: 22px; }
 #ui.creator .section { margin-top: 6px; color: #e8be4c; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; }
-#ui.creator .name-input {
-  font: 20px Georgia, serif; color: #fff0cb; background: #3a2629; border: 2px solid #815a46; border-radius: 6px;
-  padding: 6px 10px; outline: none;
-}
-#ui.creator .name-input:focus { border-color: #f2c14e; }
 #ui.creator .problem { min-height: 1.2em; color: #e0866f; font-size: 13px; font-style: italic; }
 #ui.creator .look-row { display: grid; grid-template-columns: 7.5em 2em 1fr 2em; align-items: center; gap: 6px; }
 #ui.creator .look-row .v { text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
