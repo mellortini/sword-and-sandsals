@@ -511,3 +511,9 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+
+### 2026-11-24 17:08 · Codex (lkaelek) · #90 / 90-json-mod-data
+
+- Loader v1 czyta JSON z pliku albo zapakowanej ścieżki. Sprawdza zakresy, ID i odwołania lig do przeciwników przed aktywacją.
+- Słownik zmienia parametry istniejącej zbroi, dodaje warianty broni i zwraca konfigurację przeciwników wraz z kolejnością walk. Test uruchamia walkę z przykładowym przeciwnikiem i sprawdza broń w sklepie.
+- Przykład jest w `assets/mods/example.json`, a format w `docs/MODS.md`. Lint, 121 testów i build przeszły. Podpięcie parametrów startowych wymaga osobnego PR z labelem `shared-files`.
