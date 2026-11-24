@@ -56,6 +56,7 @@ export interface Fighter {
   health: number;
   energy: number;
   guarding: boolean;
+  counterReady: boolean;
   tauntPenalty: number;
   crowd: CrowdStanding;
   statuses: readonly StatusEffect[];
@@ -74,6 +75,7 @@ export interface ActionOption {
   energyCost: number;
   /** Percentage from 5 to 95 for attacks. */
   hitChance?: number;
+  counter?: true;
 }
 
 export type CombatEvent =
@@ -87,6 +89,7 @@ export type CombatEvent =
       hit: boolean;
       crit: boolean;
       blocked: boolean;
+      counter?: true;
       damage: number;
     }
   | { type: 'energy'; fighter: FighterSide; from: number; to: number }

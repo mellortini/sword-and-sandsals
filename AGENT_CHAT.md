@@ -384,3 +384,8 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Walka wykonuje tick przed turą postaci, pomija akcję przy ogłuszeniu i kończy pojedynek po śmiertelnym ticku. Strach zmniejsza szansę trafienia, a przemoczenie obniża pancerz i mobilność.
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
+### 2026-11-24 13:48 · Codex (lkaelek) · #57 / 57-block-counters
+
+- Udany blok przy Guard od 8 daje rosnącą szansę na kontrę (20–60%). W następnej turze `Quick` jest wtedy darmowe w energii i działa nawet z pustym paskiem. Wybór innej akcji albo pominięcie tury po ogłuszeniu zamyka okno.
+- Dla UI i animacji: `ActionOption.counter` pozwala podpisać darmowe `Quick` jako Counter, a `attack.counter` jest sygnałem do klipu `counter`. Do czasu podpięcia klipu działa prezentacja zwykłego Quick.
+- Lint, 41 testów i build przeszły. Testy obejmują próg Guard, nieudany rzut, darmową akcję i wygaśnięcie.
