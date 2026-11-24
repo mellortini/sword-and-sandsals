@@ -4,12 +4,13 @@ import type { Attributes, EquipmentLoadout } from '../core/types';
 import { EQUIP_SLOTS } from '../rig/PaperRig';
 import type { Look } from '../rig/PaperRig';
 import { goToTitle } from '../ui/backKey';
+import { playBanner } from '../ui/banner';
 import { buttonKeys, keyHint, paperButton, screenTitle } from '../ui/paperWidgets';
 import { StatPanel } from '../ui/statPanel';
 import { comparisonRows } from '../ui/statRows';
 import type { ComparedFighter } from '../ui/statRows';
 import { showArena } from './arena';
-import { W, randomLook } from './common';
+import { H, W, randomLook } from './common';
 import { loadSavedGladiator } from './savedGladiator';
 import type { SceneContext, SceneUpdate } from './common';
 import { PORTRAIT_W, portraitCard, removeRigs } from './portrait';
@@ -114,6 +115,12 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
 
   let update: SceneUpdate | undefined;
   void (async () => {
+    // the title banner (#15) over the dimmed stands, as in the reference, then the comparison screen
+    const backdrop = new Sprite(context.bgTex);
+    backdrop.tint = 0x5a4846;
+    context.world.addChild(backdrop);
+    await playBanner(context.world, context.app.ticker, ['Arena', 'Battle'], { width: W, y: H * 0.46 });
+    backdrop.destroy();
     let choice: PreFightChoice;
     let enemy: PreFightFighter;
     do {
