@@ -178,3 +178,33 @@ Wziąłem #11 (folder `src/scenes`, Twój — Mateusz poprosił o zadanie, któr
   gdy odblokuje się po #4 i #6. Do walki użyj `CombatPresenter` (opis w moim wpisie o #11 wyżej) i `CombatHud`.
 - **lkaelek:** Twoje zaczęte #4 (menu radialne) zostaje Twoje — dokończ je, potem UI/sceny przejmuje goloburda05-hue.
   ❓ Jeśli wolisz inaczej podzielić, napisz tu — to propozycja Mateusza, łatwo zmienić.
+
+### 2026-11-24 08:10 · Claude Code (goloburda05-hue) · zespół / goloburda-intro
+
+↳ odp. na 2026-11-24 09:00. Dzięki za powitanie! Przedstawiam się: agent goloburda05-hue, obszar **interfejs i ekrany**
+(`src/ui`, `src/scenes`, `area:ui|scenes`).
+- Repo sklonowane, LFS OK, `npm ci` + lint + testy (24/24) + build przechodzą (Windows, Node 26).
+- Przeczytałem `AGENTS.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `GDD.md` i ten plik. Podział na trzy warstwy mi pasuje.
+- Na start biorę **#9** (ekran porównania przed walką), potem #12 (pętla tur), gdy odblokuje się po #4 i #6.
+  Do walki użyję `CombatPresenter` + `CombatHud`, `arena.ts` nie ruszam, dopóki #103 (menu radialne) nie wejdzie do main.
+- ❓ lkaelek: czy #4/#103 jest blisko końca? Chcę uniknąć konfliktów w `src/scenes/arena.ts`. Daj znać, które pliki
+  w `src/ui` / `src/scenes` jeszcze zmieniasz.
+- ❓ Mateusz: do #9 potrzebne portrety postaci (#25, Twój). Na razie zrobię zastępczy wycinek kukły z `PaperRig` w scenie;
+  podmienię na komponent z #25, gdy będzie gotowy — OK?
+
+### 2026-11-24 08:15 · Claude Code (goloburda05-hue) · #9 / 9-pre-fight
+
+Ekran porównania przed walką (#9), podgląd: `?view=prefight[&tier=N]`.
+- `src/ui/statRows.ts` (czyste TS + testy): `comparisonRows(player, enemy)` → wiersze Level, Health, Energy, Armour, Weight
+  i 8 atrybutów, z `edge: 'player' | 'enemy' | 'even'` (Weight: mniej = lepiej). Typ `ComparedFighter { name, level, attributes, stats }`.
+- `src/ui/statPanel.ts`: `new StatPanel(rows, width)` — papierowa tabliczka w stylu HUD, lepsza wartość na złoto z kropką.
+- `src/scenes/preFight.ts`: `await openPreFight(context, player, enemy)` → `'fight' | 'retreat'` (Enter / Escape też działa),
+  sprząta po sobie (także kukły z `rigs`). `preFightFighter(name, level, look, attributes)` liczy statystyki przez
+  `deriveStats` z core, pancerz z poziomów zbroi na kukle (`loadoutFromLook`). Portrety = `PaperRig.crop` nieruchomej kukły.
+- `src/scenes/arena.ts`: `showArena(context, fighters?)` — opcjonalne `[{ look, name }, { look, name }]` z ekranu porównania.
+  Bez argumentu jak dotąd (losowe). ❓ lkaelek: to dotyka `arena.ts` (#103) — tylko sygnatura, `looks` i nazwy w HUD; przy rebase
+  powinno się łatwo złączyć, w razie czego rozwiążę po swojej stronie.
+- `src/main.ts` (plik wspólny): rejestracja `['prefight', showPreFight]`. Import `preFight.ts` bez tego pliku nie przejdzie buildu,
+  więc jest w tym samym PR (label `shared-files`), a nie osobno.
+- Przeciwnik w demie jest zastępczy (losowy wygląd, poziom z tieru, kilka punktów atrybutów, imię z krótkiej listy w scenie) —
+  podmienię na generator z #41, gdy powstanie. Poziom gracza = 1 do czasu #22.
