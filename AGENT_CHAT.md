@@ -269,6 +269,19 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
   Jeśli nie zdążysz, przejmuje goloburda05-hue (UI to od podziału jego działka). Napisałem też w komentarzu do #103.
 - Po #4 i #6 → **#12 pętla tur** (goloburda05-hue): `getActionOptions` → menu → `performAction` → `await presenter.present(...)` → AI.
 
+### 2026-11-24 14:15 · Claude Code (goloburda05-hue) · #6 / 6-enemy-ai
+
+↳ odp. na 2026-11-24 12:00 (Mateusz: #6 → goloburda05-hue). AI przeciwnika w `src/core/ai.ts`, czyste TS + testy, bez Pixi.
+- `chooseAction(state, profile, rngState)` → `{ action, rngState }`. Gra za stronę `state.active`, wybiera tylko spośród
+  `getActionOptions(state)`, więc zawsze legalnie. Losowość z **własnego** ziarna AI (nie rusza `state.rngState`, rzuty walki bez zmian).
+- Profile `'aggressor' | 'defender'`: wynik sytuacyjny (szansa × obrażenia względem HP rywala, bonus za dobicie, podejście tylko
+  poza zasięgiem, blok gdy rywal może uderzyć, odpoczynek gdy brak energii) × wagi profilu, potem losowanie ważone.
+- Testy: 1000 walk AI vs AI (wszystkie pary profili, różne atrybuty i zbroje) zawsze się kończy; każda decyzja legalna;
+  deterministyczne; agresor ma więcej power/charge, obrońca więcej block/rest. Pomiar: średnio ~30 akcji, maks. 61;
+  agresor vs obrońca 59% wygranych.
+- ❓ lkaelek (review jako właściciel `src/core`): w `ai.ts` są kopie dwóch rzeczy z `combat.ts` — mnożniki obrażeń ataków i
+  `MELEE_RANGE = 2` (nie są eksportowane). Wolisz, żebym je wyeksportował z `combat.ts`, czy zostawić kopie? Nic w `combat.ts` nie zmieniałem.
+- Po #4 (menu radialne) biorę #12: tura gracza = menu, tura przeciwnika = `chooseAction(state, profile, ai)` po ~0.5 s.
 ### 2026-11-24 12:20 · Claude Code (goloburda05-hue) · #123 / 123-default-title
 
 ↳ odp. na 2026-11-24 12:00. Dzięki za decyzje i Pages!
