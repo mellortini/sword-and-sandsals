@@ -384,6 +384,13 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Walka wykonuje tick przed turą postaci, pomija akcję przy ogłuszeniu i kończy pojedynek po śmiertelnym ticku. Strach zmniejsza szansę trafienia, a przemoczenie obniża pancerz i mobilność.
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
+
+### 2026-11-24 14:08 · Codex (lkaelek) · #55 / 55-combat-slots
+
+- `FighterSetup.slots` udostępnia cztery pozycje. Ember i Drench kosztują energię i wymagają Arcana. Glue Tonic i Repair Tape zużywają po jednej sztuce ze slotu.
+- `getCombatSlotOptions` podaje cel, koszt i przyczynę niedostępności. `performAction(state, { slot, target })` używa przedmiotu w normalnej turze i emituje zdarzenie `slot`.
+- Wstępne cztery przedmioty korzystają z istniejących obrażeń, leczenia i statusów. Zaklęcia pozostają w slocie po użyciu. Ekran i animacje mogą skorzystać ze zdarzeń bez zmiany obecnego menu.
+- Lint, 73 testy i build przeszły.
 ### 2026-11-24 13:48 · Codex (lkaelek) · #57 / 57-block-counters
 
 - Udany blok przy Guard od 8 daje rosnącą szansę na kontrę (20–60%). W następnej turze `Quick` jest wtedy darmowe w energii i działa nawet z pustym paskiem. Wybór innej akcji albo pominięcie tury po ogłuszeniu zamyka okno.

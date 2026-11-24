@@ -1,5 +1,6 @@
 import type { Item } from '../data/equipment';
 import type { CrowdGift, CrowdStanding } from './crowd';
+import type { CombatItemId, CombatSlots } from './spells';
 import type { StatusEffect, StatusResistances, StatusTick } from './status';
 
 export type FighterSide = 'player' | 'enemy';
@@ -28,6 +29,7 @@ export interface FighterSetup {
   attributes?: Partial<Attributes>;
   equipment?: EquipmentLoadout;
   statusResistances?: StatusResistances;
+  slots?: CombatSlots;
   position?: number;
 }
 
@@ -63,6 +65,7 @@ export interface Fighter {
   crowd: CrowdStanding;
   statuses: readonly StatusEffect[];
   statusResistances: StatusResistances;
+  slots: CombatSlots;
 }
 
 export interface CombatState {
@@ -101,6 +104,7 @@ export type CombatEvent =
   | { type: 'taunt'; actor: FighterSide; target: FighterSide; penalty: number }
   | { type: 'crowd_gift'; fighter: FighterSide; gift: CrowdGift; amount: number }
   | ({ type: 'status'; fighter: FighterSide } & StatusTick)
+  | { type: 'slot'; actor: FighterSide; target: FighterSide; slot: number; item: CombatItemId; healthDelta: number }
   | { type: 'death'; fighter: FighterSide; winner: FighterSide }
   | { type: 'turn'; fighter: FighterSide };
 
