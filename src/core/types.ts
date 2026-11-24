@@ -1,4 +1,6 @@
 import type { Item } from '../data/equipment';
+import type { CrowdGift, CrowdStanding } from './crowd';
+import type { StatusEffect, StatusResistances, StatusTick } from './status';
 
 export type FighterSide = 'player' | 'enemy';
 export type AttackKind = 'quick' | 'normal' | 'power' | 'charge';
@@ -16,12 +18,15 @@ export interface Attributes {
   arcana: number;
 }
 
-export type EquipmentLoadout = Partial<Record<Item['slot'], number>>;
+export type HandSlot = 'weapon' | 'offHand';
+export type EquipmentSlot = Item['slot'] | HandSlot;
+export type EquipmentLoadout = Partial<Record<Item['slot'], number>> & Partial<Record<HandSlot, string>>;
 
 export interface FighterSetup {
   name?: string;
   attributes?: Partial<Attributes>;
   equipment?: EquipmentLoadout;
+  statusResistances?: StatusResistances;
   position?: number;
 }
 
@@ -30,6 +35,17 @@ export interface FighterStats {
   maxEnergy: number;
   armour: number;
   weight: number;
+  attackPower: number;
+  accuracyBonus: number;
+  evasionBonus: number;
+  blockChance: number;
+  criticalChance: number;
+  jumpDistance: number;
+  restRecovery: number;
+  tauntPenalty: number;
+  /** Percentage discount, capped at 25. */
+  shopDiscount: number;
+  spellPower: number;
 }
 
 export interface Fighter {
@@ -41,6 +57,9 @@ export interface Fighter {
   energy: number;
   guarding: boolean;
   tauntPenalty: number;
+  crowd: CrowdStanding;
+  statuses: readonly StatusEffect[];
+  statusResistances: StatusResistances;
 }
 
 export interface CombatState {
@@ -74,6 +93,8 @@ export type CombatEvent =
   | { type: 'block'; fighter: FighterSide }
   | { type: 'rest'; fighter: FighterSide; restored: number }
   | { type: 'taunt'; actor: FighterSide; target: FighterSide; penalty: number }
+  | { type: 'crowd_gift'; fighter: FighterSide; gift: CrowdGift; amount: number }
+  | ({ type: 'status'; fighter: FighterSide } & StatusTick)
   | { type: 'death'; fighter: FighterSide; winner: FighterSide }
   | { type: 'turn'; fighter: FighterSide };
 
