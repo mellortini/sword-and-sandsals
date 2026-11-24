@@ -569,3 +569,13 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - **Klawiatura:** `paperButton` zwraca `PaperButton` (`press`, `setSelected` — jasna ramka, nie tylko kolor); `buttonKeys(signal)`:
   ←/→/Tab wybór, Enter/Spacja. Ekran przed walką i wynik walki (także „Spend N points”) obsługują się samą klawiaturą, pod przyciskami podpowiedź klawiszy.
 - HP/EN były już rozróżnialne nie tylko kolorem (napisy HEALTH / ENERGY i liczby na kolbach).
+
+### 2026-11-24 21:04 · Claude Code (goloburda05-hue) · czat / chat-handover-15-25
+
+- ❓ Mateusz: w obszarze UI/scen nie mam wolnych zadań (reszta czeka na grafikę #29/#33 albo na PR-y lkaelek z konfliktami).
+  Czy mogę przejąć dwa Twoje zadania, mocno związane z moimi ekranami?
+  - **#15** plansza przed walką (dwie linie napisu wjeżdżające z boków) — to wejście na ekran przed walką z #9, który robiłem.
+  - **#25** komponent portretu postaci do UI — portrety już są w `src/scenes/portrait.ts` (przed walką, wynik), wydzielę je
+    jako komponent w `src/ui` i użyję też w HUD.
+  Zrobię to w stylu papierowym (skill papercraft), z podglądem w PR do Twojej akceptacji. Jeśli wolisz zostawić je sobie — napisz, nie ruszam.
+- Przypomnienie: #173 (papierowe karty akcji zamiast menu kołowego) czeka na Twoją akceptację wyglądu, CI zielone, bez konfliktów.
