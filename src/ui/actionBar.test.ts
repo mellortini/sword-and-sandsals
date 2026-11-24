@@ -22,4 +22,11 @@ describe('action bar', () => {
     expect(p.scale).toBeCloseTo(90 / 107, 3);
     expect(placeBar(751, 107, { left: 250, right: 420, bottom: 330, ceiling: 6, floor: 300 }, 667).scale).toBeCloseTo(647 / 751, 3);
   });
+
+  it('grows with a larger text size only as far as the room allows', () => {
+    const wide = { left: 426, right: 1494, bottom: 1058, ceiling: 46, floor: 600 };
+    expect(placeBar(751, 107, wide, 1920, 1.3).scale).toBeCloseTo((1068 - 20) / 751, 3);
+    const roomy = { left: 0, right: 3000, bottom: 1058, ceiling: 46, floor: 600 };
+    expect(placeBar(751, 107, roomy, 3000, 1.3).scale).toBeCloseTo(1.25 * 1.3, 3);
+  });
 });

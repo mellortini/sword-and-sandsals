@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 
+import { textScale } from './textSize';
 import { Tooltip } from './tooltip';
 import type { ActionOption, CombatAction } from '../core/types';
 import './actionBar.css';
@@ -44,14 +45,14 @@ const MIN_SCALE_BETWEEN = 0.8;
 /**
  * Where the bar goes and how large: between the HUD panels when it fits there; otherwise (a phone held sideways)
  * at the top, over the stands, as large as the screen width and the room above the fighters' heads allow.
- * Never over the fighters.
+ * Never over the fighters. A larger text size (#77) lets the cards grow as far as the room allows.
  */
-export function placeBar(barWidth: number, barHeight: number, slot: BarSlot, screenWidth: number): BarPlace {
+export function placeBar(barWidth: number, barHeight: number, slot: BarSlot, screenWidth: number, textScale = 1): BarPlace {
   const between = (slot.right - slot.left - 2 * SLOT_MARGIN) / barWidth;
   if (between >= MIN_SCALE_BETWEEN) {
-    return { x: (slot.left + slot.right) / 2, y: slot.bottom, edge: 'bottom', scale: Math.min(MAX_SCALE, between) };
+    return { x: (slot.left + slot.right) / 2, y: slot.bottom, edge: 'bottom', scale: Math.min(MAX_SCALE * textScale, between) };
   }
-  const scale = Math.min(1, (screenWidth - 2 * SLOT_MARGIN) / barWidth, Math.max(0, slot.floor - slot.ceiling) / barHeight);
+  const scale = Math.min(textScale, (screenWidth - 2 * SLOT_MARGIN) / barWidth, Math.max(0, slot.floor - slot.ceiling) / barHeight);
   return { x: screenWidth / 2, y: slot.ceiling, edge: 'top', scale: Math.max(0.5, scale) };
 }
 
@@ -108,7 +109,7 @@ export class ActionBar {
 
   /** Fit the bar between the HUD panels or over the fighters (screen pixels); cheap to call every frame. */
   place(slot: BarSlot) {
-    const { x, y, edge, scale } = placeBar(this.element.offsetWidth, this.element.offsetHeight, slot, document.documentElement.clientWidth);
+    const { x, y, edge, scale } = placeBar(this.element.offsetWidth, this.element.offsetHeight, slot, document.documentElement.clientWidth, textScale());
     const key = `${x.toFixed(1)} ${y.toFixed(1)} ${edge} ${scale.toFixed(3)}`;
     if (key === this.placed) return;
     this.placed = key;

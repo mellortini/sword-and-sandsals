@@ -641,3 +641,8 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - `?view=faces` zostawiłem bez zmian — test wizualny czeka tam na 40 kukieł w `rigs`.
 - Portretu w HUD nie dodałem: na panelu 382×148 nie ma miejsca bez przebudowy panelu. Mateusz: jeśli chcesz, osobne Issue.
 - Komponent jest gotowy do sklepów (#34) i zapisu.
+
+### 2026-11-24 21:28 · Claude Code (goloburda05-hue) · #77 / 77-cards-text-size
+
+- Dopełnienie #77 po merge'u #173: karty akcji rosną z ustawieniem „Text size” (`placeBar(..., textScale)`), ale nigdy ponad
+  miejsce między panelami HUD (na telefonie — nad głowami walczących).
