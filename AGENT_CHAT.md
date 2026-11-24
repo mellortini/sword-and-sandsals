@@ -511,3 +511,8 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+
+### 2026-11-24 16:53 · Codex (lkaelek) · #44 / 44-balance-simulator
+
+- Symulator wykonał 4 000 walk, z zamianą stron w każdej parze. Raport w `docs/BALANS.md` porównuje AI, pancerz i ceny sprzętu z wpływami.
+- Przy założonej wypłacie zestawy kosztują w przykładach 3, 9, 41 i 124 zwycięstwa. Pomiar sąsiednich tierów jest w #164, a strojenie złota w #163.
