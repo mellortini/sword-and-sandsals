@@ -5,6 +5,7 @@ import type { Attributes, CombatAction, FighterSide } from '../core/types';
 import type { Look } from '../rig/PaperRig';
 import { summarizeFight } from '../ui/fightSummary';
 import { FxLayer } from '../ui/fx';
+import { hudScaleFor } from '../ui/phone';
 import { CombatHud } from '../ui/hud';
 import { RadialMenu } from '../ui/radialMenu';
 import { CombatPresenter } from './combatPresenter';
@@ -113,10 +114,11 @@ export async function showArena(context: SceneContext, fighters?: readonly [Aren
   })();
 
   return (dt) => {
+    hud.setPanelScale(hudScaleFor(world.scale.x));
     hud.update(dt);
     fx.update(dt); // damage numbers, MISS and BLOCK animate and fade only while ticked
     const { x, y } = P.view.getGlobalPosition();
-    menu.setAnchor(x, y, world.scale.x);
+    menu.setAnchor(x, y, world.scale.x, world.position.y + hud.panelTop * world.scale.x);
     for (const [rig, g] of [[P, shadows[0]], [E, shadows[1]]] as const) {
       const lift = Math.max(0, (pelvisY - rig.view.y) / UNIT);
       g.position.set(rig.view.x + 0.35 * UNIT * rig.facing, FEET_Y);
