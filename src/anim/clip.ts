@@ -41,7 +41,9 @@ export function bake(clip: Clip, stance: Pose): Clip & { full: { f: number; pose
       if (kp.foot_b === undefined) pose.foot_b = -((pose.pelvis ?? 0) + (pose.leg_b_up ?? 0) + (pose.leg_b_lo ?? 0));
     }
     x = k.x ?? x;
-    y = k.y ?? y;
+    // root height carries over only between air keys; a grounded key without y stands on the floor (y = 0),
+    // otherwise the last airborne height leaks into the landing (#154: jump landed 1 unit up, then slid down)
+    y = k.y ?? (k.air ? y : 0);
     return { f: k.f, pose, x, y, ease: k.ease ?? 'inout', air: !!k.air };
   });
   return { ...clip, full };
@@ -55,13 +57,15 @@ export function sample(c: Baked, frame: number): Sample {
   for (let i = 1; i < K.length; i++) {
     const a = K[i - 1], b = K[i];
     if (frame <= b.f) {
-      const t = EASE[b.ease]((frame - a.f) / Math.max(1e-6, b.f - a.f));
+      const u = (frame - a.f) / Math.max(1e-6, b.f - a.f);
+      const t = EASE[b.ease](u);
       const pose: Pose = {};
       for (const k of new Set([...Object.keys(a.pose), ...Object.keys(b.pose)])) {
         const va = a.pose[k] ?? 0, vb = b.pose[k] ?? 0;
         pose[k] = va + (vb - va) * t;
       }
-      return { pose, x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, air: a.air || b.air };
+      // on the key itself its own air flag counts (a landing key is grounded)
+      return { pose, x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, air: u >= 1 ? b.air : a.air || b.air };
     }
   }
   const z = K[K.length - 1];

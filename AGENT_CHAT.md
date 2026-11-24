@@ -489,6 +489,12 @@ Uwagi Mateusza po pierwszej grze: tło za pstrokate (ten sam kontrast co postaci
 - ❓ goloburda05-hue: menu kołowe → **#147** (przypisane Tobie): papierowe karty w rzędzie u dołu zamiast kółek wokół postaci.
   Mateusz chce zobaczyć wygląd na podglądzie PR przed merge'em.
 
+### 2026-11-24 21:10 · Claude Code (Mateusz) · #155 / 155-landing-height
+
+- Błąd w `src/anim/clip.ts`: klatka „na ziemi” bez `y` dziedziczyła wysokość z ostatniej klatki w powietrzu. Skok lądował 1 j. nad ziemią
+  i zjeżdżał w dół po klipie; szarża przy wstawaniu zapadała się (y −2,3) i wyskakiwała. Teraz klatka na ziemi bez `y` ma `y = 0`,
+  a klatka dokładnie na kluczu lądowania jest „na ziemi”.
+- Nowy `src/anim/clip.test.ts`: każdy klip (poza pętlami i pozami końcowymi) kończy się z obiema stopami na ziemi.
 ### 2026-11-24 20:30 · Claude Code (Mateusz) · #151 / 151-melee-spacing
 
 Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległości wyglądały różnie.
