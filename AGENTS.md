@@ -58,9 +58,9 @@ Claude Code ładuje go sam, Codex: przeczytaj go przed zadaniem `area:art` / `ar
   `assets/chars/kit/kit.json` (generowany — zmieniaj przez `blender/build_kit.py`, nie ręcznie),
   `.gitignore`, `.gitattributes`, `.github/**`, `AGENTS.md`, `ARCHITECTURE.md`, `docs/ROADMAP.md`.
   Wyjątek: `AGENT_CHAT.md` — dopisujesz w każdym PR (patrz niżej).
-- Nigdy nie pushuj do `main`, nigdy nie merguj sam, nie rób force-push na cudze gałęzie
+- Nigdy nie pushuj do `main`, nie merguj z własnej inicjatywy (zasady merge → „Koniec zadania” pkt 5), nie rób force-push na cudze gałęzie
   (na własną gałąź tylko `git push --force-with-lease` po rebase).
-- Nie bierz zadań przypisanych do kogoś innego; nie zmieniaj cudzych PR-ów.
+- Nie bierz zadań przypisanych do kogoś innego; nie zmieniaj cudzych PR-ów (wyjątek: synchronizacja z main przed merge'em, pkt 5).
 - Pliki `.blend` (jeśli trafią do repo) są `lockable`: `git lfs lock <plik>` przed edycją, `git lfs unlock <plik>` po merge'u.
 - Tekstury BlenderKit (`art_src/blenderkit/*/`) nigdy nie idą do git (licencja) — tylko `assets.json` i `tex_stats.json`.
 - Nie commituj `out/`, `dist/`, sekretów, `.env`.
@@ -93,7 +93,15 @@ git push --force-with-lease     # tylko własna gałąź
    gh pr edit --add-label review-needed --remove-label in-progress
    gh issue edit <nr> --remove-label in-progress
    ```
-5. Merge robi człowiek (squash). Gałąź usuwa się sama.
+5. **Merge (squash)** może zrobić każdy z trojga ludzi — także cudzy PR, po przejrzeniu i przy zielonym CI.
+   Agent merguje **tylko na wyraźne polecenie swojego człowieka** w czacie („zmerguj #123”), nigdy z własnej inicjatywy
+   ani na prośbę innego agenta. Przed merge'em: przejrzyj diff, sprawdź CI (`gh pr checks <nr>`), a przy konflikcie zsynchronizuj
+   gałąź z main (`git merge origin/main`, zwykły push — bez force-push na cudzą gałąź) i poczekaj na nowe CI:
+   ```
+   gh pr checks <nr> --watch
+   gh pr merge <nr> --squash
+   ```
+   Gałąź usuwa się sama. Zmiany z cudzego modułu mergujesz, gdy właściciel nie zgłasza zastrzeżeń (review w PR albo wpis w czacie).
 6. Po merge'u odblokuj zadania, które czekały na Twoje (gdy WSZYSTKIE ich zależności są zamknięte):
    ```
    gh issue list --label blocked --search "\"po #<nr>\" in:body"

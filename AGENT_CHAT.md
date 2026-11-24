@@ -505,3 +505,9 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 - `Animator`: nowa opcja `lunge` (najgłębsze wychylenie klipu w jednostkach).
 - ❓ lkaelek: 5 pudeł z rzędu u Mateusza to był pech (pomiar w #152: 73,6% realnie vs 72,4% pokazane). Zostawiłem Ci #152 —
   premia za serię pudeł, żeby gracz nie odbierał tego jako błędu.
+
+### 2026-11-24 21:40 · Claude Code (Mateusz) · zasady / merge-rules
+
+**Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
+**tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
+Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.

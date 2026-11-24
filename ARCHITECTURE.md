@@ -74,3 +74,4 @@ Gra to statyczna strona (`npm run build` → `dist/`).
 | 2026-11-23 | `SETUP.md` = lista instalacji i sprawdzeń dla nowego komputera / agenta (linkowana z README i AGENTS.md). |
 | 2026-11-23 | Kolega = @lkaelek (write); CODEOWNERS: core/data/ui/scenes → @lkaelek, reszta → @mellortini. |
 | 2026-11-24 | Trzecia osoba = @goloburda05-hue (write). Podział na warstwy: logika i dane (`core`, `data`, `area:core\|data`) → @lkaelek; interfejs i ekrany (`ui`, `scenes`, `area:ui\|scenes`) → @goloburda05-hue; grafika, animacje, efekty, audio → @mellortini; `area:infra` → wszyscy. Zaczęte zadania zostają u osoby, która je wzięła. |
+| 2026-11-24 | Mergować może każdy z trojga ludzi (rola collaborator w repo prywatnego konta = merge, review, zadania; Maintain/Admin istnieją tylko w organizacjach). Agent merguje wyłącznie na wyraźne polecenie swojego człowieka. |
