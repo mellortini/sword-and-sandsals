@@ -21,6 +21,7 @@ export interface SavedCharacter {
   attributePoints?: number;
   skillPoints?: number;
   gold: number;
+  health?: number;
   attributes: Attributes;
   /** Appearance, equipped weapon and five independent armour slots. */
   look: Look;
@@ -74,6 +75,7 @@ function isCharacter(value: unknown): value is SavedCharacter {
     && within(value.level, 1, MAX_LEVEL) && within(value.experience, 0)
     && (value.attributePoints === undefined || within(value.attributePoints, 0))
     && (value.skillPoints === undefined || within(value.skillPoints, 0)) && within(value.gold, 0)
+    && (value.health === undefined || within(value.health, 0))
     && isRecord(attributes) && ATTRIBUTES.every((key) => within(attributes[key], 0))
     && isLook(value.look)
     && (hands === undefined || (isRecord(hands) && ['weapon', 'offHand'].every((slot) => hands[slot] === undefined || isItemId(hands[slot]))))

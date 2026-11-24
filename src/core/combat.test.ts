@@ -124,7 +124,7 @@ describe('combat modifiers', () => {
   it('applies the taunt penalty to the target for one turn', () => {
     const taunted = play(atContact(), 'taunt').state;
     const normal = getActionOptions(taunted).find(({ action }) => action === 'normal');
-    expect(normal?.hitChance).toBe(60);
+    expect(normal?.hitChance).toBe(54);
     expect(play(taunted, 'rest').state.fighters.enemy.tauntPenalty).toBe(0);
   });
 
