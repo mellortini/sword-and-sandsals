@@ -1,4 +1,6 @@
 import { Container, Graphics, Text } from 'pixi.js';
+import type { CrowdGift } from '../core/crowd';
+import { CrowdMeter } from './crowdMeter';
 
 interface HudFighter {
   readonly name: string;
@@ -8,6 +10,15 @@ interface HudFighter {
     readonly maxHealth: number;
     readonly maxEnergy: number;
   };
+  /** crowd favour 0-100 (#51); without it the crowd strip stays hidden */
+  readonly crowd?: { readonly favour: number };
+}
+
+/** a gift the crowd threw during the last action (the core's `crowd_gift` event) */
+export interface HudGift {
+  readonly fighter: 'player' | 'enemy';
+  readonly gift: CrowdGift;
+  readonly amount: number;
 }
 
 export interface HudState {
@@ -15,6 +26,7 @@ export interface HudState {
     readonly player: HudFighter;
     readonly enemy: HudFighter;
   };
+  readonly gifts?: readonly HudGift[];
 }
 
 const PANEL_WIDTH = 382;
@@ -41,6 +53,7 @@ export class CombatHud extends Container {
   setState(state: HudState) {
     this.player.setState(state.fighters.player);
     this.enemy.setState(state.fighters.enemy);
+    for (const g of state.gifts ?? []) (g.fighter === 'player' ? this.player : this.enemy).celebrate(g.gift, g.amount);
   }
 
   update(dt: number) {
@@ -55,6 +68,7 @@ class FighterPanel extends Container {
   });
   private readonly health = new Flask('HEALTH', 0xcf493d, 0xff987a);
   private readonly energy = new Flask('ENERGY', 0x377bb1, 0x9adcff);
+  private readonly crowd = new CrowdMeter(PANEL_WIDTH - 36);
 
   constructor() {
     super();
@@ -72,8 +86,12 @@ class FighterPanel extends Container {
     this.nameText.position.set(PANEL_WIDTH / 2, 22);
     this.health.position.set(44, 104);
     this.energy.position.set(230, 104);
-    this.addChild(plate, this.nameText, this.health, this.energy);
+    this.crowd.position.set(18, -38);
+    this.crowd.visible = false;
+    this.addChild(this.crowd, plate, this.nameText, this.health, this.energy);
   }
+
+  celebrate(gift: CrowdGift, amount: number) { this.crowd.celebrate(gift, amount); }
 
   setState(fighter: HudFighter, immediate = false) {
     if (this.nameText.text !== fighter.name) {
@@ -84,11 +102,18 @@ class FighterPanel extends Container {
     }
     this.health.setValue(fighter.health, fighter.stats.maxHealth, immediate);
     this.energy.setValue(fighter.energy, fighter.stats.maxEnergy, immediate);
+    if (fighter.crowd) {
+      this.crowd.setFavour(fighter.crowd.favour, immediate || !this.crowd.visible);
+      this.crowd.visible = true;
+    } else {
+      this.crowd.visible = false;
+    }
   }
 
   update(dt: number) {
     this.health.update(dt);
     this.energy.update(dt);
+    this.crowd.update(dt);
   }
 }
 

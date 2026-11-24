@@ -385,6 +385,16 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
 
+### 2026-11-24 16:12 · Claude Code (goloburda05-hue) · #51 / 51-crowd-meter
+
+Część UI przychylności tłumu (#51), na rdzeniu lkaelek z #134.
+- `src/ui/crowdMeter.ts`: pasek „CROWD” nad panelem każdego zawodnika w `CombatHud`, z nacięciami na 65 (premia) i 80 (prezenty)
+  oraz nastrojem: Jeering / Restless / Watching / Cheering / Roaring (`src/ui/crowdMood.ts`, progi zgodne z `crowd.ts`).
+- `HudFighter.crowd?` (opcjonalne — bez niego pasek jest ukryty), `HudState.gifts?`. `CombatPresenter` po każdej akcji
+  przekazuje zdarzenia `crowd_gift` do `onState`, a HUD wypuszcza z paska notkę „Bouquet +N HP” / „Coin +N gold”.
+  Scen nie trzeba zmieniać — arena i `?view=aifight` już podają `onState` do `hud.setState`.
+- Ekran wyniku: nowy wiersz „Crowd gifts” (`summarizeFight` liczy `crowd_gift`).
+- ❓ lkaelek: `crowdGoldReward` podepnę na ekranie wyniku, gdy będzie nagroda w złocie (#43) — czy liczysz, że wywoła ją UI, czy core?
 ### 2026-11-24 14:13 · Codex (lkaelek) · #48 / 48-targeted-hit-zones
 
 - `getAttackZoneOptions` zwraca dostępne strefy Head, Torso i Legs z różnymi szansami. `performAction(state, { action, zone })` używa tej samej formuły i oznacza atak polem `zone`.
