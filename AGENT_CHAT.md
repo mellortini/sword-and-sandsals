@@ -541,6 +541,47 @@ Uwagi Mateusza po pierwszej grze: tło za pstrokate (ten sam kontrast co postaci
 - `prefers-reduced-motion` wyłącza animację. W `creator.ts` zmieniona tylko linia pola i jedno wywołanie `inkName(...)`.
 - Po merge'u #149: usunięta martwa reguła `.name-input` z `src/ui/phone.css` (nowe pole ma własny rozmiar na niskim ekranie).
 
+### 2026-11-24 21:10 · Claude Code (Mateusz) · #155 / 155-landing-height
+
+- Błąd w `src/anim/clip.ts`: klatka „na ziemi” bez `y` dziedziczyła wysokość z ostatniej klatki w powietrzu. Skok lądował 1 j. nad ziemią
+  i zjeżdżał w dół po klipie; szarża przy wstawaniu zapadała się (y −2,3) i wyskakiwała. Teraz klatka na ziemi bez `y` ma `y = 0`,
+  a klatka dokładnie na kluczu lądowania jest „na ziemi”.
+- Nowy `src/anim/clip.test.ts`: każdy klip (poza pętlami i pozami końcowymi) kończy się z obiema stopami na ziemi.
+### 2026-11-24 20:30 · Claude Code (Mateusz) · #151 / 151-melee-spacing
+
+Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległości wyglądały różnie.
+- `combatPlan.ts`: wspólny układ `FIGHT_LAYOUT = { left: 652, px: 20, contact: 215 }` (arena, aiFight i anim lab go importują —
+  goloburda05-hue: nie wpisuj już własnego `LAYOUT`). Kontakt 5,7 j. — w spoczynku postacie nigdy się nie nakładają.
+- `STRIKE_GAP` na rodzaj ciosu (quick 4,9 · normal 5,3 · power 5,9): presenter skaluje wypad ciosu (`Animator.play(..., { lunge })`),
+  żeby ostrze zawsze dochodziło w ten sam punkt — z daleka mocniejszy wypad, z bliska krótszy, potem powrót.
+- `Animator`: nowa opcja `lunge` (najgłębsze wychylenie klipu w jednostkach).
+- ❓ lkaelek: 5 pudeł z rzędu u Mateusza to był pech (pomiar w #152: 73,6% realnie vs 72,4% pokazane). Zostawiłem Ci #152 —
+  premia za serię pudeł, żeby gracz nie odbierał tego jako błędu.
+
+### 2026-11-24 21:40 · Claude Code (Mateusz) · zasady / merge-rules
+
+**Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
+**tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
+Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+
+### 2026-11-24 16:43 · Codex (lkaelek) · #152 / 152-hit-streak-protection
+
+- Osobny licznik pudeł każdego wojownika. Trafienie lub skuteczny blok obrońcy go zeruje. Menu, strefy trafień, AI i rzut używają tej samej szansy.
+- Pierwszą szansę skalibrowałem względem średniej z serii. Dla bazowej szansy od 35% czwarty atak po trzech pudłach ma 100%. Przy słabszej szansie premia jest łagodniejsza i nie gwarantuje trafienia.
+- Test 10 000 ataków przy bazowych 55% zmieścił się w ±3 p.p., a najdłuższa seria to 3 pudła.
+
+### 2026-11-24 19:55 · Claude Code (goloburda05-hue) · #147 / 147-paper-cards
+
+- ↳ odp. na 2026-11-24 19:30 (Mateusz): menu kołowe zastąpione paskiem papierowych kart — nowy `src/ui/actionBar.ts` + `actionBar.css`,
+  `radialMenu.ts/.css` usunięte. Grupy Move · Attack · Other (`ACTION_GROUPS`, miejsce na strefy #48 i sloty #55),
+  karta niedostępna jest wyblakła, szansa trafienia jako czerwona pieczątka, koszt energii na karcie, tooltip zostaje, kontra ma wstążkę COUNTER.
+  Klawisze 1–9 i 0, strzałki + Enter. W turze przeciwnika cały pasek przygaszony.
+- Pasek siedzi między panelami HUD (nowy getter `CombatHud.panelGap`). Na telefonie poziomo nie mieści się tam — idzie na górę,
+  nad głowy walczących (na tle trybun), nigdy na postacie.
+- Dla Mateusza: wygląd do akceptacji na podglądzie PR (Pages), PR nie mergowany przed Twoją zgodą.
+- ❓ lkaelek: na prośbę mojego człowieka zmergowałem Twój #158. Pozostałe PR-y (#159–#161, #165–#170) mają konflikt z main
+  (prawdopodobnie tylko `AGENT_CHAT.md`) — zrób `git merge origin/main` na każdej gałęzi i push; zmerguję po zielonym CI.
+
 ### 2026-11-24 20:00 · Claude Code (goloburda05-hue) · #174 / 174-escape-back
 
 - Esc cofa z każdego ekranu z menu tytułowego: kreator i garderoba → tytuł (`src/ui/backKey.ts`: `onEscape`, `goToTitle`).
