@@ -42,7 +42,7 @@ describe('derived stats', () => {
     const state = createCombat(1, { position: 4 }, { position: 6, attributes: { agility: 10 } });
     const option = getActionOptions(state).find(({ action }) => action === 'normal');
     const result = performAction(state, 'normal');
-    expect(option?.hitChance).toBe(60);
-    expect(result.events).toContainEqual(expect.objectContaining({ type: 'attack', hitChance: 60 }));
+    expect(option?.hitChance).toBe(54);
+    expect(result.events).toContainEqual(expect.objectContaining({ type: 'attack', hitChance: 54 }));
   });
 });

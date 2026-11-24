@@ -2,10 +2,15 @@ import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import { createCombat, getActionOptions, performAction } from '../core/combat';
 import { nextRandom } from '../core/rng';
 import type { CombatEvent, CombatState } from '../core/types';
+import type { SavedCharacter } from '../core/save';
 import { summarizeFight, summaryRows } from '../ui/fightSummary';
+import { xpSweeps } from '../ui/levelUpRules';
+import type { FightProgress } from '../ui/levelUpRules';
 import type { FightSummary } from '../ui/fightSummary';
-import { paperButton, screenTitle } from '../ui/paperWidgets';
+import { buttonKeys, keyHint, paperButton, screenTitle } from '../ui/paperWidgets';
+import type { PaperButton } from '../ui/paperWidgets';
 import { StatPanel } from '../ui/statPanel';
+import { XpBar } from '../ui/xpBar';
 import { H, W, randomLook } from './common';
 import type { SceneContext, SceneUpdate } from './common';
 import { PORTRAIT_H, PORTRAIT_W, portraitCard, removeRigs } from './portrait';
@@ -19,6 +24,13 @@ export interface FightResult {
   readonly enemy: PortraitSubject;
   /** `summarizeFight(events)` over every event of the fight; its `winner` decides Victory or Defeat */
   readonly summary: FightSummary;
+  /** the saved gladiator's XP before and after this fight (#24); without it there is no XP bar */
+  readonly progress?: FightProgress;
+  /**
+   * opens the level-up screen for the gladiator and resolves with it saved (or unchanged on Later);
+   * the result screen offers it while the gladiator has unspent attribute points
+   */
+  readonly spendPoints?: (character: SavedCharacter) => Promise<SavedCharacter>;
 }
 
 const PANEL_W = 640;
@@ -55,22 +67,62 @@ export async function openFightResult(context: SceneContext, result: FightResult
   root.addChild(panel);
 
   const buttonsY = TOP + PORTRAIT_H + 160;
+  // keyboard (#77): ←/→ choose, Enter presses (Fight again first), Escape = Leave
+  const listening = new AbortController();
+  const keys = buttonKeys(listening.signal);
+  let finish: (choice: FightResultChoice) => void = () => {};
+  const buttons = [
+    paperButton('Fight again', W / 2 - 160, buttonsY, true, () => finish('again'), 280),
+    paperButton('Leave', W / 2 + 160, buttonsY, false, () => finish('leave'), 280),
+  ];
+  root.addChild(...buttons, keyHint('← →  choose    Enter  confirm    Esc  leave', W / 2, buttonsY + 112));
+  keys.add(...buttons);
+
+  // XP bar under the numbers, then a button to place new attribute points once the bar reaches the new level
+  let bar: XpBar | null = null;
+  let tick: (() => void) | null = null;
+  const { progress, spendPoints } = result;
+  if (progress) {
+    let gladiator = progress.after;
+    bar = new XpBar(PANEL_W - 60, xpSweeps(progress.before, progress.after), progress.earned, (level) => `LEVEL ${level}`);
+    bar.position.set((W - PANEL_W) / 2 + 30, TOP + panel.panelHeight + 26);
+    root.addChild(bar);
+    const ticker = context.app.ticker;
+    const onTick = () => bar?.update(ticker.deltaMS / 1000);
+    ticker.add(onTick);
+    tick = () => ticker.remove(onTick);
+
+    const spendY = TOP + panel.panelHeight + 120;
+    let spend: PaperButton | null = null;
+    const offer = () => {
+      spend?.destroy({ children: true });
+      spend = null;
+      const points = gladiator.attributePoints ?? 0;
+      if (!spendPoints || points === 0) return;
+      spend = paperButton(`Spend ${points} ${points === 1 ? 'point' : 'points'}`, W / 2, spendY, true, async () => {
+        bar?.skip();
+        gladiator = await spendPoints(gladiator);
+        offer();
+      }, 360);
+      root.addChild(spend);
+      keys.add(spend);
+    };
+    // points left from earlier fights can be spent at once; new ones appear with the LEVEL UP flash
+    if ((progress.before.attributePoints ?? 0) > 0 || progress.after.level === progress.before.level) offer();
+    bar.onLevelUp = () => offer();
+  }
+
   return new Promise<FightResultChoice>((resolve) => {
-    const keys = new AbortController();
-    const done = (choice: FightResultChoice) => {
-      keys.abort();
+    finish = (choice: FightResultChoice) => {
+      listening.abort();
+      tick?.();
       removeRigs(rigs, added);
       root.destroy({ children: true });
       resolve(choice);
     };
-    root.addChild(
-      paperButton('Fight again', W / 2 - 160, buttonsY, true, () => done('again'), 280),
-      paperButton('Leave', W / 2 + 160, buttonsY, false, () => done('leave'), 280),
-    );
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') done('again');
-      else if (e.key === 'Escape') done('leave');
-    }, { signal: keys.signal });
+      if (e.key === 'Escape') finish('leave');
+    }, { signal: listening.signal });
   });
 }
 
