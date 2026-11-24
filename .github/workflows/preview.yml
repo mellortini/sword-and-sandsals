@@ -1,0 +1,90 @@
+name: PR preview
+
+# Every PR from this repository is built and published to GitHub Pages under /<repo>/pr-<number>/,
+# with a link in a PR comment. Closing the PR removes its folder.
+# One-time setup (repo admin): Settings → Pages → Source: "Deploy from a branch", branch `gh-pages`, folder `/ (root)`.
+# The gh-pages branch is created by the first run and always kept as a single commit (no history growth).
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# gh-pages is shared by all PRs: one update at a time
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
+
+env:
+  PR: ${{ github.event.number }}
+  GH_TOKEN: ${{ github.token }}
+  MARKER: '<!-- pr-preview -->'
+  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+jobs:
+  deploy:
+    # forks get a read-only token, so they cannot publish
+    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build for the preview subfolder
+        run: npm run build
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/pr-${{ github.event.number }}/
+
+      - name: Publish to gh-pages
+        run: |
+          set -euo pipefail
+          .github/scripts/pages-checkout.sh pages
+          rm -rf "pages/pr-$PR"
+          mkdir -p "pages/pr-$PR"
+          cp -R dist/. "pages/pr-$PR/"
+          .github/scripts/pages-push.sh pages "Preview PR #$PR (${HEAD_SHA::7})"
+
+      - name: Comment with the link
+        run: |
+          set -euo pipefail
+          url="https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${{ github.event.repository.name }}/pr-$PR/"
+          body="$MARKER
+          **Preview:** $url
+          Views: [arena]($url) · [pre-fight]($url?view=prefight) · [wardrobe]($url?view=wardrobe) · [anim lab]($url?view=anim) · [lineup]($url?view=lineup)
+
+          Build of \`${HEAD_SHA::7}\`. GitHub Pages may need a minute after this comment before the page updates."
+          .github/scripts/pr-comment.sh "$body"
+
+  cleanup:
+    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          sparse-checkout: .github/scripts
+
+      - name: Remove the preview folder
+        run: |
+          set -euo pipefail
+          .github/scripts/pages-checkout.sh pages
+          if [ -d "pages/pr-$PR" ]; then
+            rm -rf "pages/pr-$PR"
+            .github/scripts/pages-push.sh pages "Remove preview of PR #$PR"
+          fi
+          .github/scripts/pr-comment.sh "$MARKER
+          Preview removed (PR closed)."

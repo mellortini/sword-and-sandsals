@@ -38,12 +38,14 @@ async function main() {
   fit();
 
   const params = new URLSearchParams(location.search);
-  const kit = await Kit.load('/chars/kit');
+  // BASE_URL is '/' locally and '/<repo>/pr-<n>/' in PR previews (see .github/workflows/preview.yml)
+  const base = import.meta.env.BASE_URL;
+  const kit = await Kit.load(`${base}chars/kit`);
   const context: SceneContext = {
     app, world, params, kit,
     ui: document.getElementById('ui')!,
     ...createRigCollection(kit),
-    bgTex: await Assets.load('/bg/arena.png'),
+    bgTex: await Assets.load(`${base}bg/arena.png`),
   };
   const update = await scenes.get(params.get('view') ?? 'arena')?.(context);
   startRigTicker(context, update ?? undefined);

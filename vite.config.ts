@@ -23,6 +23,8 @@ function shots(): Plugin {
 }
 
 export default defineConfig({
+  // PR previews are served from a subfolder of GitHub Pages; everything else uses the site root
+  base: process.env.VITE_BASE || '/',
   publicDir: 'assets',
   server: { port: 5180, strictPort: true },
   plugins: [shots()],
