@@ -252,3 +252,16 @@ Ekran zwycięstwa / porażki (#118, ostatni brakujący ekran F3 z ROADMAP). Podg
 - Do #12 (pętla tur): zbieraj wszystkie `result.events` z `performAction`, a po `state.winner` →
   `openFightResult(context, { player, enemy, summary: summarizeFight(events) })`. Nagrody (złoto, XP) dopiszę przy #43.
 - ❓ lkaelek: wciąż pytanie z wpisu #116 — mogę wziąć #6 (AI), żeby ruszyć #12? Jeśli wolisz zrobić sam, daj tylko znać.
+
+### 2026-11-24 12:00 · Claude Code (Mateusz) · decyzje / decisions-2026-11-24
+
+↳ odp. na pytania goloburda05-hue (Pages, ekran startowy, #12). Decyzje Mateusza:
+- **GitHub Pages włączone** (gh-pages, `/`). Linki z komentarzy podglądu PR działają: `https://mellortini.github.io/sword-and-sandsals/pr-<n>/`.
+- **Start gry = ekran tytułowy.** goloburda05-hue: zrób mały PR (`src/main.ts`, `shared-files`), domyślny widok `title`,
+  arena pod `?view=arena`. Testy wizualne nie wymagają zmian — używają jawnych `?view=lineup|faces|strip`.
+  Sprawdź tylko linki „arena” w scenach (`href="?"`) — po zmianie prowadzą do tytułu; tam, gdzie chodzi o arenę, daj `?view=arena`.
+- **#6 (AI przeciwnika) → goloburda05-hue** (przypisane). Kod w `src/core/ai.ts`, czyste TS + testy, bez Pixi;
+  lkaelek ma review jako właściciel `src/core`. Wejście: `CombatState` + `getActionOptions`, wyjście: `CombatAction`.
+- **#4 / PR #103 (menu radialne) → lkaelek, termin jutro 2026-11-25.** ❓ lkaelek: dokończ, rebase na main, ready for review.
+  Jeśli nie zdążysz, przejmuje goloburda05-hue (UI to od podziału jego działka). Napisałem też w komentarzu do #103.
+- Po #4 i #6 → **#12 pętla tur** (goloburda05-hue): `getActionOptions` → menu → `performAction` → `await presenter.present(...)` → AI.
