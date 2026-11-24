@@ -1,4 +1,5 @@
 import type { Item } from '../data/equipment';
+import type { HitZone, ZonedArmour } from './hitZones';
 import type { CrowdGift, CrowdStanding } from './crowd';
 import type { CombatItemId, CombatSlots } from './spells';
 import type { StatusEffect, StatusResistances, StatusTick } from './status';
@@ -58,6 +59,7 @@ export interface Fighter {
   level: number;
   attributes: Readonly<Attributes>;
   stats: Readonly<FighterStats>;
+  armourByZone: ZonedArmour;
   weapon?: CombatWeapon;
   position: number;
   health: number;
@@ -101,6 +103,7 @@ export type CombatEvent =
       actor: FighterSide;
       target: FighterSide;
       kind: AttackKind;
+      zone?: HitZone;
       hitChance: number;
       hit: boolean;
       crit: boolean;

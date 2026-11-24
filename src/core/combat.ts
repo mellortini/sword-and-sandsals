@@ -1,4 +1,6 @@
 import { createCrowdStanding, crowdDamageMultiplier, scoreCrowdAction } from './crowd';
+import { armourByZone, HIT_ZONES, ZONE_ACCURACY_PENALTY } from './hitZones';
+import type { AttackZoneOption, HitZone, TargetedAttack } from './hitZones';
 import { experienceForLevel, fightExperience } from './progression';
 import { nextRandom } from './rng';
 import { COMBAT_ITEMS, combatSlotOptions, consumeSlotItem, createCombatSlots } from './spells';
@@ -68,6 +70,7 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     level,
     attributes,
     stats,
+    armourByZone: armourByZone(setup.equipment),
     weapon,
     position: roundPosition(position),
     health: stats.maxHealth,
@@ -137,9 +140,18 @@ function isInRange(action: CombatAction, side: FighterSide, position: number, di
   }
 }
 
-function hitChance(kind: AttackKind, attacker: Readonly<Fighter>, defender: Readonly<Fighter>): number {
+export function getAttackZoneOptions(state: CombatState, action: AttackKind): AttackZoneOption[] {
+  const available = getActionOptions(state).find((option) => option.action === action);
+  if (!available) return [];
+  const attacker = state.fighters[state.active];
+  const defender = state.fighters[opposingSide(state.active)];
+  return HIT_ZONES.map((zone) => ({ ...available, action, zone, hitChance: hitChance(action, attacker, defender, zone) }));
+}
+
+function hitChance(kind: AttackKind, attacker: Readonly<Fighter>, defender: Readonly<Fighter>, zone?: HitZone): number {
   const { accuracyPenalty } = statusModifiers(attacker.statuses);
-  return attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty + accuracyPenalty);
+  const targetingPenalty = zone ? ZONE_ACCURACY_PENALTY[zone] : 0;
+  return attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty + accuracyPenalty + targetingPenalty);
 }
 
 export function getCombatSlotOptions(state: CombatState): CombatSlotOption[] {
@@ -173,10 +185,14 @@ function performSlotAction(state: CombatState, action: CombatSlotAction): Action
   return endTurn(fighters, side, other, state.rngState, events);
 }
 
-export function performAction(state: CombatState, action: CombatAction | CombatSlotAction): ActionResult {
+export function performAction(state: CombatState, command: CombatAction | TargetedAttack | CombatSlotAction): ActionResult {
   if (state.winner !== null) return { ok: false, state, events: [], reason: 'finished' };
-  if (typeof action !== 'string') return performSlotAction(state, action);
-  const option = getActionOptions(state).find((entry) => entry.action === action);
+  if (typeof command !== 'string' && 'slot' in command) return performSlotAction(state, command);
+  const action = typeof command === 'string' ? command : command.action;
+  const zone = typeof command === 'string' ? undefined : command.zone;
+  const option = typeof command === 'string'
+    ? getActionOptions(state).find((entry) => entry.action === command)
+    : getAttackZoneOptions(state, command.action).find((entry) => entry.zone === command.zone);
   if (!option) return { ok: false, state, events: [], reason: 'unavailable' };
 
   const side = state.active;
@@ -229,11 +245,14 @@ export function performAction(state: CombatState, action: CombatAction | CombatS
   let attack: Extract<CombatEvent, { type: 'attack' }> | undefined;
   if (isAttack(action)) {
     const traits = weaponMove(action, fighter.weapon);
-    attack = resolveAttack(action, side, fighter, opponent, traits, roll);
+    attack = resolveAttack(action, side, fighter, opponent, traits, roll, zone);
     if (option.counter) attack.counter = true;
     events.push(attack);
     if (attack.damage > 0 && opponent.health > 0) {
       if (traits.status) opponent.statuses = applyStatus(opponent.statuses, traits.status, opponent.statusResistances);
+      // aimed blows: a critical to the head stuns, a hit to the legs slows
+      const zoneStatus = zone === 'head' && attack.crit ? 'stunned' : zone === 'legs' ? 'slowed' : undefined;
+      if (zoneStatus) opponent.statuses = applyStatus(opponent.statuses, zoneStatus, opponent.statusResistances);
       const knockback = action === 'charge' ? KNOCKBACK_DISTANCE : traits.knockback;
       if (knockback > 0) move(other, opponent, 'knockback', opponent.position + direction * knockback, events);
     }
@@ -320,16 +339,18 @@ export function counterChance(guard: number): number {
 
 function resolveAttack(
   kind: AttackKind, side: FighterSide, attacker: Readonly<Fighter>, defender: Fighter,
-  traits: ReturnType<typeof weaponMove>, roll: () => number,
+  traits: ReturnType<typeof weaponMove>, roll: () => number, zone?: HitZone,
 ): Extract<CombatEvent, { type: 'attack' }> {
-  const chance = hitChance(kind, attacker, defender);
+  const chance = hitChance(kind, attacker, defender, zone);
   const offense = {
     ...attacker.stats,
     attackPower: attacker.stats.attackPower * traits.damageMultiplier * crowdDamageMultiplier(attacker.crowd),
   };
   const defense = {
     ...defender.stats,
-    armour: defender.stats.armour * statusModifiers(defender.statuses).armourMultiplier * traits.armourMultiplier,
+    // an aimed blow meets only the armour on that zone
+    armour: (zone ? defender.armourByZone[zone] : defender.stats.armour)
+      * statusModifiers(defender.statuses).armourMultiplier * traits.armourMultiplier,
   };
   const strikes: AttackStrike[] = [];
 
@@ -356,5 +377,6 @@ function resolveAttack(
     blocked: damage === 0 && strikes.some((strike) => strike.blocked),
     damage,
     ...(traits.strikes > 1 ? { strikes } : {}),
+    ...(zone ? { zone } : {}),
   };
 }
