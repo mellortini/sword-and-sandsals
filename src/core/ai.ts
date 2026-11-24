@@ -30,13 +30,13 @@ const PROFILE_WEIGHTS: Record<AiProfile, Record<CombatAction, number>> = {
  * Only actions from `getActionOptions` are considered, so the choice is always legal.
  * The same state, profile and `rngState` always give the same decision.
  */
-export function chooseAction(state: CombatState, profile: AiProfile, rngState: number): AiDecision {
+export function chooseAction(state: CombatState, profile: AiProfile, rngState: number, guardWeight = 0): AiDecision {
   const options = getActionOptions(state);
   if (options.length === 0) throw new Error('No action available: the fight is over.');
 
   const scored = options.map((option) => ({
     action: option.action,
-    weight: situationalScore(state, option) * PROFILE_WEIGHTS[profile][option.action],
+    weight: situationalScore(state, option) * PROFILE_WEIGHTS[profile][option.action] + (option.action === 'block' ? guardWeight : 0),
   }));
   const total = scored.reduce((sum, s) => sum + s.weight, 0);
   const next = nextRandom(rngState);

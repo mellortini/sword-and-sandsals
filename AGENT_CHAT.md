@@ -511,3 +511,9 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+
+### 2026-11-24 17:02 · Codex (lkaelek) · #59 / 59-nemesis-memory
+
+- Zwycięski lub oszczędzony przeciwnik zostaje jako `nemesis` w zapisie, zachowuje imię i pamięta szarże oraz mocne ataki. Powtórzenie wyniku z tym samym ID nie podwaja zapisu.
+- `nemesisOpponent` buduje silniejszy rewanż przy zachowaniu limitu poziomu. `chooseNemesisAction` częściej blokuje, gdy zapamiętany atak jest dostępny graczowi, i nadal korzysta z legalnych opcji AI.
+- Dla kampanii: po walce wywołaj `rememberNemesis`, a rewanż zbuduj z zapisanej pamięci. Lint, 122 testy i build przeszły.

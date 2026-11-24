@@ -1,6 +1,8 @@
 import type { Look } from '../rig/PaperRig';
 import { ACHIEVEMENT_COUNTERS } from './achievements';
 import type { AchievementProgress } from './achievements';
+import { LEAGUE_MAX_TIER } from './leagues';
+import type { NemesisMemory } from './nemesis';
 import { MAX_LEVEL } from './progression';
 import { resolveAttributes } from './stats';
 import type { Attributes, EquipmentLoadout } from './types';
@@ -28,6 +30,7 @@ export interface SavedCharacter {
   hands?: { weapon?: string; offHand?: string };
   inventory: string[];
   achievements?: AchievementProgress;
+  nemesis?: NemesisMemory;
 }
 
 type DecodeFailure = 'invalid' | 'unsupported';
@@ -67,6 +70,13 @@ function isAchievementProgress(value: unknown): value is AchievementProgress {
     && ACHIEVEMENT_COUNTERS.every((key) => within(counters[key], 0));
 }
 
+function isNemesisMemory(value: unknown): value is NemesisMemory {
+  return isRecord(value) && isItemId(value.id) && isItemId(value.name) && isItemId(value.lastFightId)
+    && typeof value.league === 'string' && Object.hasOwn(LEAGUE_MAX_TIER, value.league)
+    && within(value.seed, 0, 0xffffffff) && within(value.level, 1, MAX_LEVEL)
+    && within(value.encounters, 1, 20) && within(value.charges, 0, 20) && within(value.heavyAttacks, 0, 20);
+}
+
 function isCharacter(value: unknown): value is SavedCharacter {
   if (!isRecord(value)) return false;
   const { attributes, hands, inventory } = value;
@@ -78,7 +88,8 @@ function isCharacter(value: unknown): value is SavedCharacter {
     && isLook(value.look)
     && (hands === undefined || (isRecord(hands) && ['weapon', 'offHand'].every((slot) => hands[slot] === undefined || isItemId(hands[slot]))))
     && Array.isArray(inventory) && inventory.every(isItemId)
-    && (value.achievements === undefined || isAchievementProgress(value.achievements));
+    && (value.achievements === undefined || isAchievementProgress(value.achievements))
+    && (value.nemesis === undefined || isNemesisMemory(value.nemesis));
 }
 
 export function serializeSave(character: SavedCharacter): string {
