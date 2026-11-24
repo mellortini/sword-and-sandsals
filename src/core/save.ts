@@ -1,4 +1,5 @@
 import type { Look } from '../rig/PaperRig';
+import { MAX_LEVEL } from './progression';
 import { resolveAttributes } from './stats';
 import type { Attributes, EquipmentLoadout } from './types';
 
@@ -15,6 +16,8 @@ export interface SavedCharacter {
   name: string;
   level: number;
   experience: number;
+  attributePoints?: number;
+  skillPoints?: number;
   gold: number;
   attributes: Attributes;
   /** Appearance, equipped weapon and five independent armour slots. */
@@ -57,7 +60,9 @@ function isCharacter(value: unknown): value is SavedCharacter {
   if (!isRecord(value)) return false;
   const { attributes, hands, inventory } = value;
   return typeof value.name === 'string' && value.name.trim().length > 0
-    && within(value.level, 1) && within(value.experience, 0) && within(value.gold, 0)
+    && within(value.level, 1, MAX_LEVEL) && within(value.experience, 0)
+    && (value.attributePoints === undefined || within(value.attributePoints, 0))
+    && (value.skillPoints === undefined || within(value.skillPoints, 0)) && within(value.gold, 0)
     && isRecord(attributes) && ATTRIBUTES.every((key) => within(attributes[key], 0))
     && isLook(value.look)
     && (hands === undefined || (isRecord(hands) && ['weapon', 'offHand'].every((slot) => hands[slot] === undefined || isItemId(hands[slot]))))

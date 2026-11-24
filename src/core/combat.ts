@@ -1,4 +1,5 @@
 import { createCrowdStanding, crowdDamageMultiplier, scoreCrowdAction } from './crowd';
+import { experienceForLevel, fightExperience } from './progression';
 import { nextRandom } from './rng';
 import { attackDamage, attackHitChance, deriveStats, isAttack, resolveAttributes } from './stats';
 import { advanceStatusDurations, applyStatus, statusModifiers, tickStatuses } from './status';
@@ -49,6 +50,8 @@ export function createCombat(seed: number, player: FighterSetup = {}, enemy: Fig
 }
 
 function createFighter(setup: FighterSetup, defaultName: string, defaultPosition: number, crowdSeed: number): Fighter {
+  const level = setup.level ?? 1;
+  experienceForLevel(level);
   const position = setup.position ?? defaultPosition;
   if (!Number.isFinite(position) || position < 0 || position > ARENA_LENGTH) {
     throw new RangeError('Combat positions must be within the arena.');
@@ -58,6 +61,7 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
 
   return {
     name: setup.name ?? defaultName,
+    level,
     attributes,
     stats,
     position: roundPosition(position),
@@ -202,10 +206,7 @@ export function performAction(state: CombatState, action: CombatAction): ActionR
 
   fighter.tauntPenalty = 0;
   fighter.statuses = fighter.statuses.filter((effect) => effect.turns > 0);
-  if (opponent.health === 0) {
-    events.push({ type: 'death', fighter: other, winner: side });
-    return { ok: true, state: { fighters, active: side, winner: side, rngState }, events };
-  }
+  if (opponent.health === 0) return finishCombat(fighters, side, rngState, events);
 
   return startNextTurn(fighters, other, rngState, events);
 }
@@ -219,11 +220,7 @@ function startNextTurn(
     const tick = tickStatuses(fighter.statuses, fighter.health, fighter.stats.maxHealth);
     fighter.health = tick.health;
     for (const effect of tick.ticks) events.push({ type: 'status', fighter: active, ...effect });
-    if (fighter.health === 0) {
-      const winner = opposingSide(active);
-      events.push({ type: 'death', fighter: active, winner });
-      return { ok: true, state: { fighters, active: winner, winner, rngState }, events };
-    }
+    if (fighter.health === 0) return finishCombat(fighters, opposingSide(active), rngState, events);
     // Keep effects with zero turns through this action so their modifiers still apply.
     fighter.statuses = advanceStatusDurations(fighter.statuses);
     if (!tick.skip) {
@@ -234,6 +231,14 @@ function startNextTurn(
     fighter.tauntPenalty = 0;
     active = opposingSide(active);
   }
+}
+
+function finishCombat(
+  fighters: Record<FighterSide, Fighter>, winner: FighterSide, rngState: number, events: CombatEvent[],
+): ActionResult {
+  events.push({ type: 'death', fighter: opposingSide(winner), winner });
+  const rewards = { experience: fightExperience(winner, fighters.player.level, fighters.enemy.level) };
+  return { ok: true, state: { fighters, active: winner, winner, rngState, rewards }, events };
 }
 
 function move(side: FighterSide, fighter: Fighter, kind: MoveKind, position: number, events: CombatEvent[]) {

@@ -384,3 +384,9 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Walka wykonuje tick przed turą postaci, pomija akcję przy ogłuszeniu i kończy pojedynek po śmiertelnym ticku. Strach zmniejsza szansę trafienia, a przemoczenie obniża pancerz i mobilność.
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
+
+### 2026-11-24 13:56 · Codex (lkaelek) · #22 / 22-character-progression
+
+- `src/core/progression.ts`: krzywa XP na poziomy 1–60, 5 punktów atrybutów za awans i 1 punkt umiejętności co trzeci poziom. Zwycięstwo nagradza XP rosnącym wraz z poziomem rywala i różnicą poziomów, również po śmiertelnym ticku statusu.
+- Dla ekranu walki i rozwoju: `FighterSetup.level`, `state.rewards.experience` po zakończeniu walki oraz `awardExperience`. Zapis v1 przyjmuje też opcjonalne salda punktów.
+- Przyjąłem rosnący kwadratowo koszt poziomów i zero XP za porażkę. Dla starszej postaci zapisany poziom daje dolny próg XP.
