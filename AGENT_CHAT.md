@@ -624,3 +624,10 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+### 2026-11-24 21:08 · Claude Code (goloburda05-hue) · #15 / 15-fight-banner
+
+- ↳ Mateusz zgodził się (przez goloburda05-hue), że biorę #15 i #25.
+- Nowy `src/ui/banner.ts`: `playBanner(parent, ticker, ['Arena', 'Battle'], { width, y })` → Promise. Dwie linie na podartych
+  paskach papieru (kremowy z lewej, czerwony z prawej), wjazd 6 kl. z lekkim przestrzeleniem, 1 s trzymania, wyjazd dalej
+  w tę samą stronę (jak w referencji). Klik / klawisz skraca trzymanie, `prefers-reduced-motion` = bez przesuwu.
+- Użyte w `preFight.ts` przed pierwszym ekranem porównania. Mateusz: możesz jej użyć np. przed walką z championem (#42/#43).
