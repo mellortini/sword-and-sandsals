@@ -13,7 +13,7 @@ import { StatPanel } from '../ui/statPanel';
 import { XpBar } from '../ui/xpBar';
 import { H, W, randomLook } from './common';
 import type { SceneContext, SceneUpdate } from './common';
-import { PORTRAIT_H, PORTRAIT_W, portraitCard, removeRigs } from './portrait';
+import { PORTRAIT_H, PORTRAIT_W, portraitCard } from './portrait';
 import type { PortraitSubject } from './portrait';
 import { loadoutFromLook } from './preFight';
 
@@ -42,7 +42,7 @@ const TOP = 196;
  * Resolves with the choice and removes everything it added. Keyboard: Enter = Fight again, Escape = Leave.
  */
 export async function openFightResult(context: SceneContext, result: FightResult): Promise<FightResultChoice> {
-  const { world, rigs, add } = context;
+  const { world } = context;
   const { summary } = result;
   const won = summary.winner === 'player';
   const root = new Container();
@@ -54,12 +54,10 @@ export async function openFightResult(context: SceneContext, result: FightResult
     subtitle(`${won ? 'Won in' : 'Fell after'} ${summary.rounds} ${summary.rounds === 1 ? 'round' : 'rounds'}`, W / 2, 140),
   );
 
-  const rigsBefore = rigs.length;
   const sideX = (W - PANEL_W) / 2 - PORTRAIT_W - 60;
   const enemyX = W - sideX - PORTRAIT_W;
-  await portraitCard(root, add, result.player, won ? 'Winner' : 'Defeated', sideX, TOP, 1);
-  await portraitCard(root, add, result.enemy, won ? 'Defeated' : 'Winner', enemyX, TOP, -1);
-  const added = rigs.slice(rigsBefore);
+  await portraitCard(root, context, result.player, won ? 'Winner' : 'Defeated', sideX, TOP, 1);
+  await portraitCard(root, context, result.enemy, won ? 'Defeated' : 'Winner', enemyX, TOP, -1);
   root.addChild(defeatedStamp(won ? enemyX : sideX, TOP));
 
   const panel = new StatPanel(summaryRows(summary), PANEL_W);
@@ -116,7 +114,6 @@ export async function openFightResult(context: SceneContext, result: FightResult
     finish = (choice: FightResultChoice) => {
       listening.abort();
       tick?.();
-      removeRigs(rigs, added);
       root.destroy({ children: true });
       resolve(choice);
     };

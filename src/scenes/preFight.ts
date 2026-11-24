@@ -13,7 +13,7 @@ import { showArena } from './arena';
 import { H, W, randomLook } from './common';
 import { loadSavedGladiator } from './savedGladiator';
 import type { SceneContext, SceneUpdate } from './common';
-import { PORTRAIT_W, portraitCard, removeRigs } from './portrait';
+import { PORTRAIT_W, portraitCard } from './portrait';
 
 export interface PreFightFighter extends ComparedFighter {
   readonly look: Look;
@@ -43,7 +43,7 @@ const TOP = 170;
  * Keyboard (#77): ←/→ choose, Enter presses (Fight first), Escape = Leave.
  */
 export async function openPreFight(context: SceneContext, player: PreFightFighter, enemy: PreFightFighter): Promise<PreFightChoice> {
-  const { world, bgTex, rigs, add } = context;
+  const { world, bgTex } = context;
   const root = new Container();
   world.addChild(root);
 
@@ -51,12 +51,9 @@ export async function openPreFight(context: SceneContext, player: PreFightFighte
   bg.tint = 0x6e5c58;
   root.addChild(bg, screenTitle('Arena bout', W / 2, 58));
 
-  const rigsBefore = rigs.length;
   const sideX = (W - PANEL_W) / 2 - PORTRAIT_W - 60;
-  await portraitCard(root, add, player, `Level ${player.level}`, sideX, TOP, 1);
-  await portraitCard(root, add, enemy, `Level ${enemy.level}`, W - sideX - PORTRAIT_W, TOP, -1);
-  // the shared ticker renders the portraits until the choice is made; then they are taken out of `rigs`
-  const added = rigs.slice(rigsBefore);
+  await portraitCard(root, context, player, `Level ${player.level}`, sideX, TOP, 1);
+  await portraitCard(root, context, enemy, `Level ${enemy.level}`, W - sideX - PORTRAIT_W, TOP, -1);
 
   const panel = new StatPanel(comparisonRows(player, enemy), PANEL_W);
   panel.position.set((W - PANEL_W) / 2, TOP);
@@ -67,7 +64,6 @@ export async function openPreFight(context: SceneContext, player: PreFightFighte
     const keys = new AbortController();
     const done = (choice: PreFightChoice) => {
       keys.abort();
-      removeRigs(rigs, added);
       root.destroy({ children: true });
       resolve(choice);
     };
