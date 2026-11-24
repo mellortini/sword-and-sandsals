@@ -13,6 +13,7 @@ export interface PlayOpts {
   speed?: number;
   then?: string | null;        // clip after this one ends (default: idle)
   distance?: number;           // scales the clip's authored root x to travel exactly this far (units)
+  lunge?: number;              // for clips that step in and back (attacks): the deepest forward x becomes this (units)
   commit?: boolean;            // keep the final root x (the fighter moved)
   onEvent?: (e: ClipEvent) => void;
   onEnd?: () => void;
@@ -56,6 +57,10 @@ export class Animator {
     this.done = false;
     const authored = c.full[c.full.length - 1].x;
     this.xScale = opts.distance !== undefined && Math.abs(authored) > 1e-6 ? opts.distance / authored : 1;
+    if (opts.lunge !== undefined) {
+      const deepest = Math.max(...c.full.map((k) => k.x));
+      if (deepest > 1e-6) this.xScale = opts.lunge / deepest;
+    }
   }
 
   /** advance by dt seconds and pose the rig */

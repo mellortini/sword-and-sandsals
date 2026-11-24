@@ -15,6 +15,7 @@ import { loadoutFromLook } from './preFight';
 import { aiPicker, runFight } from './turnLoop';
 import type { ActionPicker } from './turnLoop';
 import { arenaBackdrop } from './backdrop';
+import { FIGHT_LAYOUT } from './combatPlan';
 
 export interface ArenaFighter {
   readonly look: Look;
@@ -22,8 +23,7 @@ export interface ArenaFighter {
   readonly attributes?: Partial<Attributes>;
 }
 
-/** melee contact without the bodies overlapping (same staging as the animation lab and ?view=aifight) */
-const LAYOUT = { left: 590, px: 25, contact: 175 };
+const LAYOUT = FIGHT_LAYOUT;
 /** seconds before the opponent answers */
 const ENEMY_PAUSE = 0.5;
 

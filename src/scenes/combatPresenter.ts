@@ -6,7 +6,7 @@
 import type { Animator } from '../anim/Animator';
 import type { CombatEvent, CombatState, Fighter, FighterSide, MoveKind } from '../core/types';
 import { BlockShield, DamageSplat, FxLayer, MissText } from '../ui/fx';
-import { forwardDelta, planSteps, screenX } from './combatPlan';
+import { MIN_LUNGE, STRIKE_GAP, forwardDelta, planSteps, screenX } from './combatPlan';
 import type { Layout, Step } from './combatPlan';
 
 export type { Layout } from './combatPlan';
@@ -156,8 +156,11 @@ export class CombatPresenter {
       case 'attack': {
         const anim = fighters[step.attack.actor];
         let reaction: Promise<void> = Promise.resolve();
+        // reach the same strike point from any melee distance (#151)
+        const gap = Math.abs(fighters.enemy.home.x - fighters.player.home.x) / unit;
         await this.clip(anim, `attack_${step.attack.kind}`, {
           blend: 1,
+          lunge: Math.max(MIN_LUNGE, gap - STRIKE_GAP[step.attack.kind]),
           onEvent: (e) => { if (e.type === 'hit') reaction = this.react(step.attack, step.fatal); },
         });
         await reaction;
