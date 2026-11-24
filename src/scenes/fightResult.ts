@@ -1,4 +1,4 @@
-import { Container, Graphics, Text } from 'pixi.js';
+import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import { createCombat, getActionOptions, performAction } from '../core/combat';
 import { nextRandom } from '../core/rng';
 import type { CombatEvent, CombatState } from '../core/types';
@@ -6,7 +6,6 @@ import { summarizeFight, summaryRows } from '../ui/fightSummary';
 import type { FightSummary } from '../ui/fightSummary';
 import { paperButton, screenTitle } from '../ui/paperWidgets';
 import { StatPanel } from '../ui/statPanel';
-import { showArena } from './arena';
 import { H, W, randomLook } from './common';
 import type { SceneContext, SceneUpdate } from './common';
 import { PORTRAIT_H, PORTRAIT_W, portraitCard, removeRigs } from './portrait';
@@ -132,7 +131,8 @@ export async function showFightResult(context: SceneContext): Promise<SceneUpdat
   const want = params.get('outcome');
   const player = { name: 'Player', look: randomLook(tier) };
   const enemy = { name: 'Varro the Creased', look: randomLook(tier) };
-  const update = await showArena(context, [player, enemy]);
+  // the arena itself now runs a live fight, so the preview only shows its backdrop
+  context.world.addChild(new Sprite(context.bgTex));
   context.ui.innerHTML = '<a href="?view=arena">arena</a> · <a href="?view=prefight">przed walką</a> · '
     + '<a href="?view=result&outcome=victory">wygrana</a> · <a href="?view=result&outcome=defeat">przegrana</a>';
 
@@ -154,5 +154,5 @@ export async function showFightResult(context: SceneContext): Promise<SceneUpdat
       seed++;
     }
   })();
-  return (dt) => update?.(dt);
+  return () => {};
 }

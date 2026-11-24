@@ -391,3 +391,78 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Pancerz strefowy bierze pod uwagę hełm, napierśnik i naramienniki albo nagolenniki i buty. Pełny komplet zwiększa ochronę również w obrębie stref.
 - Krytyk w głowę ogłusza, trafienie w nogi spowalnia ruch. Dla UI wybór może skorzystać z nowych opcji oraz ze zdarzenia ataku.
 - Lint, 72 testy i build przeszły.
+### 2026-11-24 13:51 · Codex (lkaelek) · #46 / 46-weapon-families
+
+- `src/core/weapons.ts` i walka: ciężki topór rozdziera, młot przebija część pancerza i ogłusza, włócznia ma zasięg 3 i odpycha po Power, a para sztyletów wykonuje do dwóch osobnych rzutów w jednej akcji.
+- `FighterSetup.weapon` przyjmuje ID katalogowe albo prototypową parę `daggers`; bez nadpisania walka czyta broń z wyposażenia. `attack.strikes` udostępnia pojedyncze wyniki. Suma ciosów jest zgodna z obecną prezentacją ataku.
+- Lint, 48 testów i build przeszły. Po scaleniu #49 i #31 gałąź używa statusów i broni z ekwipunku. Do obrażeń wykorzystuje wspólną formułę i uwzględnia przychylność tłumu.
+### 2026-11-24 14:08 · Codex (lkaelek) · #55 / 55-combat-slots
+
+- `FighterSetup.slots` udostępnia cztery pozycje. Ember i Drench kosztują energię i wymagają Arcana. Glue Tonic i Repair Tape zużywają po jednej sztuce ze slotu.
+- `getCombatSlotOptions` podaje cel, koszt i przyczynę niedostępności. `performAction(state, { slot, target })` używa przedmiotu w normalnej turze i emituje zdarzenie `slot`.
+- Wstępne cztery przedmioty korzystają z istniejących obrażeń, leczenia i statusów. Zaklęcia pozostają w slocie po użyciu. Ekran i animacje mogą skorzystać ze zdarzeń bez zmiany obecnego menu.
+- Lint, 73 testy i build przeszły.
+### 2026-11-24 13:48 · Codex (lkaelek) · #57 / 57-block-counters
+
+- Udany blok przy Guard od 8 daje rosnącą szansę na kontrę (20–60%). W następnej turze `Quick` jest wtedy darmowe w energii i działa nawet z pustym paskiem. Wybór innej akcji albo pominięcie tury po ogłuszeniu zamyka okno.
+- Dla UI i animacji: `ActionOption.counter` pozwala podpisać darmowe `Quick` jako Counter, a `attack.counter` jest sygnałem do klipu `counter`. Do czasu podpięcia klipu działa prezentacja zwykłego Quick.
+- Lint, 41 testów i build przeszły. Testy obejmują próg Guard, nieudany rzut, darmową akcję i wygaśnięcie.
+
+### 2026-11-24 14:16 · Codex (lkaelek) · #81 / 81-achievements
+
+- Dodałem 25 osiągnięć za wyniki walk, techniki, tłum, dobicie, komplet zbroi i poziomy. `recordAchievements` zwraca nowy stan oraz wpisy do pokazania w powiadomieniu.
+- Identyfikator zakończonej walki zapobiega powtórnemu zliczaniu po ponowieniu zapisu. Opcjonalne `achievements` jest zapisywane w dotychczasowym formacie v1.
+- Dla UI: przekaż zakończoną walkę z jej zdarzeniami i stałym ID albo sygnał wyposażenia, poziomu lub dobicia. Zapisz zwrócony stan z postacią i pokaż wyłącznie `newlyUnlocked`.
+- Lint, 72 testy i build przeszły.
+### 2026-11-24 13:56 · Codex (lkaelek) · #22 / 22-character-progression
+
+- `src/core/progression.ts`: krzywa XP na poziomy 1–60, 5 punktów atrybutów za awans i 1 punkt umiejętności co trzeci poziom. Zwycięstwo nagradza XP rosnącym wraz z poziomem rywala i różnicą poziomów, również po śmiertelnym ticku statusu.
+- Dla ekranu walki i rozwoju: `FighterSetup.level`, `state.rewards.experience` po zakończeniu walki oraz `awardExperience`. Zapis v1 przyjmuje też opcjonalne salda punktów.
+- Przyjąłem rosnący kwadratowo koszt poziomów i zero XP za porażkę. Dla starszej postaci zapisany poziom daje dolny próg XP.
+### 2026-11-24 14:02 · Codex (lkaelek) · #32 / 32-shop-transactions
+
+- `src/core/shop.ts`: osobne katalogi Armourer i Weaponsmith. Każda kolejna liga udostępnia następne dwa tiery i zachowuje wcześniejszy asortyment.
+- Kupno używa wspólnego rabatu Charm do 25% i sprawdza saldo; sprzedaż wypłaca 30% ceny bazowej i usuwa jedną sztukę z plecaka.
+- `getShopStock`, `shopPrices`, `buyItem` i `sellItem` są gotowe do podpięcia widoku sklepu. Nieudane operacje zachowują wejściowy stan.
+- Lint, 72 testy i build przeszły.
+### 2026-11-24 14:11 · Codex (lkaelek) · #62 / 62-loot-rarity-affixes
+
+- `rollLoot(seed, level)` losuje podstawę sprzętu, jedną z pięciu rzadkości i pasujące afiksy bez powtórzeń. Progi i wartości afiksów to wstępny balans.
+- `lootModifiers` udostępnia parametry afiksów, m.in. podpalenie dla Kindling i regenerację dla Glued. `lootArmourTotals` uwzględnia wspólny bonus za komplet zbroi oraz premie afiksów.
+- `RARITIES` zawiera kolory ramek do widoku łupu. Wyświetlanie i trwałe przechowywanie egzemplarzy z afiksami można podpiąć do tego modelu.
+- Lint, 71 testów i build przeszły.
+### 2026-11-24 14:05 · Codex (lkaelek) · #41 / 41-enemy-generation
+
+- `generateEnemy(seed, playerLevel, league)` zwraca imię, wygląd, poziom, atrybuty i wyposażenie. Wynik jest powtarzalny, a poziom przeciwnika mieści się w odległości dwóch od poziomu gracza.
+- Zbroja i broń spełniają wymagania poziomu oraz ograniczenia ligi. `look` używa tych samych tierów co walka. Przeciwnicy dostają miecze, zgodne z dostępną grafiką gladiusa.
+- Progi tierów są te same co w sklepach z #32. Zwrócony obiekt można podać do `createCombat`, a jego `look` do sceny.
+- Lint, 71 testów i build przeszły.
+### 2026-11-24 15:30 · Claude Code (goloburda05-hue) · #23 / 23-character-creator
+
+Kreator postaci (#23), podgląd: `?view=creator` (z tytułu: **New game**). Korzysta z #21 i #10 lkaelek — dzięki!
+- `src/ui/creatorRules.ts` (czyste TS + testy): 10 punktów startowych na 8 atrybutów, baza 5, limit 12 na atrybut w kreatorze;
+  `raise` / `lower` / `randomSpread`, `nameProblem` (litery dowolnego alfabetu, spacje, `'`, `-`, max 20), `newCharacter(name, appearance, spread)`
+  → `SavedCharacter` poziomu 1 w przepasce (zbroja 0, `gladius`), `inventory: []`. Test sprawdza, że `serializeSave` go przyjmuje.
+- `src/scenes/creator.ts` + `src/ui/creator.css`: duża kukła, panel HTML: imię, wygląd (skóra, twarz, włosy, kolor, zarost),
+  punkty z `+/−`, HP/energia z `deriveStats` na żywo, Random, Reset points, **Begin** → `saveGame` → `?view=prefight`.
+  Jeśli jest zapis, panel ostrzega, że Begin go zastąpi.
+- `src/scenes/savedGladiator.ts`: `loadSavedGladiator()` → `SavedCharacter | null` (owija `loadGame`).
+- Tytuł: **New game** → kreator, **Continue** aktywne przy zapisie (podpis „imię · level N”, zaznaczone na starcie), zapisany gladiator
+  stoi po lewej. **Quick bout** → `?view=prefight&gladiator=random`. `PaperMenu` pokazuje teraz podpis także przy aktywnej pozycji.
+- Ekran porównania: walczy zapisany gladiator (z jego atrybutami), przeciwnicy z 1. tieru, dopóki ligi (#41) nie zdecydują inaczej.
+- `src/main.ts` (plik wspólny): `['creator', showCreator]`.
+- ❓ lkaelek: złoto na start to na razie `STARTING_GOLD = 50` w `creatorRules.ts`, a 10 pkt / limit 12 to moja propozycja —
+  jeśli ekonomia (#32) albo balans mają inne liczby, zmień albo daj znać. Wpisywanie imienia „atramentem” (animacja) to osobne #28.
+### 2026-11-24 16:10 · Claude Code (goloburda05-hue) · #12 / 12-turn-loop
+
+Pętla tur na arenie (#12) — **pierwsza grywalna walka F3**. `?view=arena[&ai=aggressor|defender][&tier=N][&seed=S]`,
+z gry: tytuł → Quick bout / Continue → ekran porównania → Fight.
+- `src/scenes/arena.ts`: gracz wybiera z `RadialMenu` lkaelek (picker = `menu.open(options)` → `onAction` rozwiązuje wybór),
+  przeciwnik to `aiPicker(profile)` z #6 po 0.5 s, każdą akcję animuje `CombatPresenter`, HUD idzie za `onState`.
+  Menu otwiera się tylko w turze gracza po końcu animacji (`runFight` z #128). Przy 0 HP → `openFightResult`: rewanż albo tytuł.
+- `ArenaFighter` ma opcjonalne `attributes` — ekran porównania przekazuje je, więc walczy się prawdziwymi statystykami
+  (po #138 także zapisanego gladiatora). Wyposażenie z kukły przez `loadoutFromLook`.
+- Usunąłem podgląd ruchu z #103 (`preview()` + `ACTION_CLIPS`) — teraz o wszystkim decyduje core. lkaelek: `RadialMenu` bez zmian.
+- `?view=result` pokazuje już tylko tło areny (arena sama uruchamia walkę).
+- Sprawdzone w przeglądarce (seed 3, AI agresor): wygrana atakami w 17 akcjach, porażka samym odpoczynkiem, rewanż Enterem, menu
+  zamknięte w trakcie animacji i na ekranie wyniku. Testy wizualne nie obejmują areny.
