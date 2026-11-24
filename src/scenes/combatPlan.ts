@@ -14,6 +14,25 @@ export type Step =
   | { kind: 'pose'; side: FighterSide; clip: 'block' | 'rest' | 'taunt' }
   | { kind: 'death'; side: FighterSide; winner: FighterSide };
 
+/**
+ * Fight staging shared by the arena, ?view=aifight and the animation lab (#151).
+ * contact 215 px = 5.7 rig units between the pelvises at logical distance 0: close, but the bodies never overlap,
+ * melee range (logical 2) = 6.7 units. Logical 0..20 spans 400 px, centred on the 1920 px stage.
+ */
+export const FIGHT_LAYOUT: Layout = { left: 652, px: 20, contact: 215 };
+
+/**
+ * Where a strike lands, in rig units between the pelvises at the deepest point of the attack's lunge.
+ * The presenter stretches or shortens each attack's lunge to reach exactly this, so a hit reads as a hit from any
+ * melee distance and nobody steps through the opponent.
+ */
+export const STRIKE_GAP: Readonly<Record<'quick' | 'normal' | 'power' | 'charge', number>> = {
+  // the deeper the torso leans into the blow, the further the strike point (measured on the puppets, #151)
+  quick: 4.9, normal: 5.3, power: 5.9, charge: 5.3,
+};
+/** shortest lunge, so even a strike from very close still moves forward */
+export const MIN_LUNGE = 0.15;
+
 export interface Layout {
   /** screen x of logical position 0 for the player (pelvis) */
   left: number;

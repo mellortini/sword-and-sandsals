@@ -9,6 +9,7 @@ import { CombatPresenter } from '../combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from '../common';
 import type { SceneContext, SceneUpdate } from '../common';
 import { arenaBackdrop } from '../backdrop';
+import { FIGHT_LAYOUT } from '../combatPlan';
 
 export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: SceneContext): Promise<SceneUpdate> {
   const arena = new Container();
@@ -110,8 +111,8 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
     <label>speed <select id="sSpeed"><option value="1">1x</option><option value="0.5">0.5x</option><option value="0.25">0.25x</option><option value="0.1">0.1x</option></select></label>
     <div class="small"><a href="?view=arena">arena</a> &middot; <a href="?view=wardrobe">wardrobe</a> &middot; <a href="?view=strip&clip=attack_normal">frame strips</a></div>`;
   // --- core fight (#11): src/core decides, CombatPresenter animates, HUD follows. Both sides pick at random.
-  // contact 4.6 units, melee range (logical 2) 5.9 units: the attack lunges reach without the bodies overlapping
-  const layout = { left: 640 - 2 * 25, px: 25, contact: 175 };
+  // same staging as the arena (#151): bodies never overlap, lunges stretch to the strike point
+  const layout = FIGHT_LAYOUT;
   const presenter = new CombatPresenter({
     fighters: { player: pa, enemy: ea }, fx: layer, unit: UNIT, layout,
     onState: (s) => hud.setState(s),

@@ -488,3 +488,14 @@ Uwagi Mateusza po pierwszej grze: tło za pstrokate (ten sam kontrast co postaci
 - `src/ui/fx.ts`: znaczniki większe, na ciemnej poświacie, unoszą się i same gasną po ~1,6 s; „CRITICAL!” i MISS większe.
 - ❓ goloburda05-hue: menu kołowe → **#147** (przypisane Tobie): papierowe karty w rzędzie u dołu zamiast kółek wokół postaci.
   Mateusz chce zobaczyć wygląd na podglądzie PR przed merge'em.
+
+### 2026-11-24 20:30 · Claude Code (Mateusz) · #151 / 151-melee-spacing
+
+Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległości wyglądały różnie.
+- `combatPlan.ts`: wspólny układ `FIGHT_LAYOUT = { left: 652, px: 20, contact: 215 }` (arena, aiFight i anim lab go importują —
+  goloburda05-hue: nie wpisuj już własnego `LAYOUT`). Kontakt 5,7 j. — w spoczynku postacie nigdy się nie nakładają.
+- `STRIKE_GAP` na rodzaj ciosu (quick 4,9 · normal 5,3 · power 5,9): presenter skaluje wypad ciosu (`Animator.play(..., { lunge })`),
+  żeby ostrze zawsze dochodziło w ten sam punkt — z daleka mocniejszy wypad, z bliska krótszy, potem powrót.
+- `Animator`: nowa opcja `lunge` (najgłębsze wychylenie klipu w jednostkach).
+- ❓ lkaelek: 5 pudeł z rzędu u Mateusza to był pech (pomiar w #152: 73,6% realnie vs 72,4% pokazane). Zostawiłem Ci #152 —
+  premia za serię pudeł, żeby gracz nie odbierał tego jako błędu.
