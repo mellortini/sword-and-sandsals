@@ -2,6 +2,7 @@ import type { Item } from '../data/equipment';
 import type { CrowdGift, CrowdStanding } from './crowd';
 import type { CombatItemId, CombatSlots } from './spells';
 import type { StatusEffect, StatusResistances, StatusTick } from './status';
+import type { CombatWeapon } from './weapons';
 
 export type FighterSide = 'player' | 'enemy';
 export type AttackKind = 'quick' | 'normal' | 'power' | 'charge';
@@ -28,6 +29,7 @@ export interface FighterSetup {
   level?: number;
   attributes?: Partial<Attributes>;
   equipment?: EquipmentLoadout;
+  weapon?: string;
   statusResistances?: StatusResistances;
   slots?: CombatSlots;
   position?: number;
@@ -56,6 +58,7 @@ export interface Fighter {
   level: number;
   attributes: Readonly<Attributes>;
   stats: Readonly<FighterStats>;
+  weapon?: CombatWeapon;
   position: number;
   health: number;
   energy: number;
@@ -84,6 +87,13 @@ export interface ActionOption {
   counter?: true;
 }
 
+export interface AttackStrike {
+  readonly hit: boolean;
+  readonly crit: boolean;
+  readonly blocked: boolean;
+  readonly damage: number;
+}
+
 export type CombatEvent =
   | { type: 'move'; fighter: FighterSide; kind: MoveKind; from: number; to: number }
   | {
@@ -97,6 +107,7 @@ export type CombatEvent =
       blocked: boolean;
       counter?: true;
       damage: number;
+      strikes?: readonly AttackStrike[];
     }
   | { type: 'energy'; fighter: FighterSide; from: number; to: number }
   | { type: 'block'; fighter: FighterSide }

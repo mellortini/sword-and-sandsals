@@ -6,13 +6,14 @@ import type { CombatSlotAction, CombatSlotOption } from './spells';
 import { attackDamage, attackHitChance, deriveStats, isAttack, resolveAttributes } from './stats';
 import { advanceStatusDurations, applyStatus, statusModifiers, tickStatuses } from './status';
 import type { StatusKind } from './status';
+import { combatWeapon, weaponMove, weaponReach } from './weapons';
 import type {
-  ActionOption, ActionResult, AttackKind, CombatAction, CombatEvent, CombatState,
+  ActionOption, ActionResult, AttackKind, AttackStrike, CombatAction, CombatEvent, CombatState,
   Fighter, FighterSetup, FighterSide, MoveKind,
 } from './types';
 
 export const ARENA_LENGTH = 20;
-export const MELEE_RANGE = 2;
+export { DEFAULT_WEAPON_REACH as MELEE_RANGE } from './weapons';
 const CHARGE_RANGE = 8;
 const STEP_DISTANCE = 1.6;
 const KNOCKBACK_DISTANCE = 2;
@@ -59,13 +60,15 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     throw new RangeError('Combat positions must be within the arena.');
   }
   const attributes = resolveAttributes(setup.attributes);
-  const stats = deriveStats(attributes, setup.equipment);
+  const weapon = combatWeapon(setup.weapon) ?? combatWeapon(setup.equipment?.weapon);
+  const stats = deriveStats(attributes, setup.equipment, weapon?.damage);
 
   return {
     name: setup.name ?? defaultName,
     level,
     attributes,
     stats,
+    weapon,
     position: roundPosition(position),
     health: stats.maxHealth,
     energy: stats.maxEnergy,
@@ -101,12 +104,13 @@ export function getActionOptions(state: CombatState): ActionOption[] {
   const opponent = state.fighters[opposingSide(active)];
   const distance = getDistance(state);
   const options: ActionOption[] = [];
+  const meleeRange = weaponReach(fighter.weapon);
   const { movementMultiplier } = statusModifiers(fighter.statuses);
 
   for (const action of ACTIONS) {
     const counter = action === 'quick' && fighter.counterReady;
     const energyCost = counter ? 0 : ENERGY_COSTS[action];
-    if (energyCost > fighter.energy || !isInRange(action, active, fighter.position, distance, movementMultiplier)) continue;
+    if (energyCost > fighter.energy || !isInRange(action, active, fighter.position, distance, meleeRange, movementMultiplier)) continue;
 
     options.push(isAttack(action)
       ? { action, energyCost, hitChance: hitChance(action, fighter, opponent), ...(counter ? { counter: true } : {}) }
@@ -115,7 +119,7 @@ export function getActionOptions(state: CombatState): ActionOption[] {
   return options;
 }
 
-function isInRange(action: CombatAction, side: FighterSide, position: number, distance: number, movementMultiplier: number): boolean {
+function isInRange(action: CombatAction, side: FighterSide, position: number, distance: number, meleeRange: number, movementMultiplier: number): boolean {
   switch (action) {
     case 'step_forward':
     case 'jump':
@@ -123,11 +127,11 @@ function isInRange(action: CombatAction, side: FighterSide, position: number, di
     case 'step_back':
       return side === 'player' ? position > 0 : position < ARENA_LENGTH;
     case 'charge':
-      return distance > MELEE_RANGE && distance <= CHARGE_RANGE * movementMultiplier;
+      return distance > meleeRange && distance <= CHARGE_RANGE * movementMultiplier;
     case 'quick':
     case 'normal':
     case 'power':
-      return distance <= MELEE_RANGE;
+      return distance <= meleeRange;
     default:
       return true;
   }
@@ -222,12 +226,16 @@ export function performAction(state: CombatState, action: CombatAction | CombatS
       break;
   }
 
-  const attack = isAttack(action) ? resolveAttack(action, side, fighter, opponent, roll) : undefined;
-  if (attack) {
+  let attack: Extract<CombatEvent, { type: 'attack' }> | undefined;
+  if (isAttack(action)) {
+    const traits = weaponMove(action, fighter.weapon);
+    attack = resolveAttack(action, side, fighter, opponent, traits, roll);
     if (option.counter) attack.counter = true;
     events.push(attack);
-    if (action === 'charge' && attack.damage > 0 && opponent.health > 0) {
-      move(other, opponent, 'knockback', opponent.position + direction * KNOCKBACK_DISTANCE, events);
+    if (attack.damage > 0 && opponent.health > 0) {
+      if (traits.status) opponent.statuses = applyStatus(opponent.statuses, traits.status, opponent.statusResistances);
+      const knockback = action === 'charge' ? KNOCKBACK_DISTANCE : traits.knockback;
+      if (knockback > 0) move(other, opponent, 'knockback', opponent.position + direction * knockback, events);
     }
   }
 
@@ -311,26 +319,42 @@ export function counterChance(guard: number): number {
 }
 
 function resolveAttack(
-  kind: AttackKind, side: FighterSide, attacker: Readonly<Fighter>, defender: Fighter, roll: () => number,
+  kind: AttackKind, side: FighterSide, attacker: Readonly<Fighter>, defender: Fighter,
+  traits: ReturnType<typeof weaponMove>, roll: () => number,
 ): Extract<CombatEvent, { type: 'attack' }> {
   const chance = hitChance(kind, attacker, defender);
-  const hit = roll() < chance;
-  // A defensive stance can block one incoming attack. Crits require an unblocked hit.
-  const blocked = hit && defender.guarding && roll() < defender.stats.blockChance;
-  if (blocked) {
-    const chanceToCounter = counterChance(defender.attributes.guard);
-    if (chanceToCounter > 0 && roll() < chanceToCounter) defender.counterReady = true;
-  }
-  const crit = hit && !blocked && roll() < attacker.stats.criticalChance;
-  let damage = 0;
-  if (hit && !blocked) {
-    // crowd favour raises the attacker's power, soaking weakens the defender's armour
-    const offense = { ...attacker.stats, attackPower: attacker.stats.attackPower * crowdDamageMultiplier(attacker.crowd) };
-    const { armourMultiplier } = statusModifiers(defender.statuses);
-    const defense = { ...defender.stats, armour: defender.stats.armour * armourMultiplier };
-    damage = Math.min(defender.health, attackDamage(kind, offense, defense, crit));
+  const offense = {
+    ...attacker.stats,
+    attackPower: attacker.stats.attackPower * traits.damageMultiplier * crowdDamageMultiplier(attacker.crowd),
+  };
+  const defense = {
+    ...defender.stats,
+    armour: defender.stats.armour * statusModifiers(defender.statuses).armourMultiplier * traits.armourMultiplier,
+  };
+  const strikes: AttackStrike[] = [];
+
+  for (let i = 0; i < traits.strikes && defender.health > 0; i++) {
+    const hit = roll() < chance;
+    // A defensive stance can block an incoming strike; a skilled block may earn a free counter. Crits need an unblocked hit.
+    const blocked = hit && defender.guarding && roll() < defender.stats.blockChance;
+    if (blocked && !defender.counterReady) {
+      const chanceToCounter = counterChance(defender.attributes.guard);
+      if (chanceToCounter > 0 && roll() < chanceToCounter) defender.counterReady = true;
+    }
+    const crit = hit && !blocked && roll() < attacker.stats.criticalChance;
+    const damage = hit && !blocked ? Math.min(defender.health, attackDamage(kind, offense, defense, crit)) : 0;
     defender.health -= damage;
+    if (hit) defender.guarding = false;
+    strikes.push({ hit, blocked, crit, damage });
   }
 
-  return { type: 'attack', actor: side, target: opposingSide(side), kind, hitChance: chance, hit, crit, blocked, damage };
+  const damage = strikes.reduce((total, strike) => total + strike.damage, 0);
+  return {
+    type: 'attack', actor: side, target: opposingSide(side), kind, hitChance: chance,
+    hit: strikes.some((strike) => strike.hit),
+    crit: strikes.some((strike) => strike.crit),
+    blocked: damage === 0 && strikes.some((strike) => strike.blocked),
+    damage,
+    ...(traits.strikes > 1 ? { strikes } : {}),
+  };
 }

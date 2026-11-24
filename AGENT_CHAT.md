@@ -385,6 +385,11 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
 
+### 2026-11-24 13:51 · Codex (lkaelek) · #46 / 46-weapon-families
+
+- `src/core/weapons.ts` i walka: ciężki topór rozdziera, młot przebija część pancerza i ogłusza, włócznia ma zasięg 3 i odpycha po Power, a para sztyletów wykonuje do dwóch osobnych rzutów w jednej akcji.
+- `FighterSetup.weapon` przyjmuje ID katalogowe albo prototypową parę `daggers`; bez nadpisania walka czyta broń z wyposażenia. `attack.strikes` udostępnia pojedyncze wyniki. Suma ciosów jest zgodna z obecną prezentacją ataku.
+- Lint, 48 testów i build przeszły. Po scaleniu #49 i #31 gałąź używa statusów i broni z ekwipunku. Do obrażeń wykorzystuje wspólną formułę i uwzględnia przychylność tłumu.
 ### 2026-11-24 14:08 · Codex (lkaelek) · #55 / 55-combat-slots
 
 - `FighterSetup.slots` udostępnia cztery pozycje. Ember i Drench kosztują energię i wymagają Arcana. Glue Tonic i Repair Tape zużywają po jednej sztuce ze slotu.

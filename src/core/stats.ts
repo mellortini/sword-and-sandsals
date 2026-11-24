@@ -1,4 +1,5 @@
 import { equipmentTotals } from './inventory';
+import { combatWeapon } from './weapons';
 import type { AttackKind, Attributes, CombatAction, EquipmentLoadout, FighterStats } from './types';
 
 const DEFAULT_ATTRIBUTES: Readonly<Attributes> = {
@@ -36,7 +37,9 @@ export function shopDiscount(charm: number): number {
   return Math.min(25, Math.max(0, charm));
 }
 
-export function deriveStats(attributes: Readonly<Attributes>, equipment: EquipmentLoadout = {}): FighterStats {
+export function deriveStats(
+  attributes: Readonly<Attributes>, equipment: EquipmentLoadout = {}, weaponDamage = combatWeapon(equipment.weapon)?.damage ?? 4,
+): FighterStats {
   const { armour, weight } = equipmentTotals(equipment);
 
   return {
@@ -44,7 +47,7 @@ export function deriveStats(attributes: Readonly<Attributes>, equipment: Equipme
     maxEnergy: 20 + attributes.stamina * 4,
     armour,
     weight,
-    attackPower: 4 + attributes.might,
+    attackPower: weaponDamage + attributes.might,
     accuracyBonus: 3 * attributes.precision + 2 * DEFAULT_ATTRIBUTES.agility,
     evasionBonus: 3 * attributes.guard + 2 * attributes.agility,
     blockChance: Math.min(80, 25 + 4 * attributes.guard),
