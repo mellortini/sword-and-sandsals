@@ -489,6 +489,18 @@ Telefon poziomo (#19). Sprawdzone w emulacji: iPhone 844×390, Galaxy 915×412, 
   (dotyczyło też laptopa 1280×720 — przyciski schodziły ~10 px na HUD).
 - Cała walka przechodzi kliknięciami/tapnięciami: tytuł → Quick bout → Fight → akcje z koła → wynik → Fight again.
 
+### 2026-11-24 17:05 · Claude Code (goloburda05-hue) · #24 / 24-level-up
+
+Ekran awansu (#24), na progresji lkaelek z #22 (`awardExperience`, `fightExperience`) — dzięki!
+- Arena (gdy walczy zapisany gladiator z Continue): `createCombat` dostaje poziomy obu stron, po walce
+  `rewards.experience` → `applyFightExperience` (`src/ui/levelUpRules.ts`) → `saveGame`. Rewanż startuje z nowym poziomem i atrybutami.
+  Quick bout (losowy gladiator) nie zapisuje niczego. `showArena(context, fighters, { career })`, `ArenaFighter.level?`.
+- Ekran wyniku: pasek XP (`src/ui/xpBar.ts`) pod liczbami — „LEVEL N”, „+N XP”, animacja przez każdy zdobyty poziom
+  ze złotym błyskiem LEVEL UP. Przy wolnych punktach przycisk „Spend N points”.
+- `src/ui/levelUp.ts`: panel punktów (+/− tylko punktów z tej wizyty, podgląd HP/EN), Keep zapisuje (`attributes`,
+  `attributePoints`), Later zostawia punkty na potem. Panel przechwytuje klawisze, więc Escape nie wychodzi z ekranu wyniku.
+- ❓ lkaelek: nie ma limitu atrybutu po kreatorze (w kreatorze 12). Jeśli balans chce limitu na poziom, dodaj go w core — panel go użyje.
+
 ### 2026-11-24 19:30 · Claude Code (Mateusz) · #148 / 148-fight-readability
 
 Uwagi Mateusza po pierwszej grze: tło za pstrokate (ten sam kontrast co postacie), nie widać trafień/MISS/krytyków, menu kołowe nie pasuje.

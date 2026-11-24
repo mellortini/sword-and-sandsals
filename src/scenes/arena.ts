@@ -1,11 +1,16 @@
 import { Container, Sprite } from 'pixi.js';
 import type { AiProfile } from '../core/ai';
 import { createCombat } from '../core/combat';
+import { saveGame } from '../core/save';
+import type { SavedCharacter } from '../core/save';
 import type { Attributes, CombatAction, FighterSide } from '../core/types';
 import type { Look } from '../rig/PaperRig';
 import { summarizeFight } from '../ui/fightSummary';
 import { FxLayer } from '../ui/fx';
 import { hudScaleFor } from '../ui/phone';
+import { openLevelUp } from '../ui/levelUp';
+import { applyFightExperience } from '../ui/levelUpRules';
+import type { FightProgress } from '../ui/levelUpRules';
 import { CombatHud } from '../ui/hud';
 import { RadialMenu } from '../ui/radialMenu';
 import { CombatPresenter } from './combatPresenter';
@@ -22,6 +27,12 @@ export interface ArenaFighter {
   readonly look: Look;
   readonly name: string;
   readonly attributes?: Partial<Attributes>;
+  readonly level?: number;
+}
+
+export interface ArenaOptions {
+  /** the saved gladiator fighting as the player: wins add XP to the save and the result screen shows the XP bar (#24) */
+  readonly career?: SavedCharacter;
 }
 
 const LAYOUT = FIGHT_LAYOUT;
@@ -37,7 +48,9 @@ const pause = (sec: number) => new Promise<void>((r) => setTimeout(r, sec * 1000
  * never during an animation. At 0 HP the result screen offers a rematch or the way back to the title.
  * Pre-fight passes the two gladiators it showed; a direct visit (`?view=arena[&tier=N][&ai=aggressor|defender]`) uses random ones.
  */
-export async function showArena(context: SceneContext, fighters?: readonly [ArenaFighter, ArenaFighter]): Promise<SceneUpdate> {
+export async function showArena(
+  context: SceneContext, fighters?: readonly [ArenaFighter, ArenaFighter], options: ArenaOptions = {},
+): Promise<SceneUpdate> {
   const { world, bgTex, params, ui, add, rigs } = context;
   const arena = new Container();
   world.addChild(arena);
@@ -89,12 +102,21 @@ export async function showArena(context: SceneContext, fighters?: readonly [Aren
   ui.innerHTML = '<a href="?view=title">title</a> · <a href="?view=prefight">new opponent</a> · '
     + '<a href="?view=arena&ai=aggressor">vs aggressor</a> · <a href="?view=arena&ai=defender">vs defender</a>';
 
+  let career = options.career;
+  const spendPoints = async (character: SavedCharacter) => {
+    career = await openLevelUp(character, loadoutFromLook(character.look), saveGame);
+    return career;
+  };
+
   let seed = params.has('seed') ? Math.floor(+params.get('seed')!) : Math.floor(Math.random() * 1e9);
   void (async () => {
     for (;;) {
       const start = createCombat(seed,
-        { name: player.name, attributes: player.attributes, equipment: loadoutFromLook(player.look) },
-        { name: enemy.name, attributes: enemy.attributes, equipment: loadoutFromLook(enemy.look) });
+        {
+          name: player.name, attributes: career?.attributes ?? player.attributes,
+          level: career?.level ?? player.level, equipment: loadoutFromLook(player.look),
+        },
+        { name: enemy.name, attributes: enemy.attributes, level: enemy.level, equipment: loadoutFromLook(enemy.look) });
       presenter.reset(start);
       const outcome = await runFight(start, {
         pickers: { player: playerPicker, enemy: aiPicker(profile, seed ^ 0x85ebca6b) },
@@ -104,7 +126,16 @@ export async function showArena(context: SceneContext, fighters?: readonly [Aren
       menu.close();
       // let the death and victory poses land before the result covers them
       await pause(1.2);
-      const choice = await openFightResult(context, { player, enemy, summary: summarizeFight(outcome.events) });
+      let progress: FightProgress | undefined;
+      if (career) {
+        progress = applyFightExperience(career, outcome.state.rewards?.experience ?? 0);
+        career = progress.after;
+        // the bar still shows the XP if saving fails; the next fight starts from it again
+        if (progress.earned > 0) await saveGame(career).catch(() => undefined);
+      }
+      const choice = await openFightResult(context, {
+        player, enemy, summary: summarizeFight(outcome.events), progress, spendPoints: career ? spendPoints : undefined,
+      });
       if (choice === 'leave') {
         location.search = '?view=title';
         return;
