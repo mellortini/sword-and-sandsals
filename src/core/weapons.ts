@@ -1,5 +1,6 @@
 import { WEAPONS } from '../data/weapons';
 import type { Weapon } from '../data/weapons';
+import { readForgedItem } from './forge';
 import type { StatusKind } from './status';
 import type { AttackKind } from './types';
 
@@ -24,7 +25,10 @@ export const DEFAULT_WEAPON_REACH = 2;
 const STANDARD: WeaponMove = { strikes: 1, damageMultiplier: 1, armourMultiplier: 1, knockback: 0 };
 
 export function combatWeapon(id?: string): CombatWeapon | undefined {
-  return id === DAGGERS.id ? DAGGERS : WEAPONS.find((entry) => entry.id === id);
+  if (id === DAGGERS.id) return DAGGERS;
+  const { baseId, level } = readForgedItem(id);
+  const weapon = WEAPONS.find((entry) => entry.id === baseId);
+  return weapon && id && level > 0 ? { ...weapon, id, damage: weapon.damage + level } : weapon;
 }
 
 export function weaponReach(weapon?: CombatWeapon): number {

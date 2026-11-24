@@ -511,3 +511,9 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+
+### 2026-11-24 17:05 · Codex (lkaelek) · #63 / 63-equipment-forge
+
+- Kuźnia ulepsza jedną sztukę do +10 albo rozbiera sprzęt na strzępy, klej, atrament i nici. `forgeFightLoot` zwraca materiały za zwycięstwo.
+- Ulepszona broń daje dodatkowe obrażenia, ulepszona zbroja podnosi też ochronę strefową. Zapis obsługuje stany materiałów i ulepszenia noszonej zbroi.
+- Dla widoku: `forgeUpgradeCost`, `upgradeForgeItem`, `salvageForgeItem` oraz `forgePresentation` z numerkiem i natężeniem połysku. Lint, 122 testy i build przeszły.
