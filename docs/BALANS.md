@@ -2,7 +2,7 @@
 
 ## Pomiar
 
-Symulator używa faktycznego silnika walki, profili AI, katalogu sprzętu i cen sklepowych. Raport obejmuje 4 000 pojedynków na czterech poziomach. Każde zestawienie składa się z 250 par z zamianą stron, aby pierwszy ruch nie faworyzował jednego uczestnika. Pojedynek ma limit 300 akcji. W badaniu żaden nie doszedł do tego limitu.
+Symulator używa faktycznego silnika walki, profili AI, katalogu sprzętu i cen sklepowych. Raport obejmuje 4 000 pojedynków na czterech poziomach w wersji silnika z ochroną przed serią pudeł (#158, baza e29df70). Każde zestawienie składa się z 250 par z zamianą stron, aby pierwszy ruch nie faworyzował jednego uczestnika. Pojedynek ma limit 300 akcji. W badaniu żaden nie doszedł do tego limitu.
 
 Raport generuje polecenie PowerShell:
 
@@ -16,10 +16,10 @@ Porównanie AI używa takiego samego kompletnego wyposażenia po obu stronach. P
 
 | Poziom | Tier | Wygrane agresora z obrońcą | Śr. akcji | Wygrane kompletu z brakiem pancerza | Śr. akcji |
 | ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 | 1 | 54,6% | 35,9 | 67,6% | 29,8 |
-| 5 | 3 | 57,2% | 27,6 | 77,8% | 20,2 |
-| 12 | 6 | 54,8% | 23,4 | 92,0% | 13,2 |
-| 25 | 9 | 57,4% | 24,1 | 98,2% | 10,4 |
+| 1 | 1 | 59,6% | 36,9 | 68,2% | 30,5 |
+| 5 | 3 | 58,6% | 28,3 | 80,4% | 20,9 |
+| 12 | 6 | 55,4% | 24,2 | 95,2% | 13,2 |
+| 25 | 9 | 59,0% | 24,9 | 98,8% | 10,4 |
 
 Przewaga pełnej zbroi szybko rośnie w tych scenariuszach. Kolejny pomiar powinien porównać sąsiednie tiery i mieszane zestawy, bliższe rzeczywistej ścieżce gracza.
 
@@ -29,10 +29,10 @@ Cena obejmuje pięć części kompletu i miecz jednego tieru przy Charm 5. Symul
 
 | Poziom | Cena zestawu | Złoto na wygraną | Złoto na próbę | Wygrane do zakupu | Próby do zakupu |
 | ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 | 59 | 24,7 | 13,8 | 3 | 5 |
-| 5 | 415 | 46,5 | 26,7 | 9 | 16 |
-| 12 | 3 445 | 85,1 | 46,8 | 41 | 74 |
-| 25 | 19 975 | 162,1 | 93,2 | 124 | 215 |
+| 1 | 59 | 24,5 | 14,9 | 3 | 4 |
+| 5 | 415 | 46,6 | 27,4 | 9 | 16 |
+| 12 | 3 445 | 85,4 | 47,5 | 41 | 73 |
+| 25 | 19 975 | 163,1 | 96,4 | 123 | 208 |
 
 Ceny rosną szybciej niż wpływy z samych walk. Przed strojeniem późnych lig trzeba określić, ile wyposażenia zapewniają nagrody i jaki udział ma mieć zakup.
 
