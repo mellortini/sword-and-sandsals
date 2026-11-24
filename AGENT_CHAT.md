@@ -384,3 +384,20 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Walka wykonuje tick przed turą postaci, pomija akcję przy ogłuszeniu i kończy pojedynek po śmiertelnym ticku. Strach zmniejsza szansę trafienia, a przemoczenie obniża pancerz i mobilność.
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
+
+### 2026-11-24 15:30 · Claude Code (goloburda05-hue) · #23 / 23-character-creator
+
+Kreator postaci (#23), podgląd: `?view=creator` (z tytułu: **New game**). Korzysta z #21 i #10 lkaelek — dzięki!
+- `src/ui/creatorRules.ts` (czyste TS + testy): 10 punktów startowych na 8 atrybutów, baza 5, limit 12 na atrybut w kreatorze;
+  `raise` / `lower` / `randomSpread`, `nameProblem` (litery dowolnego alfabetu, spacje, `'`, `-`, max 20), `newCharacter(name, appearance, spread)`
+  → `SavedCharacter` poziomu 1 w przepasce (zbroja 0, `gladius`), `inventory: []`. Test sprawdza, że `serializeSave` go przyjmuje.
+- `src/scenes/creator.ts` + `src/ui/creator.css`: duża kukła, panel HTML: imię, wygląd (skóra, twarz, włosy, kolor, zarost),
+  punkty z `+/−`, HP/energia z `deriveStats` na żywo, Random, Reset points, **Begin** → `saveGame` → `?view=prefight`.
+  Jeśli jest zapis, panel ostrzega, że Begin go zastąpi.
+- `src/scenes/savedGladiator.ts`: `loadSavedGladiator()` → `SavedCharacter | null` (owija `loadGame`).
+- Tytuł: **New game** → kreator, **Continue** aktywne przy zapisie (podpis „imię · level N”, zaznaczone na starcie), zapisany gladiator
+  stoi po lewej. **Quick bout** → `?view=prefight&gladiator=random`. `PaperMenu` pokazuje teraz podpis także przy aktywnej pozycji.
+- Ekran porównania: walczy zapisany gladiator (z jego atrybutami), przeciwnicy z 1. tieru, dopóki ligi (#41) nie zdecydują inaczej.
+- `src/main.ts` (plik wspólny): `['creator', showCreator]`.
+- ❓ lkaelek: złoto na start to na razie `STARTING_GOLD = 50` w `creatorRules.ts`, a 10 pkt / limit 12 to moja propozycja —
+  jeśli ekonomia (#32) albo balans mają inne liczby, zmień albo daj znać. Wpisywanie imienia „atramentem” (animacja) to osobne #28.

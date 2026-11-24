@@ -9,6 +9,7 @@ import { comparisonRows } from '../ui/statRows';
 import type { ComparedFighter } from '../ui/statRows';
 import { showArena } from './arena';
 import { W, randomLook } from './common';
+import { loadSavedGladiator } from './savedGladiator';
 import type { SceneContext, SceneUpdate } from './common';
 import { PORTRAIT_W, portraitCard, removeRigs } from './portrait';
 
@@ -97,9 +98,14 @@ function randomEnemy(tier: number): PreFightFighter {
  * Fight → arena with the same two gladiators; Retreat → a new opponent.
  */
 export async function showPreFight(context: SceneContext): Promise<SceneUpdate> {
+  // the saved gladiator fights unless the title's Quick bout asks for a random one
+  const saved = context.params.get('gladiator') === 'random' ? null : await loadSavedGladiator();
   const tp = context.params.get('tier');
-  const tier = tp ? Math.min(10, Math.max(1, +tp)) : 1 + Math.floor(Math.random() * 10);
-  const player = preFightFighter('Player', 1, randomLook(tier));
+  // a saved gladiator meets opponents of the first tier until the leagues (#41) pick them
+  const tier = tp ? Math.min(10, Math.max(1, +tp)) : saved ? 1 : 1 + Math.floor(Math.random() * 10);
+  const player = saved
+    ? preFightFighter(saved.name, saved.level, saved.look, saved.attributes)
+    : preFightFighter('Player', 1, randomLook(tier));
   context.ui.innerHTML = '<a href="?view=arena">arena</a> · <a href="?view=wardrobe">garderoba</a>';
 
   let update: SceneUpdate | undefined;
