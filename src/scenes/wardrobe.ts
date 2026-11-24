@@ -5,7 +5,7 @@ import type { Look } from '../rig/PaperRig';
 import { PELVIS_ABOVE_FEET, randomLook } from './common';
 import type { SceneContext } from './common';
 import { goToTitle, onEscape } from '../ui/backKey';
-import { SWORD_TIERS, shownSword, swordForSet, swordName } from '../ui/swordLooks';
+import { WEAPON_FAMILIES, WEAPON_TIERS, familyName, shownWeapon, tierForSet, weaponName } from '../ui/weaponLooks';
 import { weapon } from '../data/weapons';
 
 export async function showWardrobe({ world, bgTex, kit, ui, add }: SceneContext) {
@@ -25,12 +25,14 @@ export async function showWardrobe({ world, bgTex, kit, ui, add }: SceneContext)
     { key: 'beard', title: 'Facial hair', count: 10, name: (v) => J.beards[v] },
     { key: 'set', title: 'Full set', count: 11, name: (v) => (v ? `${v}. ${J.sets[v - 1]}` : 'none') },
     ...EQUIP_SLOTS.map((s) => ({ key: s as string, title: s[0].toUpperCase() + s.slice(1), count: 11, name: (v: number) => (v ? item(s, v)!.name : '—') })),
-    // #182: gladius or a sword per armour tier; the art comes with #36, until then the gladius stands in
-    { key: 'sword', title: 'Sword', count: SWORD_TIERS + 1,
-      name: (v: number) => swordName(v) + (shownSword(v, (k) => kit.has(k)).missing ? ' (art soon)' : '') },
+    // #182, #185: weapon family and tier (0 = the gladius); the art comes with #184 / #36, until then the gladius stands in
+    { key: 'family', title: 'Weapon', count: WEAPON_FAMILIES.length, name: (v: number) => familyName(WEAPON_FAMILIES[v]) },
+    { key: 'tier', title: 'Weapon tier', count: WEAPON_TIERS + 1,
+      name: (v: number) => weaponName(choice(v)) },
   ];
-  const vals: Record<string, number> = { ...(look as unknown as Record<string, number>), set: 0, sword: 0 };
-  const showSword = () => { look.weapon = shownSword(vals.sword, (k) => kit.has(k)).weapon; };
+  const vals: Record<string, number> = { ...(look as unknown as Record<string, number>), set: 0, family: 0, tier: 0 };
+  const choice = (tier = vals.tier) => ({ family: WEAPON_FAMILIES[vals.family], tier });
+  const showWeapon = () => { look.weapon = shownWeapon(choice(), (k) => kit.has(k)).weapon; };
   const html = rows.map((r) => `<div class="row"><span class="t">${r.title}</span><button data-k="${r.key}" data-d="-1">◀</button><span class="v" id="v_${r.key}"></span><button data-k="${r.key}" data-d="1">▶</button></div>`).join('');
   ui.innerHTML = `<h3>Gladiator</h3>${html}<div class="row"><button id="rand">Random</button></div><div id="stats"></div><div class="row small"><a href="?view=title">back to title</a> (Esc) · <a href="?view=arena">arena</a> · <a href="?view=lineup">10 sets</a> · <a href="?view=faces">faces</a></div>`;
   onEscape(goToTitle);
@@ -42,7 +44,7 @@ export async function showWardrobe({ world, bgTex, kit, ui, add }: SceneContext)
     document.getElementById('stats')!.innerHTML =
       `<div>Armour <b>${armor}</b> · Weight <b>${its.reduce((a, i) => a + i.weight, 0).toFixed(1)}</b> · Value <b>${its.reduce((a, i) => a + i.price, 0).toLocaleString('en')} g</b></div>` +
       its.map((i) => `<div class="it">${i.name} <i>(+${i.armor}, ${i.price.toLocaleString('en')} g, lvl ${i.minLevel})</i></div>`).join('') +
-      (vals.sword ? swordLine(vals.sword) : '') +
+      (vals.tier ? weaponLine(WEAPON_FAMILIES[vals.family], vals.tier, shownWeapon(choice(), (k) => kit.has(k)).missing) : '') +
       (full ? `<div class="it gold">${SET_BONUS}${its[0].bonus ? ' · ' + its[0].bonus : ''}</div>` : '');
     await rig.setLook(look);
   };
@@ -50,7 +52,7 @@ export async function showWardrobe({ world, bgTex, kit, ui, add }: SceneContext)
     const b = e.target as HTMLElement;
     if (b.id === 'rand') {
       Object.assign(look, randomLook());
-      Object.assign(vals, look, { set: 0, sword: 0 });
+      Object.assign(vals, look, { set: 0, family: 0, tier: 0 });
       void refresh();
       return;
     }
@@ -60,18 +62,19 @@ export async function showWardrobe({ world, bgTex, kit, ui, add }: SceneContext)
     vals[k] = (vals[k] + +b.dataset.d! + r.count) % r.count;
     if (k === 'set') {
       for (const s of EQUIP_SLOTS) { look[s] = vals.set; vals[s] = vals.set; }
-      // a full set brings the sword of its tier (#182)
-      vals.sword = swordForSet(vals.set);
-      showSword();
-    } else if (k === 'sword') showSword();
+      // a full set brings the weapon of its tier, in the chosen family (#182, #185)
+      vals.tier = tierForSet(vals.set);
+      showWeapon();
+    } else if (k === 'family' || k === 'tier') showWeapon();
     else (look as unknown as Record<string, number>)[k] = vals[k];
     void refresh();
   });
   await refresh();
 }
 
-/** The chosen sword's catalogue line in the stats under the rows. */
-function swordLine(tier: number) {
-  const w = weapon('sword', tier);
+/** The chosen weapon's catalogue line in the stats under the rows. */
+function weaponLine(family: (typeof WEAPON_FAMILIES)[number], tier: number, missingArt: boolean) {
+  const w = weapon(family, tier);
+  if (w && missingArt) return `<div class="it">${w.name} <i>(damage ${w.damage}, ${w.price.toLocaleString('en')} g) — art soon, the gladius stands in</i></div>`;
   return w ? `<div class="it">${w.name} <i>(damage ${w.damage}, ${w.price.toLocaleString('en')} g)</i></div>` : '';
 }

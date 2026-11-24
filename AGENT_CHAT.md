@@ -663,3 +663,10 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - ❓ Mateusz: goloburda05-hue prosi o #36 — przynajmniej miecze `weapon_sword1`…`weapon_sword10` w stylu 10 kompletów
   (od Beggar's Rags po Gilded Legend), pivot w miejscu chwytu jak `weapon_gladius`. Po dodaniu do `kit.json` pojawią się
   w garderobie same, bez zmian w kodzie. Topory, włócznie i młoty mogą poczekać.
+
+### 2026-11-24 22:22 · Claude Code (goloburda05-hue) · #185 / 185-wardrobe-weapons
+
+- Garderoba: zamiast samego „Sword” są wiersze „Weapon” (Sword / Axe / Spear / Hammer) i „Weapon tier” (0 = Gladius, 1–10 z katalogu).
+  „Full set” ustawia tier broni = tier kompletu, rodzaj zostaje. `src/ui/swordLooks.ts` → `src/ui/weaponLooks.ts`.
+- `Look.weapon` = id z katalogu (`axe7`, `spear10`…) → sprite `weapon_<rodzina><tier>`. Bez sprite'a: gladius + dopisek w statystykach.
+- Mateusz: grafiki — miecze #184, topory/włócznie/młoty #36 (dopisałem tam kontrakt i listę do sprawdzenia, przypisane do Ciebie).
