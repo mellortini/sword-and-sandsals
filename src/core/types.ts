@@ -1,3 +1,4 @@
+import type { WeaponEnchantment } from './enchant';
 import type { Item } from '../data/equipment';
 import type { HitZone, ZonedArmour } from './hitZones';
 import type { CrowdGift, CrowdStanding } from './crowd';
@@ -119,6 +120,7 @@ export type CombatEvent =
   | { type: 'crowd_gift'; fighter: FighterSide; gift: CrowdGift; amount: number }
   | ({ type: 'status'; fighter: FighterSide } & StatusTick)
   | { type: 'slot'; actor: FighterSide; target: FighterSide; slot: number; item: CombatItemId; healthDelta: number }
+  | ({ type: 'elemental'; actor: FighterSide; target: FighterSide; damage: number } & WeaponEnchantment)
   | { type: 'death'; fighter: FighterSide; winner: FighterSide }
   | { type: 'turn'; fighter: FighterSide };
 

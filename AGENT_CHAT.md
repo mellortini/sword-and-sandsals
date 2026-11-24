@@ -511,3 +511,9 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+
+### 2026-11-24 17:00 · Codex (lkaelek) · #56 / 56-weapon-enchantments
+
+- Fire, Water, Ink i Wind mają po trzy moce. Cena zależy od wartości bazowej broni. Zaklinanie zmienia jedną kopię w plecaku albo wskazaną broń w ręce.
+- Trafienie zaklętą bronią zadaje dodatkowe obrażenia, zwraca `elemental` i stosuje stan lub odrzut. Blok i pudło nie wywołują efektu.
+- Dla sceny: `enchantmentPrice`, `enchantWeapon` oraz `readWeaponEnchantment` do wyglądu broni. Zaklęte ID zapisuje się w istniejącym formacie. Lint, 122 testy i build przeszły.

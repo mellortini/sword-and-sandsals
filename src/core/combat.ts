@@ -1,3 +1,4 @@
+import { enchantmentEffect } from './enchant';
 import { createCrowdStanding, crowdDamageMultiplier, scoreCrowdAction } from './crowd';
 import { armourByZone, HIT_ZONES, ZONE_ACCURACY_PENALTY } from './hitZones';
 import type { AttackZoneOption, HitZone, TargetedAttack } from './hitZones';
@@ -253,8 +254,17 @@ export function performAction(state: CombatState, command: CombatAction | Target
       // aimed blows: a critical to the head stuns, a hit to the legs slows
       const zoneStatus = zone === 'head' && attack.crit ? 'stunned' : zone === 'legs' ? 'slowed' : undefined;
       if (zoneStatus) opponent.statuses = applyStatus(opponent.statuses, zoneStatus, opponent.statusResistances);
-      const knockback = action === 'charge' ? KNOCKBACK_DISTANCE : traits.knockback;
-      if (knockback > 0) move(other, opponent, 'knockback', opponent.position + direction * knockback, events);
+      let knockback = action === 'charge' ? KNOCKBACK_DISTANCE : traits.knockback;
+      const enchantment = fighter.weapon?.enchantment;
+      if (enchantment) {
+        const effect = enchantmentEffect(enchantment);
+        const damage = Math.min(opponent.health, effect.damage);
+        opponent.health -= damage;
+        events.push({ type: 'elemental', actor: side, target: other, damage, ...enchantment });
+        if (effect.status && opponent.health > 0) opponent.statuses = applyStatus(opponent.statuses, effect.status, opponent.statusResistances);
+        knockback += effect.knockback;
+      }
+      if (knockback > 0 && opponent.health > 0) move(other, opponent, 'knockback', opponent.position + direction * knockback, events);
     }
   }
 
