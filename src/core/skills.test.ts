@@ -65,3 +65,10 @@ it('uses the armour bonus against aimed strikes and multiplies charge damage', (
   const predator = performAction(createCombat(1, { ...player, skills: ['predator-charge'] }, { position: 8 }), 'charge');
   expect(predator.state.fighters.enemy.health).toBeLessThan(charge.state.fighters.enemy.health);
 });
+
+it('combines a saved health value with skill-adjusted maximum health', () => {
+  const combat = createCombat(1, { health: 70, skills: ['wild-vigour'] });
+  expect(combat.fighters.player).toMatchObject({ health: 70, stats: { maxHealth: 76 }, consecutiveMisses: 0 });
+  const previousSave = createCombat(1, { skills: ['wild-vigour'] });
+  expect(previousSave.fighters.player.health).toBe(76);
+});

@@ -18,6 +18,8 @@ const ACTION_INFO = {
 } satisfies Record<CombatAction, { label: string; icon: string; description: string }>;
 
 const MENU_GUTTER = 38;
+/** half a button (64px, radialMenu.css) plus a small gap: how far a button reaches below its centre */
+const BUTTON_REACH = 36;
 const clampAnchor = (value: number, radius: number, extent: number) => {
   const inset = Math.min(extent / 2, radius + MENU_GUTTER);
   return Math.max(inset, Math.min(extent - inset, value));
@@ -54,7 +56,11 @@ export class RadialMenu {
     this.element.dataset.open = 'false';
   }
 
-  setAnchor(x: number, y: number, scale: number) {
+  /**
+   * Centre the ring on (x, y) in page px. `bottom` is the lowest page y the buttons may reach (the top of the HUD
+   * panels), so on a short phone screen the ring moves up instead of covering the health and energy flasks.
+   */
+  setAnchor(x: number, y: number, scale: number, bottom = Infinity) {
     const width = document.documentElement.clientWidth;
     const height = document.documentElement.clientHeight;
     const rx = Math.min(Math.max(0, width / 2 - MENU_GUTTER), Math.max(124, 192 * scale));
@@ -65,7 +71,8 @@ export class RadialMenu {
       this.placeButtons();
     }
     this.element.style.left = `${clampAnchor(x, rx, width)}px`;
-    this.element.style.top = `${clampAnchor(y, ry, height)}px`;
+    const top = Math.max(Math.min(ry + MENU_GUTTER, height / 2), Math.min(y, bottom - ry - BUTTON_REACH));
+    this.element.style.top = `${clampAnchor(top, ry, height)}px`;
   }
 
   destroy() {
