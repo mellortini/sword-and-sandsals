@@ -107,6 +107,11 @@ export class ActionBar {
     this.element.dataset.open = 'false';
   }
 
+  /** Hide the whole bar between bouts, so it never lies over the result screen (#187). */
+  setVisible(visible: boolean) {
+    this.element.hidden = !visible;
+  }
+
   /** Fit the bar between the HUD panels or over the fighters (screen pixels); cheap to call every frame. */
   place(slot: BarSlot) {
     const { x, y, edge, scale } = placeBar(this.element.offsetWidth, this.element.offsetHeight, slot, document.documentElement.clientWidth, textScale());

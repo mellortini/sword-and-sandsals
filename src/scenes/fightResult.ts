@@ -17,7 +17,7 @@ import { PORTRAIT_H, PORTRAIT_W, portraitCard } from './portrait';
 import type { PortraitSubject } from './portrait';
 import { loadoutFromLook } from './preFight';
 
-export type FightResultChoice = 'again' | 'leave';
+export type FightResultChoice = 'again' | 'next' | 'leave';
 
 export interface FightResult {
   readonly player: PortraitSubject;
@@ -31,6 +31,8 @@ export interface FightResult {
    * the result screen offers it while the gladiator has unspent attribute points
    */
   readonly spendPoints?: (character: SavedCharacter) => Promise<SavedCharacter>;
+  /** offer "Next opponent" (#187): a similar opponent, at most a little stronger */
+  readonly nextOpponent?: boolean;
 }
 
 const PANEL_W = 640;
@@ -38,7 +40,7 @@ const TOP = 196;
 
 /**
  * Result screen over the finished arena: VICTORY / DEFEAT, both portraits (the loser dimmed and stamped),
- * the fight's numbers side by side, and Fight again / Leave. Rewards (gold, XP) come with #43.
+ * the fight's numbers side by side, and Fight again / Next opponent (arena, #187) / Leave. Rewards (gold, XP) come with #43.
  * Resolves with the choice and removes everything it added. Keyboard: Enter = Fight again, Escape = Leave.
  */
 export async function openFightResult(context: SceneContext, result: FightResult): Promise<FightResultChoice> {
@@ -69,10 +71,16 @@ export async function openFightResult(context: SceneContext, result: FightResult
   const listening = new AbortController();
   const keys = buttonKeys(listening.signal);
   let finish: (choice: FightResultChoice) => void = () => {};
-  const buttons = [
-    paperButton('Fight again', W / 2 - 160, buttonsY, true, () => finish('again'), 280),
-    paperButton('Leave', W / 2 + 160, buttonsY, false, () => finish('leave'), 280),
-  ];
+  const buttons = result.nextOpponent
+    ? [
+      paperButton('Fight again', W / 2 - 320, buttonsY, true, () => finish('again'), 290),
+      paperButton('Next opponent', W / 2, buttonsY, false, () => finish('next'), 290),
+      paperButton('Leave', W / 2 + 320, buttonsY, false, () => finish('leave'), 290),
+    ]
+    : [
+      paperButton('Fight again', W / 2 - 160, buttonsY, true, () => finish('again'), 280),
+      paperButton('Leave', W / 2 + 160, buttonsY, false, () => finish('leave'), 280),
+    ];
   root.addChild(...buttons, keyHint('← →  choose    Enter  confirm    Esc  leave', W / 2, buttonsY + 112));
   keys.add(...buttons);
 

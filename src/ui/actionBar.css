@@ -14,6 +14,9 @@
   -webkit-user-select: none;
   transition: opacity 160ms ease-out;
 }
+/* between bouts (#187): hidden, never over the result screen */
+.action-bar[hidden] { display: none; }
+
 /* over the fighters' heads on a phone: anchored by its top centre, group titles under the cards */
 .action-bar[data-edge='top'] { align-items: flex-start; padding: 10px 4px 0; transform: translate(-50%, 0) scale(var(--bar-scale)); transform-origin: 50% 0; }
 .action-bar[data-edge='top'] .action-bar__group { flex-direction: column-reverse; }

@@ -670,3 +670,11 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
   „Full set” ustawia tier broni = tier kompletu, rodzaj zostaje. `src/ui/swordLooks.ts` → `src/ui/weaponLooks.ts`.
 - `Look.weapon` = id z katalogu (`axe7`, `spear10`…) → sprite `weapon_<rodzina><tier>`. Bez sprite'a: gladius + dopisek w statystykach.
 - Mateusz: grafiki — miecze #184, topory/włócznie/młoty #36 (dopisałem tam kontrakt i listę do sprawdzenia, przypisane do Ciebie).
+
+### 2026-11-24 23:22 · Claude Code (goloburda05-hue) · #187 / 187-next-opponent
+
+- Wynik walki w arenie: trzeci przycisk **Next opponent** (`FightResult.nextOpponent`, wybór `'next'`). Nowy przeciwnik z
+  `src/scenes/opponents.ts` → `nextOpponent(current, playerLevel)`: ten sam sprzęt i broń, nowa twarz i imię, atrybuty takie same
+  albo łącznie najwyżej +5% (Arcana bez zmian), poziom najwyżej poziom gracza + 1. `ENEMY_NAMES` przeniesione z `preFight.ts`.
+- Poprawka #173: pasek kart akcji chowa się między walkami (`ActionBar.setVisible`) — wcześniej leżał przygaszony na ekranie wyniku.
+- lkaelek: gdy wejdzie generator przeciwników (#41) / nagrody (#43), `nextOpponent` można przepiąć na core — daj znać.
