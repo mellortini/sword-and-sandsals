@@ -1,4 +1,6 @@
 import { createCrowdStanding, crowdDamageMultiplier, scoreCrowdAction } from './crowd';
+import { armourByZone, HIT_ZONES, ZONE_ACCURACY_PENALTY } from './hitZones';
+import type { AttackZoneOption, HitZone, TargetedAttack } from './hitZones';
 import { nextRandom } from './rng';
 import { attackDamage, attackHitChance, deriveStats, isAttack, resolveAttributes } from './stats';
 import { advanceStatusDurations, applyStatus, statusModifiers, tickStatuses } from './status';
@@ -60,6 +62,7 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     name: setup.name ?? defaultName,
     attributes,
     stats,
+    armourByZone: armourByZone(setup.equipment),
     position: roundPosition(position),
     health: stats.maxHealth,
     energy: stats.maxEnergy,
@@ -124,14 +127,27 @@ function isInRange(action: CombatAction, side: FighterSide, position: number, di
   }
 }
 
-function hitChance(kind: AttackKind, attacker: Readonly<Fighter>, defender: Readonly<Fighter>): number {
-  const { accuracyPenalty } = statusModifiers(attacker.statuses);
-  return attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty + accuracyPenalty);
+export function getAttackZoneOptions(state: CombatState, action: AttackKind): AttackZoneOption[] {
+  const available = getActionOptions(state).find((option) => option.action === action);
+  if (!available) return [];
+  const attacker = state.fighters[state.active];
+  const defender = state.fighters[opposingSide(state.active)];
+  return HIT_ZONES.map((zone) => ({ ...available, action, zone, hitChance: hitChance(action, attacker, defender, zone) }));
 }
 
-export function performAction(state: CombatState, action: CombatAction): ActionResult {
+function hitChance(kind: AttackKind, attacker: Readonly<Fighter>, defender: Readonly<Fighter>, zone?: HitZone): number {
+  const { accuracyPenalty } = statusModifiers(attacker.statuses);
+  const targetingPenalty = zone ? ZONE_ACCURACY_PENALTY[zone] : 0;
+  return attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty + accuracyPenalty + targetingPenalty);
+}
+
+export function performAction(state: CombatState, command: CombatAction | TargetedAttack): ActionResult {
   if (state.winner !== null) return { ok: false, state, events: [], reason: 'finished' };
-  const option = getActionOptions(state).find((entry) => entry.action === action);
+  const action = typeof command === 'string' ? command : command.action;
+  const zone = typeof command === 'string' ? undefined : command.zone;
+  const option = typeof command === 'string'
+    ? getActionOptions(state).find((entry) => entry.action === command)
+    : getAttackZoneOptions(state, command.action).find((entry) => entry.zone === command.zone);
   if (!option) return { ok: false, state, events: [], reason: 'unavailable' };
 
   const side = state.active;
@@ -181,11 +197,15 @@ export function performAction(state: CombatState, action: CombatAction): ActionR
       break;
   }
 
-  const attack = isAttack(action) ? resolveAttack(action, side, fighter, opponent, roll) : undefined;
+  const attack = isAttack(action) ? resolveAttack(action, side, fighter, opponent, roll, zone) : undefined;
   if (attack) {
     events.push(attack);
-    if (action === 'charge' && attack.damage > 0 && opponent.health > 0) {
-      move(other, opponent, 'knockback', opponent.position + direction * KNOCKBACK_DISTANCE, events);
+    if (attack.damage > 0 && opponent.health > 0) {
+      const status = zone === 'head' && attack.crit ? 'stunned' : zone === 'legs' ? 'slowed' : undefined;
+      if (status) opponent.statuses = applyStatus(opponent.statuses, status, opponent.statusResistances);
+      if (action === 'charge') {
+        move(other, opponent, 'knockback', opponent.position + direction * KNOCKBACK_DISTANCE, events);
+      }
     }
   }
 
@@ -253,9 +273,9 @@ function changeEnergy(side: FighterSide, fighter: Fighter, amount: number, event
 }
 
 function resolveAttack(
-  kind: AttackKind, side: FighterSide, attacker: Readonly<Fighter>, defender: Fighter, roll: () => number,
+  kind: AttackKind, side: FighterSide, attacker: Readonly<Fighter>, defender: Fighter, roll: () => number, zone?: HitZone,
 ): Extract<CombatEvent, { type: 'attack' }> {
-  const chance = hitChance(kind, attacker, defender);
+  const chance = hitChance(kind, attacker, defender, zone);
   const hit = roll() < chance;
   // A defensive stance can block one incoming attack. Crits require an unblocked hit.
   const blocked = hit && defender.guarding && roll() < defender.stats.blockChance;
@@ -265,10 +285,14 @@ function resolveAttack(
     // crowd favour raises the attacker's power, soaking weakens the defender's armour
     const offense = { ...attacker.stats, attackPower: attacker.stats.attackPower * crowdDamageMultiplier(attacker.crowd) };
     const { armourMultiplier } = statusModifiers(defender.statuses);
-    const defense = { ...defender.stats, armour: defender.stats.armour * armourMultiplier };
+    const armour = zone ? defender.armourByZone[zone] : defender.stats.armour;
+    const defense = { ...defender.stats, armour: armour * armourMultiplier };
     damage = Math.min(defender.health, attackDamage(kind, offense, defense, crit));
     defender.health -= damage;
   }
 
-  return { type: 'attack', actor: side, target: opposingSide(side), kind, hitChance: chance, hit, crit, blocked, damage };
+  return {
+    type: 'attack', actor: side, target: opposingSide(side), kind, hitChance: chance,
+    hit, crit, blocked, damage, ...(zone ? { zone } : {}),
+  };
 }

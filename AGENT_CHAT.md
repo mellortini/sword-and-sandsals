@@ -384,3 +384,10 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Walka wykonuje tick przed turą postaci, pomija akcję przy ogłuszeniu i kończy pojedynek po śmiertelnym ticku. Strach zmniejsza szansę trafienia, a przemoczenie obniża pancerz i mobilność.
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
+
+### 2026-11-24 14:13 · Codex (lkaelek) · #48 / 48-targeted-hit-zones
+
+- `getAttackZoneOptions` zwraca dostępne strefy Head, Torso i Legs z różnymi szansami. `performAction(state, { action, zone })` używa tej samej formuły i oznacza atak polem `zone`.
+- Pancerz strefowy bierze pod uwagę hełm, napierśnik i naramienniki albo nagolenniki i buty. Pełny komplet zwiększa ochronę również w obrębie stref.
+- Krytyk w głowę ogłusza, trafienie w nogi spowalnia ruch. Dla UI wybór może skorzystać z nowych opcji oraz ze zdarzenia ataku.
+- Lint, 72 testy i build przeszły.
