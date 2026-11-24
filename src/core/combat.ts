@@ -1,3 +1,4 @@
+import { MAX_PROTECTED_MISSES, protectedHitChance } from './hitProtection';
 import { createCrowdStanding, crowdDamageMultiplier, scoreCrowdAction } from './crowd';
 import { armourByZone, HIT_ZONES, ZONE_ACCURACY_PENALTY } from './hitZones';
 import type { AttackZoneOption, HitZone, TargetedAttack } from './hitZones';
@@ -80,6 +81,7 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     guarding: false,
     counterReady: false,
     tauntPenalty: 0,
+    consecutiveMisses: 0,
     crowd: createCrowdStanding(crowdSeed),
     statuses: [],
     statusResistances: { ...setup.statusResistances },
@@ -153,7 +155,8 @@ export function getAttackZoneOptions(state: CombatState, action: AttackKind): At
 function hitChance(kind: AttackKind, attacker: Readonly<Fighter>, defender: Readonly<Fighter>, zone?: HitZone): number {
   const { accuracyPenalty } = statusModifiers(attacker.statuses);
   const targetingPenalty = zone ? ZONE_ACCURACY_PENALTY[zone] : 0;
-  return attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty + accuracyPenalty + targetingPenalty);
+  const base = attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty + accuracyPenalty + targetingPenalty);
+  return protectedHitChance(base, attacker.consecutiveMisses);
 }
 
 export function getCombatSlotOptions(state: CombatState): CombatSlotOption[] {
@@ -249,6 +252,7 @@ export function performAction(state: CombatState, command: CombatAction | Target
   if (isAttack(action)) {
     const traits = weaponMove(action, fighter.weapon);
     attack = resolveAttack(action, side, fighter, opponent, traits, roll, zone);
+    fighter.consecutiveMisses = attack.hit ? 0 : Math.min(MAX_PROTECTED_MISSES, fighter.consecutiveMisses + 1);
     if (option.counter) attack.counter = true;
     events.push(attack);
     if (attack.damage > 0 && opponent.health > 0) {

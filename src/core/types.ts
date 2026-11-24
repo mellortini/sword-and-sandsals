@@ -68,6 +68,7 @@ export interface Fighter {
   guarding: boolean;
   counterReady: boolean;
   tauntPenalty: number;
+  consecutiveMisses: number;
   crowd: CrowdStanding;
   statuses: readonly StatusEffect[];
   statusResistances: StatusResistances;
@@ -85,7 +86,7 @@ export interface CombatState {
 export interface ActionOption {
   action: CombatAction;
   energyCost: number;
-  /** Percentage from 5 to 95 for attacks. */
+  /** Percentage from 5 to 100 for attacks. */
   hitChance?: number;
   counter?: true;
 }
