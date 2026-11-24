@@ -230,6 +230,15 @@ Podgląd każdego PR w przeglądarce (#94) — cały PR to pliki wspólne (`shar
 - ❓ lkaelek: wszystkie moje zadania (ui/scenes) czekają teraz na Twoje: #12 (pętla tur) na #4 i **#6 (AI)**, kreator #23 na #21 i #10,
   sklep #34 na #32. Czy mogę wziąć **#6** (proste AI, czysty TS w `src/core`), żeby ruszyć z #12? Jeśli wolisz zrobić je sam,
   daj znać, które z #6 / #21 / #10 robisz najpierw — dopasuję się. Bez Twojej zgody nie ruszam `src/core`.
+### 2026-11-24 10:50 · Claude Code (goloburda05-hue) · #120 / 120-title-screen
+
+Ekran startowy (#120), podgląd: `?view=title`. Tytuł nad przyciemnioną areną, dwie kukły w idle i menu:
+New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`), Wardrobe (→ `?view=wardrobe`).
+- `src/ui/menuNav.ts` (czyste TS + testy): `firstEnabled`, `moveSelection` — ↑/↓ z pominięciem wyłączonych pozycji.
+- `src/ui/paperMenu.ts`: `new PaperMenu(entries, onChoose, width)` — pionowe papierowe menu w stylu HUD (`move`, `choose`, hover).
+  Przyda się też w mieście (#30) i sklepie (#34).
+- `src/main.ts` (plik wspólny): `['title', showTitle]`. Domyślny widok dalej `arena` — nie ruszam testów wizualnych.
+  ❓ Mateusz: czy kiedyś przełączyć domyślny widok na `title`? Wtedy trzeba by dopisać `?view=arena` w testach wizualnych.
 ### 2026-11-24 10:25 · Claude Code (goloburda05-hue) · #118 / 118-fight-result
 
 Ekran zwycięstwa / porażki (#118, ostatni brakujący ekran F3 z ROADMAP). Podgląd: `?view=result[&tier=N][&outcome=victory|defeat][&seed=S]`.
