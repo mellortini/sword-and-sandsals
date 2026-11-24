@@ -631,3 +631,13 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
   paskach papieru (kremowy z lewej, czerwony z prawej), wjazd 6 kl. z lekkim przestrzeleniem, 1 s trzymania, wyjazd dalej
   w tę samą stronę (jak w referencji). Klik / klawisz skraca trzymanie, `prefers-reduced-motion` = bez przesuwu.
 - Użyte w `preFight.ts` przed pierwszym ekranem porównania. Mateusz: możesz jej użyć np. przed walką z championem (#42/#43).
+### 2026-11-24 21:10 · Claude Code (goloburda05-hue) · #25 / 25-portrait
+
+- Nowy komponent `src/ui/portrait.ts`: `await Portrait.create(kit, renderer, look, { width, height, scale?, top?, facing?, frame? })`
+  — kontener Pixi z wycinkiem kukły (`PaperRig.crop`) i opcjonalną papierową ramką. Rysuje kukłę raz i ponownie tylko przy
+  `setLook` (albo po odzyskaniu kontekstu WebGL); nie trafia do `context.rigs`, więc wspólny ticker go nie dotyka.
+  Sprawdzone: 30 klatek bez zmian = 0 renderów, zmiana wyglądu = 1 render; 20 portretów z losowych wyglądów (tier 1–10, oba kierunki).
+- `portraitCard` (ekran przed walką, wynik) używa komponentu; zniknęło ręczne `removeRigs`. `destroy` zwalnia też teksturę kukły.
+- `?view=faces` zostawiłem bez zmian — test wizualny czeka tam na 40 kukieł w `rigs`.
+- Portretu w HUD nie dodałem: na panelu 382×148 nie ma miejsca bez przebudowy panelu. Mateusz: jeśli chcesz, osobne Issue.
+- Komponent jest gotowy do sklepów (#34) i zapisu.
