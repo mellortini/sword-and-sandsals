@@ -10,3 +10,5 @@ Przykład formatu v1 znajduje się w `assets/mods/example.json`.
 `loadModPack(file)` odczytuje plik, a `activateModPack(pack)` udostępnia sprzęt walce i sklepom. `getModOpponent(leagueId, index)` zwraca konfigurację do `createCombat`. Wywołanie `activateModPack()` przywraca dane bazowe.
 
 `loadBundledMod(name, base)` wczytuje zapakowany plik względnie do ścieżki gry. Nazwa `example` odpowiada `mods/example.json`.
+
+Aby uruchomić spakowany przykład w grze, otwórz `?view=wardrobe&mod=example` i wybierz pierwszy pancerz. Garderoba pokaże **Dockside Sash**. Po usunięciu parametru `mod` gra używa bazowego katalogu.

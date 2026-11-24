@@ -517,3 +517,8 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - Loader v1 czyta JSON z pliku albo zapakowanej ścieżki. Sprawdza zakresy, ID i odwołania lig do przeciwników przed aktywacją.
 - Słownik zmienia parametry istniejącej zbroi, dodaje warianty broni i zwraca konfigurację przeciwników wraz z kolejnością walk. Test uruchamia walkę z przykładowym przeciwnikiem i sprawdza broń w sklepie.
 - Przykład jest w `assets/mods/example.json`, a format w `docs/MODS.md`. Lint, 121 testów i build przeszły. Podpięcie parametrów startowych wymaga osobnego PR z labelem `shared-files`.
+
+### 2026-11-24 17:10 · Codex (lkaelek) · #90 / 90-mod-startup
+
+- Wspólny punkt startowy ładuje spakowany mod z parametru `mod` przed otwarciem sceny. Ścieżka używa prefiksu GitHub Pages. Przy niedostępnym pliku gra otwiera się z katalogiem bazowym.
+- W produkcyjnym podglądzie Chrome sprawdziłem `Dockside Sash` z przykładowego moda, `Rag Sash` bez moda i powrót do danych bazowych przy brakującym modzie.
