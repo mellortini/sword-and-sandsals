@@ -269,6 +269,40 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
   Jeśli nie zdążysz, przejmuje goloburda05-hue (UI to od podziału jego działka). Napisałem też w komentarzu do #103.
 - Po #4 i #6 → **#12 pętla tur** (goloburda05-hue): `getActionOptions` → menu → `performAction` → `await presenter.present(...)` → AI.
 
+### 2026-11-24 12:20 · Claude Code (goloburda05-hue) · #123 / 123-default-title
+
+↳ odp. na 2026-11-24 12:00. Dzięki za decyzje i Pages!
+- `src/main.ts` (plik wspólny): domyślny widok to `title`, arena pod `?view=arena`. Nieznany `?view=` dalej pokazuje arenę.
+- Linki „arena” (`href="?"`) w scenach → `?view=arena`: `arena.ts` („losuj”), `preFight.ts`, `fightResult.ts` (też Leave),
+  `title.ts`, `wardrobe.ts`, `dev/animLab.ts`. Testy wizualne bez zmian (jawne `?view=`).
+- Poprawiłem kolejność moich wpisów 08:37/08:45 i 10:25/10:50 (zamieniły się przy łączeniu gałęzi), treść bez zmian.
+- Następne: **#6** (AI w `src/core/ai.ts`) w osobnym PR, review lkaelek.
+
+### 2026-11-24 13:31 · Codex (współpraca) · #21 / 21-derived-attributes
+
+- `deriveStats` liczy HP, energię, obrażenia, celność, unik, blok, krytyk, skok, odpoczynek, prowokację, rabat i moc zaklęć. Rabat jest procentem do 25.
+- Walka i AI współdzielą formuły `attackHitChance` i `attackDamage` oraz reguły zasięgu i minimalnego kosztu ataku. Zręczność obrońcy wpływa na szansę trafienia przy zachowaniu domyślnego balansu.
+- ↳ odp. na 2026-11-24 14:15: usunąłem kopie formuł z AI. Wszystkie 43 testy i build przeszły.
+
+### 2026-11-24 13:35 · Codex (lkaelek) · #10 / 10-indexeddb-save
+
+- Dodałem wersjonowany zapis jednej postaci w IndexedDB i import/eksport JSON. Zapis obejmuje statystyki, poziom, XP, złoto, wygląd, wyposażenie i plecak.
+- `loadGame(createCharacter)` zwraca nową postać przy pustym zapisie albo komunikat i nową postać przy niedostępnym lub uszkodzonym zapisie. Nieudany import zachowuje dotychczasowy zapis.
+- Dla #23 i ekranu Continue dostępne są `saveGame`, `loadGame`, `serializeSave` i `importGame`. Podpięcie ekranów zostaje po stronie UI.
+- Lint, 43 testy i build przeszły. Sprawdziłem też zapis po przeładowaniu, oba wyniki importu i odzyskiwanie po uszkodzeniu w Chromium.
+
+### 2026-11-24 13:39 · Codex (lkaelek) · #31 / 31-equipment-inventory
+
+- `src/core/inventory.ts`: plecak według ID przedmiotów, pięć slotów pancerza, broń główna i druga ręka. Założenie sprawdza własność, poziom i Might broni. Podmiana lub zdjęcie zwraca przedmiot do plecaka.
+- `equipmentLoadout` przekazuje wyposażenie do walki. `deriveStats` korzysta ze wspólnego zliczania pancerza, bonusu kompletu i ciężaru obu rąk. Druga ręka przyjmuje broń z aktualnego katalogu. Przyjąłem wstępne wagi zależne od rodziny broni.
+- Dla UI ekwipunku: `equipItem` i `unequipItem` zwracają nowy stan lub kod przyczyny odmowy.
+- Lint, 42 testy i build przeszły.
+
+### 2026-11-24 13:40 · Codex (lkaelek) · #10 / 10-indexeddb-save
+
+- Format v1 zachowuje teraz także opcjonalne `hands.weapon` i `hands.offHand` jako ID przedmiotów z #31, niezależnie od grafiki `look.weapon`. Dane bez `hands` wciąż się wczytują.
+- Lint, 44 testy i build przeszły.
+
 ### 2026-11-24 14:15 · Claude Code (goloburda05-hue) · #6 / 6-enemy-ai
 
 ↳ odp. na 2026-11-24 12:00 (Mateusz: #6 → goloburda05-hue). AI przeciwnika w `src/core/ai.ts`, czyste TS + testy, bez Pixi.
@@ -282,14 +316,7 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
 - ❓ lkaelek (review jako właściciel `src/core`): w `ai.ts` są kopie dwóch rzeczy z `combat.ts` — mnożniki obrażeń ataków i
   `MELEE_RANGE = 2` (nie są eksportowane). Wolisz, żebym je wyeksportował z `combat.ts`, czy zostawić kopie? Nic w `combat.ts` nie zmieniałem.
 - Po #4 (menu radialne) biorę #12: tura gracza = menu, tura przeciwnika = `chooseAction(state, profile, ai)` po ~0.5 s.
-### 2026-11-24 12:20 · Claude Code (goloburda05-hue) · #123 / 123-default-title
 
-↳ odp. na 2026-11-24 12:00. Dzięki za decyzje i Pages!
-- `src/main.ts` (plik wspólny): domyślny widok to `title`, arena pod `?view=arena`. Nieznany `?view=` dalej pokazuje arenę.
-- Linki „arena” (`href="?"`) w scenach → `?view=arena`: `arena.ts` („losuj”), `preFight.ts`, `fightResult.ts` (też Leave),
-  `title.ts`, `wardrobe.ts`, `dev/animLab.ts`. Testy wizualne bez zmian (jawne `?view=`).
-- Poprawiłem kolejność moich wpisów 08:37/08:45 i 10:25/10:50 (zamieniły się przy łączeniu gałęzi), treść bez zmian.
-- Następne: **#6** (AI w `src/core/ai.ts`) w osobnym PR, review lkaelek.
 ### 2026-11-24 14:30 · Claude Code (Mateusz) · #125 / 125-setlook-race
 
 - Błąd z Pages: w garderobie przy szybkim klikaniu kukła pokazywała starą zbroję (albo żadnej). `PaperRig.setLook` czekało na
@@ -299,25 +326,16 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
   wygląd. API bez zmian — nic nie trzeba poprawiać w scenach (wardrobe, preFight, portrety, presenter).
 - Wskazówka do testów: lokalny build produkcyjny = `npm run build` + `npm run preview` (atlasy jak na Pages; `npm run dev` używa PNG).
 
-### 2026-11-24 13:39 · Codex (lkaelek) · #31 / 31-equipment-inventory
+### 2026-11-24 14:50 · Claude Code (goloburda05-hue) · #128 / 128-fight-loop
 
-- `src/core/inventory.ts`: plecak według ID przedmiotów, pięć slotów pancerza, broń główna i druga ręka. Założenie sprawdza własność, poziom i Might broni. Podmiana lub zdjęcie zwraca przedmiot do plecaka.
-- `equipmentLoadout` przekazuje wyposażenie do walki. `deriveStats` korzysta ze wspólnego zliczania pancerza, bonusu kompletu i ciężaru obu rąk. Druga ręka przyjmuje broń z aktualnego katalogu. Przyjąłem wstępne wagi zależne od rodziny broni.
-- Dla UI ekwipunku: `equipItem` i `unequipItem` zwracają nowy stan lub kod przyczyny odmowy.
-- Lint, 42 testy i build przeszły.
-### 2026-11-24 13:35 · Codex (lkaelek) · #10 / 10-indexeddb-save
-
-- Dodałem wersjonowany zapis jednej postaci w IndexedDB i import/eksport JSON. Zapis obejmuje statystyki, poziom, XP, złoto, wygląd, wyposażenie i plecak.
-- `loadGame(createCharacter)` zwraca nową postać przy pustym zapisie albo komunikat i nową postać przy niedostępnym lub uszkodzonym zapisie. Nieudany import zachowuje dotychczasowy zapis.
-- Dla #23 i ekranu Continue dostępne są `saveGame`, `loadGame`, `serializeSave` i `importGame`. Podpięcie ekranów zostaje po stronie UI.
-- Lint, 43 testy i build przeszły. Sprawdziłem też zapis po przeładowaniu, oba wyniki importu i odzyskiwanie po uszkodzeniu w Chromium.
-
-### 2026-11-24 13:40 · Codex (lkaelek) · #10 / 10-indexeddb-save
-
-- Format v1 zachowuje teraz także opcjonalne `hands.weapon` i `hands.offHand` jako ID przedmiotów z #31, niezależnie od grafiki `look.weapon`. Dane bez `hands` wciąż się wczytują.
-- Lint, 44 testy i build przeszły.
-### 2026-11-24 13:31 · Codex (współpraca) · #21 / 21-derived-attributes
-
-- `deriveStats` liczy HP, energię, obrażenia, celność, unik, blok, krytyk, skok, odpoczynek, prowokację, rabat i moc zaklęć. Rabat jest procentem do 25.
-- Walka i AI współdzielą formuły `attackHitChance` i `attackDamage` oraz reguły zasięgu i minimalnego kosztu ataku. Zręczność obrońcy wpływa na szansę trafienia przy zachowaniu domyślnego balansu.
-- ↳ odp. na 2026-11-24 14:15: usunąłem kopie formuł z AI. Wszystkie 43 testy i build przeszły.
+Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolidować z #103 w `arena.ts`. Podgląd: `?view=aifight`.
+- `src/scenes/turnLoop.ts` (+ testy): `await runFight(state, { pickers: { player, enemy }, present, pause, signal })` →
+  `{ state, events, finished }`. Tura: `getActionOptions` → picker → `performAction` → `await present(...)`; picker nigdy nie jest
+  pytany w trakcie animacji. `aiPicker(profile, seed)` = picker z AI #6.
+- `src/scenes/aiFight.ts`: dwie kukły walczą same (AI vs AI, `&player=…&enemy=aggressor|defender`) przez `CombatPresenter` + HUD,
+  przerwa 0.5 s między turami, na końcu `openFightResult`. Sprawdzone do końca walki: HUD i podsumowanie zgadzają się z core.
+- `src/main.ts` (plik wspólny): `['aifight', showAiFight]`.
+- #127 jest w main, więc PR stoi już na `main` (rebase). Przy okazji ułożyłem dzisiejsze wpisy od 12:00 według godzin (treść bez zmian).
+- lkaelek: do #12 z Twojego menu potrzebuję tylko jednego: picker gracza =
+  `(state, options) => new Promise((resolve) => menu.open(options))`, a `onAction` z `RadialMenu` woła `resolve`.
+  `RadialActionOption` ma ten sam kształt co `ActionOption`, więc pasuje bez przeróbek. W `arena.ts` po #103 to podepnę.
