@@ -208,6 +208,18 @@ Ekran porównania przed walką (#9), podgląd: `?view=prefight[&tier=N]`.
   więc jest w tym samym PR (label `shared-files`), a nie osobno.
 - Przeciwnik w demie jest zastępczy (losowy wygląd, poziom z tieru, kilka punktów atrybutów, imię z krótkiej listy w scenie) —
   podmienię na generator z #41, gdy powstanie. Poziom gracza = 1 do czasu #22.
+### 2026-11-24 08:45 · Claude Code (goloburda05-hue) · #94 / 94-pr-preview
+
+Podgląd każdego PR w przeglądarce (#94) — cały PR to pliki wspólne (`shared-files`).
+- `.github/workflows/preview.yml`: PR z tego repo → `npm run build` z `VITE_BASE=/<repo>/pr-<nr>/` → kopia `dist/` do
+  `gh-pages/pr-<nr>/` → komentarz w PR z linkiem (jeden, aktualizowany przy każdym pushu). Zamknięcie PR usuwa folder.
+  `gh-pages` jest zawsze jednym commitem (force-push), więc nie puchnie od historii. PR z forków są pomijane.
+- Skrypty: `.github/scripts/pages-checkout.sh`, `pages-push.sh`, `pr-comment.sh`.
+- `vite.config.ts`: `base: process.env.VITE_BASE || '/'`; `src/main.ts`: kit i tło ładowane względem `import.meta.env.BASE_URL`
+  (lokalnie i w testach wizualnych nic się nie zmienia — base to `/`). Sprawdzone: build w podfolderze ładuje wszystko z podfolderu.
+- ❓ Mateusz: potrzebny jednorazowy krok admina repo — Settings → Pages → Source „Deploy from a branch”, gałąź `gh-pages`,
+  folder `/ (root)`. Gałąź `gh-pages` powstanie przy pierwszym przebiegu workflow (np. w tym PR). Bez tego link z komentarza da 404.
+- Uwaga przy #91 (zmiana nazwy repo): workflow bierze nazwę repo dynamicznie, nic nie trzeba zmieniać.
 
 ### 2026-11-24 08:37 · Claude Code (goloburda05-hue) · #116 / 116-unknown-view-fallback
 
@@ -227,3 +239,16 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
   Przyda się też w mieście (#30) i sklepie (#34).
 - `src/main.ts` (plik wspólny): `['title', showTitle]`. Domyślny widok dalej `arena` — nie ruszam testów wizualnych.
   ❓ Mateusz: czy kiedyś przełączyć domyślny widok na `title`? Wtedy trzeba by dopisać `?view=arena` w testach wizualnych.
+### 2026-11-24 10:25 · Claude Code (goloburda05-hue) · #118 / 118-fight-result
+
+Ekran zwycięstwa / porażki (#118, ostatni brakujący ekran F3 z ROADMAP). Podgląd: `?view=result[&tier=N][&outcome=victory|defeat][&seed=S]`.
+- `src/ui/fightSummary.ts` (czyste TS + testy): `summarizeFight(events)` → `{ winner, rounds, sides: { player, enemy } }`
+  (obrażenia, najmocniejszy cios, trafienia, chybienia, krytyki, ciosy zatrzymane blokiem), `summaryRows(summary)` → wiersze `StatPanel`.
+- `src/scenes/fightResult.ts`: `await openFightResult(context, { player, enemy, summary })` → `'again' | 'leave'` (Enter / Escape),
+  sprząta po sobie jak `openPreFight`. W podglądzie walkę rozgrywa `simulateFight` (losowe akcje z core, tylko dev — nie AI z #6).
+- Wydzieliłem wspólne kawałki z ekranu porównania: `src/ui/paperWidgets.ts` (`paperButton`, `screenTitle`, `fittedText`)
+  i `src/scenes/portrait.ts` (`portraitCard`, `removeRigs`) — `preFight.ts` wygląda tak samo.
+- `src/main.ts` (plik wspólny): `['result', showFightResult]`, więc PR ma `shared-files`.
+- Do #12 (pętla tur): zbieraj wszystkie `result.events` z `performAction`, a po `state.winner` →
+  `openFightResult(context, { player, enemy, summary: summarizeFight(events) })`. Nagrody (złoto, XP) dopiszę przy #43.
+- ❓ lkaelek: wciąż pytanie z wpisu #116 — mogę wziąć #6 (AI), żeby ruszyć #12? Jeśli wolisz zrobić sam, daj tylko znać.

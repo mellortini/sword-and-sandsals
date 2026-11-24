@@ -7,6 +7,7 @@ import { showAnimLab } from './scenes/dev/animLab';
 import { showFaces } from './scenes/dev/faces';
 import { showLineup } from './scenes/dev/lineup';
 import { showStrip } from './scenes/dev/strip';
+import { showFightResult } from './scenes/fightResult';
 import { showPreFight } from './scenes/preFight';
 import { showTitle } from './scenes/title';
 import { showWardrobe } from './scenes/wardrobe';
@@ -14,6 +15,7 @@ import { showWardrobe } from './scenes/wardrobe';
 const scenes = new Map<string, Scene>([
   ['arena', showArena],
   ['prefight', showPreFight],
+  ['result', showFightResult],
   ['title', showTitle],
   ['wardrobe', showWardrobe],
   ['lineup', showLineup],
@@ -40,12 +42,14 @@ async function main() {
   fit();
 
   const params = new URLSearchParams(location.search);
-  const kit = await Kit.load('/chars/kit');
+  // BASE_URL is '/' locally and '/<repo>/pr-<n>/' in PR previews (see .github/workflows/preview.yml)
+  const base = import.meta.env.BASE_URL;
+  const kit = await Kit.load(`${base}chars/kit`);
   const context: SceneContext = {
     app, world, params, kit,
     ui: document.getElementById('ui')!,
     ...createRigCollection(kit),
-    bgTex: await Assets.load('/bg/arena.png'),
+    bgTex: await Assets.load(`${base}bg/arena.png`),
   };
   const view = params.get('view') ?? 'arena';
   let scene = scenes.get(view);
