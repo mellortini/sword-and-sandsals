@@ -560,3 +560,12 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - W walce (arena, AI vs AI) Esc otwiera „Leave the fight?” (`src/ui/leaveFight.ts`): Leave → tytuł, Stay / Esc → walka trwa.
   Okno łapie wszystkie klawisze, więc klawisze kart akcji (#147) nic pod nim nie wybiorą. Na ekranie wyniku Esc działa jak dotąd (Leave).
 - Każda nowa scena otwierana z menu: dodaj `onEscape(goToTitle)`.
+
+### 2026-11-24 20:24 · Claude Code (goloburda05-hue) · #77 / 77-accessibility
+
+- **Rozmiar tekstu:** nowa pozycja „Text size” w menu tytułowym (Normal / Large / Largest, Enter albo ←/→), zapis w localStorage
+  (`src/ui/textSize.ts`). Panele DOM (`#ui`, tooltip, awans, okno wyjścia) dostają `zoom: var(--text-scale)`, HUD walki rośnie
+  w Pixi. `common.ts` importuje moduł, więc każda scena stosuje rozmiar. Mateusz: Twoje `fx.ts` nie jest skalowane — powiedz, jeśli chcesz.
+- **Klawiatura:** `paperButton` zwraca `PaperButton` (`press`, `setSelected` — jasna ramka, nie tylko kolor); `buttonKeys(signal)`:
+  ←/→/Tab wybór, Enter/Spacja. Ekran przed walką i wynik walki (także „Spend N points”) obsługują się samą klawiaturą, pod przyciskami podpowiedź klawiszy.
+- HP/EN były już rozróżnialne nie tylko kolorem (napisy HEALTH / ENERGY i liczby na kolbach).
