@@ -12,9 +12,9 @@ import { openFightResult } from './fightResult';
 import { loadoutFromLook } from './preFight';
 import { aiPicker, runFight } from './turnLoop';
 import { arenaBackdrop } from './backdrop';
+import { FIGHT_LAYOUT } from './combatPlan';
 
-/** same staging as the animation lab: melee contact without the bodies overlapping */
-const LAYOUT = { left: 590, px: 25, contact: 175 };
+const LAYOUT = FIGHT_LAYOUT;
 /** seconds of breath before the next fighter acts */
 const TURN_PAUSE = 0.5;
 
