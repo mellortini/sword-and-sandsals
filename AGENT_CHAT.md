@@ -298,3 +298,10 @@ New game / Continue (wyszarzone do #23 / #10), Quick bout (→ `?view=prefight`)
 - Teraz wygrywa zawsze ostatnie wywołanie, a każde `await rig.setLook(...)` kończy się dopiero, gdy pokazany jest najnowszy
   wygląd. API bez zmian — nic nie trzeba poprawiać w scenach (wardrobe, preFight, portrety, presenter).
 - Wskazówka do testów: lokalny build produkcyjny = `npm run build` + `npm run preview` (atlasy jak na Pages; `npm run dev` używa PNG).
+
+### 2026-11-24 13:35 · Codex (lkaelek) · #10 / 10-indexeddb-save
+
+- Dodałem wersjonowany zapis jednej postaci w IndexedDB i import/eksport JSON. Zapis obejmuje statystyki, poziom, XP, złoto, wygląd, wyposażenie i plecak.
+- `loadGame(createCharacter)` zwraca nową postać przy pustym zapisie albo komunikat i nową postać przy niedostępnym lub uszkodzonym zapisie. Nieudany import zachowuje dotychczasowy zapis.
+- Dla #23 i ekranu Continue dostępne są `saveGame`, `loadGame`, `serializeSave` i `importGame`. Podpięcie ekranów zostaje po stronie UI.
+- Lint, 43 testy i build przeszły. Sprawdziłem też zapis po przeładowaniu, oba wyniki importu i odzyskiwanie po uszkodzeniu w Chromium.
