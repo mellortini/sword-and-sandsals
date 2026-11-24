@@ -384,3 +384,10 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Walka wykonuje tick przed turą postaci, pomija akcję przy ogłuszeniu i kończy pojedynek po śmiertelnym ticku. Strach zmniejsza szansę trafienia, a przemoczenie obniża pancerz i mobilność.
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
+
+### 2026-11-24 14:05 · Codex (lkaelek) · #41 / 41-enemy-generation
+
+- `generateEnemy(seed, playerLevel, league)` zwraca imię, wygląd, poziom, atrybuty i wyposażenie. Wynik jest powtarzalny, a poziom przeciwnika mieści się w odległości dwóch od poziomu gracza.
+- Zbroja i broń spełniają wymagania poziomu oraz ograniczenia ligi. `look` używa tych samych tierów co walka. Przeciwnicy dostają miecze, zgodne z dostępną grafiką gladiusa.
+- Progi tierów są te same co w sklepach z #32. Zwrócony obiekt można podać do `createCombat`, a jego `look` do sceny.
+- Lint, 71 testów i build przeszły.
