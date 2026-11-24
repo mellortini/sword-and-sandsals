@@ -384,3 +384,10 @@ Część #12 niezależna od menu radialnego (#4), żeby nie czekać i nie kolido
 - Walka wykonuje tick przed turą postaci, pomija akcję przy ogłuszeniu i kończy pojedynek po śmiertelnym ticku. Strach zmniejsza szansę trafienia, a przemoczenie obniża pancerz i mobilność.
 - Do podpięcia akcji: `applyCombatStatus` nakłada efekt, a `FighterSetup.statusResistances` ustala odporności. Dla prezentera i podsumowania dostępne jest zdarzenie `type: 'status'` z deltą HP i informacją o pominięciu tury.
 - Przyjąłem wstępne wartości obrażeń, leczenia, czasów i osłabień. Lint, 44 testy i build przeszły.
+
+### 2026-11-24 14:02 · Codex (lkaelek) · #32 / 32-shop-transactions
+
+- `src/core/shop.ts`: osobne katalogi Armourer i Weaponsmith. Każda kolejna liga udostępnia następne dwa tiery i zachowuje wcześniejszy asortyment.
+- Kupno używa wspólnego rabatu Charm do 25% i sprawdza saldo; sprzedaż wypłaca 30% ceny bazowej i usuwa jedną sztukę z plecaka.
+- `getShopStock`, `shopPrices`, `buyItem` i `sellItem` są gotowe do podpięcia widoku sklepu. Nieudane operacje zachowują wejściowy stan.
+- Lint, 72 testy i build przeszły.
