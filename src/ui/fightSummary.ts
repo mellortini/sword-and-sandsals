@@ -13,6 +13,8 @@ export interface SideTotals {
   blocked: number;
   damage: number;
   bestHit: number;
+  /** bouquets and coins the crowd threw to this side (#51) */
+  gifts: number;
 }
 
 export interface FightSummary {
@@ -22,7 +24,7 @@ export interface FightSummary {
   sides: Record<FighterSide, SideTotals>;
 }
 
-const empty = (): SideTotals => ({ actions: 0, attacks: 0, hits: 0, misses: 0, crits: 0, blocked: 0, damage: 0, bestHit: 0 });
+const empty = (): SideTotals => ({ actions: 0, attacks: 0, hits: 0, misses: 0, crits: 0, blocked: 0, damage: 0, bestHit: 0, gifts: 0 });
 
 /**
  * Totals for the result screen from every event `performAction` returned, in order.
@@ -55,6 +57,9 @@ export function summarizeFight(events: readonly CombatEvent[], first: FighterSid
         s.bestHit = Math.max(s.bestHit, e.damage);
         break;
       }
+      case 'crowd_gift':
+        sides[e.fighter].gifts++;
+        break;
       case 'death':
         winner = e.winner;
         break;
@@ -77,6 +82,7 @@ const ROWS: RowSpec[] = [
   { label: 'Misses', value: (s) => s.misses, lowerIsBetter: true },
   { label: 'Critical hits', value: (s) => s.crits },
   { label: 'Blocked by foe', value: (s) => s.blocked, lowerIsBetter: true },
+  { label: 'Crowd gifts', value: (s) => s.gifts },
 ];
 
 /** Rows for `StatPanel`: player on the left, enemy on the right, the better number in gold. */

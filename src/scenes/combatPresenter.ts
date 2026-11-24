@@ -13,6 +13,7 @@ export type { Layout } from './combatPlan';
 
 type Fighters = Record<FighterSide, Fighter>;
 type AttackEvent = Extract<CombatEvent, { type: 'attack' }>;
+type CrowdGiftEvent = Extract<CombatEvent, { type: 'crowd_gift' }>;
 
 /** core move kind -> clip name */
 const MOVE_CLIP: Record<MoveKind, string> = {
@@ -25,8 +26,11 @@ export interface PresenterOptions {
   /** px per rig unit (the scene's UNIT) */
   unit: number;
   layout: Layout;
-  /** called whenever the shown health/energy change (feed it to CombatHud.setState) */
-  onState?: (state: { fighters: Fighters }) => void;
+  /**
+   * called whenever the shown health/energy/crowd change (feed it to CombatHud.setState);
+   * `gifts` lists what the crowd threw during the action that just ended
+   */
+  onState?: (state: { fighters: Fighters; gifts?: readonly CrowdGiftEvent[] }) => void;
 }
 
 const other = (side: FighterSide): FighterSide => (side === 'player' ? 'enemy' : 'player');
@@ -73,18 +77,22 @@ export class CombatPresenter {
         if (this.cancelled) return;
         await this.play(step);
       }
-      // rest refills energy at the end of its clip; also snap every value to the core's truth
+      // rest refills energy at the end of its clip; also snap every value (crowd favour too) to the core's truth
       this.shown = { player: { ...after.fighters.player }, enemy: { ...after.fighters.enemy } };
       for (const side of ['player', 'enemy'] as const) {
         this.o.fighters[side].home.x = screenX(this.o.layout, side, after.fighters[side].position);
       }
-      this.emit();
+      // the crowd reacts once the action has played out; a bouquet's health is already in `after`
+      const gifts = events.filter((e): e is CrowdGiftEvent => e.type === 'crowd_gift');
+      this.emit(gifts.length ? gifts : undefined);
     } finally {
       this.running = false;
     }
   }
 
-  private emit() { if (this.shown) this.o.onState?.({ fighters: this.shown }); }
+  private emit(gifts?: readonly CrowdGiftEvent[]) {
+    if (this.shown) this.o.onState?.(gifts ? { fighters: this.shown, gifts } : { fighters: this.shown });
+  }
 
   private setShown(side: FighterSide, patch: Partial<Fighter>) {
     if (!this.shown) return;

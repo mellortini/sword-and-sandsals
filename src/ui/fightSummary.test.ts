@@ -21,13 +21,14 @@ describe('summarizeFight', () => {
       attack('enemy', { blocked: true }),
       { type: 'turn', fighter: 'player' },
       attack('player', { crit: true, damage: 14 }),
+      { type: 'crowd_gift', fighter: 'player', gift: 'coin', amount: 5 },
       { type: 'death', fighter: 'enemy', winner: 'player' },
     ];
     const s = summarizeFight(events);
     expect(s.winner).toBe('player');
     expect(s.rounds).toBe(3);
-    expect(s.sides.player).toEqual({ actions: 3, attacks: 2, hits: 2, misses: 0, crits: 1, blocked: 0, damage: 23, bestHit: 14 });
-    expect(s.sides.enemy).toEqual({ actions: 2, attacks: 2, hits: 0, misses: 1, crits: 0, blocked: 1, damage: 0, bestHit: 0 });
+    expect(s.sides.player).toEqual({ actions: 3, attacks: 2, hits: 2, misses: 0, crits: 1, blocked: 0, damage: 23, bestHit: 14, gifts: 1 });
+    expect(s.sides.enemy).toEqual({ actions: 2, attacks: 2, hits: 0, misses: 1, crits: 0, blocked: 1, damage: 0, bestHit: 0, gifts: 0 });
   });
 
   it('marks the better side of each row; fewer misses is better', () => {
