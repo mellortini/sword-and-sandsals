@@ -24,9 +24,11 @@ import type { SceneContext, SceneUpdate } from './common';
 import { openFightResult } from './fightResult';
 import { careerLoadout } from '../ui/gearRules';
 import { recordForCareer } from '../ui/achievementRules';
-import { showAchievements } from '../ui/achievementToast';
+import { showAchievements, showNotice } from '../ui/achievementToast';
+import { afterBout } from '../ui/nemesisRules';
+import type { NemesisMemory } from '../core/nemesis';
 import { loadoutFromLook } from './preFight';
-import { aiPicker, runFight } from './turnLoop';
+import { aiPicker, nemesisPicker, runFight } from './turnLoop';
 import type { ActionPicker } from './turnLoop';
 import { arenaBackdrop } from './backdrop';
 import { FIGHT_LAYOUT } from './combatPlan';
@@ -37,6 +39,8 @@ export interface ArenaFighter {
   readonly name: string;
   readonly attributes?: Partial<Attributes>;
   readonly level?: number;
+  /** set when the opponent is the saved gladiator's nemesis (#209): it fights with what it remembers */
+  readonly nemesis?: NemesisMemory;
 }
 
 export interface ArenaOptions {
@@ -147,7 +151,7 @@ export async function showArena(
       menu.setVisible(true);
       fighting = true;
       const outcome = await runFight(start, {
-        pickers: { player: playerPicker, enemy: aiPicker(profile, seed ^ 0x85ebca6b) },
+        pickers: { player: playerPicker, enemy: enemy.nemesis ? nemesisPicker(enemy.nemesis, seed ^ 0x85ebca6b) : aiPicker(profile, seed ^ 0x85ebca6b) },
         present: (events, after) => presenter.present(events, after),
         pause: (next: FighterSide) => (next === 'enemy' ? pause(ENEMY_PAUSE) : Promise.resolve()),
       });
@@ -161,7 +165,12 @@ export async function showArena(
         // health after the bout and the potions left (#191) go to the save with the XP
         const settled = settleTempleCombat(career, outcome.state.fighters.player);
         // achievements (#203): the bout first, then the level it ended on; the result screen keeps working on `after`
-        const fought = recordForCareer(settled, { type: 'fight', id: `${Date.now().toString(36)}-${seed}`, state: outcome.state, events: outcome.events });
+        const fightId = `${Date.now().toString(36)}-${seed}`;
+        // the nemesis (#209): a victor becomes one, beating it ends the feud; a rematch fights the updated one
+        const feud = afterBout(settled, enemy, seed, fightId, outcome.state, outcome.events);
+        if (feud.notice) showNotice(feud.notice.kicker, feud.notice.title, feud.notice.text);
+        if (enemy.nemesis) enemy = { ...enemy, nemesis: feud.character.nemesis };
+        const fought = recordForCareer(feud.character, { type: 'fight', id: fightId, state: outcome.state, events: outcome.events });
         progress = applyFightExperience(fought.character, outcome.state.rewards?.experience ?? 0);
         const leveled = recordForCareer(progress.after, { type: 'level', level: progress.after.level });
         progress = { ...progress, after: leveled.character };
@@ -180,7 +189,7 @@ export async function showArena(
       }
       if (choice === 'next') {
         // #187: same gear, at most 5% stronger, at most one level above the player
-        enemy = nextOpponent(enemy, career?.level ?? player.level ?? 1);
+        enemy = { ...nextOpponent(enemy, career?.level ?? player.level ?? 1), nemesis: undefined };
         await E.setLook(drawableLook(context.kit, enemy.look));
       }
       seed++;
