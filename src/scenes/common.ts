@@ -1,3 +1,4 @@
+import { drawableLook } from '../ui/weaponLooks';
 import { Text, Texture } from 'pixi.js';
 import type { Application, Container } from 'pixi.js';
 import { Animator } from '../anim/Animator';
@@ -20,13 +21,15 @@ interface SceneRig {
   fixed?: Pose;
 }
 
+export { drawableLook };
+
 export function createRigCollection(kit: Kit) {
   const clips = bakeAll(kit.json.pose_test);
   const rigs: SceneRig[] = [];
 
   const add = async (look: Look, x: number, y: number, scale: number, facing: 1 | -1, parent: Container, phase = Math.random() * 2, still = false) => {
     const rig = new PaperRig(kit, { scale, facing });
-    await rig.setLook(look);
+    await rig.setLook(drawableLook(kit, look));
     rig.view.position.set(x, y);
     parent.addChild(rig.view);
     let anim: Animator | undefined;

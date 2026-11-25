@@ -19,9 +19,10 @@ import { CombatHud } from '../ui/hud';
 import { ActionBar } from '../ui/actionBar';
 import { leaveFightOnEscape } from '../ui/leaveFight';
 import { CombatPresenter } from './combatPresenter';
-import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from './common';
+import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, drawableLook, groundShadowTexture, randomLook } from './common';
 import type { SceneContext, SceneUpdate } from './common';
 import { openFightResult } from './fightResult';
+import { careerLoadout } from '../ui/gearRules';
 import { loadoutFromLook } from './preFight';
 import { aiPicker, runFight } from './turnLoop';
 import type { ActionPicker } from './turnLoop';
@@ -118,7 +119,7 @@ export async function showArena(
 
   let career = options.career;
   const spendPoints = async (character: SavedCharacter) => {
-    career = await openLevelUp(character, loadoutFromLook(character.look), saveGame);
+    career = await openLevelUp(character, careerLoadout(character), saveGame);
     return career;
   };
 
@@ -131,7 +132,9 @@ export async function showArena(
       const start = createCombat(seed,
         {
           name: player.name, attributes: career?.attributes ?? player.attributes,
-          level: career?.level ?? player.level, equipment: loadoutFromLook(player.look),
+          level: career?.level ?? player.level,
+          // the saved gladiator fights with the gear screen's gear (#197): weapon, forge levels, enchantments
+          equipment: career ? careerLoadout(career) : loadoutFromLook(player.look),
           // skills learned on the skill screen (#54) work in the fight
           skills: career?.skills,
           // health carries over between bouts and potions from the temple sit in the combat slots (#191)
@@ -171,7 +174,7 @@ export async function showArena(
       if (choice === 'next') {
         // #187: same gear, at most 5% stronger, at most one level above the player
         enemy = nextOpponent(enemy, career?.level ?? player.level ?? 1);
-        await E.setLook(enemy.look);
+        await E.setLook(drawableLook(context.kit, enemy.look));
       }
       seed++;
     }

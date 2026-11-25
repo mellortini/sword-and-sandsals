@@ -1,5 +1,6 @@
+import type { Kit } from '../rig/PaperRig';
 import { describe, expect, it } from 'vitest';
-import { WEAPON_FAMILIES, shownWeapon, tierForSet, weaponId, weaponName } from './weaponLooks';
+import { WEAPON_FAMILIES, shownWeapon, tierForSet, weaponId, weaponName, drawableLook } from './weaponLooks';
 
 describe('wardrobe weapons', () => {
   it('offers every family of the catalogue', () => {
@@ -25,5 +26,14 @@ describe('wardrobe weapons', () => {
     expect(shownWeapon({ family: 'spear', tier: 4 }, only(['weapon_gladius']))).toEqual({ weapon: 'gladius', missing: true });
     expect(shownWeapon({ family: 'spear', tier: 4 }, only(['weapon_spear4']))).toEqual({ weapon: 'spear4', missing: false });
     expect(shownWeapon({ family: 'sword', tier: 0 }, only(['weapon_gladius']))).toEqual({ weapon: 'gladius', missing: false });
+  });
+});
+
+describe('drawable look', () => {
+  const kit = { has: (key: string) => key === 'weapon_gladius' || key === 'weapon_sword1' } as unknown as Kit;
+  const look = { skin: 0, face: 0, hair: 0, hairColor: 0, beard: 0, helmet: 0, armor: 0, shoulders: 0, greaves: 0, boots: 0, weapon: 'sword1' };
+  it('keeps a weapon the kit can draw and shows the gladius for one without a sprite yet', () => {
+    expect(drawableLook(kit, look)).toBe(look);
+    expect(drawableLook(kit, { ...look, weapon: 'sword7' })).toEqual({ ...look, weapon: 'gladius' });
   });
 });

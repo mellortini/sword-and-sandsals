@@ -2,6 +2,7 @@ import { Container, Graphics } from 'pixi.js';
 import type { Renderer } from 'pixi.js';
 import { PaperRig } from '../rig/PaperRig';
 import type { Kit, Look } from '../rig/PaperRig';
+import { drawableLook } from './weaponLooks';
 
 export interface PortraitOptions {
   /** window size in px */
@@ -62,7 +63,7 @@ export class Portrait extends Container {
   /** A portrait of `look`, drawn and ready to add to the stage. */
   static async create(kit: Kit, renderer: Renderer, look: Look, options: PortraitOptions): Promise<Portrait> {
     const p = new Portrait(kit, renderer, options);
-    await p.setLook(look);
+    await p.setLook(drawableLook(kit, look));
     return p;
   }
 

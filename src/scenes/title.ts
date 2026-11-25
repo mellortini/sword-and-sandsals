@@ -2,15 +2,16 @@ import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import { saveGame } from '../core/save';
 import type { SavedCharacter } from '../core/save';
 import { openForge } from '../ui/forge';
+import { openGear } from '../ui/gear';
 import { openSkillTree } from '../ui/skillTree';
 import { openTemple } from '../ui/temple';
 import { openTrainer } from '../ui/trainer';
-import { loadoutFromLook } from './preFight';
+import { careerLoadout } from '../ui/gearRules';
 import { templeHealingQuote } from '../core/temple';
 import { PaperMenu } from '../ui/paperMenu';
 import { TEXT_SIZES, cycleTextSize, textSizeIndex } from '../ui/textSize';
 import type { PaperMenuEntry } from '../ui/paperMenu';
-import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from './common';
+import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, drawableLook, groundShadowTexture, randomLook } from './common';
 import type { SceneContext } from './common';
 import { loadSavedGladiator } from './savedGladiator';
 
@@ -20,7 +21,7 @@ interface TitleEntry extends PaperMenuEntry {
   /** a setting changed in place (Enter, ←/→) instead of a screen */
   readonly setting?: 'textSize';
   /** a panel opened over the title (skills #54, forge #189) */
-  readonly panel?: 'skills' | 'forge' | 'temple' | 'trainer';
+  readonly panel?: 'skills' | 'gear' | 'forge' | 'temple' | 'trainer';
 }
 
 const skillNote = (c: SavedCharacter) => {
@@ -53,6 +54,9 @@ function entries(saved: SavedCharacter | null): TitleEntry[] {
       ? { label: 'Skills', enabled: true, panel: 'skills', note: skillNote(saved) }
       : { label: 'Skills', enabled: false, note: 'no saved game yet' },
     saved
+      ? { label: 'Gear', enabled: true, panel: 'gear', note: 'wear what is in your pack' }
+      : { label: 'Gear', enabled: false, note: 'no saved game yet' },
+    saved
       ? { label: 'Forge', enabled: true, panel: 'forge', note: forgeNote(saved) }
       : { label: 'Forge', enabled: false, note: 'no saved game yet' },
     saved
@@ -71,7 +75,7 @@ function entries(saved: SavedCharacter | null): TitleEntry[] {
  * `?view=title`: game title over the dimmed arena, two idle gladiators facing each other and the main menu.
  * Mouse or keyboard (↑/↓, Enter; ←/→ change a setting such as Text size, #77). Entries open their view by URL.
  */
-export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
+export async function showTitle({ world, bgTex, ui, add, kit }: SceneContext) {
   const root = new Container();
   world.addChild(root);
   const bg = new Sprite(bgTex);
@@ -81,13 +85,15 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
   // the saved gladiator (if any) stands on the left
   const saved = await loadSavedGladiator();
   const gsh = groundShadowTexture();
+  let hero: Awaited<ReturnType<typeof add>> | undefined;
   for (const [i, x] of [[0, 330], [1, 1590]] as const) {
     const g = new Sprite(gsh);
     g.anchor.set(0.5); g.blendMode = 'multiply'; g.tint = 0x8a5a48;
     g.width = 5.2 * UNIT; g.height = 1.3 * UNIT;
     g.position.set(x + 0.35 * UNIT * (i ? -1 : 1), FEET_Y);
     root.addChild(g);
-    await add(i === 0 && saved ? saved.look : randomLook(), x, FEET_Y - PELVIS_ABOVE_FEET * UNIT, UNIT, i ? -1 : 1, root, i * 0.7);
+    const rig = await add(i === 0 && saved ? saved.look : randomLook(), x, FEET_Y - PELVIS_ABOVE_FEET * UNIT, UNIT, i ? -1 : 1, root, i * 0.7);
+    if (i === 0) hero = rig;
   }
 
   // a dark vignette band behind the title and the menu keeps the text readable over the busy stands
@@ -124,6 +130,12 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
         gladiator = c;
         menu.setNote(i, skillNote(c));
       });
+    } else if (items[i].panel === 'gear' && gladiator) {
+      void openGear(gladiator, saveGame).then((c) => {
+        gladiator = c;
+        // the saved gladiator on the left shows the new gear at once
+        if (saved) void hero?.setLook(drawableLook(kit, c.look));
+      });
     } else if (items[i].panel === 'forge' && gladiator) {
       void openForge(gladiator, saveGame).then((c) => {
         gladiator = c;
@@ -135,7 +147,7 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
         menu.setNote(i, templeNote(c));
       });
     } else if (items[i].panel === 'trainer' && gladiator) {
-      void openTrainer(gladiator, loadoutFromLook(gladiator.look), saveGame).then((c) => {
+      void openTrainer(gladiator, careerLoadout(gladiator), saveGame).then((c) => {
         gladiator = c;
         menu.setNote(i, trainerNote(c));
       });
