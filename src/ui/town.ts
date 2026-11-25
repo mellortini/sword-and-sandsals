@@ -8,6 +8,7 @@ import { careerLoadout } from './gearRules';
 import { equipmentSignal, recordForCareer, trophyCount } from './achievementRules';
 import { showAchievements } from './achievementToast';
 import { openTrophies } from './trophies';
+import { openShop } from './shop';
 import { openSkillTree } from './skillTree';
 import { openTemple } from './temple';
 import { openTrainer } from './trainer';
@@ -29,6 +30,8 @@ interface Building {
 
 /** The town's places in the order the panel lists them (#201). Each opens its own screen. */
 export const BUILDINGS: readonly Building[] = [
+  { id: 'armourer', name: 'Armourer', purpose: 'Buy and sell armour', note: (c) => `${c.gold} gold`, open: (c, save) => openShop('armourer', c, save) },
+  { id: 'weaponsmith', name: 'Weaponsmith', purpose: 'Buy and sell weapons', note: (c) => `${c.gold} gold`, open: (c, save) => openShop('weaponsmith', c, save) },
   {
     id: 'gear', name: 'Gear', purpose: 'Wear what is in your pack',
     note: (c) => plural(c.inventory.length, 'item') + ' in the pack', open: openGear,
