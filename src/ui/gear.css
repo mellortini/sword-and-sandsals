@@ -29,6 +29,7 @@
 .gear .gear-slot button:focus-visible, .gear .gear-item button:focus-visible { outline: 2px solid #3a2418; outline-offset: 1px; }
 @media (max-width: 760px), (max-height: 500px) {
   .gear-slot, .gear-item { padding: 3px 6px; font-size: 12px; }
-  .gear-slot { grid-template-columns: 5.5em 1fr 5.4em; }
+  .gear-slot { grid-template-columns: 7em 1fr 5.4em; }
+  .gear-slot__name { white-space: nowrap; }
   .gear-slot__stat { display: none; }
 }

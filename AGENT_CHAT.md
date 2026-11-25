@@ -776,3 +776,8 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - ❓ lkaelek: (1) oferta wg ligi — kariera nie ma jeszcze ligi, więc `shopLeague(level)` liczy ją z poziomu (progi jak `minLevel` tierów 3/5/7/9).
   Gdy liga trafi do zapisu (#58), podmienię na nią. (2) `sellItem` szuka dokładnego id w katalogu, więc ulepszonych/zaklętych sztuk nie da się
   sprzedać („not bought here”). Czy tak ma być, czy core ma płacić za bazę (+ coś za poziom)?
+
+### 2026-11-25 13:45 · Claude Code (goloburda05-hue) · #207 / 207-shop-phone
+
+- Przegląd nowych ekranów na telefonie (844×390): Town, Gear, Hall of Fame OK. Poprawki: sklep zostaje w jednym wierszu na niskim
+  ekranie (6 pozycji zamiast 3; dwuwierszowy układ tylko przy szerokości ≤ 600 px), w Gear nazwy slotów nie łamią się.
