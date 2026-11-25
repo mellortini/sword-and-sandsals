@@ -1,0 +1,40 @@
+/* Shop counter (src/ui/shop.ts): Buy / Sell tabs over a list of paper rows; panel from forge.css. */
+.shop__panel { width: min(96vw, 820px); }
+.shop .forge__name { text-transform: capitalize; }
+.shop__gold { margin-left: auto; color: #e8be4c; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; }
+.shop__gold b { color: #f2c14e; font-size: 20px; letter-spacing: 0; }
+.shop__tabs { display: flex; gap: 6px; }
+.shop__tabs button {
+  font: inherit; font-size: 14px; padding: 6px 22px; border: 0; border-radius: 3px 3px 0 0; cursor: pointer; background: #3a2328; color: #cdb99a;
+  box-shadow: inset 0 0 0 1px #815a46;
+}
+/* the open tab is the paper colour and bold; never colour alone */
+.shop__tabs [aria-selected='true'] { background: #ecd9b0; color: #3a2418; font-weight: bold; }
+.shop__tabs button:focus-visible { outline: 2px solid #fff0d0; outline-offset: 2px; }
+.shop__list { display: flex; flex-direction: column; gap: 5px; overflow-y: auto; min-height: 120px; padding: 2px 4px 6px; }
+.shop-row {
+  display: grid; grid-template-columns: 1fr 1fr auto; align-items: center; gap: 10px; padding: 5px 8px; border-radius: 3px; font-size: 13px;
+  color: #3a2418; background: linear-gradient(160deg, #fff8e3 0%, transparent 50%), #ecd9b0; box-shadow: inset 0 0 0 1px #a07a4f;
+}
+.shop-row__name { font-weight: bold; display: flex; flex-direction: column; }
+.shop-row__name small { font-weight: normal; font-size: 11px; font-style: italic; color: #8b6a4a; }
+.shop-row__stat { font-size: 12px; color: #5a4030; }
+.shop-row__stat b { color: #a8322a; }
+.shop-row__none { font-size: 11.5px; font-style: italic; color: #8b6a4a; }
+.shop-row button {
+  font: inherit; font-size: 12px; font-weight: bold; padding: 5px 10px; border: 0; border-radius: 3px; cursor: pointer; background: #9a6a2e;
+  color: #f3e6d6; white-space: nowrap;
+}
+.shop-row button[aria-disabled='true'] { opacity: 0.4; cursor: default; }
+.shop-row button:focus-visible { outline: 2px solid #3a2418; outline-offset: 1px; }
+/* low screens (a phone held sideways) keep one line per item, only tighter */
+@media (max-height: 500px) {
+  .shop-row { padding: 3px 6px; }
+  .shop-row__name { flex-direction: row; align-items: baseline; gap: 6px; }
+}
+/* narrow screens stack the stat under the name */
+@media (max-width: 600px) {
+  .shop-row { grid-template-columns: 1fr auto; padding: 3px 6px; }
+  .shop-row__stat { grid-column: 1; grid-row: 2; }
+  .shop-row button { grid-column: 2; grid-row: 1 / span 2; }
+}

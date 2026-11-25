@@ -31,4 +31,11 @@ describe('comparisonRows', () => {
     expect(row('Armour').edge).toBe('player');
     expect(row('Weight')).toMatchObject({ enemy: '0.0', edge: 'enemy' });
   });
+
+  it('shows a wounded gladiator as health left / max and compares the health left', () => {
+    const full = fighter(1);
+    const wounded = { ...fighter(1), health: 30 };
+    const row = comparisonRows(wounded, full).find((r) => r.label === 'Health')!;
+    expect(row).toEqual({ label: 'Health', player: `30 / ${full.stats.maxHealth}`, enemy: String(full.stats.maxHealth), edge: 'enemy' });
+  });
 });

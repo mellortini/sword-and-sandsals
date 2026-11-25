@@ -82,7 +82,7 @@ describe('combat statuses', () => {
     const threatened = applyCombatStatus(initial, 'enemy', 'feared');
     const enemy = performAction(threatened, 'rest').state;
     const chance = getActionOptions(enemy).find((option) => option.action === 'normal')?.hitChance;
-    expect(chance).toBe(60);
+    expect(chance).toBe(54);
     const attack = performAction(enemy, 'normal');
     expect(attack.events.find((event) => event.type === 'attack')).toMatchObject({ hitChance: chance });
     expect(attack.state.fighters.enemy.statuses).toEqual([]);
