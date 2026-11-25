@@ -1,5 +1,7 @@
 import { chooseAction } from '../core/ai';
 import type { AiProfile } from '../core/ai';
+import { chooseNemesisAction } from '../core/nemesis';
+import type { NemesisMemory } from '../core/nemesis';
 import { getActionOptions, getCombatSlotOptions, performAction } from '../core/combat';
 import type { TargetedAttack } from '../core/hitZones';
 import type { CombatSlotAction, CombatSlotOption } from '../core/spells';
@@ -51,6 +53,16 @@ export async function runFight(start: CombatState, o: FightLoopOptions): Promise
     if (state.winner === null && o.pause) await o.pause(state.active);
   }
   return { state, events, finished: state.winner !== null };
+}
+
+/** The nemesis's AI (#209): a defender that guards more against the attacks it remembers. */
+export function nemesisPicker(memory: NemesisMemory, seed: number): ActionPicker {
+  let rng = seed >>> 0;
+  return async (state) => {
+    const decision = chooseNemesisAction(state, memory, rng);
+    rng = decision.rngState;
+    return decision.action;
+  };
 }
 
 /** An ActionPicker backed by the enemy AI (#6) with its own random seed. */

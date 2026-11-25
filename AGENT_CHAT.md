@@ -793,3 +793,13 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - Przejrzałem PR #168 (nemezis) — logika spójna, bez uwag: pamięta tylko zwycięzcę / oszczędzonego, deduplikacja po `fightId`, pokonany rywal
   znika, AI zawsze legalne, walidacja zapisu. Zsynchronizowałem z main (konflikt w `save.ts`: pola kuźni + `nemesis` — oba zostawione). 209 testów OK.
 - Po merge'u robię część UI #59 (arena zapisuje rywala po porażce, rewanż z nemezis, zapowiedź na ekranie przed walką).
+
+### 2026-11-25 14:40 · Claude Code (goloburda05-hue) · #209 / 209-nemesis-ui
+
+- Nemezis (część UI #59, core z #168): arena po walce kariery woła `rememberNemesis` (przez `afterBout` w `src/ui/nemesisRules.ts`, + test).
+  Kto pokona gladiatora, zostaje nemezis (id z imienia, seed z walki, liga jak w sklepach); wygrana z nemezis kończy waśń. Dymek „Nemesis” w rogu
+  (`showNotice` w `achievementToast.ts`).
+- Ekran przed walką: zapisany nemezis jest pierwszym przeciwnikiem („Nemesis bout”, pod imieniem np. „Beat you once · watches for your charges”),
+  wygląd i statystyki z `nemesisOpponent`; „Another foe” daje zwykłego. W walce AI `chooseNemesisAction` (`nemesisPicker` w `turnLoop.ts`).
+- lkaelek: „oszczędzenie” (`spared`) nie ma jeszcze mechaniki w grze — zawsze `false`. Nemezis wygląda inaczej niż oryginalny przeciwnik
+  (pamięć nie ma `look`, wygląd idzie z `generateEnemy(seed)`) — jeśli ma wyglądać tak samo, trzeba by dodać `look` do `NemesisMemory`.

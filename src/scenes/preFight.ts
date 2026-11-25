@@ -11,6 +11,8 @@ import { comparisonRows } from '../ui/statRows';
 import type { ComparedFighter } from '../ui/statRows';
 import { boutStartHealth, showArena } from './arena';
 import { careerLoadout } from '../ui/gearRules';
+import { nemesisLine, nemesisRival } from '../ui/nemesisRules';
+import type { NemesisMemory } from '../core/nemesis';
 import { H, W, randomLook } from './common';
 import { loadSavedGladiator } from './savedGladiator';
 import type { SceneContext, SceneUpdate } from './common';
@@ -46,18 +48,22 @@ const TOP = 170;
  * Fight · Another foe (Retreat: a new opponent) · Leave (back to the title, #174).
  * Keyboard (#77): ←/→ choose, Enter presses (Fight first), Escape = Leave.
  */
-export async function openPreFight(context: SceneContext, player: PreFightFighter, enemy: PreFightFighter): Promise<PreFightChoice> {
+export async function openPreFight(
+  context: SceneContext, player: PreFightFighter, enemy: PreFightFighter,
+  /** the nemesis (#209) gets its own title and a line about the feud under its name */
+  labels: { title?: string; enemyNote?: string } = {},
+): Promise<PreFightChoice> {
   const { world, bgTex } = context;
   const root = new Container();
   world.addChild(root);
 
   const bg = new Sprite(bgTex);
   bg.tint = 0x6e5c58;
-  root.addChild(bg, screenTitle('Arena bout', W / 2, 58));
+  root.addChild(bg, screenTitle(labels.title ?? 'Arena bout', W / 2, 58));
 
   const sideX = (W - PANEL_W) / 2 - PORTRAIT_W - 60;
   await portraitCard(root, context, player, `Level ${player.level}`, sideX, TOP, 1);
-  await portraitCard(root, context, enemy, `Level ${enemy.level}`, W - sideX - PORTRAIT_W, TOP, -1);
+  await portraitCard(root, context, enemy, labels.enemyNote ? `Level ${enemy.level} · ${labels.enemyNote}` : `Level ${enemy.level}`, W - sideX - PORTRAIT_W, TOP, -1);
 
   const panel = new StatPanel(comparisonRows(player, enemy), PANEL_W);
   panel.position.set((W - PANEL_W) / 2, TOP);
@@ -122,9 +128,18 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
     backdrop.destroy();
     let choice: PreFightChoice;
     let enemy: PreFightFighter;
+    // a saved gladiator's nemesis (#209) waits first; Another foe gives an ordinary opponent
+    let nemesis: NemesisMemory | undefined = saved?.nemesis;
     do {
-      enemy = randomEnemy(tier);
-      choice = await openPreFight(context, player, enemy);
+      if (nemesis && saved) {
+        const rival = nemesisRival(nemesis, saved.level);
+        enemy = preFightFighter(rival.name, rival.level, rival.look, rival.attributes, rival.equipment);
+        choice = await openPreFight(context, player, enemy, { title: 'Nemesis bout', enemyNote: nemesisLine(nemesis) });
+        if (choice === 'retreat') nemesis = undefined;
+      } else {
+        enemy = randomEnemy(tier);
+        choice = await openPreFight(context, player, enemy);
+      }
     } while (choice === 'retreat');
     if (choice === 'leave') {
       goToTitle();
@@ -133,7 +148,7 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
     context.ui.innerHTML = '';
     update = (await showArena(context, [
       { look: player.look, name: player.name, attributes: player.attributes, level: player.level },
-      { look: enemy.look, name: enemy.name, attributes: enemy.attributes, level: enemy.level },
+      { look: enemy.look, name: enemy.name, attributes: enemy.attributes, level: enemy.level, nemesis },
     ], { career: saved ?? undefined })) ?? undefined;
   })();
   return (dt) => update?.(dt);
