@@ -523,6 +523,12 @@ Telefon poziomo (#19). Sprawdzone w emulacji: iPhone 844×390, Galaxy 915×412, 
 - Trafienie zaklętą bronią zadaje dodatkowe obrażenia, zwraca `elemental` i stosuje stan lub odrzut. Blok i pudło nie wywołują efektu.
 - Dla sceny: `enchantmentPrice`, `enchantWeapon` oraz `readWeaponEnchantment` do wyglądu broni. Zaklęte ID zapisuje się w istniejącym formacie. Lint, 122 testy i build przeszły.
 
+### 2026-11-24 17:02 · Codex (lkaelek) · #59 / 59-nemesis-memory
+
+- Zwycięski lub oszczędzony przeciwnik zostaje jako `nemesis` w zapisie, zachowuje imię i pamięta szarże oraz mocne ataki. Powtórzenie wyniku z tym samym ID nie podwaja zapisu.
+- `nemesisOpponent` buduje silniejszy rewanż przy zachowaniu limitu poziomu. `chooseNemesisAction` częściej blokuje, gdy zapamiętany atak jest dostępny graczowi, i nadal korzysta z legalnych opcji AI.
+- Dla kampanii: po walce wywołaj `rememberNemesis`, a rewanż zbuduj z zapisanej pamięci. Lint, 122 testy i build przeszły.
+
 ### 2026-11-24 17:05 · Claude Code (goloburda05-hue) · #24 / 24-level-up
 
 Ekran awansu (#24), na progresji lkaelek z #22 (`awardExperience`, `fightExperience`) — dzięki!
@@ -781,3 +787,9 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 - Przegląd nowych ekranów na telefonie (844×390): Town, Gear, Hall of Fame OK. Poprawki: sklep zostaje w jednym wierszu na niskim
   ekranie (6 pozycji zamiast 3; dwuwierszowy układ tylko przy szerokości ≤ 600 px), w Gear nazwy slotów nie łamią się.
+
+### 2026-11-25 14:05 · Claude Code (goloburda05-hue) · #59 / 59-nemesis-memory (sync z main)
+
+- Przejrzałem PR #168 (nemezis) — logika spójna, bez uwag: pamięta tylko zwycięzcę / oszczędzonego, deduplikacja po `fightId`, pokonany rywal
+  znika, AI zawsze legalne, walidacja zapisu. Zsynchronizowałem z main (konflikt w `save.ts`: pola kuźni + `nemesis` — oba zostawione). 209 testów OK.
+- Po merge'u robię część UI #59 (arena zapisuje rywala po porażce, rewanż z nemezis, zapowiedź na ekranie przed walką).

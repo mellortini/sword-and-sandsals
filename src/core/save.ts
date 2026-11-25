@@ -5,6 +5,8 @@ import { ACHIEVEMENT_COUNTERS } from './achievements';
 import type { AchievementProgress } from './achievements';
 import { FORGE_MATERIALS } from './forge';
 import type { ForgeMaterials } from './forge';
+import { LEAGUE_MAX_TIER } from './leagues';
+import type { NemesisMemory } from './nemesis';
 import { MAX_LEVEL } from './progression';
 import { resolveAttributes } from './stats';
 import type { ArmourImprovements, Attributes, EquipmentLoadout } from './types';
@@ -36,6 +38,7 @@ export interface SavedCharacter {
   achievements?: AchievementProgress;
   forgeMaterials?: ForgeMaterials;
   armourImprovements?: ArmourImprovements;
+  nemesis?: NemesisMemory;
 }
 
 type DecodeFailure = 'invalid' | 'unsupported';
@@ -83,6 +86,13 @@ function isArmourImprovements(value: unknown): value is ArmourImprovements {
   return isRecord(value) && Object.entries(value).every(([slot, level]) => EQUIPMENT.some((key) => key === slot) && within(level, 1, 10));
 }
 
+function isNemesisMemory(value: unknown): value is NemesisMemory {
+  return isRecord(value) && isItemId(value.id) && isItemId(value.name) && isItemId(value.lastFightId)
+    && typeof value.league === 'string' && Object.hasOwn(LEAGUE_MAX_TIER, value.league)
+    && within(value.seed, 0, 0xffffffff) && within(value.level, 1, MAX_LEVEL)
+    && within(value.encounters, 1, 20) && within(value.charges, 0, 20) && within(value.heavyAttacks, 0, 20);
+}
+
 function isCharacter(value: unknown): value is SavedCharacter {
   if (!isRecord(value)) return false;
   const { attributes, hands, inventory } = value;
@@ -98,7 +108,8 @@ function isCharacter(value: unknown): value is SavedCharacter {
     && Array.isArray(inventory) && inventory.every(isItemId)
     && (value.achievements === undefined || isAchievementProgress(value.achievements))
     && (value.forgeMaterials === undefined || isForgeMaterials(value.forgeMaterials))
-    && (value.armourImprovements === undefined || isArmourImprovements(value.armourImprovements));
+    && (value.armourImprovements === undefined || isArmourImprovements(value.armourImprovements))
+    && (value.nemesis === undefined || isNemesisMemory(value.nemesis));
 }
 
 export function serializeSave(character: SavedCharacter): string {
