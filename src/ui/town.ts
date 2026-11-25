@@ -5,6 +5,9 @@ import { openEnchanter } from './enchanter';
 import { openForge } from './forge';
 import { openGear } from './gear';
 import { careerLoadout } from './gearRules';
+import { equipmentSignal, recordForCareer, trophyCount } from './achievementRules';
+import { showAchievements } from './achievementToast';
+import { openTrophies } from './trophies';
 import { openSkillTree } from './skillTree';
 import { openTemple } from './temple';
 import { openTrainer } from './trainer';
@@ -50,6 +53,7 @@ export const BUILDINGS: readonly Building[] = [
     note: (c) => ((c.skillPoints ?? 0) > 0 ? `${plural(c.skillPoints!, 'point')} to spend` : `${c.skills?.length ?? 0} learned`),
     open: openSkillTree,
   },
+  { id: 'trophies', name: 'Hall of Fame', purpose: 'Your achievements and record', note: (c) => `${trophyCount(c)} earned`, open: (c) => openTrophies(c) },
 ];
 
 /**
@@ -116,6 +120,15 @@ export function openTown(character: SavedCharacter, save: Save, onChange?: (c: S
       backdrop.hidden = true;
       const before = current;
       current = await place.open(current, save);
+      // new gear may complete an armour set (#203)
+      if (place.id === 'gear' && current !== before) {
+        const { character, unlocked } = recordForCareer(current, equipmentSignal(careerLoadout(current)));
+        if (unlocked.length) {
+          current = character;
+          await save(current).catch(() => undefined);
+          showAchievements(unlocked);
+        }
+      }
       backdrop.hidden = false;
       if (current !== before) onChange?.(current);
       listen();
