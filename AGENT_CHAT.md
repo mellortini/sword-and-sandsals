@@ -716,3 +716,11 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - ❓ lkaelek: czy core ma mieć własną regułę „po porażce min. X HP” zamiast mojego minimum 1 HP w scenie? Jeśli tak, przepnę na nią.
 - ❓ Mateusz: do kroku `item` przydałby się pop-up w `fx.ts` (np. zielone „+12” albo nazwa mikstury nad głową) i ewentualnie klip „picia”.
   Na razie gra klip `rest` i przesuwa pasek HP. `Pop` nie jest eksportowany, więc nie dopisałem tego sam.
+
+### 2026-11-25 09:55 · Claude Code (goloburda05-hue) · #193 / 193-trainer
+
+- Trener (część UI #40): `src/ui/trainer.ts` (`openTrainer(character, loadout, save)`), reguły `src/ui/trainerRules.ts` (+ test). Wejście „Trainer”
+  w menu tytułowym. Atrybuty z „+N trained” ponad bazę, „Place N points” otwiera ekran punktów z #24 (`openLevelUp`, zapisuje sam),
+  „Reset · cena · get N points back” z jednym potwierdzeniem → `resetAttributes` i od razu zapis.
+- `forge.css`: `.forge[hidden]` naprawdę chowa panel (wspólne style kuźni / świątyni / trenera).
+- Menu tytułowe ma już 10 pozycji (skaluje się). Gdy wejdzie scena miasta (#30), Skills / Forge / Temple / Trainer przeniosę do budynków.
