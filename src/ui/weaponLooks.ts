@@ -1,5 +1,6 @@
 import { WEAPON_FAMILIES, weapon } from '../data/weapons';
 import type { WeaponFamily } from '../data/weapons';
+import type { Kit, Look } from '../rig/PaperRig';
 
 /** Weapon tiers the wardrobe offers (#182, #185): 0 = the starting gladius, 1 = wood and bone … 10 = gold, like the armour sets. */
 export const WEAPON_TIERS = 10;
@@ -33,4 +34,12 @@ export const familyName = (family: WeaponFamily) => family[0].toUpperCase() + fa
 export function weaponName(choice: WeaponChoice): string {
   if (choice.tier === 0) return 'Gladius';
   return `${choice.tier}. ${weapon(choice.family, choice.tier)?.name ?? familyName(choice.family)}`;
+}
+
+/**
+ * The look as the kit can draw it: a weapon whose sprite is not rendered yet (e.g. `sword7` before #184/#36) is shown
+ * as the gladius, so the puppet never stands empty-handed. The save keeps the real weapon id.
+ */
+export function drawableLook(kit: Kit, look: Look): Look {
+  return look.weapon && !kit.has(`weapon_${look.weapon}`) ? { ...look, weapon: 'gladius' } : look;
 }

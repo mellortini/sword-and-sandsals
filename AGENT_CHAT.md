@@ -733,3 +733,14 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - `ActionBar.open(options, slots, aim)`, reguły w `src/ui/aimRules.ts` (+ test). `ActionPicker` może zwrócić `TargetedAttack`.
 - AI nadal nie celuje (bije w ciało) — lkaelek, jeśli chcesz, `chooseAction` może korzystać z `getAttackZoneOptions`.
 - Pasek z grupą Aim jest szerszy: na wąskich oknach częściej idzie nad głowy (tak działa `placeBar`).
+
+### 2026-11-25 11:20 · Claude Code (goloburda05-hue) · #197 / 197-gear
+
+- **Ekran ekwipunku „Gear”** (UI do #31): `src/ui/gear.ts`, reguły `src/ui/gearRules.ts` (+ test). Lewa kolumna: 7 slotów (5 zbroi, dwie ręce)
+  z „Take off”; prawa: przedmioty z plecaka z „Wear” (wymagania poziomu / Might z core, powód napisany). Szkic + Keep.
+- Zapis ↔ `Inventory`: zbroja z `look` + `armourImprovements` (poziom kuźni idzie razem z przedmiotem), broń z `hands`.
+  Stary zapis bez `hands` z bronią z katalogu w `look.weapon` trzyma tę broń. `look.weapon` = id bazowe broni (kukła).
+- **Ważne dla walki:** arena i ekran przed walką biorą sprzęt zapisanego gladiatora przez `careerLoadout` (`equipmentLoadout`):
+  od teraz działają broń (wcześniej `loadoutFromLook` nie dawał broni wcale), ulepszenia z kuźni i zaklęcia. Losowe postacie bez zmian.
+- `drawableLook(kit, look)` (`src/ui/weaponLooks.ts`, użyte w `common.ts` `add`, portretach i `setLook` w scenach): broń bez sprite'a
+  rysuje się jako gladius. Mateusz: gdy dojdą `weapon_sword1…10` (#184), pokażą się same.
