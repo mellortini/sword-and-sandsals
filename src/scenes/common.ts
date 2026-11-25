@@ -4,6 +4,8 @@ import { Animator } from '../anim/Animator';
 import { bakeAll } from '../anim/clips';
 import { DEFAULT_LOOK, EQUIP_SLOTS, PaperRig } from '../rig/PaperRig';
 import type { Kit, Look, Pose } from '../rig/PaperRig';
+// every scene applies the player's text size (#77)
+import '../ui/textSize';
 
 export const W = 1920, H = 1080;
 export const UNIT = 38;

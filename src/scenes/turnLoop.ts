@@ -7,7 +7,7 @@ import type { ActionOption, CombatAction, CombatEvent, CombatState, FighterSide 
 export type ActionPicker = (state: CombatState, options: readonly ActionOption[]) => Promise<CombatAction>;
 
 export interface FightLoopOptions {
-  /** who chooses for each side: the radial menu for the player (#12), the AI for the enemy */
+  /** who chooses for each side: the action bar for the player (#147), the AI for the enemy */
   readonly pickers: Readonly<Record<FighterSide, ActionPicker>>;
   /** plays one action's events (CombatPresenter.present); the next choice waits until it resolves */
   readonly present: (events: readonly CombatEvent[], after: CombatState) => Promise<void>;

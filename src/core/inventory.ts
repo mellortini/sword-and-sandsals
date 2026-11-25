@@ -1,6 +1,7 @@
 import { ITEMS } from '../data/equipment';
 import { WEAPONS } from '../data/weapons';
 import type { WeaponFamily } from '../data/weapons';
+import { readWeaponEnchantment } from './enchant';
 import { readForgedItem } from './forge';
 import type { EquipmentLoadout, EquipmentSlot, HandSlot } from './types';
 
@@ -30,8 +31,8 @@ export function equipItem(inventory: Inventory, id: string, character: EquipRequ
   const index = inventory.backpack.indexOf(id);
   if (index === -1) return { ok: false, inventory, reason: 'not-owned' };
 
-  const { baseId } = readForgedItem(id);
-  const armour = ITEMS.find((piece) => piece.id === baseId);
+  const armour = ITEMS.find((piece) => piece.id === readForgedItem(id).baseId);
+  const { baseId } = readForgedItem(readWeaponEnchantment(id).baseId);
   const weapon = WEAPONS.find((entry) => entry.id === baseId);
   const item = armour ?? weapon;
   if (!item) return { ok: false, inventory, reason: 'unknown-item' };
@@ -76,7 +77,7 @@ export function equipmentTotals(loadout: Readonly<EquipmentLoadout>): { armour: 
   const armourWeight = equipped.reduce((total, piece) => total + piece.weight, 0);
   const handWeight = [loadout.weapon, loadout.offHand].reduce((total, id) => {
     if (id === undefined) return total;
-    const { baseId } = readForgedItem(id);
+    const { baseId } = readForgedItem(readWeaponEnchantment(id).baseId);
     const weapon = WEAPONS.find((entry) => entry.id === baseId);
     return total + (weapon ? WEAPON_WEIGHT[weapon.family] : 0);
   }, 0);

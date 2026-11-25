@@ -1,0 +1,43 @@
+/* Level-up screen (src/ui/levelUp.ts): a paper panel over the result screen. */
+.level-up {
+  position: fixed; inset: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(28, 16, 19, 0.62);
+  font-family: Georgia, serif; color: #f3e6d6;
+}
+.level-up__panel {
+  box-sizing: border-box; width: min(92vw, 520px); max-height: 94vh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 7px; padding: 18px 22px;
+  background: rgba(46, 27, 32, 0.97); border: 2px solid #815a46; border-radius: 12px;
+  box-shadow: 0 8px 0 rgba(20, 10, 12, 0.45);
+  font-size: 15px;
+}
+.level-up h3 { margin: 0; font-size: 28px; font-weight: normal; letter-spacing: 0.08em; color: #f2c14e; text-align: center; }
+.level-up__name { text-align: center; color: #e8cfa8; font-style: italic; margin-bottom: 4px; }
+.level-up__points { display: flex; justify-content: space-between; align-items: baseline; color: #e8be4c;
+  font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; }
+.level-up__points b { color: #f2c14e; font-size: 20px; }
+.level-up__points b.done { color: #9ec27a; }
+.level-up__row { display: grid; grid-template-columns: 6.2em 2.2em 2.4em 2.2em 1fr; align-items: center; gap: 6px; }
+.level-up__row .v { text-align: center; font-weight: bold; font-size: 17px; }
+.level-up__row .v.up { color: #f2c14e; }
+.level-up__row .hint { color: #b9a28c; font-size: 12.5px; font-style: italic; }
+.level-up button { font: inherit; background: #6b4a3a; color: #f3e6d6; border: 0; border-radius: 4px; padding: 4px 0;
+  cursor: pointer; min-height: 30px; }
+.level-up button:hover:not(:disabled) { background: #8a5f48; }
+.level-up button:disabled { opacity: 0.35; cursor: default; }
+.level-up button:focus-visible { outline: 2px solid #fff0d0; outline-offset: 2px; }
+.level-up__derived { margin-top: 4px; color: #e8cfa8; }
+.level-up__derived b { color: #fff0cb; }
+.level-up__derived i { color: #9ec27a; font-style: normal; }
+.level-up__problem { min-height: 1.1em; color: #e0866f; font-size: 13px; font-style: italic; }
+.level-up__actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px; }
+.level-up__actions button { padding: 8px 0; }
+.level-up__actions .keep { background: #9a6a2e; font-weight: bold; font-size: 17px; }
+.level-up__actions .keep:hover:not(:disabled) { background: #b98238; }
+
+@media (max-height: 500px) {
+  .level-up__panel { gap: 3px; padding: 10px 16px; font-size: 13px; }
+  .level-up h3 { font-size: 20px; }
+  .level-up button { min-height: 28px; }
+}

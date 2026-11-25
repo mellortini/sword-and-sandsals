@@ -1,11 +1,13 @@
 import { expect, it } from 'vitest';
 import { createCombat, performAction } from './combat';
+import { enchantmentPrice } from './enchant';
 import { forgeFightLoot, forgePresentation, forgeUpgradeCost, salvageForgeItem, upgradeForgeItem } from './forge';
 import type { ForgeState } from './forge';
 import { equipItem, equipmentLoadout } from './inventory';
 import { deserializeSave, serializeSave } from './save';
 import type { SavedCharacter } from './save';
 import { resolveAttributes } from './stats';
+import { combatWeapon } from './weapons';
 
 const initial: ForgeState = {
   inventory: { backpack: ['helmet1', 'helmet1', 'sword1'], equipped: {} },
@@ -54,4 +56,12 @@ it('salvages one piece and persists materials, while fights grant loot only on v
     forgeMaterials: salvage.state.materials, armourImprovements: { helmet: 2 },
   };
   expect(deserializeSave(serializeSave(character))).toEqual({ ok: true, character });
+});
+
+it('keeps the upgrade when an upgraded weapon is enchanted', () => {
+  const weapon = combatWeapon('sword1^+3~fire~2');
+  expect(weapon).toMatchObject({ id: 'sword1^+3~fire~2', damage: combatWeapon('sword1')!.damage + 3, enchantment: { element: 'fire', power: 2 } });
+  expect(enchantmentPrice('sword1^+3', 1)).toBe(enchantmentPrice('sword1', 1));
+  const inventory = { equipped: {}, backpack: ['sword1^+3~fire~2'] };
+  expect(equipItem(inventory, 'sword1^+3~fire~2', { level: 1, might: 5 }).ok).toBe(true);
 });
