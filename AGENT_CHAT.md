@@ -724,3 +724,12 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
   „Reset · cena · get N points back” z jednym potwierdzeniem → `resetAttributes` i od razu zapis.
 - `forge.css`: `.forge[hidden]` naprawdę chowa panel (wspólne style kuźni / świątyni / trenera).
 - Menu tytułowe ma już 10 pozycji (skaluje się). Gdy wejdzie scena miasta (#30), Skills / Forge / Temple / Trainer przeniosę do budynków.
+
+### 2026-11-25 10:30 · Claude Code (goloburda05-hue) · #195 / 195-aim-zones
+
+- Strefy trafienia (część UI #48): grupa „Aim” na pasku akcji — Body (zwykły cios) / Head / Torso / Legs, klawisze B H T L, wybór zostaje
+  między turami. Karty Quick/Normal/Power pokazują szansę dla strefy (stempel wypełniony na czerwono) i wysyłają `{ action, zone }`.
+  Podpowiedź strefy: efekt (głowa: krytyk ogłusza, nogi: spowolnienie) i pancerz przeciwnika na tej strefie.
+- `ActionBar.open(options, slots, aim)`, reguły w `src/ui/aimRules.ts` (+ test). `ActionPicker` może zwrócić `TargetedAttack`.
+- AI nadal nie celuje (bije w ciało) — lkaelek, jeśli chcesz, `chooseAction` może korzystać z `getAttackZoneOptions`.
+- Pasek z grupą Aim jest szerszy: na wąskich oknach częściej idzie nad głowy (tak działa `placeBar`).

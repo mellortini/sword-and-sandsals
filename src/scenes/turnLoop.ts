@@ -1,6 +1,7 @@
 import { chooseAction } from '../core/ai';
 import type { AiProfile } from '../core/ai';
 import { getActionOptions, getCombatSlotOptions, performAction } from '../core/combat';
+import type { TargetedAttack } from '../core/hitZones';
 import type { CombatSlotAction, CombatSlotOption } from '../core/spells';
 import type { ActionOption, CombatAction, CombatEvent, CombatState, FighterSide } from '../core/types';
 
@@ -10,7 +11,7 @@ import type { ActionOption, CombatAction, CombatEvent, CombatState, FighterSide 
  */
 export type ActionPicker = (
   state: CombatState, options: readonly ActionOption[], slots: readonly CombatSlotOption[],
-) => Promise<CombatAction | CombatSlotAction>;
+) => Promise<CombatAction | CombatSlotAction | TargetedAttack>;
 
 export interface FightLoopOptions {
   /** who chooses for each side: the action bar for the player (#147), the AI for the enemy */
