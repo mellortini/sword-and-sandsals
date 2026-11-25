@@ -3,10 +3,12 @@ import { saveGame } from '../core/save';
 import type { SavedCharacter } from '../core/save';
 import { openForge } from '../ui/forge';
 import { openSkillTree } from '../ui/skillTree';
+import { openTemple } from '../ui/temple';
+import { templeHealingQuote } from '../core/temple';
 import { PaperMenu } from '../ui/paperMenu';
 import { TEXT_SIZES, cycleTextSize, textSizeIndex } from '../ui/textSize';
 import type { PaperMenuEntry } from '../ui/paperMenu';
-import { FEET_Y, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from './common';
+import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from './common';
 import type { SceneContext } from './common';
 import { loadSavedGladiator } from './savedGladiator';
 
@@ -16,7 +18,7 @@ interface TitleEntry extends PaperMenuEntry {
   /** a setting changed in place (Enter, ←/→) instead of a screen */
   readonly setting?: 'textSize';
   /** a panel opened over the title (skills #54, forge #189) */
-  readonly panel?: 'skills' | 'forge';
+  readonly panel?: 'skills' | 'forge' | 'temple';
 }
 
 const skillNote = (c: SavedCharacter) => {
@@ -27,6 +29,11 @@ const skillNote = (c: SavedCharacter) => {
 const forgeNote = (c: SavedCharacter) => {
   const n = c.inventory.length;
   return n > 0 ? `${n} ${n === 1 ? 'item' : 'items'} in your pack` : 'pack is empty';
+};
+
+const templeNote = (c: SavedCharacter) => {
+  const { health, maxHealth } = templeHealingQuote(c);
+  return health < maxHealth ? `wounded · ${health} / ${maxHealth} HP` : `${c.gold} gold`;
 };
 
 function entries(saved: SavedCharacter | null): TitleEntry[] {
@@ -41,6 +48,9 @@ function entries(saved: SavedCharacter | null): TitleEntry[] {
     saved
       ? { label: 'Forge', enabled: true, panel: 'forge', note: forgeNote(saved) }
       : { label: 'Forge', enabled: false, note: 'no saved game yet' },
+    saved
+      ? { label: 'Temple', enabled: true, panel: 'temple', note: templeNote(saved) }
+      : { label: 'Temple', enabled: false, note: 'no saved game yet' },
     { label: 'Quick bout', enabled: true, view: 'prefight&gladiator=random' },
     { label: 'Wardrobe', enabled: true, view: 'wardrobe' },
     { label: 'Text size', enabled: true, setting: 'textSize', note: TEXT_SIZES[textSizeIndex()].name },
@@ -71,9 +81,8 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
   }
 
   // a dark vignette band behind the title and the menu keeps the text readable over the busy stands
-  root.addChild(new Graphics()
-    .roundRect(W / 2 - 520, 60, 1040, 880, 40)
-    .fill({ color: 0x1c1013, alpha: 0.55 }));
+  const band = new Graphics();
+  root.addChild(band);
 
   const title = new Text({
     text: 'FOLDED GLORY',
@@ -110,15 +119,25 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
         gladiator = c;
         menu.setNote(i, forgeNote(c));
       });
+    } else if (items[i].panel === 'temple' && gladiator) {
+      void openTemple(gladiator, saveGame).then((c) => {
+        gladiator = c;
+        menu.setNote(i, templeNote(c));
+      });
     } else changeSetting(i, 1);
   }, undefined, saved ? 1 : 0);
   const menuY = 330;
-  menu.position.set((W - menu.menuWidth) / 2, menuY);
+  // the menu shrinks to keep itself and the hint on the screen once it has many entries (town screens, #189/#191)
+  const menuScale = Math.min(1, (H - menuY - 90) / menu.menuHeight);
+  menu.scale.set(menuScale);
+  menu.position.set((W - menu.menuWidth * menuScale) / 2, menuY);
+  const menuBottom = menuY + menu.menuHeight * menuScale;
+  band.roundRect(W / 2 - 520, 60, 1040, Math.max(880, menuBottom + 80 - 60), 40).fill({ color: 0x1c1013, alpha: 0.55 });
   root.addChild(menu);
 
   const hint = new Text({ text: '↑ ↓  choose    Enter  confirm    ← →  change text size', style: { fontFamily: 'Georgia', fontSize: 22, fill: '#cdb99a' } });
   hint.anchor.set(0.5);
-  hint.position.set(W / 2, menuY + menu.menuHeight + 40);
+  hint.position.set(W / 2, menuBottom + 40);
   root.addChild(hint);
 
   window.addEventListener('keydown', (e) => {

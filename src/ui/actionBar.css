@@ -137,3 +137,13 @@
 @media (prefers-reduced-motion: reduce) {
   .action-bar, .action-card { transition: none; }
 }
+
+/* combat-slot items (#191): pale green-blue paper so potions read apart from actions; the stamp shows how many are left */
+.action-card--item::before {
+  background:
+    linear-gradient(160deg, #f4fbf2 0%, transparent 45%),
+    radial-gradient(ellipse at 80% 95%, #6f9a8a55, transparent 60%),
+    #cfe3d6;
+}
+.action-card--item .action-card__label { font-size: 12px; line-height: 1.05; text-align: center; }
+.action-bar__group--items[hidden] { display: none; }

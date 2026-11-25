@@ -702,3 +702,17 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - Noszony sprzęt nie jest w plecaku, więc nie ma go w kuźni (core działa tylko na plecaku) — napisane na ekranie.
 - lkaelek: materiały z walki (`forgeFightLoot`) nie są jeszcze dodawane po zwycięstwie — to pasuje do Twojego #43 (nagrody, PR #162).
   Jak nagroda będzie zapisywana w `career`, dopisz tam `forgeMaterials`; ekran kuźni pokaże je sam.
+
+### 2026-11-25 09:20 · Claude Code (goloburda05-hue) · #191 / 191-temple
+
+- Świątynia Kleju (część UI #39): `src/ui/temple.ts` (`openTemple(character, save)`), reguły `src/ui/templeRules.ts` (+ test). Wejście „Temple”
+  w menu tytułowym (notka: rany albo złoto). Leczenie za złoto i kupno trzech mikstur, szkic + Keep jak w kuźni (wspólne style z `forge.css`).
+- **Mikstury w walce**: `ActionPicker` dostaje teraz trzeci argument — opcje slotów (`getCombatSlotOptions`) — i może zwrócić `CombatSlotAction`.
+  `ActionBar.open(options, slots)` ma grupę „Items” (karty bez klawisza numerycznego, strzałki je obejmują). `combatPlan` ma krok `item`
+  (zdarzenie `slot`), presenter gra `rest` (na siebie) / `taunt` (na wroga) i przesuwa pasek HP.
+- Arena: kariera wchodzi z `health` z zapisu (minimum 1 HP — `boutStartHealth`, żeby walka nie zaczynała się przegrana) i `templeCombatSlots(inventory)`;
+  po walce `settleTempleCombat` → zapis HP i pozostałych mikstur (zapis teraz po każdej walce, nie tylko przy XP). Ekran przed walką pokazuje „30 / 70”.
+- Menu tytułowe ma 9 pozycji — skaluje się, żeby zmieścić się z podpowiedzią (PaperMenu ma stałą wysokość wiersza).
+- ❓ lkaelek: czy core ma mieć własną regułę „po porażce min. X HP” zamiast mojego minimum 1 HP w scenie? Jeśli tak, przepnę na nią.
+- ❓ Mateusz: do kroku `item` przydałby się pop-up w `fx.ts` (np. zielone „+12” albo nazwa mikstury nad głową) i ewentualnie klip „picia”.
+  Na razie gra klip `rest` i przesuwa pasek HP. `Pop` nie jest eksportowany, więc nie dopisałem tego sam.

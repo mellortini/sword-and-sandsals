@@ -9,7 +9,7 @@ import { buttonKeys, keyHint, paperButton, screenTitle } from '../ui/paperWidget
 import { StatPanel } from '../ui/statPanel';
 import { comparisonRows } from '../ui/statRows';
 import type { ComparedFighter } from '../ui/statRows';
-import { showArena } from './arena';
+import { boutStartHealth, showArena } from './arena';
 import { H, W, randomLook } from './common';
 import { loadSavedGladiator } from './savedGladiator';
 import type { SceneContext, SceneUpdate } from './common';
@@ -105,7 +105,7 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
   // a saved gladiator meets opponents of the first tier until the leagues (#41) pick them
   const tier = tp ? Math.min(10, Math.max(1, +tp)) : saved ? 1 : 1 + Math.floor(Math.random() * 10);
   const player = saved
-    ? preFightFighter(saved.name, saved.level, saved.look, saved.attributes)
+    ? { ...preFightFighter(saved.name, saved.level, saved.look, saved.attributes), health: boutStartHealth(saved.health) }
     : preFightFighter('Player', 1, randomLook(tier));
   context.ui.innerHTML = '<a href="?view=arena">arena</a> · <a href="?view=wardrobe">garderoba</a>';
 
