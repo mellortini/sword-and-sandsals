@@ -1,15 +1,8 @@
 import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import { saveGame } from '../core/save';
 import type { SavedCharacter } from '../core/save';
-import { openEnchanter } from '../ui/enchanter';
-import { openForge } from '../ui/forge';
-import { openGear } from '../ui/gear';
-import { openSkillTree } from '../ui/skillTree';
-import { openTemple } from '../ui/temple';
-import { openTrainer } from '../ui/trainer';
-import { careerLoadout } from '../ui/gearRules';
-import { templeHealingQuote } from '../core/temple';
 import { PaperMenu } from '../ui/paperMenu';
+import { openTown, townNote } from '../ui/town';
 import { TEXT_SIZES, cycleTextSize, textSizeIndex } from '../ui/textSize';
 import type { PaperMenuEntry } from '../ui/paperMenu';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, drawableLook, groundShadowTexture, randomLook } from './common';
@@ -21,29 +14,9 @@ interface TitleEntry extends PaperMenuEntry {
   readonly view?: string;
   /** a setting changed in place (Enter, ←/→) instead of a screen */
   readonly setting?: 'textSize';
-  /** a panel opened over the title (skills #54, forge #189) */
-  readonly panel?: 'skills' | 'gear' | 'forge' | 'enchanter' | 'temple' | 'trainer';
+  /** a panel opened over the title: the town with its buildings (#201) */
+  readonly panel?: 'town';
 }
-
-const skillNote = (c: SavedCharacter) => {
-  const n = c.skillPoints ?? 0;
-  return n > 0 ? `${n} skill ${n === 1 ? 'point' : 'points'} to spend` : `${c.skills?.length ?? 0} learned`;
-};
-
-const forgeNote = (c: SavedCharacter) => {
-  const n = c.inventory.length;
-  return n > 0 ? `${n} ${n === 1 ? 'item' : 'items'} in your pack` : 'pack is empty';
-};
-
-const templeNote = (c: SavedCharacter) => {
-  const { health, maxHealth } = templeHealingQuote(c);
-  return health < maxHealth ? `wounded · ${health} / ${maxHealth} HP` : `${c.gold} gold`;
-};
-
-const trainerNote = (c: SavedCharacter) => {
-  const n = c.attributePoints ?? 0;
-  return n > 0 ? `${n} attribute ${n === 1 ? 'point' : 'points'} to place` : 'reset your training';
-};
 
 function entries(saved: SavedCharacter | null): TitleEntry[] {
   return [
@@ -52,23 +25,8 @@ function entries(saved: SavedCharacter | null): TitleEntry[] {
       ? { label: 'Continue', enabled: true, view: 'prefight', note: `${saved.name} · level ${saved.level}` }
       : { label: 'Continue', enabled: false, note: 'no saved game yet' },
     saved
-      ? { label: 'Skills', enabled: true, panel: 'skills', note: skillNote(saved) }
-      : { label: 'Skills', enabled: false, note: 'no saved game yet' },
-    saved
-      ? { label: 'Gear', enabled: true, panel: 'gear', note: 'wear what is in your pack' }
-      : { label: 'Gear', enabled: false, note: 'no saved game yet' },
-    saved
-      ? { label: 'Forge', enabled: true, panel: 'forge', note: forgeNote(saved) }
-      : { label: 'Forge', enabled: false, note: 'no saved game yet' },
-    saved
-      ? { label: 'Enchantress', enabled: true, panel: 'enchanter', note: 'fire, water, ink, wind' }
-      : { label: 'Enchantress', enabled: false, note: 'no saved game yet' },
-    saved
-      ? { label: 'Temple', enabled: true, panel: 'temple', note: templeNote(saved) }
-      : { label: 'Temple', enabled: false, note: 'no saved game yet' },
-    saved
-      ? { label: 'Trainer', enabled: true, panel: 'trainer', note: trainerNote(saved) }
-      : { label: 'Trainer', enabled: false, note: 'no saved game yet' },
+      ? { label: 'Town', enabled: true, panel: 'town', note: townNote(saved) }
+      : { label: 'Town', enabled: false, note: 'no saved game yet' },
     { label: 'Quick bout', enabled: true, view: 'prefight&gladiator=random' },
     { label: 'Wardrobe', enabled: true, view: 'wardrobe' },
     { label: 'Text size', enabled: true, setting: 'textSize', note: TEXT_SIZES[textSizeIndex()].name },
@@ -129,33 +87,14 @@ export async function showTitle({ world, bgTex, ui, add, kit }: SceneContext) {
   const menu = new PaperMenu(items, (i) => {
     const view = items[i].view;
     if (view) location.search = `?view=${view}`;
-    else if (items[i].panel === 'skills' && gladiator) {
-      void openSkillTree(gladiator, saveGame).then((c) => {
+    else if (items[i].panel === 'town' && gladiator) {
+      void openTown(gladiator, saveGame, (c) => {
         gladiator = c;
-        menu.setNote(i, skillNote(c));
-      });
-    } else if (items[i].panel === 'gear' && gladiator) {
-      void openGear(gladiator, saveGame).then((c) => {
-        gladiator = c;
-        // the saved gladiator on the left shows the new gear at once
+        // the saved gladiator on the left shows new gear at once
         if (saved) void hero?.setLook(drawableLook(kit, c.look));
-      });
-    } else if (items[i].panel === 'forge' && gladiator) {
-      void openForge(gladiator, saveGame).then((c) => {
+      }).then((c) => {
         gladiator = c;
-        menu.setNote(i, forgeNote(c));
-      });
-    } else if (items[i].panel === 'enchanter' && gladiator) {
-      void openEnchanter(gladiator, saveGame).then((c) => { gladiator = c; });
-    } else if (items[i].panel === 'temple' && gladiator) {
-      void openTemple(gladiator, saveGame).then((c) => {
-        gladiator = c;
-        menu.setNote(i, templeNote(c));
-      });
-    } else if (items[i].panel === 'trainer' && gladiator) {
-      void openTrainer(gladiator, careerLoadout(gladiator), saveGame).then((c) => {
-        gladiator = c;
-        menu.setNote(i, trainerNote(c));
+        menu.setNote(i, townNote(c));
       });
     } else changeSetting(i, 1);
   }, undefined, saved ? 1 : 0);

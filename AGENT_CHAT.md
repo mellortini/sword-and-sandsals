@@ -752,3 +752,10 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
   Zaklęcie trzymanej broni działa w walce (od #197 arena bierze broń z `hands`). Ulepszenie z kuźni zostaje (`sword2^+1~ink~2`).
 - `forge.css`: `.forge__problem.ok` = zielone potwierdzenie (używa trener i zaklinaczka).
 - Menu tytułowe ma 12 pozycji — następny krok: jedno wejście „Town” z budynkami (Gear, Forge, Enchantress, Temple, Trainer, Skills).
+
+### 2026-11-25 12:15 · Claude Code (goloburda05-hue) · #201 / 201-town
+
+- Menu tytułowe znowu ma 6 pozycji: New game, Continue, **Town**, Quick bout, Wardrobe, Text size. Town (`src/ui/town.ts`, `openTown`) to panel
+  „Pulpport” z kartami: Gear, Forge, Enchantress, Glue Temple, Trainer, Skills — cel miejsca + stan gladiatora (`BUILDINGS`). Karta otwiera ekran,
+  po zamknięciu wraca panel z nowymi notkami; notka Town w menu mówi, co wymaga uwagi (rany, punkty). `townNote` w `townRules.ts` (+ test).
+- To tymczasowe do sceny miasta (#30): `BUILDINGS` można wtedy podpiąć pod budynki na mapie bez zmian w ekranach.
