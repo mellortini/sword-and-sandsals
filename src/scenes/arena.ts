@@ -6,7 +6,7 @@ import { saveGame } from '../core/save';
 import type { CombatSlotAction } from '../core/spells';
 import { settleTempleCombat, templeCombatSlots } from '../core/temple';
 import type { SavedCharacter } from '../core/save';
-import type { Attributes, CombatAction, FighterSide } from '../core/types';
+import type { Attributes, CombatAction, EquipmentLoadout, FighterSide } from '../core/types';
 import type { Look } from '../rig/PaperRig';
 import { summarizeFight } from '../ui/fightSummary';
 import { FxLayer } from '../ui/fx';
@@ -26,6 +26,7 @@ import { careerLoadout } from '../ui/gearRules';
 import { recordForCareer } from '../ui/achievementRules';
 import { showAchievements, showNotice } from '../ui/achievementToast';
 import { afterBout } from '../ui/nemesisRules';
+import { nextBout, recordLeagueWin } from '../ui/leagueRules';
 import type { NemesisMemory } from '../core/nemesis';
 import { loadoutFromLook } from './preFight';
 import { aiPicker, nemesisPicker, runFight } from './turnLoop';
@@ -41,6 +42,10 @@ export interface ArenaFighter {
   readonly level?: number;
   /** set when the opponent is the saved gladiator's nemesis (#209): it fights with what it remembers */
   readonly nemesis?: NemesisMemory;
+  /** set for a league fighter (#58): its AI profile, and its wins are saved on the ladder */
+  readonly bout?: { readonly id: string; readonly profile: AiProfile };
+  /** the gear the fighter really fights with when it is more than its look shows (weapon, league fighters) */
+  readonly equipment?: EquipmentLoadout;
 }
 
 export interface ArenaOptions {
@@ -146,12 +151,12 @@ export async function showArena(
           // health carries over between bouts and potions from the temple sit in the combat slots (#191)
           ...(career && { health: boutStartHealth(career.health), slots: templeCombatSlots(career.inventory) }),
         },
-        { name: enemy.name, attributes: enemy.attributes, level: enemy.level, equipment: loadoutFromLook(enemy.look) });
+        { name: enemy.name, attributes: enemy.attributes, level: enemy.level, equipment: enemy.equipment ?? loadoutFromLook(enemy.look) });
       presenter.reset(start);
       menu.setVisible(true);
       fighting = true;
       const outcome = await runFight(start, {
-        pickers: { player: playerPicker, enemy: enemy.nemesis ? nemesisPicker(enemy.nemesis, seed ^ 0x85ebca6b) : aiPicker(profile, seed ^ 0x85ebca6b) },
+        pickers: { player: playerPicker, enemy: enemy.nemesis ? nemesisPicker(enemy.nemesis, seed ^ 0x85ebca6b) : aiPicker(enemy.bout?.profile ?? profile, seed ^ 0x85ebca6b) },
         present: (events, after) => presenter.present(events, after),
         pause: (next: FighterSide) => (next === 'enemy' ? pause(ENEMY_PAUSE) : Promise.resolve()),
       });
@@ -170,7 +175,13 @@ export async function showArena(
         const feud = afterBout(settled, enemy, seed, fightId, outcome.state, outcome.events);
         if (feud.notice) showNotice(feud.notice.kicker, feud.notice.title, feud.notice.text);
         if (enemy.nemesis) enemy = { ...enemy, nemesis: feud.character.nemesis };
-        const fought = recordForCareer(feud.character, { type: 'fight', id: fightId, state: outcome.state, events: outcome.events });
+        // a league bout won goes on the ladder (#58); the champion's fall clears the league
+        const leagueWon = outcome.state.winner === 'player' && enemy.bout ? recordLeagueWin(feud.character, enemy.bout.id) : feud.character;
+        if (leagueWon !== feud.character) {
+          const next = nextBout(leagueWon);
+          showNotice('League', `${enemy.name} is beaten`, next ? `Next on the ladder: ${next.bout.name}.` : 'Every league with fighters is cleared.');
+        }
+        const fought = recordForCareer(leagueWon, { type: 'fight', id: fightId, state: outcome.state, events: outcome.events });
         progress = applyFightExperience(fought.character, outcome.state.rewards?.experience ?? 0);
         const leveled = recordForCareer(progress.after, { type: 'level', level: progress.after.level });
         progress = { ...progress, after: leveled.character };
@@ -189,7 +200,7 @@ export async function showArena(
       }
       if (choice === 'next') {
         // #187: same gear, at most 5% stronger, at most one level above the player
-        enemy = { ...nextOpponent(enemy, career?.level ?? player.level ?? 1), nemesis: undefined };
+        enemy = { ...nextOpponent(enemy, career?.level ?? player.level ?? 1), nemesis: undefined, bout: undefined, equipment: undefined };
         await E.setLook(drawableLook(context.kit, enemy.look));
       }
       seed++;

@@ -4,6 +4,8 @@ import { templeHealingQuote } from '../core/temple';
 import { openEnchanter } from './enchanter';
 import { openForge } from './forge';
 import { openGear } from './gear';
+import { openLeagues } from './leagues';
+import { ladderNote } from './leagueRules';
 import { careerLoadout } from './gearRules';
 import { equipmentSignal, recordForCareer, trophyCount } from './achievementRules';
 import { showAchievements } from './achievementToast';
@@ -30,6 +32,7 @@ interface Building {
 
 /** The town's places in the order the panel lists them (#201). Each opens its own screen. */
 export const BUILDINGS: readonly Building[] = [
+  { id: 'leagues', name: 'Leagues', purpose: 'Climb the ladder to the champions', note: ladderNote, open: (c) => openLeagues(c) },
   { id: 'armourer', name: 'Armourer', purpose: 'Buy and sell armour', note: (c) => `${c.gold} gold`, open: (c, save) => openShop('armourer', c, save) },
   { id: 'weaponsmith', name: 'Weaponsmith', purpose: 'Buy and sell weapons', note: (c) => `${c.gold} gold`, open: (c, save) => openShop('weaponsmith', c, save) },
   {

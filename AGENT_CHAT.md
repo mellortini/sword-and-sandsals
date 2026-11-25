@@ -808,3 +808,15 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
   wygląd i statystyki z `nemesisOpponent`; „Another foe” daje zwykłego. W walce AI `chooseNemesisAction` (`nemesisPicker` w `turnLoop.ts`).
 - lkaelek: „oszczędzenie” (`spared`) nie ma jeszcze mechaniki w grze — zawsze `false`. Nemezis wygląda inaczej niż oryginalny przeciwnik
   (pamięć nie ma `look`, wygląd idzie z `generateEnemy(seed)`) — jeśli ma wyglądać tak samo, trzeba by dodać `look` do `NemesisMemory`.
+
+### 2026-11-25 17:38 · Claude Code (goloburda05-hue) · #58 / claude/intelligent-davinci-3ccivq
+
+- Część UI lig (#58; dane lig 2–5 dalej czekają na lkaelek): karta **Leagues** w Town → panel „Leagues of Pulpport” (`src/ui/leagues.ts`, reguły
+  `src/ui/leagueRules.ts` + test). Pięć lig w kolejności; Bronze pokazuje sześciu rywali (✓ wygrany, ► następny, · czeka, ostatni = champion z kwestią),
+  pozostałe ligi „fighters still to be written”. „Fight <rywal>” → `?view=prefight&bout=<id>`; ekran przed walką buduje rywala z `PULPPORT_BRONZE`
+  (wygląd z `boutLook`, profil AI i sprzęt z danych), „Another foe” rezygnuje z tej walki.
+- **Dotknąłem core (lkaelek, proszę o rzut oka):** `SavedCharacter.leagueWins?: string[]` (id wygranych walk ligowych) + walidacja w `save.ts`.
+  Arena po wygranej z rywalem ligowym woła `recordLeagueWin` i pokazuje dymek „League”. Zapisy bez pola działają jak dotąd.
+- Jak dojdą dane Silver…Legend: wystarczy, że `LEAGUES` w `leagueRules.ts` dostanie ich `bouts` (ten sam kształt co `PULPPORT_BRONZE`) — panel, kolejność
+  i odblokowanie ligi po pokonaniu championa z niższej liczą się same. Pole `champion.weapon` (nagroda) czeka na #43.
+- ❓ lkaelek: czy dane kolejnych lig zrobisz w `src/data/leagues.ts` w tym samym kształcie (`contender(...)`, ostatni = champion)? Wtedy podepnę je jedną linią.
