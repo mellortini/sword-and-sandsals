@@ -1,6 +1,7 @@
 import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import { saveGame } from '../core/save';
 import type { SavedCharacter } from '../core/save';
+import { openForge } from '../ui/forge';
 import { openSkillTree } from '../ui/skillTree';
 import { PaperMenu } from '../ui/paperMenu';
 import { TEXT_SIZES, cycleTextSize, textSizeIndex } from '../ui/textSize';
@@ -14,13 +15,18 @@ interface TitleEntry extends PaperMenuEntry {
   readonly view?: string;
   /** a setting changed in place (Enter, ←/→) instead of a screen */
   readonly setting?: 'textSize';
-  /** a panel opened over the title (#54) */
-  readonly panel?: 'skills';
+  /** a panel opened over the title (skills #54, forge #189) */
+  readonly panel?: 'skills' | 'forge';
 }
 
 const skillNote = (c: SavedCharacter) => {
   const n = c.skillPoints ?? 0;
   return n > 0 ? `${n} skill ${n === 1 ? 'point' : 'points'} to spend` : `${c.skills?.length ?? 0} learned`;
+};
+
+const forgeNote = (c: SavedCharacter) => {
+  const n = c.inventory.length;
+  return n > 0 ? `${n} ${n === 1 ? 'item' : 'items'} in your pack` : 'pack is empty';
 };
 
 function entries(saved: SavedCharacter | null): TitleEntry[] {
@@ -32,6 +38,9 @@ function entries(saved: SavedCharacter | null): TitleEntry[] {
     saved
       ? { label: 'Skills', enabled: true, panel: 'skills', note: skillNote(saved) }
       : { label: 'Skills', enabled: false, note: 'no saved game yet' },
+    saved
+      ? { label: 'Forge', enabled: true, panel: 'forge', note: forgeNote(saved) }
+      : { label: 'Forge', enabled: false, note: 'no saved game yet' },
     { label: 'Quick bout', enabled: true, view: 'prefight&gladiator=random' },
     { label: 'Wardrobe', enabled: true, view: 'wardrobe' },
     { label: 'Text size', enabled: true, setting: 'textSize', note: TEXT_SIZES[textSizeIndex()].name },
@@ -95,6 +104,11 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
       void openSkillTree(gladiator, saveGame).then((c) => {
         gladiator = c;
         menu.setNote(i, skillNote(c));
+      });
+    } else if (items[i].panel === 'forge' && gladiator) {
+      void openForge(gladiator, saveGame).then((c) => {
+        gladiator = c;
+        menu.setNote(i, forgeNote(c));
       });
     } else changeSetting(i, 1);
   }, undefined, saved ? 1 : 0);

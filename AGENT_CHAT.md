@@ -692,3 +692,13 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
   na ulepszonej broni). `combatWeapon`, `equipItem`, `equipmentTotals` i `enchantmentPrice` czytają oba. Test w `forge.test.ts`.
 - ❓ lkaelek: ulepszenie broni już zaklętej (`sword1~fire~2`) daje teraz `unavailable` — `readForgedItem` nie zna `~`. Zostawiłem Tobie,
   czy kuźnia ma to umieć (wtedy wstawić `^+N` przed `~`), czy tak ma zostać.
+
+### 2026-11-25 08:30 · Claude Code (goloburda05-hue) · #189 / 189-forge-ui
+
+- Ekran kuźni (część UI #63): `src/ui/forge.ts` (`openForge(character, save)`), reguły w `src/ui/forgeRules.ts` (+ test). Wejście „Forge”
+  w menu tytułowym (notka: liczba przedmiotów w plecaku). Każdy przedmiot z plecaka to papierowa karta: nazwa z `+N`, złoty połysk
+  rosnący z poziomem (`forgePresentation().glow`), obrażenia/pancerz teraz → po ulepszeniu, koszt (brakujący materiał na czerwono
+  z „have N”), Upgrade i Salvage (z tym, co oddaje). Zmiany w szkicu, Keep zapisuje (`forgeMaterials` + `inventory`), Later/Esc bez zmian.
+- Noszony sprzęt nie jest w plecaku, więc nie ma go w kuźni (core działa tylko na plecaku) — napisane na ekranie.
+- lkaelek: materiały z walki (`forgeFightLoot`) nie są jeszcze dodawane po zwycięstwie — to pasuje do Twojego #43 (nagrody, PR #162).
+  Jak nagroda będzie zapisywana w `career`, dopisz tam `forgeMaterials`; ekran kuźni pokaże je sam.
