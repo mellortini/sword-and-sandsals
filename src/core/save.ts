@@ -39,6 +39,8 @@ export interface SavedCharacter {
   forgeMaterials?: ForgeMaterials;
   armourImprovements?: ArmourImprovements;
   nemesis?: NemesisMemory;
+  /** IDs of the league bouts the gladiator has won (#58), in the order they were won. */
+  leagueWins?: string[];
 }
 
 type DecodeFailure = 'invalid' | 'unsupported';
@@ -109,7 +111,8 @@ function isCharacter(value: unknown): value is SavedCharacter {
     && (value.achievements === undefined || isAchievementProgress(value.achievements))
     && (value.forgeMaterials === undefined || isForgeMaterials(value.forgeMaterials))
     && (value.armourImprovements === undefined || isArmourImprovements(value.armourImprovements))
-    && (value.nemesis === undefined || isNemesisMemory(value.nemesis));
+    && (value.nemesis === undefined || isNemesisMemory(value.nemesis))
+    && (value.leagueWins === undefined || (Array.isArray(value.leagueWins) && value.leagueWins.length <= 200 && value.leagueWins.every(isItemId)));
 }
 
 export function serializeSave(character: SavedCharacter): string {

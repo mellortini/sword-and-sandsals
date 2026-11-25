@@ -12,6 +12,7 @@ import type { ComparedFighter } from '../ui/statRows';
 import { boutStartHealth, showArena } from './arena';
 import { careerLoadout } from '../ui/gearRules';
 import { nemesisLine, nemesisRival } from '../ui/nemesisRules';
+import { boutLook, findBout } from '../ui/leagueRules';
 import type { NemesisMemory } from '../core/nemesis';
 import { H, W, randomLook } from './common';
 import { loadSavedGladiator } from './savedGladiator';
@@ -130,8 +131,14 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
     let enemy: PreFightFighter;
     // a saved gladiator's nemesis (#209) waits first; Another foe gives an ordinary opponent
     let nemesis: NemesisMemory | undefined = saved?.nemesis;
+    // a league bout chosen on the ladder (#58) comes first; Another foe drops it
+    let bout = saved && context.params.get('bout') ? findBout(saved, context.params.get('bout')!) : undefined;
     do {
-      if (nemesis && saved) {
+      if (bout) {
+        enemy = preFightFighter(bout.name, bout.level, boutLook(bout), bout.setup.attributes, bout.setup.equipment);
+        choice = await openPreFight(context, player, enemy, { title: bout.champion ? 'Champion bout' : 'League bout', enemyNote: bout.champion ? 'League champion' : undefined });
+        if (choice === 'retreat') bout = undefined;
+      } else if (nemesis && saved) {
         const rival = nemesisRival(nemesis, saved.level);
         enemy = preFightFighter(rival.name, rival.level, rival.look, rival.attributes, rival.equipment);
         choice = await openPreFight(context, player, enemy, { title: 'Nemesis bout', enemyNote: nemesisLine(nemesis) });
@@ -148,7 +155,10 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
     context.ui.innerHTML = '';
     update = (await showArena(context, [
       { look: player.look, name: player.name, attributes: player.attributes, level: player.level },
-      { look: enemy.look, name: enemy.name, attributes: enemy.attributes, level: enemy.level, nemesis },
+      {
+        look: enemy.look, name: enemy.name, attributes: enemy.attributes, level: enemy.level, nemesis,
+        ...(bout && { bout: { id: bout.id, profile: bout.profile }, equipment: bout.setup.equipment }),
+      },
     ], { career: saved ?? undefined })) ?? undefined;
   })();
   return (dt) => update?.(dt);
