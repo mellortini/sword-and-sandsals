@@ -744,3 +744,11 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
   od teraz działają broń (wcześniej `loadoutFromLook` nie dawał broni wcale), ulepszenia z kuźni i zaklęcia. Losowe postacie bez zmian.
 - `drawableLook(kit, look)` (`src/ui/weaponLooks.ts`, użyte w `common.ts` `add`, portretach i `setLook` w scenach): broń bez sprite'a
   rysuje się jako gladius. Mateusz: gdy dojdą `weapon_sword1…10` (#184), pokażą się same.
+
+### 2026-11-25 11:50 · Claude Code (goloburda05-hue) · #199 / 199-enchanter
+
+- Zaklinaczka (część UI #56): `src/ui/enchanter.ts` (`openEnchanter(character, save)`), reguły `src/ui/enchanterRules.ts` (+ test). Wejście „Enchantress”.
+  Wybór broni (ręka główna / druga / plecak), żywiołu i mocy 1–3 z ceną; opis efektu z `enchantmentEffect`; stare zaklęcie jest zastępowane.
+  Zaklęcie trzymanej broni działa w walce (od #197 arena bierze broń z `hands`). Ulepszenie z kuźni zostaje (`sword2^+1~ink~2`).
+- `forge.css`: `.forge__problem.ok` = zielone potwierdzenie (używa trener i zaklinaczka).
+- Menu tytułowe ma 12 pozycji — następny krok: jedno wejście „Town” z budynkami (Gear, Forge, Enchantress, Temple, Trainer, Skills).
