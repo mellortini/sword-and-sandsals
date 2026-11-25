@@ -1,6 +1,7 @@
 import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import { saveGame } from '../core/save';
 import type { SavedCharacter } from '../core/save';
+import { openEnchanter } from '../ui/enchanter';
 import { openForge } from '../ui/forge';
 import { openGear } from '../ui/gear';
 import { openSkillTree } from '../ui/skillTree';
@@ -21,7 +22,7 @@ interface TitleEntry extends PaperMenuEntry {
   /** a setting changed in place (Enter, ←/→) instead of a screen */
   readonly setting?: 'textSize';
   /** a panel opened over the title (skills #54, forge #189) */
-  readonly panel?: 'skills' | 'gear' | 'forge' | 'temple' | 'trainer';
+  readonly panel?: 'skills' | 'gear' | 'forge' | 'enchanter' | 'temple' | 'trainer';
 }
 
 const skillNote = (c: SavedCharacter) => {
@@ -59,6 +60,9 @@ function entries(saved: SavedCharacter | null): TitleEntry[] {
     saved
       ? { label: 'Forge', enabled: true, panel: 'forge', note: forgeNote(saved) }
       : { label: 'Forge', enabled: false, note: 'no saved game yet' },
+    saved
+      ? { label: 'Enchantress', enabled: true, panel: 'enchanter', note: 'fire, water, ink, wind' }
+      : { label: 'Enchantress', enabled: false, note: 'no saved game yet' },
     saved
       ? { label: 'Temple', enabled: true, panel: 'temple', note: templeNote(saved) }
       : { label: 'Temple', enabled: false, note: 'no saved game yet' },
@@ -141,6 +145,8 @@ export async function showTitle({ world, bgTex, ui, add, kit }: SceneContext) {
         gladiator = c;
         menu.setNote(i, forgeNote(c));
       });
+    } else if (items[i].panel === 'enchanter' && gladiator) {
+      void openEnchanter(gladiator, saveGame).then((c) => { gladiator = c; });
     } else if (items[i].panel === 'temple' && gladiator) {
       void openTemple(gladiator, saveGame).then((c) => {
         gladiator = c;

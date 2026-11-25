@@ -63,6 +63,8 @@
 
 .forge__hint { color: #b9a28c; font-size: 12.5px; font-style: italic; text-align: center; }
 .forge__problem { min-height: 1.1em; color: #e0866f; font-size: 13px; font-style: italic; text-align: center; }
+/* a confirmation instead of a problem (green, and the words say what happened) */
+.forge__problem.ok { color: #9ec27a; }
 .forge__actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px; width: min(100%, 420px); align-self: center; }
 .forge__actions button {
   font: inherit; padding: 8px 0; border: 0; border-radius: 4px; cursor: pointer; background: #6b4a3a; color: #f3e6d6;
