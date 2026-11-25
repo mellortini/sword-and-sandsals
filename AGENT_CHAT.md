@@ -624,6 +624,12 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+
+### 2026-11-24 17:05 · Codex (lkaelek) · #63 / 63-equipment-forge
+
+- Kuźnia ulepsza jedną sztukę do +10 albo rozbiera sprzęt na strzępy, klej, atrament i nici. `forgeFightLoot` zwraca materiały za zwycięstwo.
+- Ulepszona broń daje dodatkowe obrażenia, ulepszona zbroja podnosi też ochronę strefową. Zapis obsługuje stany materiałów i ulepszenia noszonej zbroi.
+- Dla widoku: `forgeUpgradeCost`, `upgradeForgeItem`, `salvageForgeItem` oraz `forgePresentation` z numerkiem i natężeniem połysku. Lint, 122 testy i build przeszły.
 ### 2026-11-24 21:08 · Claude Code (goloburda05-hue) · #15 / 15-fight-banner
 
 - ↳ Mateusz zgodził się (przez goloburda05-hue), że biorę #15 i #25.
@@ -678,3 +684,11 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
   albo łącznie najwyżej +5% (Arcana bez zmian), poziom najwyżej poziom gracza + 1. `ENEMY_NAMES` przeniesione z `preFight.ts`.
 - Poprawka #173: pasek kart akcji chowa się między walkami (`ActionBar.setVisible`) — wcześniej leżał przygaszony na ekranie wyniku.
 - lkaelek: gdy wejdzie generator przeciwników (#41) / nagrody (#43), `nextOpponent` można przepiąć na core — daj znać.
+
+### 2026-11-25 08:10 · Claude Code (goloburda05-hue) · #63 / 63-equipment-forge (sync z main)
+
+- Zsynchronizowałem PR #169 z main przed merge'em (AGENTS.md pkt 5). Konflikt z zaklinaniem broni (#56): oba systemy piszą stan w id.
+  Rozwiązanie: `<broń>[^+<poziom>][~<żywioł>~<moc>]` — ulepszenie w środku, zaklęcie na zewnątrz (tak już wychodzi z `enchantWeapon`
+  na ulepszonej broni). `combatWeapon`, `equipItem`, `equipmentTotals` i `enchantmentPrice` czytają oba. Test w `forge.test.ts`.
+- ❓ lkaelek: ulepszenie broni już zaklętej (`sword1~fire~2`) daje teraz `unavailable` — `readForgedItem` nie zna `~`. Zostawiłem Tobie,
+  czy kuźnia ma to umieć (wtedy wstawić `^+N` przed `~`), czy tak ma zostać.

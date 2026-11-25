@@ -3,9 +3,11 @@ import { isSkillId } from './skills';
 import type { Look } from '../rig/PaperRig';
 import { ACHIEVEMENT_COUNTERS } from './achievements';
 import type { AchievementProgress } from './achievements';
+import { FORGE_MATERIALS } from './forge';
+import type { ForgeMaterials } from './forge';
 import { MAX_LEVEL } from './progression';
 import { resolveAttributes } from './stats';
-import type { Attributes, EquipmentLoadout } from './types';
+import type { ArmourImprovements, Attributes, EquipmentLoadout } from './types';
 
 const SAVE_VERSION = 1;
 const DATABASE = 'folded-glory';
@@ -32,6 +34,8 @@ export interface SavedCharacter {
   hands?: { weapon?: string; offHand?: string };
   inventory: string[];
   achievements?: AchievementProgress;
+  forgeMaterials?: ForgeMaterials;
+  armourImprovements?: ArmourImprovements;
 }
 
 type DecodeFailure = 'invalid' | 'unsupported';
@@ -71,6 +75,14 @@ function isAchievementProgress(value: unknown): value is AchievementProgress {
     && ACHIEVEMENT_COUNTERS.every((key) => within(counters[key], 0));
 }
 
+function isForgeMaterials(value: unknown): value is ForgeMaterials {
+  return isRecord(value) && FORGE_MATERIALS.every((key) => within(value[key], 0));
+}
+
+function isArmourImprovements(value: unknown): value is ArmourImprovements {
+  return isRecord(value) && Object.entries(value).every(([slot, level]) => EQUIPMENT.some((key) => key === slot) && within(level, 1, 10));
+}
+
 function isCharacter(value: unknown): value is SavedCharacter {
   if (!isRecord(value)) return false;
   const { attributes, hands, inventory } = value;
@@ -84,7 +96,9 @@ function isCharacter(value: unknown): value is SavedCharacter {
     && isLook(value.look)
     && (hands === undefined || (isRecord(hands) && ['weapon', 'offHand'].every((slot) => hands[slot] === undefined || isItemId(hands[slot]))))
     && Array.isArray(inventory) && inventory.every(isItemId)
-    && (value.achievements === undefined || isAchievementProgress(value.achievements));
+    && (value.achievements === undefined || isAchievementProgress(value.achievements))
+    && (value.forgeMaterials === undefined || isForgeMaterials(value.forgeMaterials))
+    && (value.armourImprovements === undefined || isArmourImprovements(value.armourImprovements));
 }
 
 export function serializeSave(character: SavedCharacter): string {

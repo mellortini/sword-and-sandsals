@@ -2,6 +2,7 @@ import { WEAPONS } from '../data/weapons';
 import type { Weapon } from '../data/weapons';
 import { readWeaponEnchantment } from './enchant';
 import type { WeaponEnchantment } from './enchant';
+import { readForgedItem } from './forge';
 import type { StatusKind } from './status';
 import type { AttackKind } from './types';
 
@@ -28,9 +29,12 @@ const STANDARD: WeaponMove = { strikes: 1, damageMultiplier: 1, armourMultiplier
 
 export function combatWeapon(id?: string): CombatWeapon | undefined {
   if (id === DAGGERS.id) return DAGGERS;
-  const { baseId, enchantment } = readWeaponEnchantment(id);
+  // an id is `<weapon>[^+<level>][~<element>~<power>]`: forge upgrade inside, enchantment outside
+  const { baseId: forgedId, enchantment } = readWeaponEnchantment(id);
+  const { baseId, level } = readForgedItem(forgedId);
   const weapon = WEAPONS.find((entry) => entry.id === baseId);
-  return weapon && enchantment && id ? { ...weapon, id, enchantment } : weapon;
+  if (!weapon || !id || (!enchantment && level === 0)) return weapon;
+  return { ...weapon, id, damage: weapon.damage + level, ...(enchantment && { enchantment }) };
 }
 
 export function weaponReach(weapon?: CombatWeapon): number {
