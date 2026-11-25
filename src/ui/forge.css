@@ -5,6 +5,7 @@
   background: rgba(28, 16, 19, 0.66);
   font-family: Georgia, serif; color: #f3e6d6;
 }
+.forge[hidden] { display: none; }
 .forge__panel {
   box-sizing: border-box; width: min(96vw, 1060px); max-height: 94vh;
   display: flex; flex-direction: column; gap: 10px; padding: 16px 20px;

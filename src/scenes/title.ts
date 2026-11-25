@@ -4,6 +4,8 @@ import type { SavedCharacter } from '../core/save';
 import { openForge } from '../ui/forge';
 import { openSkillTree } from '../ui/skillTree';
 import { openTemple } from '../ui/temple';
+import { openTrainer } from '../ui/trainer';
+import { loadoutFromLook } from './preFight';
 import { templeHealingQuote } from '../core/temple';
 import { PaperMenu } from '../ui/paperMenu';
 import { TEXT_SIZES, cycleTextSize, textSizeIndex } from '../ui/textSize';
@@ -18,7 +20,7 @@ interface TitleEntry extends PaperMenuEntry {
   /** a setting changed in place (Enter, ←/→) instead of a screen */
   readonly setting?: 'textSize';
   /** a panel opened over the title (skills #54, forge #189) */
-  readonly panel?: 'skills' | 'forge' | 'temple';
+  readonly panel?: 'skills' | 'forge' | 'temple' | 'trainer';
 }
 
 const skillNote = (c: SavedCharacter) => {
@@ -36,6 +38,11 @@ const templeNote = (c: SavedCharacter) => {
   return health < maxHealth ? `wounded · ${health} / ${maxHealth} HP` : `${c.gold} gold`;
 };
 
+const trainerNote = (c: SavedCharacter) => {
+  const n = c.attributePoints ?? 0;
+  return n > 0 ? `${n} attribute ${n === 1 ? 'point' : 'points'} to place` : 'reset your training';
+};
+
 function entries(saved: SavedCharacter | null): TitleEntry[] {
   return [
     { label: 'New game', enabled: true, view: 'creator' },
@@ -51,6 +58,9 @@ function entries(saved: SavedCharacter | null): TitleEntry[] {
     saved
       ? { label: 'Temple', enabled: true, panel: 'temple', note: templeNote(saved) }
       : { label: 'Temple', enabled: false, note: 'no saved game yet' },
+    saved
+      ? { label: 'Trainer', enabled: true, panel: 'trainer', note: trainerNote(saved) }
+      : { label: 'Trainer', enabled: false, note: 'no saved game yet' },
     { label: 'Quick bout', enabled: true, view: 'prefight&gladiator=random' },
     { label: 'Wardrobe', enabled: true, view: 'wardrobe' },
     { label: 'Text size', enabled: true, setting: 'textSize', note: TEXT_SIZES[textSizeIndex()].name },
@@ -123,6 +133,11 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
       void openTemple(gladiator, saveGame).then((c) => {
         gladiator = c;
         menu.setNote(i, templeNote(c));
+      });
+    } else if (items[i].panel === 'trainer' && gladiator) {
+      void openTrainer(gladiator, loadoutFromLook(gladiator.look), saveGame).then((c) => {
+        gladiator = c;
+        menu.setNote(i, trainerNote(c));
       });
     } else changeSetting(i, 1);
   }, undefined, saved ? 1 : 0);
