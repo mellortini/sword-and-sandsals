@@ -2,11 +2,14 @@
 
 import { textScale } from './textSize';
 import { Tooltip } from './tooltip';
+import type { TargetedAttack } from '../core/hitZones';
 import type { CombatSlotAction, CombatSlotOption } from '../core/spells';
+import { AIMS, AIM_INFO, aimDescription, aimedChance, aimedCommand } from './aimRules';
+import type { Aim, AimInfo } from './aimRules';
 import type { ActionOption, CombatAction } from '../core/types';
 import './actionBar.css';
 
-/** The cards in order, grouped as they sit on the bar. Zones (#48) will get a group of their own; slot items have theirs (#191). */
+/** The cards in order, grouped as they sit on the bar. Aim (#195) and slot items (#191) have groups of their own. */
 export const ACTION_GROUPS: readonly { title: string; actions: readonly CombatAction[] }[] = [
   { title: 'Move', actions: ['step_back', 'step_forward', 'jump', 'charge'] },
   { title: 'Attack', actions: ['quick', 'normal', 'power'] },
@@ -84,11 +87,16 @@ export class ActionBar {
   private readonly items = document.createElement('div');
   private readonly itemRow = document.createElement('div');
   private slots: readonly CombatSlotOption[] = [];
+  /** where attacks go (#195); stays chosen from turn to turn */
+  private aim: Aim = 'body';
+  private aimInfo?: AimInfo;
+  private readonly aimButtons = new Map<Aim, HTMLButtonElement>();
 
-  constructor(private readonly onAction: (action: CombatAction | CombatSlotAction) => void) {
+  constructor(private readonly onAction: (action: CombatAction | CombatSlotAction | TargetedAttack) => void) {
     this.element.className = 'action-bar';
     this.element.setAttribute('role', 'toolbar');
     this.element.setAttribute('aria-label', 'Combat actions');
+    this.element.append(this.makeAimGroup());
     let index = 0;
     for (const group of ACTION_GROUPS) {
       const box = document.createElement('div');
@@ -119,8 +127,10 @@ export class ActionBar {
    * The player's turn: these options can be picked, every other card is faded. `slots` are the items in the combat
    * slots; an unavailable one (energy, Arcana) is shown faded with the reason.
    */
-  open(options: readonly ActionOption[], slots: readonly CombatSlotOption[] = []) {
+  open(options: readonly ActionOption[], slots: readonly CombatSlotOption[] = [], aim?: AimInfo) {
     this.options = new Map(options.map((o) => [o.action, o]));
+    this.aimInfo = aim;
+    this.fillAim();
     for (const [action, card] of this.cards) this.fill(card, action, this.options.get(action));
     this.slots = slots;
     this.fillItems();
@@ -191,11 +201,60 @@ export class ActionBar {
     card.classList.toggle('counter', option?.counter === true);
     const cost = card.querySelector('.action-card__cost')!;
     cost.textContent = option ? (option.energyCost > 0 ? `${option.energyCost} EN` : 'free') : '';
+    const hitChance = aimedChance(action, option, this.aim, this.aimInfo);
+    const aimed = typeof aimedCommand(action, this.aim, this.aimInfo) !== 'string';
+    card.classList.toggle('aimed', aimed);
     const stamp = card.querySelector<HTMLElement>('.action-card__stamp')!;
-    stamp.textContent = option?.hitChance === undefined ? '' : `${option.hitChance}%`;
-    stamp.hidden = option?.hitChance === undefined;
-    const chance = option?.hitChance === undefined ? '' : `, ${option.hitChance}% to hit`;
+    stamp.textContent = hitChance === undefined ? '' : `${hitChance}%`;
+    stamp.hidden = hitChance === undefined;
+    const at = aimed ? ` at the ${AIM_INFO[this.aim].label.toLowerCase()}` : '';
+    const chance = hitChance === undefined ? '' : `, ${hitChance}% to hit${at}`;
     card.setAttribute('aria-label', `${label}${chance}${option ? '' : ', not possible now'}`);
+  }
+
+  /** Body / Head / Torso / Legs: one is always pressed; keys B, H, T, L. */
+  private makeAimGroup() {
+    const box = document.createElement('div');
+    box.className = 'action-bar__group action-bar__group--aim';
+    const title = document.createElement('div');
+    title.className = 'action-bar__title';
+    title.textContent = 'Aim';
+    const row = document.createElement('div');
+    row.className = 'action-bar__row action-bar__aims';
+    row.setAttribute('role', 'radiogroup');
+    row.setAttribute('aria-label', 'Aim attacks at');
+    for (const aim of AIMS) {
+      const { label, key } = AIM_INFO[aim];
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'aim-toggle';
+      b.dataset.aim = aim;
+      b.setAttribute('role', 'radio');
+      b.innerHTML = `<span class="aim-toggle__key" aria-hidden="true">${key}</span><span>${label}</span>`;
+      this.tooltip.attach(b, () => ({
+        title: aim === 'body' ? 'Body · no aim' : `Aim at the ${label.toLowerCase()}`,
+        description: aimDescription(aim, this.aimInfo),
+      }));
+      b.addEventListener('click', () => this.setAim(aim));
+      this.aimButtons.set(aim, b);
+      row.append(b);
+    }
+    box.append(title, row);
+    return box;
+  }
+
+  private setAim(aim: Aim) {
+    if (this.element.inert) return;
+    this.aim = aim;
+    this.fillAim();
+    for (const [action, card] of this.cards) this.fill(card, action, this.options.get(action));
+  }
+
+  private fillAim() {
+    for (const [aim, b] of this.aimButtons) {
+      b.setAttribute('aria-checked', String(aim === this.aim));
+      b.tabIndex = aim === this.aim ? 0 : -1;
+    }
   }
 
   /** One card per filled slot, in slot order; rebuilt each turn because quantities change. */
@@ -233,13 +292,20 @@ export class ActionBar {
 
   private pick(action: CombatAction) {
     if (this.element.inert || !this.options.has(action)) return;
+    const command = aimedCommand(action, this.aim, this.aimInfo);
     this.close();
-    this.onAction(action);
+    this.onAction(command);
   }
 
   private readonly onKey = (e: KeyboardEvent) => {
     if (this.element.inert || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.target instanceof HTMLElement && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    const aim = AIMS.find((a) => AIM_INFO[a].key.toLowerCase() === e.key.toLowerCase());
+    if (aim) {
+      e.preventDefault();
+      this.setAim(aim);
+      return;
+    }
     if (/^[0-9]$/.test(e.key)) {
       const action = this.order[(+e.key + 9) % 10];
       if (action && this.options.has(action)) {

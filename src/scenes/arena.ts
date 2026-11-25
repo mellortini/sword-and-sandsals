@@ -1,6 +1,7 @@
 import { Container, Sprite } from 'pixi.js';
 import type { AiProfile } from '../core/ai';
-import { createCombat } from '../core/combat';
+import { createCombat, getAttackZoneOptions } from '../core/combat';
+import type { TargetedAttack } from '../core/hitZones';
 import { saveGame } from '../core/save';
 import type { CombatSlotAction } from '../core/spells';
 import { settleTempleCombat, templeCombatSlots } from '../core/temple';
@@ -98,16 +99,18 @@ export async function showArena(
   });
 
   // the player's turn: open the menu with the options the core allows and wait for a click
-  let choose: ((action: CombatAction | CombatSlotAction) => void) | null = null;
+  let choose: ((action: CombatAction | CombatSlotAction | TargetedAttack) => void) | null = null;
   const menu = new ActionBar((action) => {
     const resolve = choose;
     choose = null;
     resolve?.(action);
   });
   arena.on('destroyed', () => menu.destroy());
-  const playerPicker: ActionPicker = (_state, options, slots) => new Promise((resolve) => {
+  const playerPicker: ActionPicker = (state, options, slots) => new Promise((resolve) => {
     choose = resolve;
-    menu.open(options, slots);
+    // aimed attacks (#195): the zone chances of this turn and the opponent's armour per zone
+    const zones = (['quick', 'normal', 'power'] as const).flatMap((a) => getAttackZoneOptions(state, a));
+    menu.open(options, slots, { zones, armour: state.fighters.enemy.armourByZone });
   });
 
   ui.innerHTML = '<a href="?view=title">title</a> · <a href="?view=prefight">new opponent</a> · '
