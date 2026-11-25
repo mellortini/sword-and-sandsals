@@ -2,6 +2,8 @@ import { Container, Sprite } from 'pixi.js';
 import type { AiProfile } from '../core/ai';
 import { createCombat } from '../core/combat';
 import { saveGame } from '../core/save';
+import type { CombatSlotAction } from '../core/spells';
+import { settleTempleCombat, templeCombatSlots } from '../core/temple';
 import type { SavedCharacter } from '../core/save';
 import type { Attributes, CombatAction, FighterSide } from '../core/types';
 import type { Look } from '../rig/PaperRig';
@@ -39,6 +41,9 @@ export interface ArenaOptions {
 }
 
 const LAYOUT = FIGHT_LAYOUT;
+
+/** Health a saved gladiator starts a bout with: a beaten one steps in with at least 1 HP (heal at the temple, #191). */
+export const boutStartHealth = (health: number | undefined) => (health === undefined ? undefined : Math.max(1, health));
 /** seconds before the opponent answers */
 const ENEMY_PAUSE = 0.5;
 
@@ -93,16 +98,16 @@ export async function showArena(
   });
 
   // the player's turn: open the menu with the options the core allows and wait for a click
-  let choose: ((action: CombatAction) => void) | null = null;
+  let choose: ((action: CombatAction | CombatSlotAction) => void) | null = null;
   const menu = new ActionBar((action) => {
     const resolve = choose;
     choose = null;
     resolve?.(action);
   });
   arena.on('destroyed', () => menu.destroy());
-  const playerPicker: ActionPicker = (_state, options) => new Promise((resolve) => {
+  const playerPicker: ActionPicker = (_state, options, slots) => new Promise((resolve) => {
     choose = resolve;
-    menu.open(options);
+    menu.open(options, slots);
   });
 
   ui.innerHTML = '<a href="?view=title">title</a> · <a href="?view=prefight">new opponent</a> · '
@@ -126,6 +131,8 @@ export async function showArena(
           level: career?.level ?? player.level, equipment: loadoutFromLook(player.look),
           // skills learned on the skill screen (#54) work in the fight
           skills: career?.skills,
+          // health carries over between bouts and potions from the temple sit in the combat slots (#191)
+          ...(career && { health: boutStartHealth(career.health), slots: templeCombatSlots(career.inventory) }),
         },
         { name: enemy.name, attributes: enemy.attributes, level: enemy.level, equipment: loadoutFromLook(enemy.look) });
       presenter.reset(start);
@@ -143,10 +150,12 @@ export async function showArena(
       await pause(1.2);
       let progress: FightProgress | undefined;
       if (career) {
-        progress = applyFightExperience(career, outcome.state.rewards?.experience ?? 0);
+        // health after the bout and the potions left (#191) go to the save with the XP
+        const settled = settleTempleCombat(career, outcome.state.fighters.player);
+        progress = applyFightExperience(settled, outcome.state.rewards?.experience ?? 0);
         career = progress.after;
         // the bar still shows the XP if saving fails; the next fight starts from it again
-        if (progress.earned > 0) await saveGame(career).catch(() => undefined);
+        await saveGame(career).catch(() => undefined);
       }
       const choice = await openFightResult(context, {
         player, enemy, summary: summarizeFight(outcome.events), progress, spendPoints: career ? spendPoints : undefined,

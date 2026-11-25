@@ -9,10 +9,10 @@ const nextTick = () => new Promise<void>((r) => setTimeout(r, 0));
 describe('runFight', () => {
   it('alternates turns and ends when someone falls', async () => {
     const order: FighterSide[] = [];
-    const tracked = (side: FighterSide, inner: ActionPicker): ActionPicker => async (state, options) => {
+    const tracked = (side: FighterSide, inner: ActionPicker): ActionPicker => async (state, options, slots) => {
       order.push(side);
       expect(state.active).toBe(side);
-      return inner(state, options);
+      return inner(state, options, slots);
     };
     const outcome = await runFight(createCombat(11), {
       pickers: { player: tracked('player', aiPicker('aggressor', 1)), enemy: tracked('enemy', aiPicker('defender', 2)) },
@@ -27,10 +27,10 @@ describe('runFight', () => {
   it('never asks for a choice while an action is still being shown', async () => {
     let presenting = false;
     let picks = 0;
-    const picker = (inner: ActionPicker): ActionPicker => async (state, options) => {
+    const picker = (inner: ActionPicker): ActionPicker => async (state, options, slots) => {
       expect(presenting).toBe(false);
       picks++;
-      return inner(state, options);
+      return inner(state, options, slots);
     };
     await runFight(createCombat(5), {
       pickers: { player: picker(aiPicker('aggressor', 3)), enemy: picker(aiPicker('aggressor', 4)) },
@@ -73,5 +73,19 @@ describe('runFight', () => {
       pickers: { player: wrong, enemy: wrong },
       present: async () => {},
     })).rejects.toThrow(/not available/);
+  });
+
+  it('lets a picker use a potion from a combat slot', async () => {
+    const start = createCombat(3, { health: 20, slots: [{ id: 'glue-tonic', quantity: 2 }, null, null, null] });
+    let offered: unknown;
+    let used = false;
+    const drinker: ActionPicker = async (state, options, slots) => {
+      offered ??= slots;
+      if (!used) { used = true; return { slot: 0, target: 'player' }; }
+      return aiPicker('aggressor', 5)(state, options, slots);
+    };
+    const outcome = await runFight(start, { pickers: { player: drinker, enemy: aiPicker('defender', 6) }, present: async () => {} });
+    expect(offered).toEqual([expect.objectContaining({ slot: 0, id: 'glue-tonic', quantity: 2, target: 'player' })]);
+    expect(outcome.events).toContainEqual(expect.objectContaining({ type: 'slot', actor: 'player', item: 'glue-tonic', healthDelta: 12 }));
   });
 });
