@@ -27,7 +27,13 @@
 }
 .shop-row button[aria-disabled='true'] { opacity: 0.4; cursor: default; }
 .shop-row button:focus-visible { outline: 2px solid #3a2418; outline-offset: 1px; }
-@media (max-width: 760px), (max-height: 500px) {
+/* low screens (a phone held sideways) keep one line per item, only tighter */
+@media (max-height: 500px) {
+  .shop-row { padding: 3px 6px; }
+  .shop-row__name { flex-direction: row; align-items: baseline; gap: 6px; }
+}
+/* narrow screens stack the stat under the name */
+@media (max-width: 600px) {
   .shop-row { grid-template-columns: 1fr auto; padding: 3px 6px; }
   .shop-row__stat { grid-column: 1; grid-row: 2; }
   .shop-row button { grid-column: 2; grid-row: 1 / span 2; }
