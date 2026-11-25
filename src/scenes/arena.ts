@@ -23,6 +23,8 @@ import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, drawableLook, groundShadowTextur
 import type { SceneContext, SceneUpdate } from './common';
 import { openFightResult } from './fightResult';
 import { careerLoadout } from '../ui/gearRules';
+import { recordForCareer } from '../ui/achievementRules';
+import { showAchievements } from '../ui/achievementToast';
 import { loadoutFromLook } from './preFight';
 import { aiPicker, runFight } from './turnLoop';
 import type { ActionPicker } from './turnLoop';
@@ -158,8 +160,13 @@ export async function showArena(
       if (career) {
         // health after the bout and the potions left (#191) go to the save with the XP
         const settled = settleTempleCombat(career, outcome.state.fighters.player);
-        progress = applyFightExperience(settled, outcome.state.rewards?.experience ?? 0);
+        // achievements (#203): the bout first, then the level it ended on; the result screen keeps working on `after`
+        const fought = recordForCareer(settled, { type: 'fight', id: `${Date.now().toString(36)}-${seed}`, state: outcome.state, events: outcome.events });
+        progress = applyFightExperience(fought.character, outcome.state.rewards?.experience ?? 0);
+        const leveled = recordForCareer(progress.after, { type: 'level', level: progress.after.level });
+        progress = { ...progress, after: leveled.character };
         career = progress.after;
+        showAchievements([...fought.unlocked, ...leveled.unlocked]);
         // the bar still shows the XP if saving fails; the next fight starts from it again
         await saveGame(career).catch(() => undefined);
       }

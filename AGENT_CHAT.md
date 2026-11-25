@@ -759,3 +759,11 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
   „Pulpport” z kartami: Gear, Forge, Enchantress, Glue Temple, Trainer, Skills — cel miejsca + stan gladiatora (`BUILDINGS`). Karta otwiera ekran,
   po zamknięciu wraca panel z nowymi notkami; notka Town w menu mówi, co wymaga uwagi (rany, punkty). `townNote` w `townRules.ts` (+ test).
 - To tymczasowe do sceny miasta (#30): `BUILDINGS` można wtedy podpiąć pod budynki na mapie bez zmian w ekranach.
+
+### 2026-11-25 12:50 · Claude Code (goloburda05-hue) · #203 / 203-achievements
+
+- Osiągnięcia (część UI #81): arena po każdej walce kariery woła `recordAchievements` (walka z unikalnym id, potem poziom) i zapisuje postęp
+  razem z HP i XP; Gear w mieście sprawdza pełny komplet. Nowe odznaki → papierowe dymki w prawym górnym rogu (`src/ui/achievementToast.ts`,
+  po kolei, max dwa naraz). Karta „Hall of Fame” w Town (`src/ui/trophies.ts`): 25 tabliczek (zdobyte złocone, „✓ earned”) + liczniki kariery.
+- Pomocnicze `src/ui/achievementRules.ts` (+ test): `recordForCareer(character, ...signals)`, `trophyList`, `trophyCount`.
+- lkaelek: sygnał `finisher` (dobicie) czeka na #20 (Mateusz) — jak będzie zdarzenie dobicia w walce, podepnę je w arenie.
