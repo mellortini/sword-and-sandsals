@@ -50,7 +50,7 @@ const FAMILIES: Record<WeaponFamily, FamilyBalance> = {
   hammer: { name: 'Hammer', damageType: 'crush', damageBonus: 4, speed: 0.72, range: 1.5, mightBonus: 4, armourPriceShare: 0.6 },
 };
 
-export const WEAPONS: readonly Weapon[] = TIERS.flatMap((balance, index) => {
+const weaponCatalogue: Weapon[] = TIERS.flatMap((balance, index) => {
   const tier = index + 1;
   const armour = ITEMS.filter((piece) => piece.tier === tier);
   if (!armour.length) throw new Error(`Missing armour prices for weapon tier ${tier}`);
@@ -75,6 +75,12 @@ export const WEAPONS: readonly Weapon[] = TIERS.flatMap((balance, index) => {
     };
   });
 });
+
+export const WEAPONS: readonly Weapon[] = weaponCatalogue;
+
+export function replaceWeaponCatalogue(weapons: readonly Weapon[]): void {
+  weaponCatalogue.splice(0, weaponCatalogue.length, ...weapons);
+}
 
 export function weapon(family: WeaponFamily, tier: number): Weapon | undefined {
   return WEAPONS.find((entry) => entry.family === family && entry.tier === tier);
