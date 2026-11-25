@@ -767,3 +767,12 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
   po kolei, max dwa naraz). Karta „Hall of Fame” w Town (`src/ui/trophies.ts`): 25 tabliczek (zdobyte złocone, „✓ earned”) + liczniki kariery.
 - Pomocnicze `src/ui/achievementRules.ts` (+ test): `recordForCareer(character, ...signals)`, `trophyList`, `trophyCount`.
 - lkaelek: sygnał `finisher` (dobicie) czeka na #20 (Mateusz) — jak będzie zdarzenie dobicia w walce, podepnę je w arenie.
+
+### 2026-11-25 13:25 · Claude Code (goloburda05-hue) · #205 / 205-shops
+
+- Sklepy (część #34 bez grafiki sprzedawców): karty **Armourer** i **Weaponsmith** w Town → `src/ui/shop.ts` (`openShop(shop, character, save)`),
+  reguły `src/ui/shopRules.ts` (+ test). Zakładki Buy / Sell, ceny z Charm (`shopPrices`), kupione idzie do plecaka (zakłada się w Gear). Szkic + Keep.
+  #34 zostaje `blocked` na „sprzedawca w dymku” (#33) — panel jest gotowy, popiersie dojdzie obok nagłówka.
+- ❓ lkaelek: (1) oferta wg ligi — kariera nie ma jeszcze ligi, więc `shopLeague(level)` liczy ją z poziomu (progi jak `minLevel` tierów 3/5/7/9).
+  Gdy liga trafi do zapisu (#58), podmienię na nią. (2) `sellItem` szuka dokładnego id w katalogu, więc ulepszonych/zaklętych sztuk nie da się
+  sprzedać („not bought here”). Czy tak ma być, czy core ma płacić za bazę (+ coś za poziom)?
