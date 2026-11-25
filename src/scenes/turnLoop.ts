@@ -1,10 +1,17 @@
 import { chooseAction } from '../core/ai';
 import type { AiProfile } from '../core/ai';
-import { getActionOptions, performAction } from '../core/combat';
+import { getActionOptions, getCombatSlotOptions, performAction } from '../core/combat';
+import type { TargetedAttack } from '../core/hitZones';
+import type { CombatSlotAction, CombatSlotOption } from '../core/spells';
 import type { ActionOption, CombatAction, CombatEvent, CombatState, FighterSide } from '../core/types';
 
-/** Decides one action for the side whose turn it is. Gets only the options the core allows right now. */
-export type ActionPicker = (state: CombatState, options: readonly ActionOption[]) => Promise<CombatAction>;
+/**
+ * Decides one action for the side whose turn it is. Gets only the options the core allows right now, and the items in
+ * the fighter's combat slots (potions, spells; some may be `unavailable`). Answers with an action or a slot to use.
+ */
+export type ActionPicker = (
+  state: CombatState, options: readonly ActionOption[], slots: readonly CombatSlotOption[],
+) => Promise<CombatAction | CombatSlotAction | TargetedAttack>;
 
 export interface FightLoopOptions {
   /** who chooses for each side: the action bar for the player (#147), the AI for the enemy */
@@ -34,10 +41,10 @@ export async function runFight(start: CombatState, o: FightLoopOptions): Promise
   const events: CombatEvent[] = [];
   while (state.winner === null && !o.signal?.aborted) {
     const side = state.active;
-    const action = await o.pickers[side](state, getActionOptions(state));
+    const action = await o.pickers[side](state, getActionOptions(state), getCombatSlotOptions(state));
     if (o.signal?.aborted) break;
     const result = performAction(state, action);
-    if (!result.ok) throw new Error(`The ${side} picked "${action}", which is not available (${result.reason}).`);
+    if (!result.ok) throw new Error(`The ${side} picked ${JSON.stringify(action)}, which is not available (${result.reason}).`);
     events.push(...result.events);
     await o.present(result.events, result.state);
     state = result.state;

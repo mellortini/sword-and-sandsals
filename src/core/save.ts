@@ -3,11 +3,13 @@ import { isSkillId } from './skills';
 import type { Look } from '../rig/PaperRig';
 import { ACHIEVEMENT_COUNTERS } from './achievements';
 import type { AchievementProgress } from './achievements';
+import { FORGE_MATERIALS } from './forge';
+import type { ForgeMaterials } from './forge';
 import { LEAGUE_MAX_TIER } from './leagues';
 import type { NemesisMemory } from './nemesis';
 import { MAX_LEVEL } from './progression';
 import { resolveAttributes } from './stats';
-import type { Attributes, EquipmentLoadout } from './types';
+import type { ArmourImprovements, Attributes, EquipmentLoadout } from './types';
 
 const SAVE_VERSION = 1;
 const DATABASE = 'folded-glory';
@@ -34,6 +36,8 @@ export interface SavedCharacter {
   hands?: { weapon?: string; offHand?: string };
   inventory: string[];
   achievements?: AchievementProgress;
+  forgeMaterials?: ForgeMaterials;
+  armourImprovements?: ArmourImprovements;
   nemesis?: NemesisMemory;
 }
 
@@ -74,6 +78,14 @@ function isAchievementProgress(value: unknown): value is AchievementProgress {
     && ACHIEVEMENT_COUNTERS.every((key) => within(counters[key], 0));
 }
 
+function isForgeMaterials(value: unknown): value is ForgeMaterials {
+  return isRecord(value) && FORGE_MATERIALS.every((key) => within(value[key], 0));
+}
+
+function isArmourImprovements(value: unknown): value is ArmourImprovements {
+  return isRecord(value) && Object.entries(value).every(([slot, level]) => EQUIPMENT.some((key) => key === slot) && within(level, 1, 10));
+}
+
 function isNemesisMemory(value: unknown): value is NemesisMemory {
   return isRecord(value) && isItemId(value.id) && isItemId(value.name) && isItemId(value.lastFightId)
     && typeof value.league === 'string' && Object.hasOwn(LEAGUE_MAX_TIER, value.league)
@@ -95,6 +107,8 @@ function isCharacter(value: unknown): value is SavedCharacter {
     && (hands === undefined || (isRecord(hands) && ['weapon', 'offHand'].every((slot) => hands[slot] === undefined || isItemId(hands[slot]))))
     && Array.isArray(inventory) && inventory.every(isItemId)
     && (value.achievements === undefined || isAchievementProgress(value.achievements))
+    && (value.forgeMaterials === undefined || isForgeMaterials(value.forgeMaterials))
+    && (value.armourImprovements === undefined || isArmourImprovements(value.armourImprovements))
     && (value.nemesis === undefined || isNemesisMemory(value.nemesis));
 }
 

@@ -22,7 +22,7 @@ const ZONE_BY_SLOT: Readonly<Record<Item['slot'], HitZone>> = {
 export function armourByZone(loadout: EquipmentLoadout = {}): ZonedArmour {
   const armour: Record<HitZone, number> = { head: 0, torso: 0, legs: 0 };
   for (const piece of ITEMS) {
-    if (loadout[piece.slot] === piece.tier) armour[ZONE_BY_SLOT[piece.slot]] += piece.armor;
+    if (loadout[piece.slot] === piece.tier) armour[ZONE_BY_SLOT[piece.slot]] += piece.armor + (loadout.improvements?.[piece.slot] ?? 0);
   }
   if (equipmentTotals(loadout).fullSet) {
     for (const zone of HIT_ZONES) armour[zone] = Math.round(armour[zone] * 1.1);

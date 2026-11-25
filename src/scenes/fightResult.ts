@@ -13,11 +13,11 @@ import { StatPanel } from '../ui/statPanel';
 import { XpBar } from '../ui/xpBar';
 import { H, W, randomLook } from './common';
 import type { SceneContext, SceneUpdate } from './common';
-import { PORTRAIT_H, PORTRAIT_W, portraitCard, removeRigs } from './portrait';
+import { PORTRAIT_H, PORTRAIT_W, portraitCard } from './portrait';
 import type { PortraitSubject } from './portrait';
 import { loadoutFromLook } from './preFight';
 
-export type FightResultChoice = 'again' | 'leave';
+export type FightResultChoice = 'again' | 'next' | 'leave';
 
 export interface FightResult {
   readonly player: PortraitSubject;
@@ -31,6 +31,8 @@ export interface FightResult {
    * the result screen offers it while the gladiator has unspent attribute points
    */
   readonly spendPoints?: (character: SavedCharacter) => Promise<SavedCharacter>;
+  /** offer "Next opponent" (#187): a similar opponent, at most a little stronger */
+  readonly nextOpponent?: boolean;
 }
 
 const PANEL_W = 640;
@@ -38,11 +40,11 @@ const TOP = 196;
 
 /**
  * Result screen over the finished arena: VICTORY / DEFEAT, both portraits (the loser dimmed and stamped),
- * the fight's numbers side by side, and Fight again / Leave. Rewards (gold, XP) come with #43.
+ * the fight's numbers side by side, and Fight again / Next opponent (arena, #187) / Leave. Rewards (gold, XP) come with #43.
  * Resolves with the choice and removes everything it added. Keyboard: Enter = Fight again, Escape = Leave.
  */
 export async function openFightResult(context: SceneContext, result: FightResult): Promise<FightResultChoice> {
-  const { world, rigs, add } = context;
+  const { world } = context;
   const { summary } = result;
   const won = summary.winner === 'player';
   const root = new Container();
@@ -54,12 +56,10 @@ export async function openFightResult(context: SceneContext, result: FightResult
     subtitle(`${won ? 'Won in' : 'Fell after'} ${summary.rounds} ${summary.rounds === 1 ? 'round' : 'rounds'}`, W / 2, 140),
   );
 
-  const rigsBefore = rigs.length;
   const sideX = (W - PANEL_W) / 2 - PORTRAIT_W - 60;
   const enemyX = W - sideX - PORTRAIT_W;
-  await portraitCard(root, add, result.player, won ? 'Winner' : 'Defeated', sideX, TOP, 1);
-  await portraitCard(root, add, result.enemy, won ? 'Defeated' : 'Winner', enemyX, TOP, -1);
-  const added = rigs.slice(rigsBefore);
+  await portraitCard(root, context, result.player, won ? 'Winner' : 'Defeated', sideX, TOP, 1);
+  await portraitCard(root, context, result.enemy, won ? 'Defeated' : 'Winner', enemyX, TOP, -1);
   root.addChild(defeatedStamp(won ? enemyX : sideX, TOP));
 
   const panel = new StatPanel(summaryRows(summary), PANEL_W);
@@ -71,10 +71,16 @@ export async function openFightResult(context: SceneContext, result: FightResult
   const listening = new AbortController();
   const keys = buttonKeys(listening.signal);
   let finish: (choice: FightResultChoice) => void = () => {};
-  const buttons = [
-    paperButton('Fight again', W / 2 - 160, buttonsY, true, () => finish('again'), 280),
-    paperButton('Leave', W / 2 + 160, buttonsY, false, () => finish('leave'), 280),
-  ];
+  const buttons = result.nextOpponent
+    ? [
+      paperButton('Fight again', W / 2 - 320, buttonsY, true, () => finish('again'), 290),
+      paperButton('Next opponent', W / 2, buttonsY, false, () => finish('next'), 290),
+      paperButton('Leave', W / 2 + 320, buttonsY, false, () => finish('leave'), 290),
+    ]
+    : [
+      paperButton('Fight again', W / 2 - 160, buttonsY, true, () => finish('again'), 280),
+      paperButton('Leave', W / 2 + 160, buttonsY, false, () => finish('leave'), 280),
+    ];
   root.addChild(...buttons, keyHint('← →  choose    Enter  confirm    Esc  leave', W / 2, buttonsY + 112));
   keys.add(...buttons);
 
@@ -116,7 +122,6 @@ export async function openFightResult(context: SceneContext, result: FightResult
     finish = (choice: FightResultChoice) => {
       listening.abort();
       tick?.();
-      removeRigs(rigs, added);
       root.destroy({ children: true });
       resolve(choice);
     };

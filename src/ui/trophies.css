@@ -1,0 +1,23 @@
+/* Hall of Fame (src/ui/trophies.ts): career counters and a grid of plaques; panel from forge.css. */
+.trophies__panel { width: min(96vw, 1000px); }
+.trophies__count { margin-left: auto; color: #e8be4c; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; }
+.trophies__count b { color: #f2c14e; font-size: 18px; letter-spacing: 0; }
+.trophies__counters { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; color: #cdb99a; font-size: 13px; }
+.trophies__counters b { color: #f2c14e; }
+.trophies__list {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 12px; margin: 0; padding: 2px 6px 6px; list-style: none; overflow-y: auto;
+}
+.trophy {
+  display: grid; grid-template-columns: 1fr auto; gap: 1px 6px; padding: 6px 9px; border-radius: 3px; font-size: 12.5px; color: #3a2418;
+  background: #d9c8a4; box-shadow: inset 0 0 0 1px #a07a4f; opacity: 0.6;
+}
+/* earned: gilded plaque, full strength; the state is also written ("✓ earned") */
+.trophy.earned { opacity: 1; background: linear-gradient(160deg, #fff3c8 0%, transparent 55%), #e3c06a; box-shadow: inset 0 0 0 2px #8a6a22, 0 2px 0 #2a171299; }
+.trophy__title { font-weight: bold; font-size: 13.5px; }
+.trophy__state { font-size: 10.5px; font-style: italic; color: #6b5030; }
+.trophy.earned .trophy__state { font-style: normal; font-weight: bold; color: #3a2418; }
+.trophy__text { grid-column: 1 / -1; color: #5a4030; }
+.trophies__close { grid-template-columns: 1fr; width: min(100%, 200px); }
+@media (max-width: 760px), (max-height: 500px) {
+  .trophies__list { grid-template-columns: repeat(2, 1fr); }
+}

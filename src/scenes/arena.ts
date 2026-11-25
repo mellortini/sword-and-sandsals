@@ -1,7 +1,10 @@
 import { Container, Sprite } from 'pixi.js';
 import type { AiProfile } from '../core/ai';
-import { createCombat } from '../core/combat';
+import { createCombat, getAttackZoneOptions } from '../core/combat';
+import type { TargetedAttack } from '../core/hitZones';
 import { saveGame } from '../core/save';
+import type { CombatSlotAction } from '../core/spells';
+import { settleTempleCombat, templeCombatSlots } from '../core/temple';
 import type { SavedCharacter } from '../core/save';
 import type { Attributes, CombatAction, FighterSide } from '../core/types';
 import type { Look } from '../rig/PaperRig';
@@ -16,14 +19,18 @@ import { CombatHud } from '../ui/hud';
 import { ActionBar } from '../ui/actionBar';
 import { leaveFightOnEscape } from '../ui/leaveFight';
 import { CombatPresenter } from './combatPresenter';
-import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from './common';
+import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, drawableLook, groundShadowTexture, randomLook } from './common';
 import type { SceneContext, SceneUpdate } from './common';
 import { openFightResult } from './fightResult';
+import { careerLoadout } from '../ui/gearRules';
+import { recordForCareer } from '../ui/achievementRules';
+import { showAchievements } from '../ui/achievementToast';
 import { loadoutFromLook } from './preFight';
 import { aiPicker, runFight } from './turnLoop';
 import type { ActionPicker } from './turnLoop';
 import { arenaBackdrop } from './backdrop';
 import { FIGHT_LAYOUT } from './combatPlan';
+import { nextOpponent } from './opponents';
 
 export interface ArenaFighter {
   readonly look: Look;
@@ -38,6 +45,9 @@ export interface ArenaOptions {
 }
 
 const LAYOUT = FIGHT_LAYOUT;
+
+/** Health a saved gladiator starts a bout with: a beaten one steps in with at least 1 HP (heal at the temple, #191). */
+export const boutStartHealth = (health: number | undefined) => (health === undefined ? undefined : Math.max(1, health));
 /** seconds before the opponent answers */
 const ENEMY_PAUSE = 0.5;
 
@@ -62,8 +72,9 @@ export async function showArena(
 
   const tp = params.get('tier');
   const tier = tp ? +tp : undefined;
-  const [player, enemy]: readonly [ArenaFighter, ArenaFighter] = fighters
+  const [player, firstEnemy]: readonly [ArenaFighter, ArenaFighter] = fighters
     ?? [{ name: 'Player', look: randomLook(tier) }, { name: 'Opponent', look: randomLook(tier) }];
+  let enemy: ArenaFighter = firstEnemy;
   const asked = params.get('ai');
   const profile: AiProfile = asked === 'aggressor' || asked === 'defender' ? asked : PROFILES[Math.floor(Math.random() * PROFILES.length)];
 
@@ -91,16 +102,18 @@ export async function showArena(
   });
 
   // the player's turn: open the menu with the options the core allows and wait for a click
-  let choose: ((action: CombatAction) => void) | null = null;
+  let choose: ((action: CombatAction | CombatSlotAction | TargetedAttack) => void) | null = null;
   const menu = new ActionBar((action) => {
     const resolve = choose;
     choose = null;
     resolve?.(action);
   });
   arena.on('destroyed', () => menu.destroy());
-  const playerPicker: ActionPicker = (_state, options) => new Promise((resolve) => {
+  const playerPicker: ActionPicker = (state, options, slots) => new Promise((resolve) => {
     choose = resolve;
-    menu.open(options);
+    // aimed attacks (#195): the zone chances of this turn and the opponent's armour per zone
+    const zones = (['quick', 'normal', 'power'] as const).flatMap((a) => getAttackZoneOptions(state, a));
+    menu.open(options, slots, { zones, armour: state.fighters.enemy.armourByZone });
   });
 
   ui.innerHTML = '<a href="?view=title">title</a> · <a href="?view=prefight">new opponent</a> · '
@@ -108,7 +121,7 @@ export async function showArena(
 
   let career = options.career;
   const spendPoints = async (character: SavedCharacter) => {
-    career = await openLevelUp(character, loadoutFromLook(character.look), saveGame);
+    career = await openLevelUp(character, careerLoadout(character), saveGame);
     return career;
   };
 
@@ -121,10 +134,17 @@ export async function showArena(
       const start = createCombat(seed,
         {
           name: player.name, attributes: career?.attributes ?? player.attributes,
-          level: career?.level ?? player.level, equipment: loadoutFromLook(player.look),
+          level: career?.level ?? player.level,
+          // the saved gladiator fights with the gear screen's gear (#197): weapon, forge levels, enchantments
+          equipment: career ? careerLoadout(career) : loadoutFromLook(player.look),
+          // skills learned on the skill screen (#54) work in the fight
+          skills: career?.skills,
+          // health carries over between bouts and potions from the temple sit in the combat slots (#191)
+          ...(career && { health: boutStartHealth(career.health), slots: templeCombatSlots(career.inventory) }),
         },
         { name: enemy.name, attributes: enemy.attributes, level: enemy.level, equipment: loadoutFromLook(enemy.look) });
       presenter.reset(start);
+      menu.setVisible(true);
       fighting = true;
       const outcome = await runFight(start, {
         pickers: { player: playerPicker, enemy: aiPicker(profile, seed ^ 0x85ebca6b) },
@@ -133,21 +153,35 @@ export async function showArena(
       });
       fighting = false;
       menu.close();
+      menu.setVisible(false);
       // let the death and victory poses land before the result covers them
       await pause(1.2);
       let progress: FightProgress | undefined;
       if (career) {
-        progress = applyFightExperience(career, outcome.state.rewards?.experience ?? 0);
+        // health after the bout and the potions left (#191) go to the save with the XP
+        const settled = settleTempleCombat(career, outcome.state.fighters.player);
+        // achievements (#203): the bout first, then the level it ended on; the result screen keeps working on `after`
+        const fought = recordForCareer(settled, { type: 'fight', id: `${Date.now().toString(36)}-${seed}`, state: outcome.state, events: outcome.events });
+        progress = applyFightExperience(fought.character, outcome.state.rewards?.experience ?? 0);
+        const leveled = recordForCareer(progress.after, { type: 'level', level: progress.after.level });
+        progress = { ...progress, after: leveled.character };
         career = progress.after;
+        showAchievements([...fought.unlocked, ...leveled.unlocked]);
         // the bar still shows the XP if saving fails; the next fight starts from it again
-        if (progress.earned > 0) await saveGame(career).catch(() => undefined);
+        await saveGame(career).catch(() => undefined);
       }
       const choice = await openFightResult(context, {
         player, enemy, summary: summarizeFight(outcome.events), progress, spendPoints: career ? spendPoints : undefined,
+        nextOpponent: true,
       });
       if (choice === 'leave') {
         location.search = '?view=title';
         return;
+      }
+      if (choice === 'next') {
+        // #187: same gear, at most 5% stronger, at most one level above the player
+        enemy = nextOpponent(enemy, career?.level ?? player.level ?? 1);
+        await E.setLook(drawableLook(context.kit, enemy.look));
       }
       seed++;
     }

@@ -4,15 +4,18 @@ import type { Attributes, EquipmentLoadout } from '../core/types';
 import { EQUIP_SLOTS } from '../rig/PaperRig';
 import type { Look } from '../rig/PaperRig';
 import { goToTitle } from '../ui/backKey';
+import { playBanner } from '../ui/banner';
 import { buttonKeys, keyHint, paperButton, screenTitle } from '../ui/paperWidgets';
 import { StatPanel } from '../ui/statPanel';
 import { comparisonRows } from '../ui/statRows';
 import type { ComparedFighter } from '../ui/statRows';
-import { showArena } from './arena';
-import { W, randomLook } from './common';
+import { boutStartHealth, showArena } from './arena';
+import { careerLoadout } from '../ui/gearRules';
+import { H, W, randomLook } from './common';
 import { loadSavedGladiator } from './savedGladiator';
 import type { SceneContext, SceneUpdate } from './common';
-import { PORTRAIT_W, portraitCard, removeRigs } from './portrait';
+import { ENEMY_NAMES } from './opponents';
+import { PORTRAIT_W, portraitCard } from './portrait';
 
 export interface PreFightFighter extends ComparedFighter {
   readonly look: Look;
@@ -27,9 +30,11 @@ export function loadoutFromLook(look: Look): EquipmentLoadout {
   return loadout;
 }
 
-export function preFightFighter(name: string, level: number, look: Look, attributes: Partial<Attributes> = {}): PreFightFighter {
+export function preFightFighter(
+  name: string, level: number, look: Look, attributes: Partial<Attributes> = {}, loadout: EquipmentLoadout = loadoutFromLook(look),
+): PreFightFighter {
   const resolved = resolveAttributes(attributes);
-  return { name, level, look, attributes: resolved, stats: deriveStats(resolved, loadoutFromLook(look)) };
+  return { name, level, look, attributes: resolved, stats: deriveStats(resolved, loadout) };
 }
 
 const PANEL_W = 640;
@@ -42,7 +47,7 @@ const TOP = 170;
  * Keyboard (#77): ←/→ choose, Enter presses (Fight first), Escape = Leave.
  */
 export async function openPreFight(context: SceneContext, player: PreFightFighter, enemy: PreFightFighter): Promise<PreFightChoice> {
-  const { world, bgTex, rigs, add } = context;
+  const { world, bgTex } = context;
   const root = new Container();
   world.addChild(root);
 
@@ -50,12 +55,9 @@ export async function openPreFight(context: SceneContext, player: PreFightFighte
   bg.tint = 0x6e5c58;
   root.addChild(bg, screenTitle('Arena bout', W / 2, 58));
 
-  const rigsBefore = rigs.length;
   const sideX = (W - PANEL_W) / 2 - PORTRAIT_W - 60;
-  await portraitCard(root, add, player, `Level ${player.level}`, sideX, TOP, 1);
-  await portraitCard(root, add, enemy, `Level ${enemy.level}`, W - sideX - PORTRAIT_W, TOP, -1);
-  // the shared ticker renders the portraits until the choice is made; then they are taken out of `rigs`
-  const added = rigs.slice(rigsBefore);
+  await portraitCard(root, context, player, `Level ${player.level}`, sideX, TOP, 1);
+  await portraitCard(root, context, enemy, `Level ${enemy.level}`, W - sideX - PORTRAIT_W, TOP, -1);
 
   const panel = new StatPanel(comparisonRows(player, enemy), PANEL_W);
   panel.position.set((W - PANEL_W) / 2, TOP);
@@ -66,7 +68,6 @@ export async function openPreFight(context: SceneContext, player: PreFightFighte
     const keys = new AbortController();
     const done = (choice: PreFightChoice) => {
       keys.abort();
-      removeRigs(rigs, added);
       root.destroy({ children: true });
       resolve(choice);
     };
@@ -83,7 +84,6 @@ export async function openPreFight(context: SceneContext, player: PreFightFighte
   });
 }
 
-const ENEMY_NAMES = ['Crixus Fold', 'Varro the Creased', 'Spiculus', 'Flamma Pulp', 'Tetraites', 'Priscus Vellum'];
 
 /** Placeholder opponent until the enemy generator (#41): gear tier sets the level, a few extra attribute points. */
 function randomEnemy(tier: number): PreFightFighter {
@@ -108,12 +108,18 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
   // a saved gladiator meets opponents of the first tier until the leagues (#41) pick them
   const tier = tp ? Math.min(10, Math.max(1, +tp)) : saved ? 1 : 1 + Math.floor(Math.random() * 10);
   const player = saved
-    ? preFightFighter(saved.name, saved.level, saved.look, saved.attributes)
+    ? { ...preFightFighter(saved.name, saved.level, saved.look, saved.attributes, careerLoadout(saved)), health: boutStartHealth(saved.health) }
     : preFightFighter('Player', 1, randomLook(tier));
   context.ui.innerHTML = '<a href="?view=arena">arena</a> · <a href="?view=wardrobe">garderoba</a>';
 
   let update: SceneUpdate | undefined;
   void (async () => {
+    // the title banner (#15) over the dimmed stands, as in the reference, then the comparison screen
+    const backdrop = new Sprite(context.bgTex);
+    backdrop.tint = 0x5a4846;
+    context.world.addChild(backdrop);
+    await playBanner(context.world, context.app.ticker, ['Arena', 'Battle'], { width: W, y: H * 0.46 });
+    backdrop.destroy();
     let choice: PreFightChoice;
     let enemy: PreFightFighter;
     do {

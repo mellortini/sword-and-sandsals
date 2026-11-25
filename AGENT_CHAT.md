@@ -630,3 +630,166 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
 **Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
 **tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
 Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
+
+### 2026-11-24 17:05 · Codex (lkaelek) · #63 / 63-equipment-forge
+
+- Kuźnia ulepsza jedną sztukę do +10 albo rozbiera sprzęt na strzępy, klej, atrament i nici. `forgeFightLoot` zwraca materiały za zwycięstwo.
+- Ulepszona broń daje dodatkowe obrażenia, ulepszona zbroja podnosi też ochronę strefową. Zapis obsługuje stany materiałów i ulepszenia noszonej zbroi.
+- Dla widoku: `forgeUpgradeCost`, `upgradeForgeItem`, `salvageForgeItem` oraz `forgePresentation` z numerkiem i natężeniem połysku. Lint, 122 testy i build przeszły.
+### 2026-11-24 21:08 · Claude Code (goloburda05-hue) · #15 / 15-fight-banner
+
+- ↳ Mateusz zgodził się (przez goloburda05-hue), że biorę #15 i #25.
+- Nowy `src/ui/banner.ts`: `playBanner(parent, ticker, ['Arena', 'Battle'], { width, y })` → Promise. Dwie linie na podartych
+  paskach papieru (kremowy z lewej, czerwony z prawej), wjazd 6 kl. z lekkim przestrzeleniem, 1 s trzymania, wyjazd dalej
+  w tę samą stronę (jak w referencji). Klik / klawisz skraca trzymanie, `prefers-reduced-motion` = bez przesuwu.
+- Użyte w `preFight.ts` przed pierwszym ekranem porównania. Mateusz: możesz jej użyć np. przed walką z championem (#42/#43).
+### 2026-11-24 21:10 · Claude Code (goloburda05-hue) · #25 / 25-portrait
+
+- Nowy komponent `src/ui/portrait.ts`: `await Portrait.create(kit, renderer, look, { width, height, scale?, top?, facing?, frame? })`
+  — kontener Pixi z wycinkiem kukły (`PaperRig.crop`) i opcjonalną papierową ramką. Rysuje kukłę raz i ponownie tylko przy
+  `setLook` (albo po odzyskaniu kontekstu WebGL); nie trafia do `context.rigs`, więc wspólny ticker go nie dotyka.
+  Sprawdzone: 30 klatek bez zmian = 0 renderów, zmiana wyglądu = 1 render; 20 portretów z losowych wyglądów (tier 1–10, oba kierunki).
+- `portraitCard` (ekran przed walką, wynik) używa komponentu; zniknęło ręczne `removeRigs`. `destroy` zwalnia też teksturę kukły.
+- `?view=faces` zostawiłem bez zmian — test wizualny czeka tam na 40 kukieł w `rigs`.
+- Portretu w HUD nie dodałem: na panelu 382×148 nie ma miejsca bez przebudowy panelu. Mateusz: jeśli chcesz, osobne Issue.
+- Komponent jest gotowy do sklepów (#34) i zapisu.
+
+### 2026-11-24 21:28 · Claude Code (goloburda05-hue) · #77 / 77-cards-text-size
+
+- Dopełnienie #77 po merge'u #173: karty akcji rosną z ustawieniem „Text size” (`placeBar(..., textScale)`), ale nigdy ponad
+  miejsce między panelami HUD (na telefonie — nad głowami walczących).
+### 2026-11-24 21:32 · Claude Code (goloburda05-hue) · #54 / 54-skill-trees
+
+- Ekran umiejętności: `src/ui/skillTree.ts` (`openSkillTree(character, save)`), otwierany z menu tytułowego („Skills”, notka
+  z liczbą punktów). Sześć papierowych drzewek po 4 karty; stan zawsze napisany na karcie (learned ✓ / chosen / can learn / locked).
+  Wybór w szkicu (`src/ui/skillTreeRules.ts`), Keep uczy przez `unlockSkill` z core i zapisuje, Later/Esc bez zmian. Strzałki + Enter.
+- `arena.ts` przekazuje teraz `skills: career?.skills` do `createCombat` — wcześniej wyuczone umiejętności nie działały w walce.
+- ↳ lkaelek: przejrzałem `core/skills.ts`, `data/skills.ts` i punkty w `progression.ts` (#166) — logika spójna (łańcuch 4 umiejętności,
+  punkt co 3. poziom, walidacja w `save.ts`). Nic nie poprawiałem.
+
+### 2026-11-24 21:52 · Claude Code (goloburda05-hue) · #182 / 182-wardrobe-sword
+
+- Garderoba: nowy wiersz „Sword” (Gladius + miecze tier 1–10, nazwy z `data/weapons.ts`), a „Full set” dobiera miecz tego samego
+  tieru co komplet zbroi. Logika w `src/ui/swordLooks.ts`: `Look.weapon` = `'sword<tier>'` → sprite `weapon_sword<tier>`.
+  Gdy sprite'a jeszcze nie ma, kukła trzyma gladius, a wiersz ma dopisek „(art soon)” — nic nie znika z ręki.
+- ❓ Mateusz: goloburda05-hue prosi o #36 — przynajmniej miecze `weapon_sword1`…`weapon_sword10` w stylu 10 kompletów
+  (od Beggar's Rags po Gilded Legend), pivot w miejscu chwytu jak `weapon_gladius`. Po dodaniu do `kit.json` pojawią się
+  w garderobie same, bez zmian w kodzie. Topory, włócznie i młoty mogą poczekać.
+
+### 2026-11-24 22:22 · Claude Code (goloburda05-hue) · #185 / 185-wardrobe-weapons
+
+- Garderoba: zamiast samego „Sword” są wiersze „Weapon” (Sword / Axe / Spear / Hammer) i „Weapon tier” (0 = Gladius, 1–10 z katalogu).
+  „Full set” ustawia tier broni = tier kompletu, rodzaj zostaje. `src/ui/swordLooks.ts` → `src/ui/weaponLooks.ts`.
+- `Look.weapon` = id z katalogu (`axe7`, `spear10`…) → sprite `weapon_<rodzina><tier>`. Bez sprite'a: gladius + dopisek w statystykach.
+- Mateusz: grafiki — miecze #184, topory/włócznie/młoty #36 (dopisałem tam kontrakt i listę do sprawdzenia, przypisane do Ciebie).
+
+### 2026-11-24 23:22 · Claude Code (goloburda05-hue) · #187 / 187-next-opponent
+
+- Wynik walki w arenie: trzeci przycisk **Next opponent** (`FightResult.nextOpponent`, wybór `'next'`). Nowy przeciwnik z
+  `src/scenes/opponents.ts` → `nextOpponent(current, playerLevel)`: ten sam sprzęt i broń, nowa twarz i imię, atrybuty takie same
+  albo łącznie najwyżej +5% (Arcana bez zmian), poziom najwyżej poziom gracza + 1. `ENEMY_NAMES` przeniesione z `preFight.ts`.
+- Poprawka #173: pasek kart akcji chowa się między walkami (`ActionBar.setVisible`) — wcześniej leżał przygaszony na ekranie wyniku.
+- lkaelek: gdy wejdzie generator przeciwników (#41) / nagrody (#43), `nextOpponent` można przepiąć na core — daj znać.
+
+### 2026-11-25 08:10 · Claude Code (goloburda05-hue) · #63 / 63-equipment-forge (sync z main)
+
+- Zsynchronizowałem PR #169 z main przed merge'em (AGENTS.md pkt 5). Konflikt z zaklinaniem broni (#56): oba systemy piszą stan w id.
+  Rozwiązanie: `<broń>[^+<poziom>][~<żywioł>~<moc>]` — ulepszenie w środku, zaklęcie na zewnątrz (tak już wychodzi z `enchantWeapon`
+  na ulepszonej broni). `combatWeapon`, `equipItem`, `equipmentTotals` i `enchantmentPrice` czytają oba. Test w `forge.test.ts`.
+- ❓ lkaelek: ulepszenie broni już zaklętej (`sword1~fire~2`) daje teraz `unavailable` — `readForgedItem` nie zna `~`. Zostawiłem Tobie,
+  czy kuźnia ma to umieć (wtedy wstawić `^+N` przed `~`), czy tak ma zostać.
+
+### 2026-11-25 08:30 · Claude Code (goloburda05-hue) · #189 / 189-forge-ui
+
+- Ekran kuźni (część UI #63): `src/ui/forge.ts` (`openForge(character, save)`), reguły w `src/ui/forgeRules.ts` (+ test). Wejście „Forge”
+  w menu tytułowym (notka: liczba przedmiotów w plecaku). Każdy przedmiot z plecaka to papierowa karta: nazwa z `+N`, złoty połysk
+  rosnący z poziomem (`forgePresentation().glow`), obrażenia/pancerz teraz → po ulepszeniu, koszt (brakujący materiał na czerwono
+  z „have N”), Upgrade i Salvage (z tym, co oddaje). Zmiany w szkicu, Keep zapisuje (`forgeMaterials` + `inventory`), Later/Esc bez zmian.
+- Noszony sprzęt nie jest w plecaku, więc nie ma go w kuźni (core działa tylko na plecaku) — napisane na ekranie.
+- lkaelek: materiały z walki (`forgeFightLoot`) nie są jeszcze dodawane po zwycięstwie — to pasuje do Twojego #43 (nagrody, PR #162).
+  Jak nagroda będzie zapisywana w `career`, dopisz tam `forgeMaterials`; ekran kuźni pokaże je sam.
+
+### 2026-11-25 09:20 · Claude Code (goloburda05-hue) · #191 / 191-temple
+
+- Świątynia Kleju (część UI #39): `src/ui/temple.ts` (`openTemple(character, save)`), reguły `src/ui/templeRules.ts` (+ test). Wejście „Temple”
+  w menu tytułowym (notka: rany albo złoto). Leczenie za złoto i kupno trzech mikstur, szkic + Keep jak w kuźni (wspólne style z `forge.css`).
+- **Mikstury w walce**: `ActionPicker` dostaje teraz trzeci argument — opcje slotów (`getCombatSlotOptions`) — i może zwrócić `CombatSlotAction`.
+  `ActionBar.open(options, slots)` ma grupę „Items” (karty bez klawisza numerycznego, strzałki je obejmują). `combatPlan` ma krok `item`
+  (zdarzenie `slot`), presenter gra `rest` (na siebie) / `taunt` (na wroga) i przesuwa pasek HP.
+- Arena: kariera wchodzi z `health` z zapisu (minimum 1 HP — `boutStartHealth`, żeby walka nie zaczynała się przegrana) i `templeCombatSlots(inventory)`;
+  po walce `settleTempleCombat` → zapis HP i pozostałych mikstur (zapis teraz po każdej walce, nie tylko przy XP). Ekran przed walką pokazuje „30 / 70”.
+- Menu tytułowe ma 9 pozycji — skaluje się, żeby zmieścić się z podpowiedzią (PaperMenu ma stałą wysokość wiersza).
+- ❓ lkaelek: czy core ma mieć własną regułę „po porażce min. X HP” zamiast mojego minimum 1 HP w scenie? Jeśli tak, przepnę na nią.
+- ❓ Mateusz: do kroku `item` przydałby się pop-up w `fx.ts` (np. zielone „+12” albo nazwa mikstury nad głową) i ewentualnie klip „picia”.
+  Na razie gra klip `rest` i przesuwa pasek HP. `Pop` nie jest eksportowany, więc nie dopisałem tego sam.
+
+### 2026-11-25 09:55 · Claude Code (goloburda05-hue) · #193 / 193-trainer
+
+- Trener (część UI #40): `src/ui/trainer.ts` (`openTrainer(character, loadout, save)`), reguły `src/ui/trainerRules.ts` (+ test). Wejście „Trainer”
+  w menu tytułowym. Atrybuty z „+N trained” ponad bazę, „Place N points” otwiera ekran punktów z #24 (`openLevelUp`, zapisuje sam),
+  „Reset · cena · get N points back” z jednym potwierdzeniem → `resetAttributes` i od razu zapis.
+- `forge.css`: `.forge[hidden]` naprawdę chowa panel (wspólne style kuźni / świątyni / trenera).
+- Menu tytułowe ma już 10 pozycji (skaluje się). Gdy wejdzie scena miasta (#30), Skills / Forge / Temple / Trainer przeniosę do budynków.
+
+### 2026-11-25 10:30 · Claude Code (goloburda05-hue) · #195 / 195-aim-zones
+
+- Strefy trafienia (część UI #48): grupa „Aim” na pasku akcji — Body (zwykły cios) / Head / Torso / Legs, klawisze B H T L, wybór zostaje
+  między turami. Karty Quick/Normal/Power pokazują szansę dla strefy (stempel wypełniony na czerwono) i wysyłają `{ action, zone }`.
+  Podpowiedź strefy: efekt (głowa: krytyk ogłusza, nogi: spowolnienie) i pancerz przeciwnika na tej strefie.
+- `ActionBar.open(options, slots, aim)`, reguły w `src/ui/aimRules.ts` (+ test). `ActionPicker` może zwrócić `TargetedAttack`.
+- AI nadal nie celuje (bije w ciało) — lkaelek, jeśli chcesz, `chooseAction` może korzystać z `getAttackZoneOptions`.
+- Pasek z grupą Aim jest szerszy: na wąskich oknach częściej idzie nad głowy (tak działa `placeBar`).
+
+### 2026-11-25 11:20 · Claude Code (goloburda05-hue) · #197 / 197-gear
+
+- **Ekran ekwipunku „Gear”** (UI do #31): `src/ui/gear.ts`, reguły `src/ui/gearRules.ts` (+ test). Lewa kolumna: 7 slotów (5 zbroi, dwie ręce)
+  z „Take off”; prawa: przedmioty z plecaka z „Wear” (wymagania poziomu / Might z core, powód napisany). Szkic + Keep.
+- Zapis ↔ `Inventory`: zbroja z `look` + `armourImprovements` (poziom kuźni idzie razem z przedmiotem), broń z `hands`.
+  Stary zapis bez `hands` z bronią z katalogu w `look.weapon` trzyma tę broń. `look.weapon` = id bazowe broni (kukła).
+- **Ważne dla walki:** arena i ekran przed walką biorą sprzęt zapisanego gladiatora przez `careerLoadout` (`equipmentLoadout`):
+  od teraz działają broń (wcześniej `loadoutFromLook` nie dawał broni wcale), ulepszenia z kuźni i zaklęcia. Losowe postacie bez zmian.
+- `drawableLook(kit, look)` (`src/ui/weaponLooks.ts`, użyte w `common.ts` `add`, portretach i `setLook` w scenach): broń bez sprite'a
+  rysuje się jako gladius. Mateusz: gdy dojdą `weapon_sword1…10` (#184), pokażą się same.
+
+### 2026-11-25 11:50 · Claude Code (goloburda05-hue) · #199 / 199-enchanter
+
+- Zaklinaczka (część UI #56): `src/ui/enchanter.ts` (`openEnchanter(character, save)`), reguły `src/ui/enchanterRules.ts` (+ test). Wejście „Enchantress”.
+  Wybór broni (ręka główna / druga / plecak), żywiołu i mocy 1–3 z ceną; opis efektu z `enchantmentEffect`; stare zaklęcie jest zastępowane.
+  Zaklęcie trzymanej broni działa w walce (od #197 arena bierze broń z `hands`). Ulepszenie z kuźni zostaje (`sword2^+1~ink~2`).
+- `forge.css`: `.forge__problem.ok` = zielone potwierdzenie (używa trener i zaklinaczka).
+- Menu tytułowe ma 12 pozycji — następny krok: jedno wejście „Town” z budynkami (Gear, Forge, Enchantress, Temple, Trainer, Skills).
+
+### 2026-11-25 12:15 · Claude Code (goloburda05-hue) · #201 / 201-town
+
+- Menu tytułowe znowu ma 6 pozycji: New game, Continue, **Town**, Quick bout, Wardrobe, Text size. Town (`src/ui/town.ts`, `openTown`) to panel
+  „Pulpport” z kartami: Gear, Forge, Enchantress, Glue Temple, Trainer, Skills — cel miejsca + stan gladiatora (`BUILDINGS`). Karta otwiera ekran,
+  po zamknięciu wraca panel z nowymi notkami; notka Town w menu mówi, co wymaga uwagi (rany, punkty). `townNote` w `townRules.ts` (+ test).
+- To tymczasowe do sceny miasta (#30): `BUILDINGS` można wtedy podpiąć pod budynki na mapie bez zmian w ekranach.
+
+### 2026-11-25 12:50 · Claude Code (goloburda05-hue) · #203 / 203-achievements
+
+- Osiągnięcia (część UI #81): arena po każdej walce kariery woła `recordAchievements` (walka z unikalnym id, potem poziom) i zapisuje postęp
+  razem z HP i XP; Gear w mieście sprawdza pełny komplet. Nowe odznaki → papierowe dymki w prawym górnym rogu (`src/ui/achievementToast.ts`,
+  po kolei, max dwa naraz). Karta „Hall of Fame” w Town (`src/ui/trophies.ts`): 25 tabliczek (zdobyte złocone, „✓ earned”) + liczniki kariery.
+- Pomocnicze `src/ui/achievementRules.ts` (+ test): `recordForCareer(character, ...signals)`, `trophyList`, `trophyCount`.
+- lkaelek: sygnał `finisher` (dobicie) czeka na #20 (Mateusz) — jak będzie zdarzenie dobicia w walce, podepnę je w arenie.
+
+### 2026-11-25 13:25 · Claude Code (goloburda05-hue) · #205 / 205-shops
+
+- Sklepy (część #34 bez grafiki sprzedawców): karty **Armourer** i **Weaponsmith** w Town → `src/ui/shop.ts` (`openShop(shop, character, save)`),
+  reguły `src/ui/shopRules.ts` (+ test). Zakładki Buy / Sell, ceny z Charm (`shopPrices`), kupione idzie do plecaka (zakłada się w Gear). Szkic + Keep.
+  #34 zostaje `blocked` na „sprzedawca w dymku” (#33) — panel jest gotowy, popiersie dojdzie obok nagłówka.
+- ❓ lkaelek: (1) oferta wg ligi — kariera nie ma jeszcze ligi, więc `shopLeague(level)` liczy ją z poziomu (progi jak `minLevel` tierów 3/5/7/9).
+  Gdy liga trafi do zapisu (#58), podmienię na nią. (2) `sellItem` szuka dokładnego id w katalogu, więc ulepszonych/zaklętych sztuk nie da się
+  sprzedać („not bought here”). Czy tak ma być, czy core ma płacić za bazę (+ coś za poziom)?
+
+### 2026-11-25 13:45 · Claude Code (goloburda05-hue) · #207 / 207-shop-phone
+
+- Przegląd nowych ekranów na telefonie (844×390): Town, Gear, Hall of Fame OK. Poprawki: sklep zostaje w jednym wierszu na niskim
+  ekranie (6 pozycji zamiast 3; dwuwierszowy układ tylko przy szerokości ≤ 600 px), w Gear nazwy slotów nie łamią się.
+
+### 2026-11-25 14:05 · Claude Code (goloburda05-hue) · #59 / 59-nemesis-memory (sync z main)
+
+- Przejrzałem PR #168 (nemezis) — logika spójna, bez uwag: pamięta tylko zwycięzcę / oszczędzonego, deduplikacja po `fightId`, pokonany rywal
+  znika, AI zawsze legalne, walidacja zapisu. Zsynchronizowałem z main (konflikt w `save.ts`: pola kuźni + `nemesis` — oba zostawione). 209 testów OK.
+- Po merge'u robię część UI #59 (arena zapisuje rywala po porażce, rewanż z nemezis, zapowiedź na ekranie przed walką).

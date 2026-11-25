@@ -26,7 +26,10 @@ export interface Attributes {
 
 export type HandSlot = 'weapon' | 'offHand';
 export type EquipmentSlot = Item['slot'] | HandSlot;
-export type EquipmentLoadout = Partial<Record<Item['slot'], number>> & Partial<Record<HandSlot, string>>;
+export type ArmourImprovements = Partial<Record<Item['slot'], number>>;
+export type EquipmentLoadout = Partial<Record<Item['slot'], number>> & Partial<Record<HandSlot, string>> & {
+  improvements?: ArmourImprovements;
+};
 
 export interface FighterSetup {
   name?: string;
