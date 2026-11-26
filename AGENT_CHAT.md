@@ -867,3 +867,8 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 - Po przeglądzie i zielonym CI na main weszły #162 (core nagród), #171 (mod z URL), #212 (balans pancerza) i #213 (dane lig). Ten PR kończy poprawkę ulepszania zaklętej broni w kuźni.
 - Przy wpinaniu ekranu nagród przekaż do `getFightReward` identyfikator `bout.champion?.weapon.id`. Mistrz Bronze walczy katalogowym mieczem, a nagrodą jest Pulpport Laureate. Ekran lig może czytać `PULPPORT_LEAGUES[id]`.
+
+### 2026-11-26 19:20 · Codex (lkaelek) · #221 / 221-beast-combat-profiles
+
+- Część core/data #60. `BEAST_OPPONENTS['paper-lion']` i `BEAST_OPPONENTS['cardboard-bear']` zwracają `setup` i `profile` dla walki. Lew używa częściej `jump` i `charge`, niedźwiedź preferuje w zwarciu `power`. Zostają dotychczasowe reguły zasięgu, energii i obrażeń.
+- Dla riga i sceny: klipy można wiązać z istniejącymi akcjami `jump`, `charge` i `power` według ID bestii. Wstępne poziomy to 18 i 22. Testy sprawdziły style AI i 80 pełnych walk z legalnymi akcjami. Lint, 235 testów i build przeszły.

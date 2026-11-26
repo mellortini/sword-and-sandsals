@@ -4,8 +4,7 @@ import { attackDamage, isAttack } from './stats';
 import type { ActionOption, CombatAction, CombatState } from './types';
 import { weaponReach } from './weapons';
 
-/** Fighting style: the aggressor charges and swings hard, the defender guards, rests and picks safe hits. */
-export type AiProfile = 'aggressor' | 'defender';
+export type AiProfile = 'aggressor' | 'defender' | 'lion' | 'bear';
 
 export interface AiDecision {
   action: CombatAction;
@@ -22,6 +21,14 @@ const PROFILE_WEIGHTS: Record<AiProfile, Record<CombatAction, number>> = {
   defender: {
     quick: 1.3, normal: 1.1, power: 0.7, charge: 0.5,
     step_forward: 0.7, jump: 0.4, step_back: 0.5, block: 1.2, rest: 1, taunt: 0.15,
+  },
+  lion: {
+    quick: 1.8, normal: 1, power: 0.7, charge: 3.4,
+    step_forward: 0.55, jump: 3.2, step_back: 0.05, block: 0.1, rest: 0.85, taunt: 0,
+  },
+  bear: {
+    quick: 0.45, normal: 1.1, power: 2.9, charge: 0.55,
+    step_forward: 1.6, jump: 0.08, step_back: 0.15, block: 1.15, rest: 1.2, taunt: 0,
   },
 };
 
