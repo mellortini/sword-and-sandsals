@@ -1,9 +1,9 @@
 import { ITEMS } from '../data/equipment';
-import { WEAPONS } from '../data/weapons';
 import type { WeaponFamily } from '../data/weapons';
 import { readWeaponEnchantment } from './enchant';
 import { readForgedItem } from './forge';
 import type { EquipmentLoadout, EquipmentSlot, HandSlot } from './types';
+import { findWeapon } from './weapons';
 
 export interface Inventory {
   readonly backpack: readonly string[];
@@ -33,7 +33,7 @@ export function equipItem(inventory: Inventory, id: string, character: EquipRequ
 
   const armour = ITEMS.find((piece) => piece.id === readForgedItem(id).baseId);
   const { baseId } = readForgedItem(readWeaponEnchantment(id).baseId);
-  const weapon = WEAPONS.find((entry) => entry.id === baseId);
+  const weapon = findWeapon(baseId);
   const item = armour ?? weapon;
   if (!item) return { ok: false, inventory, reason: 'unknown-item' };
   if (character.level < item.minLevel) return { ok: false, inventory, reason: 'level' };
@@ -78,7 +78,7 @@ export function equipmentTotals(loadout: Readonly<EquipmentLoadout>): { armour: 
   const handWeight = [loadout.weapon, loadout.offHand].reduce((total, id) => {
     if (id === undefined) return total;
     const { baseId } = readForgedItem(readWeaponEnchantment(id).baseId);
-    const weapon = WEAPONS.find((entry) => entry.id === baseId);
+    const weapon = findWeapon(baseId);
     return total + (weapon ? WEAPON_WEIGHT[weapon.family] : 0);
   }, 0);
   const fullSet = equipped.length === 5 && equipped.every(({ tier }) => tier === equipped[0].tier);
