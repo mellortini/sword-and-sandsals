@@ -2,27 +2,15 @@ import { WEAPONS } from '../data/weapons';
 import { readForgedItem } from './forge';
 import type { SavedCharacter } from './save';
 import type { StatusKind } from './status';
+import { ENCHANT_ELEMENTS, readWeaponEnchantment } from './weaponEnchantmentId';
+import type { EnchantElement, EnchantPower, WeaponEnchantment } from './weaponEnchantmentId';
 
-export const ENCHANT_ELEMENTS = ['fire', 'water', 'ink', 'wind'] as const;
-export type EnchantElement = (typeof ENCHANT_ELEMENTS)[number];
-export type EnchantPower = 1 | 2 | 3;
-
-export interface WeaponEnchantment {
-  readonly element: EnchantElement;
-  readonly power: EnchantPower;
-}
+export { ENCHANT_ELEMENTS, readWeaponEnchantment } from './weaponEnchantmentId';
+export type { EnchantElement, EnchantPower, WeaponEnchantment } from './weaponEnchantmentId';
 
 const DAMAGE = { 1: 2, 2: 4, 3: 7 };
 const PRICE_SHARE = { 1: 0.4, 2: 0.8, 3: 1.2 };
 const STATUS: Readonly<Partial<Record<EnchantElement, StatusKind>>> = { fire: 'burning', water: 'soaked', ink: 'feared' };
-
-export function readWeaponEnchantment(id?: string): { baseId?: string; enchantment?: WeaponEnchantment } {
-  const [baseId, element, power, extra] = id?.split('~') ?? [];
-  if (!baseId || !ENCHANT_ELEMENTS.some((entry) => entry === element) || !['1', '2', '3'].includes(power) || extra !== undefined) {
-    return { baseId: id };
-  }
-  return { baseId, enchantment: { element: element as EnchantElement, power: Number(power) as EnchantPower } };
-}
 
 export function enchantmentEffect({ element, power }: WeaponEnchantment): { damage: number; knockback: number; status?: StatusKind } {
   return { damage: DAMAGE[power], knockback: element === 'wind' ? 0.5 + power * 0.5 : 0, status: STATUS[element] };

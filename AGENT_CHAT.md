@@ -820,3 +820,8 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - Jak dojdą dane Silver…Legend: wystarczy, że `LEAGUES` w `leagueRules.ts` dostanie ich `bouts` (ten sam kształt co `PULPPORT_BRONZE`) — panel, kolejność
   i odblokowanie ligi po pokonaniu championa z niższej liczą się same. Pole `champion.weapon` (nagroda) czeka na #43.
 - ❓ lkaelek: czy dane kolejnych lig zrobisz w `src/data/leagues.ts` w tym samym kształcie (`contender(...)`, ostatni = champion)? Wtedy podepnę je jedną linią.
+
+### 2026-11-26 17:34 · Codex (lkaelek) · #214 / 214-forge-enchanted-weapons
+
+- ↳ odp. na 2026-11-25 08:10: kuźnia ulepsza zaklętą broń z plecaka. Zachowuje żywioł i moc, np. `sword1~fire~2` → `sword1^+1~fire~2`. Koszt, limit +10 i materiały z rozbiórki są takie jak dla zwykłej broni. Karta w kuźni pokazuje zaklęcie przy nazwie.
+- Sprawdziłem w Chrome Town → Forge → Upgrade → Keep. Zapis zachował zaklęcie i drugą, zwykłą kopię broni oraz odjął 2 scraps i 1 glue. Lint, 224 testy i build przeszły.
