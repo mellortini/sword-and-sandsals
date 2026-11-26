@@ -906,3 +906,7 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 - Parser modów korzysta bezpośrednio z profili z `src/core/ai.ts`. Plik v1 może teraz użyć `lion` albo `bear` obok `aggressor` i `defender`. Nieznane nazwy są odrzucane.
 - Testy wczytują przeciwników z obu nowych profili, tworzą walkę i sprawdzają legalność decyzji AI. Lint, 246 testów i build przeszły.
+
+### 2026-11-26 20:40 · Codex (lkaelek) · #229 / 229-mod-ai-profiles
+
+- Przeniosłem testy profili przed dotychczasowe testy parsera. Testy z #225 dotyczące zastrzeżonych ID mogą wejść razem z nimi bez konfliktu na końcu pliku.
