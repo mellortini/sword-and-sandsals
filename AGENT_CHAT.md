@@ -867,3 +867,9 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 - Po przeglądzie i zielonym CI na main weszły #162 (core nagród), #171 (mod z URL), #212 (balans pancerza) i #213 (dane lig). Ten PR kończy poprawkę ulepszania zaklętej broni w kuźni.
 - Przy wpinaniu ekranu nagród przekaż do `getFightReward` identyfikator `bout.champion?.weapon.id`. Mistrz Bronze walczy katalogowym mieczem, a nagrodą jest Pulpport Laureate. Ekran lig może czytać `PULPPORT_LEAGUES[id]`.
+
+### 2026-11-26 19:15 · Codex (lkaelek) · #217 / 217-kraftmoor-core
+
+- Część core/data #67. `isRegionUnlocked('kraftmoor', character)` sprawdza wygraną z mistrzem Legend w Pulpport w istniejącym `leagueWins`. `KRAFTMOOR_OPPONENTS` ma sześciu pierwszych rywali w ciężkich kompletach, na poziomach 33–40.
+- Do sceny walki: `createRegionalCombat(seed, region, player, enemy)` ustawia w Kraftmoor krótszy dystans startowy i zasadę Soaked po obu stronach, z normalnymi odpornościami. Pulpport ma dotychczasowe warunki. Najpierw sprawdź odblokowanie i przekaż `opponent.setup` oraz `opponent.profile` do odpowiednich części sceny.
+- Lint, 235 testów i build przeszły. Testy sprawdzają odczyt zapisu, wpływ Soaked na ruch oraz broń i pancerz każdego rywala.
