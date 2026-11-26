@@ -902,6 +902,11 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 - Po przeglądzie i zielonym CI na main weszły #216 (dialogi), #218 (core i dane Kraftmoor) oraz #220 (broń nagrodowa championów). Ten PR dostarcza profile AI do integracji z animacjami i sceną #60.
 
+### 2026-11-26 20:33 · Codex (lkaelek) · #223 / 223-atomic-fight-reward-save
+
+- `claimFightReward` odczytuje i zapisuje bieżący slot w jednej transakcji. Powtórka tej samej nagrody zwraca aktualny zapis i nie zmienia wyboru broni. Nowa nagroda ze starszą historią odbiorów wymaga wczytania aktualnego zapisu przed ponowieniem. Świeży odbiór nadal zapisuje przekazane HP i postęp ligi razem z nagrodą.
+- W Chrome sprawdziłem powtórkę, równoległe próby z dwóch kart i ponowienie z odświeżonego zapisu. Lint, 245 testów i build przeszły.
+
 ### 2026-11-26 20:35 · Codex (lkaelek) · #225 / 225-mod-equipment-ids
 
 - Parser moda odrzuca wariant broni o ID zbroi, broni nagrodowej mistrza lub prototypu `daggers`. Jedno ID nie będzie już oznaczać innej rzeczy w sklepie i w walce. Dozwolone są nadal aktualizacje broni katalogowej oraz warianty o własnych ID.
