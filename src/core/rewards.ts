@@ -4,7 +4,7 @@ import { crowdGoldReward } from './crowd';
 import { FORGE_MATERIALS, forgeFightLoot, readForgedItem } from './forge';
 import type { ForgeMaterials } from './forge';
 import { awardExperience, fightExperience } from './progression';
-import { saveGame } from './save';
+import { updateSavedGame } from './save';
 import type { SavedCharacter } from './save';
 import type { CombatState } from './types';
 
@@ -55,8 +55,16 @@ export function applyFightReward(character: SavedCharacter, reward: FightReward,
   };
 }
 
-export async function claimFightReward(character: SavedCharacter, reward: FightReward, takeWeapon: boolean): Promise<SavedCharacter> {
-  const updated = applyFightReward(character, reward, takeWeapon);
-  if (updated !== character) await saveGame(updated);
-  return updated;
+export function claimFightReward(character: SavedCharacter, reward: FightReward, takeWeapon: boolean): Promise<SavedCharacter> {
+  return updateSavedGame((stored) => {
+    if (stored) {
+      const recorded = stored.rewardedFightIds ?? [];
+      const expected = character.rewardedFightIds ?? [];
+      if (stored.name === character.name && recorded.includes(reward.fightId)) return stored;
+      if (stored.name !== character.name || recorded.length !== expected.length || recorded.some((id, index) => id !== expected[index])) {
+        throw new Error('The saved career has changed. Reload it before claiming another reward.');
+      }
+    }
+    return applyFightReward(character, reward, takeWeapon);
+  });
 }

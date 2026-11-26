@@ -1,12 +1,12 @@
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { PULPPORT_CHAMPION_WEAPON, PULPPORT_LEAGUES } from '../data/leagues';
 import { WEAPONS } from '../data/weapons';
 import { createCombat, performAction } from './combat';
 import { enchantWeapon } from './enchant';
 import { upgradeForgeItem } from './forge';
 import { equipItem } from './inventory';
-import { applyFightReward, getFightReward } from './rewards';
-import { deserializeSave, serializeSave } from './save';
+import { applyFightReward, claimFightReward, getFightReward } from './rewards';
+import * as save from './save';
 import type { SavedCharacter } from './save';
 import { resolveAttributes } from './stats';
 import { combatWeapon } from './weapons';
@@ -35,7 +35,7 @@ it('awards gold, XP, forge materials and the champion prize once, including afte
     gold: 85, level: 2, attributePoints: 5, inventory: ['armor1', PULPPORT_CHAMPION_WEAPON.id],
     forgeMaterials: { scraps: 3, glue: 1, ink: 0, threads: 1 },
   });
-  const loaded = deserializeSave(serializeSave(updated));
+  const loaded = save.deserializeSave(save.serializeSave(updated));
   if (!loaded.ok) throw new Error('Expected a valid save.');
   expect(applyFightReward(loaded.character, reward, true)).toBe(loaded.character);
   expect(equipItem({ backpack: loaded.character.inventory, equipped: {} }, PULPPORT_CHAMPION_WEAPON.id,
@@ -67,6 +67,31 @@ it('rejects a reward that would overflow the material balance', () => {
   const full = { ...character, forgeMaterials: { scraps: Number.MAX_SAFE_INTEGER, glue: 0, ink: 0, threads: 0 } };
   expect(() => applyFightReward(full, championWin(), true)).toThrow(RangeError);
   expect(full.forgeMaterials.scraps).toBe(Number.MAX_SAFE_INTEGER);
+});
+
+it('returns the latest career on a repeat claim and rejects new rewards from an older history', async () => {
+  const reward = championWin();
+  const won = applyFightReward(character, reward, true);
+  const later = applyFightReward(won, { ...reward, fightId: 'second-bout' }, false);
+  const update = vi.spyOn(save, 'updateSavedGame').mockImplementation(async (transform) => transform(later));
+  try {
+    await expect(claimFightReward(character, reward, false)).resolves.toBe(later);
+    await expect(claimFightReward(character, { ...reward, fightId: 'third-bout' }, false)).rejects.toThrow('saved career has changed');
+  } finally {
+    update.mockRestore();
+  }
+});
+
+it('keeps changes from the completed bout when saving the first claim', async () => {
+  const change = { ...character, health: 12, leagueWins: ['bronze-champion'] };
+  const update = vi.spyOn(save, 'updateSavedGame').mockImplementation(async (transform) => transform(character));
+  try {
+    await expect(claimFightReward(change, championWin(), true)).resolves.toMatchObject({
+      health: 12, leagueWins: ['bronze-champion'], rewardedFightIds: ['bronze-final'],
+    });
+  } finally {
+    update.mockRestore();
+  }
 });
 
 const leaguePrizes = Object.entries(PULPPORT_LEAGUES).map(([league, bouts]) => ({ league, bout: bouts.at(-1)! }));
