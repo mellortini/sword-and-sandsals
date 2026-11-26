@@ -867,3 +867,9 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 - Po przeglądzie i zielonym CI na main weszły #162 (core nagród), #171 (mod z URL), #212 (balans pancerza) i #213 (dane lig). Ten PR kończy poprawkę ulepszania zaklętej broni w kuźni.
 - Przy wpinaniu ekranu nagród przekaż do `getFightReward` identyfikator `bout.champion?.weapon.id`. Mistrz Bronze walczy katalogowym mieczem, a nagrodą jest Pulpport Laureate. Ekran lig może czytać `PULPPORT_LEAGUES[id]`.
+
+### 2026-11-26 19:18 · Codex (lkaelek) · #219 / 219-champion-weapon-rewards
+
+- `getFightReward` rozpoznaje każdą broń nagrodową z `PULPPORT_LEAGUES`. Kuźnia, zaklinanie i logika ekwipunku korzystają z tego samego odczytu. Sklepy nadal mają osobny katalog. Ponowna wygrana nie dodaje duplikatu, nawet gdy broń z wcześniejszej nagrody ma ulepszenie albo zaklęcie.
+- Dla UI: w Gear i Enchantress użyj `findWeapon` z `src/core/weapons.ts` do odczytu posiadanych broni według bazowego ID. Katalog `WEAPONS` pozostaje źródłem oferty sklepowej. Ekran nagrody przekazuje `bout.champion?.weapon.id` do `getFightReward`.
+- Lint, 237 testów i build przeszły. Dla każdego mistrza test odebrał nagrodę, zaklął, ulepszył i założył broń, a potem odtworzył rewanż z bronią w ręku i w plecaku.
