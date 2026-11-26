@@ -23,11 +23,14 @@ function championWin() {
   return reward;
 }
 
-it('awards gold, XP and the champion prize and prevents a duplicate after loading', () => {
+it('awards gold, XP, forge materials and the champion prize once, including after loading', () => {
   const reward = championWin();
   expect(reward.weapon).toBe(PULPPORT_CHAMPION_WEAPON);
   const updated = applyFightReward(character, reward, true);
-  expect(updated).toMatchObject({ gold: 85, level: 2, attributePoints: 5, inventory: ['armor1', PULPPORT_CHAMPION_WEAPON.id] });
+  expect(updated).toMatchObject({
+    gold: 85, level: 2, attributePoints: 5, inventory: ['armor1', PULPPORT_CHAMPION_WEAPON.id],
+    forgeMaterials: { scraps: 3, glue: 1, ink: 0, threads: 1 },
+  });
   const loaded = deserializeSave(serializeSave(updated));
   if (!loaded.ok) throw new Error('Expected a valid save.');
   expect(applyFightReward(loaded.character, reward, true)).toBe(loaded.character);
@@ -35,15 +38,29 @@ it('awards gold, XP and the champion prize and prevents a duplicate after loadin
     { level: 4, might: 5 })).toMatchObject({ ok: true, inventory: { equipped: { weapon: PULPPORT_CHAMPION_WEAPON.id } } });
 });
 
-it('leaves the weapon behind without forfeiting gold or XP', () => {
+it('adds rewards to existing materials even when the weapon is left behind', () => {
   const reward = championWin();
-  const updated = applyFightReward(character, reward, false);
-  expect(updated).toMatchObject({ gold: 85, level: 2, inventory: ['armor1'], rewardedFightIds: ['bronze-final'] });
+  const stocked = { ...character, forgeMaterials: { scraps: 9, glue: 3, ink: 2, threads: 1 } };
+  const updated = applyFightReward(stocked, reward, false);
+  expect(updated).toMatchObject({
+    gold: 85, level: 2, inventory: ['armor1'], rewardedFightIds: ['bronze-final'],
+    forgeMaterials: { scraps: 12, glue: 4, ink: 2, threads: 2 },
+  });
+  expect(stocked.forgeMaterials.scraps).toBe(9);
 });
 
 it('keeps donated coins on defeat without granting champion loot or XP', () => {
   const start = createCombat(2);
   const player = { ...start.fighters.player, crowd: { ...start.fighters.player.crowd, giftGold: 5 } };
   const loss = { ...start, winner: 'enemy' as const, fighters: { ...start.fighters, player } };
-  expect(getFightReward(loss, 'lost-final', PULPPORT_CHAMPION_WEAPON.id)).toMatchObject({ gold: 5, experience: 0, weapon: undefined });
+  const reward = getFightReward(loss, 'lost-final', PULPPORT_CHAMPION_WEAPON.id)!;
+  expect(reward).toMatchObject({ gold: 5, experience: 0, weapon: undefined });
+  expect(reward.forgeMaterials).toBeUndefined();
+  expect(applyFightReward(character, reward, true).forgeMaterials).toBeUndefined();
+});
+
+it('rejects a reward that would overflow the material balance', () => {
+  const full = { ...character, forgeMaterials: { scraps: Number.MAX_SAFE_INTEGER, glue: 0, ink: 0, threads: 0 } };
+  expect(() => applyFightReward(full, championWin(), true)).toThrow(RangeError);
+  expect(full.forgeMaterials.scraps).toBe(Number.MAX_SAFE_INTEGER);
 });
