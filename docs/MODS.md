@@ -4,6 +4,7 @@ Przykład formatu v1 znajduje się w `assets/mods/example.json`.
 
 - `armour` aktualizuje istniejące ID zbroi i zachowuje grafikę oraz slot.
 - `weapons` aktualizuje istniejącą broń albo dodaje wariant wskazanego `base`. Wariant dziedziczy rodzinę, tier i wymagania.
+  ID wariantu musi być inne niż ID zbroi, broni nagrodowej mistrza lub zastrzeżonego prototypu `daggers`.
 - `enemies` opisuje przeciwników, ich profile AI, poziom i wyposażenie.
   `profile` przyjmuje `aggressor`, `defender`, `lion` albo `bear`.
 - `leagues` określa kolejność przeciwników przez ich ID w tym samym pliku.

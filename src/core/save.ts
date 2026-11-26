@@ -6,7 +6,7 @@ import type { AchievementProgress } from './achievements';
 import { FORGE_MATERIALS } from './forge';
 import type { ForgeMaterials } from './forge';
 import { LEAGUE_MAX_TIER } from './leagues';
-import type { NemesisMemory } from './nemesis';
+import type { NemesisAppearance, NemesisMemory } from './nemesis';
 import { MAX_LEVEL } from './progression';
 import { resolveAttributes } from './stats';
 import type { ArmourImprovements, Attributes, EquipmentLoadout } from './types';
@@ -62,9 +62,12 @@ function within(value: unknown, min: number, max = Number.MAX_SAFE_INTEGER): boo
   return typeof value === 'number' && Number.isSafeInteger(value) && value >= min && value <= max;
 }
 
+function isAppearance(value: unknown): value is NemesisAppearance & Record<string, unknown> {
+  return isRecord(value) && APPEARANCE.every((part) => within(value[part], 0, 9));
+}
+
 function isLook(value: unknown): value is Look {
-  return isRecord(value)
-    && APPEARANCE.every((part) => within(value[part], 0, 9))
+  return isAppearance(value)
     && EQUIPMENT.every((slot) => within(value[slot], 0, 10))
     && typeof value.weapon === 'string';
 }
@@ -92,6 +95,7 @@ function isArmourImprovements(value: unknown): value is ArmourImprovements {
 function isNemesisMemory(value: unknown): value is NemesisMemory {
   return isRecord(value) && isItemId(value.id) && isItemId(value.name) && isItemId(value.lastFightId)
     && typeof value.league === 'string' && Object.hasOwn(LEAGUE_MAX_TIER, value.league)
+    && (value.appearance === undefined || isAppearance(value.appearance))
     && within(value.seed, 0, 0xffffffff) && within(value.level, 1, MAX_LEVEL)
     && within(value.encounters, 1, 20) && within(value.charges, 0, 20) && within(value.heavyAttacks, 0, 20);
 }
@@ -157,23 +161,57 @@ function openDatabase(): Promise<IDBDatabase> {
   });
 }
 
-async function withStore<T>(mode: IDBTransactionMode, action: (store: IDBObjectStore) => IDBRequest<T>): Promise<T> {
+async function withSaveTransaction<T>(
+  mode: IDBTransactionMode, action: (store: IDBObjectStore, abort: (cause: unknown) => void) => () => T,
+): Promise<T> {
   const database = await openDatabase();
   try {
     return await new Promise((resolve, reject) => {
       const transaction = database.transaction(STORE, mode);
-      const request = action(transaction.objectStore(STORE));
-      transaction.oncomplete = () => resolve(request.result);
-      transaction.onabort = () => reject(transaction.error ?? new Error('Save transaction aborted.'));
+      let failure: unknown;
+      const abort = (cause: unknown) => {
+        failure = cause;
+        transaction.abort();
+      };
+      transaction.onabort = () => reject(failure ?? transaction.error ?? new Error('Save transaction aborted.'));
+      const result = action(transaction.objectStore(STORE), abort);
+      transaction.oncomplete = () => resolve(result());
     });
   } finally {
     database.close();
   }
 }
 
+function withStore<T>(mode: IDBTransactionMode, action: (store: IDBObjectStore) => IDBRequest<T>): Promise<T> {
+  return withSaveTransaction(mode, (store) => {
+    const request = action(store);
+    return () => request.result;
+  });
+}
+
 export async function saveGame(character: SavedCharacter): Promise<void> {
   const json = serializeSave(character);
   await withStore('readwrite', (store) => store.put(json, SLOT));
+}
+
+/** Read, transform and save the current slot in one transaction. Returning the stored object skips the write. */
+export function updateSavedGame(update: (stored: SavedCharacter | undefined) => SavedCharacter): Promise<SavedCharacter> {
+  return withSaveTransaction('readwrite', (store, abort) => {
+    let character: SavedCharacter;
+    const request = store.get(SLOT);
+    request.onsuccess = () => {
+      try {
+        const decoded = typeof request.result === 'string' ? deserializeSave(request.result) : undefined;
+        if (request.result !== undefined && !decoded?.ok) throw new Error('The current save could not be read.');
+        const stored = decoded?.ok ? decoded.character : undefined;
+        character = update(stored);
+        if (character !== stored) store.put(serializeSave(character), SLOT);
+      } catch (cause) {
+        abort(cause);
+      }
+    };
+    return () => character;
+  });
 }
 
 /** Returns a fresh character on a missing, unreadable or unsupported save. */
