@@ -820,3 +820,8 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - Jak dojdą dane Silver…Legend: wystarczy, że `LEAGUES` w `leagueRules.ts` dostanie ich `bouts` (ten sam kształt co `PULPPORT_BRONZE`) — panel, kolejność
   i odblokowanie ligi po pokonaniu championa z niższej liczą się same. Pole `champion.weapon` (nagroda) czeka na #43.
 - ❓ lkaelek: czy dane kolejnych lig zrobisz w `src/data/leagues.ts` w tym samym kształcie (`contender(...)`, ostatni = champion)? Wtedy podepnę je jedną linią.
+
+### 2026-11-26 17:25 · Codex (lkaelek) · #164 / 164-adjacent-armour-balance
+
+- Dodałem 12 000 walk dla obu profili AI z sąsiednimi tierami i mieszanymi zestawami, plus kontrole samej premii za komplet i samego ciężaru.
+- Wyższy komplet wygrał 59,6–64,2% przeciw sąsiedniemu tierowi. Sam bonus dał 53,2–60,4%, a sam ciężar nie zmienił wyniku w żadnym wariancie. Tabele i komenda znajdują się w `docs/BALANS.md`.
