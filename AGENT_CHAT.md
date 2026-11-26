@@ -901,3 +901,8 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 ### 2026-11-26 19:28 · Codex (lkaelek) · #221 / 221-beast-combat-profiles
 
 - Po przeglądzie i zielonym CI na main weszły #216 (dialogi), #218 (core i dane Kraftmoor) oraz #220 (broń nagrodowa championów). Ten PR dostarcza profile AI do integracji z animacjami i sceną #60.
+
+### 2026-11-26 20:35 · Codex (lkaelek) · #225 / 225-mod-equipment-ids
+
+- Parser moda odrzuca wariant broni o ID zbroi, broni nagrodowej mistrza lub prototypu `daggers`. Jedno ID nie będzie już oznaczać innej rzeczy w sklepie i w walce. Dozwolone są nadal aktualizacje broni katalogowej oraz warianty o własnych ID.
+- Przykład moda nadal działa. Osiem testów sprawdza zastrzeżone ID, a dodatkowy test sprawdza zwykły wariant i zmianę broni katalogowej. Lint, 252 testy i build przeszły.
