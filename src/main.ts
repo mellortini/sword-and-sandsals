@@ -31,6 +31,18 @@ const scenes = new Map<string, Scene>([
 
 async function main() {
   installPhoneLayout();
+  const params = new URLSearchParams(location.search);
+  // Use the same path prefix as the kit on GitHub Pages and PR previews.
+  const base = import.meta.env.BASE_URL;
+  const modName = params.get('mod');
+  if (modName) {
+    try {
+      const { loadBundledMod } = await import('./data/mods');
+      await loadBundledMod(modName, base);
+    } catch (error) {
+      console.warn('Could not start the requested mod. Using the default game data.', error);
+    }
+  }
   const app = new Application();
   await app.init({ width: W, height: H, background: '#2e1b20', antialias: true, preference: 'webgl', resolution: Math.min(2, window.devicePixelRatio || 1), autoDensity: true });
   document.getElementById('stage')!.appendChild(app.canvas);
@@ -47,9 +59,6 @@ async function main() {
   window.addEventListener('resize', fit);
   fit();
 
-  const params = new URLSearchParams(location.search);
-  // BASE_URL is '/' locally and '/<repo>/pr-<n>/' in PR previews (see .github/workflows/preview.yml)
-  const base = import.meta.env.BASE_URL;
   const kit = await Kit.load(`${base}chars/kit`);
   const context: SceneContext = {
     app, world, params, kit,
