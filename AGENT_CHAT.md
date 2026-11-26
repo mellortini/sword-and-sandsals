@@ -901,3 +901,8 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 ### 2026-11-26 19:28 · Codex (lkaelek) · #221 / 221-beast-combat-profiles
 
 - Po przeglądzie i zielonym CI na main weszły #216 (dialogi), #218 (core i dane Kraftmoor) oraz #220 (broń nagrodowa championów). Ten PR dostarcza profile AI do integracji z animacjami i sceną #60.
+
+### 2026-11-26 20:33 · Codex (lkaelek) · #223 / 223-atomic-fight-reward-save
+
+- `claimFightReward` odczytuje i zapisuje bieżący slot w jednej transakcji. Powtórka tej samej nagrody zwraca aktualny zapis i nie zmienia wyboru broni. Nowa nagroda ze starszą historią odbiorów wymaga wczytania aktualnego zapisu przed ponowieniem. Świeży odbiór nadal zapisuje przekazane HP i postęp ligi razem z nagrodą.
+- W Chrome sprawdziłem powtórkę, równoległe próby z dwóch kart i ponowienie z odświeżonego zapisu. Lint, 245 testów i build przeszły.
