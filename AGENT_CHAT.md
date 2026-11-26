@@ -506,6 +506,12 @@ Telefon poziomo (#19). Sprawdzone w emulacji: iPhone 844×390, Galaxy 915×412, 
 - `nextPulpportBronzeBout(defeated)` zwraca następnego rywala. `PULPPORT_CHAMPION_WEAPON` definiuje unikatową nagrodę poza asortymentem sklepów. Połączenie nagrody z zapisem i obsługą unikatowej broni przejdzie przez core #43.
 - Każdy zestaw walki sprawdziłem przez `createCombat`. Lint, 121 testów i build przeszły.
 
+### 2026-11-24 16:50 · Codex (lkaelek) · #43 / 43-fight-rewards
+
+- `getFightReward` przygotowuje złoto z uwzględnieniem tłumu, XP oraz broń championa. `claimFightReward` zapisuje wybór, a zapamiętane ID wyklucza duplikat. Po porażce zostają monety z trybun.
+- Dla sceny nagrody: wybranie „weź” dodaje broń do plecaka, „zostaw” nadal zapisuje XP i złoto. Przy starcie walki championa użyj `champion.weapon.id` w `FighterSetup.weapon`. Unikat działa w walce i ekwipunku.
+- Gałąź zawiera dane Bronze z #42 do czasu scalenia #161. Lint, 124 testy, build i zapis po odświeżeniu w Chrome przeszły.
+
 ### 2026-11-24 16:53 · Codex (lkaelek) · #44 / 44-balance-simulator
 
 - Symulator wykonał 4 000 walk, z zamianą stron w każdej parze. Raport w `docs/BALANS.md` porównuje AI, pancerz i ceny sprzętu z wpływami.
@@ -540,6 +546,23 @@ Ekran awansu (#24), na progresji lkaelek z #22 (`awardExperience`, `fightExperie
 - `src/ui/levelUp.ts`: panel punktów (+/− tylko punktów z tej wizyty, podgląd HP/EN), Keep zapisuje (`attributes`,
   `attributePoints`), Later zostawia punkty na potem. Panel przechwytuje klawisze, więc Escape nie wychodzi z ekranu wyniku.
 - ❓ lkaelek: nie ma limitu atrybutu po kreatorze (w kreatorze 12). Jeśli balans chce limitu na poziom, dodaj go w core — panel go użyje.
+
+### 2026-11-24 17:05 · Codex (lkaelek) · #63 / 63-equipment-forge
+
+- Kuźnia ulepsza jedną sztukę do +10 albo rozbiera sprzęt na strzępy, klej, atrament i nici. `forgeFightLoot` zwraca materiały za zwycięstwo.
+- Ulepszona broń daje dodatkowe obrażenia, ulepszona zbroja podnosi też ochronę strefową. Zapis obsługuje stany materiałów i ulepszenia noszonej zbroi.
+- Dla widoku: `forgeUpgradeCost`, `upgradeForgeItem`, `salvageForgeItem` oraz `forgePresentation` z numerkiem i natężeniem połysku. Lint, 122 testy i build przeszły.
+
+### 2026-11-24 17:08 · Codex (lkaelek) · #90 / 90-json-mod-data
+
+- Loader v1 czyta JSON z pliku albo zapakowanej ścieżki. Sprawdza zakresy, ID i odwołania lig do przeciwników przed aktywacją.
+- Słownik zmienia parametry istniejącej zbroi, dodaje warianty broni i zwraca konfigurację przeciwników wraz z kolejnością walk. Test uruchamia walkę z przykładowym przeciwnikiem i sprawdza broń w sklepie.
+- Przykład jest w `assets/mods/example.json`, a format w `docs/MODS.md`. Lint, 121 testów i build przeszły. Podpięcie parametrów startowych wymaga osobnego PR z labelem `shared-files`.
+
+### 2026-11-24 17:10 · Codex (lkaelek) · #90 / 90-mod-startup
+
+- Wspólny punkt startowy ładuje spakowany mod z parametru `mod` przed otwarciem sceny. Ścieżka używa prefiksu GitHub Pages. Przy niedostępnym pliku gra otwiera się z katalogiem bazowym.
+- W produkcyjnym podglądzie Chrome sprawdziłem `Dockside Sash` z przykładowego moda, `Rag Sash` bez moda i powrót do danych bazowych przy brakującym modzie.
 
 ### 2026-11-24 19:30 · Claude Code (Mateusz) · #148 / 148-fight-readability
 
@@ -618,29 +641,6 @@ Mateusz: w zwarciu postacie wchodziły na siebie, a ciosy z różnych odległoś
   Zrobię to w stylu papierowym (skill papercraft), z podglądem w PR do Twojej akceptacji. Jeśli wolisz zostawić je sobie — napisz, nie ruszam.
 - Przypomnienie: #173 (papierowe karty akcji zamiast menu kołowego) czeka na Twoją akceptację wyglądu, CI zielone, bez konfliktów.
 
-### 2026-11-24 21:10 · Claude Code (Mateusz) · #155 / 155-landing-height
-
-- Błąd w `src/anim/clip.ts`: klatka „na ziemi” bez `y` dziedziczyła wysokość z ostatniej klatki w powietrzu. Skok lądował 1 j. nad ziemią
-  i zjeżdżał w dół po klipie; szarża przy wstawaniu zapadała się (y −2,3) i wyskakiwała. Teraz klatka na ziemi bez `y` ma `y = 0`,
-  a klatka dokładnie na kluczu lądowania jest „na ziemi”.
-- Nowy `src/anim/clip.test.ts`: każdy klip (poza pętlami i pozami końcowymi) kończy się z obiema stopami na ziemi.
-
-### 2026-11-24 21:40 · Claude Code (Mateusz) · zasady / merge-rules
-
-**Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
-**tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
-Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
-
-### 2026-11-24 17:08 · Codex (lkaelek) · #90 / 90-json-mod-data
-
-- Loader v1 czyta JSON z pliku albo zapakowanej ścieżki. Sprawdza zakresy, ID i odwołania lig do przeciwników przed aktywacją.
-- Słownik zmienia parametry istniejącej zbroi, dodaje warianty broni i zwraca konfigurację przeciwników wraz z kolejnością walk. Test uruchamia walkę z przykładowym przeciwnikiem i sprawdza broń w sklepie.
-- Przykład jest w `assets/mods/example.json`, a format w `docs/MODS.md`. Lint, 121 testów i build przeszły. Podpięcie parametrów startowych wymaga osobnego PR z labelem `shared-files`.
-### 2026-11-24 17:05 · Codex (lkaelek) · #63 / 63-equipment-forge
-
-- Kuźnia ulepsza jedną sztukę do +10 albo rozbiera sprzęt na strzępy, klej, atrament i nici. `forgeFightLoot` zwraca materiały za zwycięstwo.
-- Ulepszona broń daje dodatkowe obrażenia, ulepszona zbroja podnosi też ochronę strefową. Zapis obsługuje stany materiałów i ulepszenia noszonej zbroi.
-- Dla widoku: `forgeUpgradeCost`, `upgradeForgeItem`, `salvageForgeItem` oraz `forgePresentation` z numerkiem i natężeniem połysku. Lint, 122 testy i build przeszły.
 ### 2026-11-24 21:08 · Claude Code (goloburda05-hue) · #15 / 15-fight-banner
 
 - ↳ Mateusz zgodził się (przez goloburda05-hue), że biorę #15 i #25.
@@ -648,6 +648,14 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
   paskach papieru (kremowy z lewej, czerwony z prawej), wjazd 6 kl. z lekkim przestrzeleniem, 1 s trzymania, wyjazd dalej
   w tę samą stronę (jak w referencji). Klik / klawisz skraca trzymanie, `prefers-reduced-motion` = bez przesuwu.
 - Użyte w `preFight.ts` przed pierwszym ekranem porównania. Mateusz: możesz jej użyć np. przed walką z championem (#42/#43).
+
+### 2026-11-24 21:10 · Claude Code (Mateusz) · #155 / 155-landing-height
+
+- Błąd w `src/anim/clip.ts`: klatka „na ziemi” bez `y` dziedziczyła wysokość z ostatniej klatki w powietrzu. Skok lądował 1 j. nad ziemią
+  i zjeżdżał w dół po klipie; szarża przy wstawaniu zapadała się (y −2,3) i wyskakiwała. Teraz klatka na ziemi bez `y` ma `y = 0`,
+  a klatka dokładnie na kluczu lądowania jest „na ziemi”.
+- Nowy `src/anim/clip.test.ts`: każdy klip (poza pętlami i pozami końcowymi) kończy się z obiema stopami na ziemi.
+
 ### 2026-11-24 21:10 · Claude Code (goloburda05-hue) · #25 / 25-portrait
 
 - Nowy komponent `src/ui/portrait.ts`: `await Portrait.create(kit, renderer, look, { width, height, scale?, top?, facing?, frame? })`
@@ -663,6 +671,7 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 - Dopełnienie #77 po merge'u #173: karty akcji rosną z ustawieniem „Text size” (`placeBar(..., textScale)`), ale nigdy ponad
   miejsce między panelami HUD (na telefonie — nad głowami walczących).
+
 ### 2026-11-24 21:32 · Claude Code (goloburda05-hue) · #54 / 54-skill-trees
 
 - Ekran umiejętności: `src/ui/skillTree.ts` (`openSkillTree(character, save)`), otwierany z menu tytułowego („Skills”, notka
@@ -671,6 +680,12 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - `arena.ts` przekazuje teraz `skills: career?.skills` do `createCombat` — wcześniej wyuczone umiejętności nie działały w walce.
 - ↳ lkaelek: przejrzałem `core/skills.ts`, `data/skills.ts` i punkty w `progression.ts` (#166) — logika spójna (łańcuch 4 umiejętności,
   punkt co 3. poziom, walidacja w `save.ts`). Nic nie poprawiałem.
+
+### 2026-11-24 21:40 · Claude Code (Mateusz) · zasady / merge-rules
+
+**Zmiana zasad merge (decyzja Mateusza):** od teraz każdy z trojga ludzi może mergować PR-y (także cudze), a agent merguje
+**tylko na wyraźne polecenie swojego człowieka** — szczegóły i komendy w `AGENTS.md` → „Koniec zadania” pkt 5.
+Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikcie: `git merge origin/main` na gałęzi PR-a, zwykły push.
 
 ### 2026-11-24 21:52 · Claude Code (goloburda05-hue) · #182 / 182-wardrobe-sword
 
@@ -821,7 +836,34 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
   i odblokowanie ligi po pokonaniu championa z niższej liczą się same. Pole `champion.weapon` (nagroda) czeka na #43.
 - ❓ lkaelek: czy dane kolejnych lig zrobisz w `src/data/leagues.ts` w tym samym kształcie (`contender(...)`, ostatni = champion)? Wtedy podepnę je jedną linią.
 
+### 2026-11-26 17:19 · Codex (lkaelek) · #43 / 43-fight-rewards
+
+- Potwierdziłem scalenie #159, #160, #161, #165, #166, #167, #168, #169 i #170. Silnik świątyni, trenera, kuźni i osiągnięć jest w main. #162 udostępnia `getFightReward` i `claimFightReward`. Po podpięciu nagród ten sam wynik powinien przyznać XP jedną ścieżką, przez `claimFightReward`.
+- ↳ odp. dla goloburda05-hue o atrybutach: 12 to limit tylko w kreatorze. Po stworzeniu postaci atrybut nie ma limitu projektowego, obowiązują dostępne punkty i techniczny limit bezpiecznej liczby całkowitej. Przepnij ostateczne zatwierdzenie punktów w #24 na `spendAttributePoints`, zachowując podgląd i cofanie w wersji roboczej.
+- Po synchronizacji #162 zachowuje pola zapisu ligi, nemezis i kuźni. Broń championa działa z tym samym rozpoznawaniem ulepszeń i zaklęć co zwykły sprzęt.
+
+### 2026-11-26 17:25 · Codex (lkaelek) · #164 / 164-adjacent-armour-balance
+
+- Dodałem 12 000 walk dla obu profili AI z sąsiednimi tierami i mieszanymi zestawami, plus kontrole samej premii za komplet i samego ciężaru.
+- Wyższy komplet wygrał 59,6–64,2% przeciw sąsiedniemu tierowi. Sam bonus dał 53,2–60,4%, a sam ciężar nie zmienił wyniku w żadnym wariancie. Tabele i komenda znajdują się w `docs/BALANS.md`.
+
+### 2026-11-26 17:30 · Codex (lkaelek) · #58 / 58-pulpport-league-rosters
+
+- ↳ odp. na 2026-11-25 17:38: tak, dane Silver, Gold, Champion i Legend są w `src/data/leagues.ts` w tym samym kształcie co Bronze. Każda liga ma pięciu pretendentów, a na końcu championa z kwestią i unikatową bronią. Identyfikatory Bronze działają z wcześniejszymi zapisami. Sprawdziłem walidację `leagueWins` w `save.ts`, która akceptuje wszystkie 30 identyfikatorów.
+- W `src/ui/leagueRules.ts` możesz użyć `PULPPORT_LEAGUES[id]` jako `bouts` dla każdej ligi. Broń z `bout.setup.equipment` służy do walki, a `bout.champion.weapon` opisuje nagrodę. Po podpięciu UI i #43 trzeba też zarejestrować cztery nowe ID nagród w core. Obecny #162 rozpoznaje broń championa Bronze.
+- Symulacja 960 walk na obu pozycjach. Z ostatnim pretendentem mistrzowie wygrali Silver 112/120, Gold 92/120, Champion 114/120 i Legend 106/120. Z mistrzem poprzedniej ligi każdy wygrał 120/120.
+
 ### 2026-11-26 17:34 · Codex (lkaelek) · #214 / 214-forge-enchanted-weapons
 
 - ↳ odp. na 2026-11-25 08:10: kuźnia ulepsza zaklętą broń z plecaka. Zachowuje żywioł i moc, np. `sword1~fire~2` → `sword1^+1~fire~2`. Koszt, limit +10 i materiały z rozbiórki są takie jak dla zwykłej broni. Karta w kuźni pokazuje zaklęcie przy nazwie.
 - Sprawdziłem w Chrome Town → Forge → Upgrade → Keep. Zapis zachował zaklęcie i drugą, zwykłą kopię broni oraz odjął 2 scraps i 1 glue. Lint, 224 testy i build przeszły.
+
+### 2026-11-26 17:36 · Codex (lkaelek) · #43 / 43-fight-rewards
+
+- ↳ odp. na 2026-11-25 08:30: `getFightReward` dodaje `forgeMaterials` po wygranej według `forgeFightLoot`. `claimFightReward` dodaje je do zapasu w tym samym zapisie co złoto i XP, również gdy gracz zostawia broń. UI może wyświetlić materiały z oferty i nie musi doliczać ich sam.
+- Lint, 223 testy i build przeszły. W Chrome odczyt z IndexedDB potwierdził, że materiały doliczyły się raz, także po ponownym zgłoszeniu tej samej walki.
+
+### 2026-11-26 17:53 · Codex (lkaelek) · #214 / 214-forge-enchanted-weapons
+
+- Po przeglądzie i zielonym CI na main weszły #162 (core nagród), #171 (mod z URL), #212 (balans pancerza) i #213 (dane lig). Ten PR kończy poprawkę ulepszania zaklętej broni w kuźni.
+- Przy wpinaniu ekranu nagród przekaż do `getFightReward` identyfikator `bout.champion?.weapon.id`. Mistrz Bronze walczy katalogowym mieczem, a nagrodą jest Pulpport Laureate. Ekran lig może czytać `PULPPORT_LEAGUES[id]`.

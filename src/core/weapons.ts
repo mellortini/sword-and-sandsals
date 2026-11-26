@@ -1,3 +1,4 @@
+import { PULPPORT_CHAMPION_WEAPON } from '../data/leagues';
 import { WEAPONS } from '../data/weapons';
 import type { Weapon } from '../data/weapons';
 import { readWeaponEnchantment } from './enchant';
@@ -27,12 +28,16 @@ const DAGGERS: CombatWeapon = { id: 'daggers', family: 'daggers', damage: 4, ran
 export const DEFAULT_WEAPON_REACH = 2;
 const STANDARD: WeaponMove = { strikes: 1, damageMultiplier: 1, armourMultiplier: 1, knockback: 0 };
 
+export function findWeapon(id?: string): Weapon | undefined {
+  return id === PULPPORT_CHAMPION_WEAPON.id ? PULPPORT_CHAMPION_WEAPON : WEAPONS.find((entry) => entry.id === id);
+}
+
 export function combatWeapon(id?: string): CombatWeapon | undefined {
   if (id === DAGGERS.id) return DAGGERS;
   // an id is `<weapon>[^+<level>][~<element>~<power>]`: forge upgrade inside, enchantment outside
   const { baseId: forgedId, enchantment } = readWeaponEnchantment(id);
   const { baseId, level } = readForgedItem(forgedId);
-  const weapon = WEAPONS.find((entry) => entry.id === baseId);
+  const weapon = findWeapon(baseId);
   if (!weapon || !id || (!enchantment && level === 0)) return weapon;
   return { ...weapon, id, damage: weapon.damage + level, ...(enchantment && { enchantment }) };
 }

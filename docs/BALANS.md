@@ -40,3 +40,33 @@ Ceny rosną szybciej niż wpływy z samych walk. Przed strojeniem późnych lig 
 
 - Wpływ pancerza przy sąsiednich tierach. [#164](https://github.com/mellortini/sword-and-sandsals/issues/164)
 - Krzywa cen i nagród w wyższych ligach. [#163](https://github.com/mellortini/sword-and-sandsals/issues/163)
+
+## Sąsiednie tiery i mieszane zestawy (#164)
+
+Powtórzyłem pomiar na bazie `5839fd0`. W każdej komórce jest odsetek wygranych zawodnika w pełnym wyższym komplecie oraz średnia liczba akcji. Każdy wariant to 250 par z zamianą stron. Obaj zawodnicy mają ten sam profil, atrybuty i miecz. Łącznie odbyło się 12 000 walk, każda poniżej limitu 300 akcji.
+
+- **Sąsiedni** — rywal nosi pełny komplet o tier niżej.
+- **Mieszany** — rywal ma napierśnik i nagolenniki z wyższego tieru, a hełm, naramienniki i buty z niższego.
+- **Tylko komplet** — obaj mają te same części. Rywal zachowuje bazowy pancerz tych części i ich ciężar. Odejmuje się od jego ochrony zaokrągloną premię +10%.
+- **Tylko ciężar** — obaj mają tę samą ochronę. Rywal ma ciężar mniejszy o 4 jednostki.
+
+| Tiers | AI | Sąsiedni | Mieszany | Tylko komplet | Tylko ciężar |
+| --- | --- | ---: | ---: | ---: | ---: |
+| 3 / 2 | Agresor | 59,6% / 24,2 | 55,4% / 25,0 | 53,2% / 25,2 | 50,0% / 25,8 |
+| 3 / 2 | Obrońca | 61,8% / 29,6 | 60,4% / 30,3 | 56,0% / 31,0 | 50,0% / 31,9 |
+| 6 / 5 | Agresor | 64,0% / 20,0 | 62,8% / 20,4 | 57,6% / 21,0 | 50,0% / 21,7 |
+| 6 / 5 | Obrońca | 63,0% / 25,0 | 61,0% / 25,3 | 54,2% / 26,1 | 50,0% / 26,7 |
+| 9 / 8 | Agresor | 63,8% / 20,5 | 63,8% / 20,5 | 60,4% / 21,2 | 50,0% / 22,2 |
+| 9 / 8 | Obrońca | 64,2% / 26,0 | 64,2% / 26,0 | 59,4% / 26,7 | 50,0% / 27,9 |
+
+| Tiers | Wyższy komplet | Baza wyższego | Niższy komplet | Mieszany |
+| --- | ---: | ---: | ---: | ---: |
+| 3 / 2 | 11 | 10 | 7 | 9 |
+| 6 / 5 | 31 | 28 | 23 | 25 |
+| 9 / 8 | 61 | 55 | 50 | 50 |
+
+Sam bonus kompletu daje 53,2–60,4% wygranych. Zmiana tieru dodaje jeszcze różnicę w bazowym pancerzu. Na tierach 9 i 8 dwa warianty rywala mają po 50 pancerza i dają identyczny wynik przy tych samych ziarnach. Sam ciężar daje dokładnie 50,0% w każdej kontroli, bo obecny silnik i AI nie używają ciężaru do rozstrzygania akcji.
+
+```powershell
+npm test -- src/core/armourBalance.test.ts --silent=false
+```

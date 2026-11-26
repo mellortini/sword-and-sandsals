@@ -4,7 +4,7 @@ import { createCombat, performAction } from '../src/core/combat';
 import { crowdGoldReward } from '../src/core/crowd';
 import type { League } from '../src/core/leagues';
 import { getShopStock, shopPrices } from '../src/core/shop';
-import type { FighterSetup } from '../src/core/types';
+import type { Fighter, FighterSetup, FighterStats } from '../src/core/types';
 
 const SCENARIOS: ReadonlyArray<{ level: number; tier: number; league: League; victoryGold: number }> = [
   { level: 1, tier: 1, league: 'bronze', victoryGold: 20 },
@@ -16,13 +16,24 @@ const SCENARIOS: ReadonlyArray<{ level: number; tier: number; league: League; vi
 const MAX_ACTIONS = 300;
 const SIDES = ['player', 'enemy'] as const;
 
-interface Contender {
+export interface Contender {
   readonly setup: FighterSetup;
   readonly profile: AiProfile;
+  readonly statsOverride?: Partial<Pick<FighterStats, 'armour' | 'weight'>>;
+}
+
+function withControlledStats(fighter: Readonly<Fighter>, contender: Contender): Readonly<Fighter> {
+  return contender.statsOverride ? { ...fighter, stats: { ...fighter.stats, ...contender.statsOverride } } : fighter;
 }
 
 function duel(seed: number, player: Contender, enemy: Contender) {
   let state = createCombat(seed, player.setup, enemy.setup);
+  if (player.statsOverride || enemy.statsOverride) {
+    state = { ...state, fighters: {
+      player: withControlledStats(state.fighters.player, player),
+      enemy: withControlledStats(state.fighters.enemy, enemy),
+    } };
+  }
   const ai = { player: (seed ^ 0x41835a0d) >>> 0, enemy: (seed ^ 0x2c73ab8a) >>> 0 };
   let actions = 0;
   while (state.winner === null && actions < MAX_ACTIONS) {
@@ -37,7 +48,7 @@ function duel(seed: number, player: Contender, enemy: Contender) {
   return { state, actions };
 }
 
-function compare(a: Contender, b: Contender, pairs: number, victoryGold: number) {
+export function compareContenders(a: Contender, b: Contender, pairs: number, victoryGold = 0) {
   let wins = 0;
   let losses = 0;
   let timeouts = 0;
@@ -79,8 +90,8 @@ export function simulateBalance(pairs = 250) {
 
     return {
       level, tier, league, victoryGold, kitPrice,
-      profiles: compare({ setup, profile: 'aggressor' }, { setup, profile: 'defender' }, pairs, victoryGold),
-      armour: compare({ setup, profile: 'aggressor' }, { setup: light, profile: 'aggressor' }, pairs, victoryGold),
+      profiles: compareContenders({ setup, profile: 'aggressor' }, { setup, profile: 'defender' }, pairs, victoryGold),
+      armour: compareContenders({ setup, profile: 'aggressor' }, { setup: light, profile: 'aggressor' }, pairs, victoryGold),
     };
   });
 }
