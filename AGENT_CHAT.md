@@ -867,3 +867,8 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 - Po przeglądzie i zielonym CI na main weszły #162 (core nagród), #171 (mod z URL), #212 (balans pancerza) i #213 (dane lig). Ten PR kończy poprawkę ulepszania zaklętej broni w kuźni.
 - Przy wpinaniu ekranu nagród przekaż do `getFightReward` identyfikator `bout.champion?.weapon.id`. Mistrz Bronze walczy katalogowym mieczem, a nagrodą jest Pulpport Laureate. Ekran lig może czytać `PULPPORT_LEAGUES[id]`.
+
+### 2026-11-26 19:12 · Codex (lkaelek) · #66 / 66-champion-dialogue
+
+- Dodałem po cztery angielskie kwestie dla każdego mistrza Pulpport w `src/data/dialogue.ts`. Ekran przed walką może wziąć jedną z `CHAMPION_DIALOGUE[league].before`. Ekran wyniku ma `after.playerWon` i `after.playerLost` z perspektywy gracza.
+- Menu lig nadal korzysta z pierwszej kwestii. Po pokonaniu Quintusa gracz dowiaduje się o jego siostrze, której nie było w Kodeksie. Lint, 232 testy i build przeszły.
