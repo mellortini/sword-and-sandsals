@@ -1,0 +1,84 @@
+/* Forge screen (src/ui/forge.ts): pack items as paper cards over the game. Colours follow skillTree.css. */
+.forge {
+  position: fixed; inset: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(28, 16, 19, 0.66);
+  font-family: Georgia, serif; color: #f3e6d6;
+}
+.forge[hidden] { display: none; }
+.forge__panel {
+  box-sizing: border-box; width: min(96vw, 1060px); max-height: 94vh;
+  display: flex; flex-direction: column; gap: 10px; padding: 16px 20px;
+  background: rgba(46, 27, 32, 0.97); border: 2px solid #815a46; border-radius: 12px;
+  box-shadow: 0 8px 0 rgba(20, 10, 12, 0.45);
+}
+.forge__head { display: flex; align-items: baseline; gap: 14px; }
+.forge h3 { margin: 0; font-size: 28px; font-weight: normal; letter-spacing: 0.08em; color: #f2c14e; }
+.forge__name { color: #e8cfa8; font-style: italic; }
+
+/* materials: four paper tags; the change since opening is written next to the number */
+.forge__materials { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.forge-material {
+  display: flex; align-items: baseline; justify-content: center; gap: 8px; padding: 5px 8px; border-radius: 3px;
+  background: #3a2328; box-shadow: inset 0 0 0 1px #815a46;
+  font-size: 12.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #e8be4c;
+}
+.forge-material b { font-size: 19px; letter-spacing: 0; color: #f2c14e; }
+.forge-material i { font-style: normal; letter-spacing: 0; font-size: 13px; color: #9ec27a; }
+
+.forge__items {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px; overflow-y: auto; min-height: 120px; padding: 4px 6px 8px;
+}
+.forge__empty { grid-column: 1 / -1; align-self: center; text-align: center; color: #cdb99a; font-style: italic; }
+
+/* each item is a paper card; the upgrade level makes it shine with a gold rim and glow (--glow 0…1) */
+.forge-item {
+  display: flex; flex-direction: column; gap: 4px; padding: 8px 10px 9px; border-radius: 3px;
+  font-size: 13px; color: #3a2418;
+  background: linear-gradient(160deg, #fff8e3 0%, transparent 50%), #ecd9b0;
+  box-shadow:
+    inset 0 0 0 calc(2px + var(--glow) * 2px) color-mix(in srgb, #d8a933 calc(var(--glow) * 100%), #a07a4f),
+    0 0 calc(var(--glow) * 18px) color-mix(in srgb, #f2c14e calc(var(--glow) * 85%), transparent),
+    0 3px 0 #2a171299;
+}
+.forge-item__title { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.forge-item__name { font-weight: bold; font-size: 14.5px; }
+.forge-item__tier { font-size: 10.5px; font-style: italic; color: #8b6a4a; white-space: nowrap; }
+.forge-item__stat { color: #5a4030; }
+.forge-item__stat b { color: #2f6b2a; }
+.forge-item__max { margin-left: 6px; font-size: 11px; font-style: italic; color: #8a6a22; }
+.forge-item__cost { display: flex; flex-wrap: wrap; gap: 3px 8px; align-items: baseline; color: #5a4030; font-size: 12px; }
+.forge-cost { white-space: nowrap; }
+/* a missing material is red and says how much you have; never colour alone */
+.forge-cost--short { color: #a8322a; font-weight: bold; }
+.forge-item__buttons { display: grid; grid-template-columns: 1fr 1.4fr; gap: 6px; margin-top: 3px; }
+.forge-item__buttons button {
+  font: inherit; font-size: 12px; padding: 5px 4px; border: 0; border-radius: 3px; cursor: pointer;
+  background: #6b4a3a; color: #f3e6d6;
+}
+.forge-item__buttons [data-act='upgrade'] { background: #9a6a2e; font-weight: bold; }
+.forge-item__buttons [aria-disabled='true'] { opacity: 0.45; cursor: default; }
+.forge-item__buttons button:hover:not([aria-disabled='true']) { filter: brightness(1.1); }
+.forge-item__buttons button:focus-visible { outline: 2px solid #3a2418; outline-offset: 1px; }
+
+.forge__hint { color: #b9a28c; font-size: 12.5px; font-style: italic; text-align: center; }
+.forge__problem { min-height: 1.1em; color: #e0866f; font-size: 13px; font-style: italic; text-align: center; }
+/* a confirmation instead of a problem (green, and the words say what happened) */
+.forge__problem.ok { color: #9ec27a; }
+.forge__actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px; width: min(100%, 420px); align-self: center; }
+.forge__actions button {
+  font: inherit; padding: 8px 0; border: 0; border-radius: 4px; cursor: pointer; background: #6b4a3a; color: #f3e6d6;
+}
+.forge__actions .keep { background: #9a6a2e; font-weight: bold; font-size: 17px; }
+.forge__actions button:disabled { opacity: 0.35; cursor: default; }
+.forge__actions button:focus-visible { outline: 2px solid #fff0d0; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .forge-item { transition: box-shadow 0.25s ease-out; }
+}
+@media (max-width: 760px), (max-height: 500px) {
+  .forge__items { grid-template-columns: repeat(2, 1fr); }
+  .forge__panel { padding: 10px 14px; gap: 6px; }
+  .forge-item { font-size: 12px; }
+  .forge__hint { display: none; }
+}

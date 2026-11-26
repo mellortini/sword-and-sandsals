@@ -2,7 +2,7 @@ import type { StatusKind } from './status';
 import type { FighterSide } from './types';
 
 type SpellId = 'ember' | 'drench';
-type PotionId = 'glue-tonic' | 'repair-tape';
+type PotionId = 'glue-tonic' | 'repair-tape' | 'staples';
 
 export type CombatItemId = SpellId | PotionId;
 
@@ -33,6 +33,7 @@ interface ItemDefinition {
   readonly minArcana: number;
   readonly health?: number | 'spellPower';
   readonly status?: StatusKind;
+  readonly clears?: StatusKind;
 }
 
 export const COMBAT_ITEMS: Readonly<Record<CombatItemId, ItemDefinition>> = {
@@ -40,6 +41,7 @@ export const COMBAT_ITEMS: Readonly<Record<CombatItemId, ItemDefinition>> = {
   drench: { name: 'Drench', target: 'opponent', energyCost: 5, minArcana: 3, status: 'soaked' },
   'glue-tonic': { name: 'Glue Tonic', target: 'self', energyCost: 2, minArcana: 0, health: 12 },
   'repair-tape': { name: 'Repair Tape', target: 'self', energyCost: 2, minArcana: 0, status: 'taped' },
+  staples: { name: 'Staples', target: 'self', energyCost: 2, minArcana: 0, health: 4, clears: 'torn' },
 };
 
 const SLOT_INDEXES = [0, 1, 2, 3] as const;
@@ -56,14 +58,15 @@ export function createCombatSlots(slots: CombatSlots = EMPTY_SLOTS): CombatSlots
 }
 
 export function combatSlotOptions(
-  slots: CombatSlots, actor: FighterSide, opponent: FighterSide, energy: number, arcana: number,
+  slots: CombatSlots, actor: FighterSide, opponent: FighterSide, energy: number, arcana: number, spellDiscount = 0,
 ): CombatSlotOption[] {
   const options: CombatSlotOption[] = [];
   for (const slot of SLOT_INDEXES) {
     const entry = slots[slot];
     if (!entry) continue;
     const { id } = entry;
-    const { name, target, energyCost, minArcana } = COMBAT_ITEMS[id];
+    const { name, target, energyCost: baseCost, minArcana } = COMBAT_ITEMS[id];
+    const energyCost = Math.max(0, baseCost - ('quantity' in entry ? 0 : spellDiscount));
     const unavailable = arcana < minArcana ? 'arcana' : energy < energyCost ? 'energy' : undefined;
     options.push({
       slot, id, name, target: target === 'self' ? actor : opponent, energyCost, minArcana, unavailable,

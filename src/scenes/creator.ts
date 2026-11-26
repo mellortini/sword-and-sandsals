@@ -8,6 +8,8 @@ import {
   ATTRIBUTE_BASE, ATTRIBUTE_INFO, NAME_MAX, canLower, canRaise, lower, nameProblem, newCharacter, raise, randomSpread, startSpread,
 } from '../ui/creatorRules';
 import type { Appearance, AttributeKey, PointSpread } from '../ui/creatorRules';
+import { goToTitle, onEscape } from '../ui/backKey';
+import { inkName } from '../ui/inkName';
 import { PELVIS_ABOVE_FEET } from './common';
 import type { SceneContext } from './common';
 import { loadSavedGladiator } from './savedGladiator';
@@ -56,7 +58,7 @@ export async function showCreator({ world, bgTex, kit, ui, add }: SceneContext) 
   ui.innerHTML = `
     <h3>Gladiator</h3>
     <div class="section">Name</div>
-    <input class="name-input" id="cName" maxlength="${NAME_MAX + 10}" placeholder="Write a name in ink…" autocomplete="off" spellcheck="false">
+    <input id="cName" aria-label="Gladiator name" placeholder="Write a name in ink…" autocomplete="off" spellcheck="false">
     <div class="problem" id="cProblem"></div>
     <div class="section">Appearance</div>
     ${looks.map((r) => `<div class="look-row"><span>${r.title}</span><button data-look="${r.key}" data-d="-1" aria-label="previous ${r.title}">◀</button><span class="v" id="look_${r.key}"></span><button data-look="${r.key}" data-d="1" aria-label="next ${r.title}">▶</button></div>`).join('')}
@@ -65,11 +67,12 @@ export async function showCreator({ world, bgTex, kit, ui, add }: SceneContext) 
     <div class="derived" id="cDerived"></div>
     ${replacing ? `<div class="warn">Begin replaces your saved gladiator ${escape(replacing.name)} (level ${replacing.level}).</div>` : ''}
     <div class="actions"><button id="cRandom">Random</button><button id="cReset">Reset points</button><button class="begin" id="cBegin">Begin</button></div>
-    <div class="small"><a href="?view=title">back to title</a></div>`;
+    <div class="small"><a href="?view=title">back to title</a> <span class="key">(Esc)</span></div>`;
 
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   const nameInput = $<HTMLInputElement>('cName');
   const begin = $<HTMLButtonElement>('cBegin');
+  inkName(nameInput, NAME_MAX);
 
   const refresh = () => {
     for (const r of looks) $(`look_${r.key}`).textContent = r.name(appearance[r.key]);
@@ -130,4 +133,5 @@ export async function showCreator({ world, bgTex, kit, ui, add }: SceneContext) 
 
   refresh();
   nameInput.focus();
+  onEscape(goToTitle);
 }

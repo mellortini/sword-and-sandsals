@@ -13,6 +13,7 @@ import { showFightResult } from './scenes/fightResult';
 import { showPreFight } from './scenes/preFight';
 import { showTitle } from './scenes/title';
 import { showWardrobe } from './scenes/wardrobe';
+import { installPhoneLayout } from './ui/phone';
 
 const scenes = new Map<string, Scene>([
   ['arena', showArena],
@@ -29,6 +30,7 @@ const scenes = new Map<string, Scene>([
 ]);
 
 async function main() {
+  installPhoneLayout();
   const params = new URLSearchParams(location.search);
   // Use the same path prefix as the kit on GitHub Pages and PR previews.
   const base = import.meta.env.BASE_URL;

@@ -7,9 +7,9 @@ describe('targeted attacks', () => {
   it('shows the chance for each target and applies the same value to the attack roll', () => {
     const close = createCombat(1, { position: 4 }, { position: 6 });
     const options = getAttackZoneOptions(close, 'normal');
-    expect(options.map(({ zone, hitChance }) => [zone, hitChance])).toEqual([['head', 50], ['torso', 70], ['legs', 60]]);
+    expect(options.map(({ zone, hitChance }) => [zone, hitChance])).toEqual([['head', 41], ['torso', 66], ['legs', 54]]);
     const aimed = performAction(close, options[0]);
-    expect(aimed.events).toContainEqual(expect.objectContaining({ type: 'attack', zone: 'head', hitChance: 50 }));
+    expect(aimed.events).toContainEqual(expect.objectContaining({ type: 'attack', zone: 'head', hitChance: 41 }));
     const far = createCombat(1);
     expect(getAttackZoneOptions(far, 'normal')).toEqual([]);
     expect(performAction(far, { action: 'normal', zone: 'head' })).toEqual({ ok: false, state: far, events: [], reason: 'unavailable' });

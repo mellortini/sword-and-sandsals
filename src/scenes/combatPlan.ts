@@ -2,6 +2,7 @@
  * Pure part of the combat presenter: turns the event list from `performAction` into presentation steps
  * and maps logical arena positions to screen x. No Pixi here, so it is unit-tested.
  */
+import type { CombatItemId } from '../core/spells';
 import type { CombatEvent, FighterSide, MoveKind } from '../core/types';
 
 type AttackEvent = Extract<CombatEvent, { type: 'attack' }>;
@@ -12,6 +13,8 @@ export type Step =
   | { kind: 'move'; side: FighterSide; move: MoveKind; from: number; to: number; strike?: AttackEvent; fatal?: boolean }
   | { kind: 'attack'; attack: AttackEvent; fatal: boolean }
   | { kind: 'pose'; side: FighterSide; clip: 'block' | 'rest' | 'taunt' }
+  /** a potion or spell from a combat slot (#191): `healthDelta` is applied to `target` */
+  | { kind: 'item'; side: FighterSide; target: FighterSide; item: CombatItemId; healthDelta: number }
   | { kind: 'death'; side: FighterSide; winner: FighterSide };
 
 /**
@@ -83,6 +86,9 @@ export function planSteps(events: readonly CombatEvent[]): Step[] {
         break;
       case 'taunt':
         steps.push({ kind: 'pose', side: e.actor, clip: 'taunt' });
+        break;
+      case 'slot':
+        steps.push({ kind: 'item', side: e.actor, target: e.target, item: e.item, healthDelta: e.healthDelta });
         break;
       case 'death':
         steps.push({ kind: 'death', side: e.fighter, winner: e.winner });

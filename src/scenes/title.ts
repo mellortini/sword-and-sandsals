@@ -1,14 +1,21 @@
 import { Container, Graphics, Sprite, Text } from 'pixi.js';
+import { saveGame } from '../core/save';
 import type { SavedCharacter } from '../core/save';
 import { PaperMenu } from '../ui/paperMenu';
+import { openTown, townNote } from '../ui/town';
+import { TEXT_SIZES, cycleTextSize, textSizeIndex } from '../ui/textSize';
 import type { PaperMenuEntry } from '../ui/paperMenu';
-import { FEET_Y, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from './common';
+import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, drawableLook, groundShadowTexture, randomLook } from './common';
 import type { SceneContext } from './common';
 import { loadSavedGladiator } from './savedGladiator';
 
 interface TitleEntry extends PaperMenuEntry {
   /** `?view=` the entry opens */
   readonly view?: string;
+  /** a setting changed in place (Enter, ←/→) instead of a screen */
+  readonly setting?: 'textSize';
+  /** a panel opened over the title: the town with its buildings (#201) */
+  readonly panel?: 'town';
 }
 
 function entries(saved: SavedCharacter | null): TitleEntry[] {
@@ -17,16 +24,20 @@ function entries(saved: SavedCharacter | null): TitleEntry[] {
     saved
       ? { label: 'Continue', enabled: true, view: 'prefight', note: `${saved.name} · level ${saved.level}` }
       : { label: 'Continue', enabled: false, note: 'no saved game yet' },
+    saved
+      ? { label: 'Town', enabled: true, panel: 'town', note: townNote(saved) }
+      : { label: 'Town', enabled: false, note: 'no saved game yet' },
     { label: 'Quick bout', enabled: true, view: 'prefight&gladiator=random' },
     { label: 'Wardrobe', enabled: true, view: 'wardrobe' },
+    { label: 'Text size', enabled: true, setting: 'textSize', note: TEXT_SIZES[textSizeIndex()].name },
   ];
 }
 
 /**
  * `?view=title`: game title over the dimmed arena, two idle gladiators facing each other and the main menu.
- * Mouse or keyboard (↑/↓, Enter). Entries open their view by URL, like every other scene.
+ * Mouse or keyboard (↑/↓, Enter; ←/→ change a setting such as Text size, #77). Entries open their view by URL.
  */
-export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
+export async function showTitle({ world, bgTex, ui, add, kit }: SceneContext) {
   const root = new Container();
   world.addChild(root);
   const bg = new Sprite(bgTex);
@@ -36,19 +47,20 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
   // the saved gladiator (if any) stands on the left
   const saved = await loadSavedGladiator();
   const gsh = groundShadowTexture();
+  let hero: Awaited<ReturnType<typeof add>> | undefined;
   for (const [i, x] of [[0, 330], [1, 1590]] as const) {
     const g = new Sprite(gsh);
     g.anchor.set(0.5); g.blendMode = 'multiply'; g.tint = 0x8a5a48;
     g.width = 5.2 * UNIT; g.height = 1.3 * UNIT;
     g.position.set(x + 0.35 * UNIT * (i ? -1 : 1), FEET_Y);
     root.addChild(g);
-    await add(i === 0 && saved ? saved.look : randomLook(), x, FEET_Y - PELVIS_ABOVE_FEET * UNIT, UNIT, i ? -1 : 1, root, i * 0.7);
+    const rig = await add(i === 0 && saved ? saved.look : randomLook(), x, FEET_Y - PELVIS_ABOVE_FEET * UNIT, UNIT, i ? -1 : 1, root, i * 0.7);
+    if (i === 0) hero = rig;
   }
 
   // a dark vignette band behind the title and the menu keeps the text readable over the busy stands
-  root.addChild(new Graphics()
-    .roundRect(W / 2 - 520, 60, 1040, 800, 40)
-    .fill({ color: 0x1c1013, alpha: 0.55 }));
+  const band = new Graphics();
+  root.addChild(band);
 
   const title = new Text({
     text: 'FOLDED GLORY',
@@ -68,22 +80,43 @@ export async function showTitle({ world, bgTex, ui, add }: SceneContext) {
   root.addChild(title, tagline);
 
   const items = entries(saved);
+  const changeSetting = (i: number, step: 1 | -1) => {
+    if (items[i].setting === 'textSize') menu.setNote(i, TEXT_SIZES[cycleTextSize(step)].name);
+  };
+  let gladiator = saved;
   const menu = new PaperMenu(items, (i) => {
     const view = items[i].view;
     if (view) location.search = `?view=${view}`;
+    else if (items[i].panel === 'town' && gladiator) {
+      void openTown(gladiator, saveGame, (c) => {
+        gladiator = c;
+        // the saved gladiator on the left shows new gear at once
+        if (saved) void hero?.setLook(drawableLook(kit, c.look));
+      }).then((c) => {
+        gladiator = c;
+        menu.setNote(i, townNote(c));
+      });
+    } else changeSetting(i, 1);
   }, undefined, saved ? 1 : 0);
-  menu.position.set((W - menu.menuWidth) / 2, 380);
+  const menuY = 330;
+  // the menu shrinks to keep itself and the hint on the screen once it has many entries (town screens, #189/#191)
+  const menuScale = Math.min(1, (H - menuY - 90) / menu.menuHeight);
+  menu.scale.set(menuScale);
+  menu.position.set((W - menu.menuWidth * menuScale) / 2, menuY);
+  const menuBottom = menuY + menu.menuHeight * menuScale;
+  band.roundRect(W / 2 - 520, 60, 1040, Math.max(880, menuBottom + 80 - 60), 40).fill({ color: 0x1c1013, alpha: 0.55 });
   root.addChild(menu);
 
-  const hint = new Text({ text: '↑ ↓  choose    Enter  confirm', style: { fontFamily: 'Georgia', fontSize: 22, fill: '#cdb99a' } });
+  const hint = new Text({ text: '↑ ↓  choose    Enter  confirm    ← →  change text size', style: { fontFamily: 'Georgia', fontSize: 22, fill: '#cdb99a' } });
   hint.anchor.set(0.5);
-  hint.position.set(W / 2, 380 + menu.menuHeight + 44);
+  hint.position.set(W / 2, menuBottom + 40);
   root.addChild(hint);
 
   window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown') menu.move(1);
     else if (e.key === 'ArrowUp') menu.move(-1);
     else if (e.key === 'Enter') menu.choose();
+    else if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && items[menu.selected]?.setting) changeSetting(menu.selected, e.key === 'ArrowRight' ? 1 : -1);
     else return;
     e.preventDefault();
   });
