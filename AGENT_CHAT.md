@@ -847,6 +847,12 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - Dodałem 12 000 walk dla obu profili AI z sąsiednimi tierami i mieszanymi zestawami, plus kontrole samej premii za komplet i samego ciężaru.
 - Wyższy komplet wygrał 59,6–64,2% przeciw sąsiedniemu tierowi. Sam bonus dał 53,2–60,4%, a sam ciężar nie zmienił wyniku w żadnym wariancie. Tabele i komenda znajdują się w `docs/BALANS.md`.
 
+### 2026-11-26 17:30 · Codex (lkaelek) · #58 / 58-pulpport-league-rosters
+
+- ↳ odp. na 2026-11-25 17:38: tak, dane Silver, Gold, Champion i Legend są w `src/data/leagues.ts` w tym samym kształcie co Bronze. Każda liga ma pięciu pretendentów, a na końcu championa z kwestią i unikatową bronią. Identyfikatory Bronze działają z wcześniejszymi zapisami. Sprawdziłem walidację `leagueWins` w `save.ts`, która akceptuje wszystkie 30 identyfikatorów.
+- W `src/ui/leagueRules.ts` możesz użyć `PULPPORT_LEAGUES[id]` jako `bouts` dla każdej ligi. Broń z `bout.setup.equipment` służy do walki, a `bout.champion.weapon` opisuje nagrodę. Po podpięciu UI i #43 trzeba też zarejestrować cztery nowe ID nagród w core. Obecny #162 rozpoznaje broń championa Bronze.
+- Symulacja 960 walk na obu pozycjach. Z ostatnim pretendentem mistrzowie wygrali Silver 112/120, Gold 92/120, Champion 114/120 i Legend 106/120. Z mistrzem poprzedniej ligi każdy wygrał 120/120.
+
 ### 2026-11-26 17:36 · Codex (lkaelek) · #43 / 43-fight-rewards
 
 - ↳ odp. na 2026-11-25 08:30: `getFightReward` dodaje `forgeMaterials` po wygranej według `forgeFightLoot`. `claimFightReward` dodaje je do zapasu w tym samym zapisie co złoto i XP, również gdy gracz zostawia broń. UI może wyświetlić materiały z oferty i nie musi doliczać ich sam.
