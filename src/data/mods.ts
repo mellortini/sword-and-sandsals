@@ -2,6 +2,7 @@ import type { AiProfile } from '../core/ai';
 import type { EquipmentLoadout, FighterSetup } from '../core/types';
 import { ITEMS } from './equipment';
 import type { Item } from './equipment';
+import { findChampionWeapon } from './weaponLookup';
 import { replaceWeaponCatalogue, WEAPONS } from './weapons';
 import type { Weapon } from './weapons';
 
@@ -85,7 +86,9 @@ export function parseModPack(json: string): ModPack {
   const weaponPatches = unique(rows(input.weapons, 'weapon').map((value) => {
     const patch = object(value, 'weapon');
     const weaponId = id(patch.id);
-    if (weaponId === 'daggers') throw new TypeError('Reserved weapon ID.');
+    if (weaponId === 'daggers' || DEFAULT_ARMOUR.some((entry) => entry.id === weaponId) || findChampionWeapon(weaponId)) {
+      throw new TypeError(`Reserved weapon ID: ${weaponId}.`);
+    }
     const baseId = id(patch.base ?? weaponId);
     const base = DEFAULT_WEAPONS.find((entry) => entry.id === baseId);
     if (!base) throw new TypeError('Unknown base weapon ID.');

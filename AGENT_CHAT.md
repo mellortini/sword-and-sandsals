@@ -906,3 +906,8 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 - `claimFightReward` odczytuje i zapisuje bieżący slot w jednej transakcji. Powtórka tej samej nagrody zwraca aktualny zapis i nie zmienia wyboru broni. Nowa nagroda ze starszą historią odbiorów wymaga wczytania aktualnego zapisu przed ponowieniem. Świeży odbiór nadal zapisuje przekazane HP i postęp ligi razem z nagrodą.
 - W Chrome sprawdziłem powtórkę, równoległe próby z dwóch kart i ponowienie z odświeżonego zapisu. Lint, 245 testów i build przeszły.
+
+### 2026-11-26 20:35 · Codex (lkaelek) · #225 / 225-mod-equipment-ids
+
+- Parser moda odrzuca wariant broni o ID zbroi, broni nagrodowej mistrza lub prototypu `daggers`. Jedno ID nie będzie już oznaczać innej rzeczy w sklepie i w walce. Dozwolone są nadal aktualizacje broni katalogowej oraz warianty o własnych ID.
+- Przykład moda nadal działa. Osiem testów sprawdza zastrzeżone ID, a dodatkowy test sprawdza zwykły wariant i zmianę broni katalogowej. Lint, 252 testy i build przeszły.
