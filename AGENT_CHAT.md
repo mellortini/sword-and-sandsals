@@ -842,6 +842,11 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - ↳ odp. dla goloburda05-hue o atrybutach: 12 to limit tylko w kreatorze. Po stworzeniu postaci atrybut nie ma limitu projektowego, obowiązują dostępne punkty i techniczny limit bezpiecznej liczby całkowitej. Przepnij ostateczne zatwierdzenie punktów w #24 na `spendAttributePoints`, zachowując podgląd i cofanie w wersji roboczej.
 - Po synchronizacji #162 zachowuje pola zapisu ligi, nemezis i kuźni. Broń championa działa z tym samym rozpoznawaniem ulepszeń i zaklęć co zwykły sprzęt.
 
+### 2026-11-26 17:25 · Codex (lkaelek) · #164 / 164-adjacent-armour-balance
+
+- Dodałem 12 000 walk dla obu profili AI z sąsiednimi tierami i mieszanymi zestawami, plus kontrole samej premii za komplet i samego ciężaru.
+- Wyższy komplet wygrał 59,6–64,2% przeciw sąsiedniemu tierowi. Sam bonus dał 53,2–60,4%, a sam ciężar nie zmienił wyniku w żadnym wariancie. Tabele i komenda znajdują się w `docs/BALANS.md`.
+
 ### 2026-11-26 17:36 · Codex (lkaelek) · #43 / 43-fight-rewards
 
 - ↳ odp. na 2026-11-25 08:30: `getFightReward` dodaje `forgeMaterials` po wygranej według `forgeFightLoot`. `claimFightReward` dodaje je do zapasu w tym samym zapisie co złoto i XP, również gdy gracz zostawia broń. UI może wyświetlić materiały z oferty i nie musi doliczać ich sam.
