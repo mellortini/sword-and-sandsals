@@ -1,11 +1,12 @@
-import { PULPPORT_CHAMPION_WEAPON } from '../data/leagues';
-import { WEAPONS } from '../data/weapons';
+import { findWeapon } from '../data/weaponLookup';
 import type { Weapon } from '../data/weapons';
 import { readWeaponEnchantment } from './enchant';
 import type { WeaponEnchantment } from './enchant';
 import { readForgedItem } from './forge';
 import type { StatusKind } from './status';
 import type { AttackKind } from './types';
+
+export { findWeapon } from '../data/weaponLookup';
 
 export interface CombatWeapon {
   readonly id: string;
@@ -27,10 +28,6 @@ interface WeaponMove {
 const DAGGERS: CombatWeapon = { id: 'daggers', family: 'daggers', damage: 4, range: 1.5 };
 export const DEFAULT_WEAPON_REACH = 2;
 const STANDARD: WeaponMove = { strikes: 1, damageMultiplier: 1, armourMultiplier: 1, knockback: 0 };
-
-export function findWeapon(id?: string): Weapon | undefined {
-  return id === PULPPORT_CHAMPION_WEAPON.id ? PULPPORT_CHAMPION_WEAPON : WEAPONS.find((entry) => entry.id === id);
-}
 
 export function combatWeapon(id?: string): CombatWeapon | undefined {
   if (id === DAGGERS.id) return DAGGERS;

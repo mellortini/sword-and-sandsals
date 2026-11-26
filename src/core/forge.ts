@@ -1,5 +1,5 @@
 import { ITEMS } from '../data/equipment';
-import { WEAPONS } from '../data/weapons';
+import { findWeapon } from '../data/weaponLookup';
 import type { Inventory } from './inventory';
 import type { CombatState } from './types';
 import { readWeaponEnchantment } from './weaponEnchantmentId';
@@ -21,12 +21,12 @@ export function readForgedItem(id?: string): { baseId?: string; level: number; e
   const match = forgedId?.match(/^(.+)\^\+([1-9]|10)$/);
   const baseId = match?.[1] ?? forgedId;
   const level = match ? Number(match[2]) : 0;
-  if (enchantment && !WEAPONS.some((weapon) => weapon.id === baseId)) return { baseId: id, level: 0 };
+  if (enchantment && !findWeapon(baseId)) return { baseId: id, level: 0 };
   return { baseId, level, ...(enchantment && { enchantment }) };
 }
 
 function baseEquipment(id?: string) {
-  return ITEMS.find((entry) => entry.id === id) ?? WEAPONS.find((entry) => entry.id === id);
+  return ITEMS.find((entry) => entry.id === id) ?? findWeapon(id);
 }
 
 export function forgePresentation(id: string): { label: string; glow: number } | undefined {

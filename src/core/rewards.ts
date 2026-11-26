@@ -1,7 +1,7 @@
-import { PULPPORT_CHAMPION_WEAPON } from '../data/leagues';
+import { findChampionWeapon } from '../data/weaponLookup';
 import type { Weapon } from '../data/weapons';
 import { crowdGoldReward } from './crowd';
-import { FORGE_MATERIALS, forgeFightLoot } from './forge';
+import { FORGE_MATERIALS, forgeFightLoot, readForgedItem } from './forge';
 import type { ForgeMaterials } from './forge';
 import { awardExperience, fightExperience } from './progression';
 import { saveGame } from './save';
@@ -21,7 +21,7 @@ export function getFightReward(state: CombatState, fightId: string, championPriz
   const { player, enemy } = state.fighters;
   const won = state.winner === 'player';
   const prizeId = championPrizeId ?? enemy.weapon?.id;
-  const weapon = won && prizeId === PULPPORT_CHAMPION_WEAPON.id ? PULPPORT_CHAMPION_WEAPON : undefined;
+  const weapon = won ? findChampionWeapon(prizeId) : undefined;
   return {
     fightId,
     gold: crowdGoldReward(won ? 15 + 5 * enemy.level : 0, player.crowd),
@@ -39,7 +39,8 @@ export function applyFightReward(character: SavedCharacter, reward: FightReward,
   if (!Number.isSafeInteger(gold)) throw new RangeError('Gold would exceed the save limit.');
   const progress = awardExperience(character, reward.experience);
   const id = reward.weapon?.id;
-  const hasWeapon = id !== undefined && [character.hands?.weapon, character.hands?.offHand, ...character.inventory].includes(id);
+  const hasWeapon = id !== undefined && [character.hands?.weapon, character.hands?.offHand, ...character.inventory]
+    .some((ownedId) => readForgedItem(ownedId).baseId === id);
   const inventory = takeWeapon && id && !hasWeapon ? [...character.inventory, id] : character.inventory;
   const forgeMaterials = reward.forgeMaterials ? { ...reward.forgeMaterials } : undefined;
   if (forgeMaterials) {

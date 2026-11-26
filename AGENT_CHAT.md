@@ -868,7 +868,36 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - Po przeglądzie i zielonym CI na main weszły #162 (core nagród), #171 (mod z URL), #212 (balans pancerza) i #213 (dane lig). Ten PR kończy poprawkę ulepszania zaklętej broni w kuźni.
 - Przy wpinaniu ekranu nagród przekaż do `getFightReward` identyfikator `bout.champion?.weapon.id`. Mistrz Bronze walczy katalogowym mieczem, a nagrodą jest Pulpport Laureate. Ekran lig może czytać `PULPPORT_LEAGUES[id]`.
 
+### 2026-11-26 19:12 · Codex (lkaelek) · #66 / 66-champion-dialogue
+
+- Dodałem po cztery angielskie kwestie dla każdego mistrza Pulpport w `src/data/dialogue.ts`. Ekran przed walką może wziąć jedną z `CHAMPION_DIALOGUE[league].before`. Ekran wyniku ma `after.playerWon` i `after.playerLost` z perspektywy gracza.
+- Menu lig nadal korzysta z pierwszej kwestii. Po pokonaniu Quintusa gracz dowiaduje się o jego siostrze, której nie było w Kodeksie. Lint, 232 testy i build przeszły.
+
+### 2026-11-26 19:15 · Codex (lkaelek) · #217 / 217-kraftmoor-core
+
+- Część core/data #67. `isRegionUnlocked('kraftmoor', character)` sprawdza wygraną z mistrzem Legend w Pulpport w istniejącym `leagueWins`. `KRAFTMOOR_OPPONENTS` ma sześciu pierwszych rywali w ciężkich kompletach, na poziomach 33–40.
+- Do sceny walki: `createRegionalCombat(seed, region, player, enemy)` ustawia w Kraftmoor krótszy dystans startowy i zasadę Soaked po obu stronach, z normalnymi odpornościami. Pulpport ma dotychczasowe warunki. Najpierw sprawdź odblokowanie i przekaż `opponent.setup` oraz `opponent.profile` do odpowiednich części sceny.
+- Lint, 235 testów i build przeszły. Testy sprawdzają odczyt zapisu, wpływ Soaked na ruch oraz broń i pancerz każdego rywala.
+
+### 2026-11-26 19:18 · Codex (lkaelek) · #219 / 219-champion-weapon-rewards
+
+- `getFightReward` rozpoznaje każdą broń nagrodową z `PULPPORT_LEAGUES`. Kuźnia, zaklinanie i logika ekwipunku korzystają z tego samego odczytu. Sklepy nadal mają osobny katalog. Ponowna wygrana nie dodaje duplikatu, nawet gdy broń z wcześniejszej nagrody ma ulepszenie albo zaklęcie.
+- Dla UI: w Gear i Enchantress użyj `findWeapon` z `src/core/weapons.ts` do odczytu posiadanych broni według bazowego ID. Katalog `WEAPONS` pozostaje źródłem oferty sklepowej. Ekran nagrody przekazuje `bout.champion?.weapon.id` do `getFightReward`.
+- Lint, 237 testów i build przeszły. Dla każdego mistrza test odebrał nagrodę, zaklął, ulepszył i założył broń, a potem odtworzył rewanż z bronią w ręku i w plecaku.
+
 ### 2026-11-26 19:20 · Codex (lkaelek) · #221 / 221-beast-combat-profiles
 
 - Część core/data #60. `BEAST_OPPONENTS['paper-lion']` i `BEAST_OPPONENTS['cardboard-bear']` zwracają `setup` i `profile` dla walki. Lew używa częściej `jump` i `charge`, niedźwiedź preferuje w zwarciu `power`. Zostają dotychczasowe reguły zasięgu, energii i obrażeń.
 - Dla riga i sceny: klipy można wiązać z istniejącymi akcjami `jump`, `charge` i `power` według ID bestii. Wstępne poziomy to 18 i 22. Testy sprawdziły style AI i 80 pełnych walk z legalnymi akcjami. Lint, 235 testów i build przeszły.
+
+### 2026-11-26 19:24 · Codex (lkaelek) · #217 / 217-kraftmoor-core
+
+- Przy przeglądzie #218 doprecyzowałem pozycje startowe. Jeżeli ustawienia rywala lub gracza zawierają `position: undefined`, Kraftmoor nadal używa swoich wartości 6 i 14. Test osłania ten przypadek i jawne nadpisanie pozycji.
+
+### 2026-11-26 19:26 · Codex (lkaelek) · #219 / 219-champion-weapon-rewards
+
+- Uzupełnienie po przeglądzie #220: kiedy nagrody trafią do UI, `tierOf` w `src/ui/forgeRules.ts` też powinno używać `findWeapon(baseId)`. Kuźnia już odczytuje obrażenia przez core i potrafi ulepszyć broń mistrza. Pole tier w karcie nadal pokazuje 0, bo czyta katalog sklepu.
+
+### 2026-11-26 19:28 · Codex (lkaelek) · #221 / 221-beast-combat-profiles
+
+- Po przeglądzie i zielonym CI na main weszły #216 (dialogi), #218 (core i dane Kraftmoor) oraz #220 (broń nagrodowa championów). Ten PR dostarcza profile AI do integracji z animacjami i sceną #60.
