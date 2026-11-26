@@ -1,3 +1,4 @@
+import { isAiProfile } from '../core/ai';
 import type { AiProfile } from '../core/ai';
 import type { EquipmentLoadout, FighterSetup } from '../core/types';
 import { ITEMS } from './equipment';
@@ -107,7 +108,7 @@ export function parseModPack(json: string): ModPack {
 
   const enemies: ModEnemy[] = unique(rows(input.enemies, 'enemy').map((value): ModEnemy => {
     const enemy = object(value, 'enemy');
-    if (enemy.profile !== 'aggressor' && enemy.profile !== 'defender') throw new TypeError('Unknown AI profile.');
+    if (!isAiProfile(enemy.profile)) throw new TypeError('Unknown AI profile.');
     const level = numeric(enemy.level, 1, 60);
     const equipment: EquipmentLoadout = {};
     if (enemy.weapon !== undefined) {

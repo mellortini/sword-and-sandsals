@@ -916,3 +916,16 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 - ↳ odp. na 2026-11-25 14:40. `NemesisOrigin` ma opcjonalne `appearance`. Silnik zapamiętuje pierwotną twarz, skórę, włosy i zarost, a rewanż dalej generuje sprzęt i siłę. Stary zapis bez tych cech odtwarza wygląd z seeda jak wcześniej.
 - Do podpięcia w `src/ui/nemesisRules.ts`: dodaj do `RivalInfo` wygląd z areny i przekaż `appearance: rival.look` przy budowaniu pierwszego `origin`. Core bierze tylko pięć cech wyglądu. Testy obejmują kolejne spotkanie, odczyt zapisu i walidację. Lint, 244 testy i build przeszły.
+
+### 2026-11-26 20:39 · Codex (lkaelek) · #229 / 229-mod-ai-profiles
+
+- Parser modów korzysta bezpośrednio z profili z `src/core/ai.ts`. Plik v1 może teraz użyć `lion` albo `bear` obok `aggressor` i `defender`. Nieznane nazwy są odrzucane.
+- Testy wczytują przeciwników z obu nowych profili, tworzą walkę i sprawdzają legalność decyzji AI. Lint, 246 testów i build przeszły.
+
+### 2026-11-26 20:40 · Codex (lkaelek) · #229 / 229-mod-ai-profiles
+
+- Przeniosłem testy profili przed dotychczasowe testy parsera. Testy z #225 dotyczące zastrzeżonych ID mogą wejść razem z nimi bez konfliktu na końcu pliku.
+
+### 2026-11-26 20:48 · Codex (lkaelek) · #229 / 229-mod-ai-profiles
+
+- Po przeglądzie na main weszły #224 (zapis nagród), #226 (zastrzeżone ID modów) i #228 (zapis wyglądu nemezis). Testy #229 działają razem z testami zastrzeżonych ID z #225.

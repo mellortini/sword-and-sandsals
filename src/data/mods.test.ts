@@ -1,11 +1,31 @@
 import { afterEach, expect, it } from 'vitest';
 import example from '../../assets/mods/example.json';
-import { createCombat } from '../core/combat';
+import { chooseAction } from '../core/ai';
+import { createCombat, getActionOptions } from '../core/combat';
 import { getShopStock } from '../core/shop';
 import { PULPPORT_LEAGUES } from './leagues';
 import { activateModPack, getActiveModPack, getModOpponent, loadModPack, parseModPack } from './mods';
 
 afterEach(() => activateModPack());
+
+it.each(['lion', 'bear'])('uses a mod opponent with the %s profile in combat', (profile) => {
+  activateModPack(parseModPack(JSON.stringify({
+    version: 1,
+    enemies: [{ id: 'arena-beast', name: 'Arena Beast', level: 18, profile }],
+    leagues: [{ id: 'beast-cup', name: 'Beast Cup', opponents: ['arena-beast'] }],
+  })));
+  const opponent = getModOpponent('beast-cup', 0);
+  if (!opponent) throw new Error('Expected the mod opponent.');
+  expect(opponent.profile).toBe(profile);
+  const fight = { ...createCombat(1, {}, opponent.setup), active: 'enemy' as const };
+  expect(getActionOptions(fight).map(({ action }) => action)).toContain(chooseAction(fight, opponent.profile, 17).action);
+});
+
+it('rejects unknown AI profile names in a mod', () => {
+  expect(() => parseModPack(JSON.stringify({
+    version: 1, enemies: [{ id: 'unknown', name: 'Unknown', level: 1, profile: 'constructor' }],
+  }))).toThrow('Unknown AI profile.');
+});
 
 it('loads the example file and uses its armour, weapon and opponent in real combat and shops', async () => {
   const file = new Blob([JSON.stringify(example)], { type: 'application/json' });

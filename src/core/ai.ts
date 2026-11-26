@@ -32,6 +32,10 @@ const PROFILE_WEIGHTS: Record<AiProfile, Record<CombatAction, number>> = {
   },
 };
 
+export function isAiProfile(value: unknown): value is AiProfile {
+  return typeof value === 'string' && Object.hasOwn(PROFILE_WEIGHTS, value);
+}
+
 /**
  * Picks an action for the side whose turn it is (`state.active`).
  * Only actions from `getActionOptions` are considered, so the choice is always legal.
