@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { BEAST_OPPONENTS } from '../data/beasts';
 import { chooseAction } from './ai';
 import type { AiProfile } from './ai';
 import { createCombat, getActionOptions, performAction } from './combat';
@@ -69,5 +70,28 @@ describe('enemy AI', () => {
   it('refuses to act once the fight is over', () => {
     const state = { ...createCombat(1), winner: 'player' as const };
     expect(() => chooseAction(state, 'defender', 1)).toThrow();
+  });
+});
+
+describe('beast AI', () => {
+  it('favours pouncing with the lion and crushing in melee with the bear', () => {
+    const rollActions = (state: CombatState, profile: AiProfile) => Array.from({ length: 200 }, (_, index) =>
+      chooseAction(state, profile, Math.imul(index + 1, 0x9e3779b1) >>> 0).action);
+    const distant = createCombat(1);
+    const charging = createCombat(1, { position: 5 }, { position: 12 });
+    const close = createCombat(1, { position: 9 }, { position: 10 });
+    expect(share(rollActions(distant, 'lion'), ['jump'])).toBeGreaterThan(share(rollActions(distant, 'bear'), ['jump']));
+    expect(share(rollActions(charging, 'lion'), ['charge'])).toBeGreaterThan(share(rollActions(charging, 'bear'), ['charge']));
+    expect(share(rollActions(close, 'bear'), ['power'])).toBeGreaterThan(share(rollActions(close, 'lion'), ['power']));
+  });
+
+  it.each(Object.entries(BEAST_OPPONENTS))('finishes seeded arena fights against %s with legal actions', (_id, beast) => {
+    const player: FighterSetup = { level: 20, attributes: { might: 13, guard: 12, vitality: 13, stamina: 11 }, equipment: { weapon: 'sword6' } };
+    for (let seed = 1; seed <= 40; seed++) {
+      const { state, picks } = fight(seed, { player: 'aggressor', enemy: beast.profile }, player, beast.setup);
+      expect(state.fighters.enemy.weapon).toBeUndefined();
+      expect(state.winner).not.toBeNull();
+      expect(picks.enemy).not.toContain('taunt');
+    }
   });
 });

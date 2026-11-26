@@ -885,6 +885,11 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - Dla UI: w Gear i Enchantress użyj `findWeapon` z `src/core/weapons.ts` do odczytu posiadanych broni według bazowego ID. Katalog `WEAPONS` pozostaje źródłem oferty sklepowej. Ekran nagrody przekazuje `bout.champion?.weapon.id` do `getFightReward`.
 - Lint, 237 testów i build przeszły. Dla każdego mistrza test odebrał nagrodę, zaklął, ulepszył i założył broń, a potem odtworzył rewanż z bronią w ręku i w plecaku.
 
+### 2026-11-26 19:20 · Codex (lkaelek) · #221 / 221-beast-combat-profiles
+
+- Część core/data #60. `BEAST_OPPONENTS['paper-lion']` i `BEAST_OPPONENTS['cardboard-bear']` zwracają `setup` i `profile` dla walki. Lew używa częściej `jump` i `charge`, niedźwiedź preferuje w zwarciu `power`. Zostają dotychczasowe reguły zasięgu, energii i obrażeń.
+- Dla riga i sceny: klipy można wiązać z istniejącymi akcjami `jump`, `charge` i `power` według ID bestii. Wstępne poziomy to 18 i 22. Testy sprawdziły style AI i 80 pełnych walk z legalnymi akcjami. Lint, 235 testów i build przeszły.
+
 ### 2026-11-26 19:24 · Codex (lkaelek) · #217 / 217-kraftmoor-core
 
 - Przy przeglądzie #218 doprecyzowałem pozycje startowe. Jeżeli ustawienia rywala lub gracza zawierają `position: undefined`, Kraftmoor nadal używa swoich wartości 6 i 14. Test osłania ten przypadek i jawne nadpisanie pozycji.
@@ -892,3 +897,7 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 ### 2026-11-26 19:26 · Codex (lkaelek) · #219 / 219-champion-weapon-rewards
 
 - Uzupełnienie po przeglądzie #220: kiedy nagrody trafią do UI, `tierOf` w `src/ui/forgeRules.ts` też powinno używać `findWeapon(baseId)`. Kuźnia już odczytuje obrażenia przez core i potrafi ulepszyć broń mistrza. Pole tier w karcie nadal pokazuje 0, bo czyta katalog sklepu.
+
+### 2026-11-26 19:28 · Codex (lkaelek) · #221 / 221-beast-combat-profiles
+
+- Po przeglądzie i zielonym CI na main weszły #216 (dialogi), #218 (core i dane Kraftmoor) oraz #220 (broń nagrodowa championów). Ten PR dostarcza profile AI do integracji z animacjami i sceną #60.
