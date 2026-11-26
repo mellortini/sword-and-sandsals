@@ -2,6 +2,7 @@ import { afterEach, expect, it } from 'vitest';
 import example from '../../assets/mods/example.json';
 import { createCombat } from '../core/combat';
 import { getShopStock } from '../core/shop';
+import { PULPPORT_LEAGUES } from './leagues';
 import { activateModPack, getActiveModPack, getModOpponent, loadModPack, parseModPack } from './mods';
 
 afterEach(() => activateModPack());
@@ -29,4 +30,24 @@ it('rejects an unknown version, broken reference and out-of-range item without c
   expect(() => parseModPack('{"version":1,"armour":[{"id":"armor1","armor":999}]}')).toThrow(RangeError);
   expect(() => parseModPack('{"version":1,"leagues":[{"id":"broken-cup","name":"Broken Cup","opponents":["unknown"]}]}')).toThrow(TypeError);
   expect(getActiveModPack()).toBe(active);
+});
+
+const championIds = Object.values(PULPPORT_LEAGUES).map((bouts) => bouts.at(-1)!.champion!.weapon.id);
+
+it.each(['daggers', 'armor1', 'helmet2', ...championIds])('rejects a weapon variant using the reserved ID %s', (id) => {
+  const active = parseModPack(JSON.stringify(example));
+  activateModPack(active);
+  const collision = { version: 1, weapons: [{ id, base: 'sword1', name: 'Mod Blade', damage: 15 }] };
+  expect(() => parseModPack(JSON.stringify(collision))).toThrow(`Reserved weapon ID: ${id}.`);
+  expect(getActiveModPack()).toBe(active);
+});
+
+it('keeps ordinary catalogue overrides and uniquely named weapon variants available', () => {
+  const pack = parseModPack(JSON.stringify({
+    version: 1,
+    weapons: [{ id: 'sword1', damage: 12 }, { id: 'reed-sword', base: 'sword1', damage: 13 }],
+  }));
+  activateModPack(pack);
+  expect(createCombat(1, { equipment: { weapon: 'sword1' } }).fighters.player.weapon?.damage).toBe(12);
+  expect(getShopStock('weaponsmith', 'bronze')).toContainEqual(expect.objectContaining({ id: 'reed-sword', damage: 13 }));
 });

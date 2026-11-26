@@ -161,23 +161,57 @@ function openDatabase(): Promise<IDBDatabase> {
   });
 }
 
-async function withStore<T>(mode: IDBTransactionMode, action: (store: IDBObjectStore) => IDBRequest<T>): Promise<T> {
+async function withSaveTransaction<T>(
+  mode: IDBTransactionMode, action: (store: IDBObjectStore, abort: (cause: unknown) => void) => () => T,
+): Promise<T> {
   const database = await openDatabase();
   try {
     return await new Promise((resolve, reject) => {
       const transaction = database.transaction(STORE, mode);
-      const request = action(transaction.objectStore(STORE));
-      transaction.oncomplete = () => resolve(request.result);
-      transaction.onabort = () => reject(transaction.error ?? new Error('Save transaction aborted.'));
+      let failure: unknown;
+      const abort = (cause: unknown) => {
+        failure = cause;
+        transaction.abort();
+      };
+      transaction.onabort = () => reject(failure ?? transaction.error ?? new Error('Save transaction aborted.'));
+      const result = action(transaction.objectStore(STORE), abort);
+      transaction.oncomplete = () => resolve(result());
     });
   } finally {
     database.close();
   }
 }
 
+function withStore<T>(mode: IDBTransactionMode, action: (store: IDBObjectStore) => IDBRequest<T>): Promise<T> {
+  return withSaveTransaction(mode, (store) => {
+    const request = action(store);
+    return () => request.result;
+  });
+}
+
 export async function saveGame(character: SavedCharacter): Promise<void> {
   const json = serializeSave(character);
   await withStore('readwrite', (store) => store.put(json, SLOT));
+}
+
+/** Read, transform and save the current slot in one transaction. Returning the stored object skips the write. */
+export function updateSavedGame(update: (stored: SavedCharacter | undefined) => SavedCharacter): Promise<SavedCharacter> {
+  return withSaveTransaction('readwrite', (store, abort) => {
+    let character: SavedCharacter;
+    const request = store.get(SLOT);
+    request.onsuccess = () => {
+      try {
+        const decoded = typeof request.result === 'string' ? deserializeSave(request.result) : undefined;
+        if (request.result !== undefined && !decoded?.ok) throw new Error('The current save could not be read.');
+        const stored = decoded?.ok ? decoded.character : undefined;
+        character = update(stored);
+        if (character !== stored) store.put(serializeSave(character), SLOT);
+      } catch (cause) {
+        abort(cause);
+      }
+    };
+    return () => character;
+  });
 }
 
 /** Returns a fresh character on a missing, unreadable or unsupported save. */
