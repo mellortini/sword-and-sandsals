@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "armour": [{ "id": "armor1", "name": "Dockside Sash", "armor": 3 }],
+  "weapons": [{ "id": "quay-blade", "base": "sword1", "name": "Quay Blade", "damage": 7, "price": 25 }],
+  "enemies": [
+    { "id": "quay-duellist", "name": "Vesper of the Quay", "level": 2, "profile": "aggressor", "weapon": "quay-blade", "armour": { "armor": 1 } },
+    { "id": "dockside-guard", "name": "Aelia the Watchful", "level": 3, "profile": "defender", "weapon": "sword2", "armour": { "helmet": 1, "armor": 2 } }
+  ],
+  "leagues": [{ "id": "quay-cup", "name": "Quay Cup", "opponents": ["quay-duellist", "dockside-guard"] }]
+}

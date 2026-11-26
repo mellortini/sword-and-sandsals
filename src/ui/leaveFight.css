@@ -1,0 +1,23 @@
+/* "Leave the fight?" (src/ui/leaveFight.ts): a small paper panel over the arena. */
+.leave-fight {
+  position: fixed; inset: 0; z-index: 6;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(28, 16, 19, 0.55);
+  font-family: Georgia, serif; color: #f3e6d6;
+}
+.leave-fight__panel {
+  box-sizing: border-box; width: min(92vw, 400px); padding: 18px 22px;
+  background: rgba(46, 27, 32, 0.97); border: 2px solid #815a46; border-radius: 12px;
+  box-shadow: 0 8px 0 rgba(20, 10, 12, 0.45);
+  text-align: center;
+}
+.leave-fight h3 { margin: 0 0 6px; font-size: 26px; font-weight: normal; letter-spacing: 0.06em; color: #f2c14e; }
+.leave-fight p { margin: 0 0 14px; color: #e8cfa8; font-style: italic; font-size: 15px; }
+.leave-fight__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.leave-fight button {
+  font: inherit; font-size: 17px; padding: 9px 0; border: 0; border-radius: 4px; cursor: pointer;
+  background: #6b4a3a; color: #f3e6d6;
+}
+.leave-fight button.stay { background: #9a6a2e; font-weight: bold; }
+.leave-fight button:hover { filter: brightness(1.15); }
+.leave-fight button:focus-visible { outline: 2px solid #fff0d0; outline-offset: 2px; }

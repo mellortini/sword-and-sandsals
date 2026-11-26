@@ -169,6 +169,11 @@ export class CombatPresenter {
       case 'pose':
         await this.clip(fighters[step.side], step.clip);
         return;
+      case 'item':
+        // no own clip or pop-up yet: the user pauses as when resting and the target's bar moves when it ends
+        await this.clip(fighters[step.side], step.side === step.target ? 'rest' : 'taunt');
+        if (this.shown) this.setShown(step.target, { health: Math.max(0, this.shown[step.target].health + step.healthDelta) });
+        return;
       case 'death':
         // the loser already fell on the hit frame; the winner celebrates and holds the pose
         await this.clip(fighters[other(step.side)], 'victory', { then: null });

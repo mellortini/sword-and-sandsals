@@ -1,0 +1,63 @@
+/* Skill screen (src/ui/skillTree.ts): six paper trees over the game. */
+.skill-tree {
+  position: fixed; inset: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(28, 16, 19, 0.66);
+  font-family: Georgia, serif; color: #f3e6d6;
+}
+.skill-tree__panel {
+  box-sizing: border-box; width: min(96vw, 1060px); max-height: 94vh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 10px; padding: 16px 20px;
+  background: rgba(46, 27, 32, 0.97); border: 2px solid #815a46; border-radius: 12px;
+  box-shadow: 0 8px 0 rgba(20, 10, 12, 0.45);
+}
+.skill-tree__head { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 14px; }
+.skill-tree h3 { margin: 0; font-size: 28px; font-weight: normal; letter-spacing: 0.08em; color: #f2c14e; }
+.skill-tree__name { color: #e8cfa8; font-style: italic; }
+.skill-tree__points { color: #e8be4c; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; }
+.skill-tree__points b { color: #f2c14e; font-size: 20px; }
+.skill-tree__points b.done { color: #9ec27a; }
+.skill-tree__trees { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 16px; }
+.skill-tree__tree { display: flex; flex-direction: column; }
+.skill-tree h4 { margin: 0 0 6px; text-align: center; color: #e8be4c; font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; }
+
+/* each skill is a paper card; a thread joins it to the one above */
+.skill {
+  position: relative; display: grid; grid-template-columns: 1fr auto; gap: 0 6px; text-align: left;
+  margin-top: 10px; padding: 6px 9px 7px; border: 0; border-radius: 3px; cursor: pointer;
+  font: inherit; font-size: 13px; color: #3a2418;
+  background: linear-gradient(160deg, #fff8e3 0%, transparent 50%), #ecd9b0;
+  box-shadow: inset 0 0 0 2px #a07a4f, 0 3px 0 #2a171299;
+}
+.skill:first-of-type { margin-top: 0; }
+.skill:not(:first-of-type)::before {
+  content: ''; position: absolute; left: 50%; top: -10px; width: 2px; height: 10px; background: #a07a4f;
+}
+.skill__name { font-weight: bold; font-size: 14px; }
+.skill__state { font-size: 10.5px; font-style: italic; color: #8b6a4a; }
+.skill__text { grid-column: 1 / -1; color: #5a4030; }
+/* learned: gold card with a tick; chosen: red ink ring; locked: faded. Never colour alone: the state is written on the card */
+.skill[data-state='learned'] { background: #c9a24f; box-shadow: inset 0 0 0 2px #7a5a22, 0 3px 0 #2a171299; cursor: default; }
+.skill[data-state='learned'] .skill__state { color: #3a2418; font-weight: bold; }
+.skill[data-state='learned'] .skill__state::before { content: '✓ '; }
+.skill[data-state='picked'] { box-shadow: inset 0 0 0 3px #a8322a, 0 3px 0 #2a171299; }
+.skill[data-state='picked'] .skill__state { color: #a8322a; font-weight: bold; }
+.skill[data-state='locked'], .skill[data-state='open'][aria-disabled='true'] { opacity: 0.45; cursor: default; }
+.skill:hover:not([aria-disabled='true']) { filter: brightness(1.06); }
+.skill:focus-visible { outline: 2px solid #fff0d0; outline-offset: 2px; }
+
+.skill-tree__hint { color: #b9a28c; font-size: 12.5px; font-style: italic; text-align: center; }
+.skill-tree__problem { min-height: 1.1em; color: #e0866f; font-size: 13px; font-style: italic; text-align: center; }
+.skill-tree__actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px; width: min(100%, 420px); align-self: center; }
+.skill-tree__actions button {
+  font: inherit; padding: 8px 0; border: 0; border-radius: 4px; cursor: pointer; background: #6b4a3a; color: #f3e6d6;
+}
+.skill-tree__actions .keep { background: #9a6a2e; font-weight: bold; font-size: 17px; }
+.skill-tree__actions button:disabled { opacity: 0.35; cursor: default; }
+.skill-tree__actions button:focus-visible { outline: 2px solid #fff0d0; outline-offset: 2px; }
+
+@media (max-width: 760px), (max-height: 500px) {
+  .skill-tree__trees { grid-template-columns: repeat(2, 1fr); }
+  .skill-tree__panel { padding: 10px 14px; gap: 6px; }
+  .skill { font-size: 12px; }
+}

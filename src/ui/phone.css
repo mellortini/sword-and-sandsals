@@ -1,0 +1,63 @@
+/* Phones and small tablets in landscape (#19). Loaded once from src/main.ts through src/ui/phone.ts. */
+
+/* touch: no double-tap zoom, no grey tap flash, no rubber-band scrolling, no text selection on long press */
+html, body {
+  touch-action: manipulation;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+input, textarea { -webkit-user-select: text; user-select: text; }
+#stage canvas { touch-action: none; }
+
+/* keep the HTML panels clear of a notch or rounded corner (viewport-fit=cover in index.html) */
+#ui {
+  top: max(10px, env(safe-area-inset-top));
+  left: max(10px, env(safe-area-inset-left));
+}
+
+/* a phone held sideways: the dev links shrink to a small block, the creator panel fits the short screen */
+@media (max-height: 500px) {
+  body #ui:not(.creator):not(.wardrobe):not(.lab) {
+    flex-direction: row; flex-wrap: wrap; gap: 2px 6px; max-width: 26vw;
+    padding: 4px 8px; font-size: 11px; opacity: 0.85;
+  }
+  body #ui.creator {
+    top: max(2vh, env(safe-area-inset-top)); right: max(2vw, env(safe-area-inset-right));
+    width: min(46vw, 470px); max-height: 96vh; font-size: 13px; gap: 4px; padding: 8px 12px;
+  }
+  body #ui.creator h3 { font-size: 18px; }
+  body #ui.creator .look-row { grid-template-columns: 6.4em 2.4em 1fr 2.4em; }
+  body #ui.creator .attr-row { grid-template-columns: 5.6em 2.4em 2.2em 2.4em 1fr; }
+  body #ui.creator button { min-height: 28px; }
+}
+
+/* held upright: ask to turn the device (the arena is a wide stage) */
+.rotate-hint {
+  display: none;
+  position: fixed; inset: 0; z-index: 10;
+  flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  padding: 24px; box-sizing: border-box;
+  background: #2e1b20; color: #f3e6d6; font: 20px / 1.4 Georgia, serif; text-align: center;
+}
+.rotate-hint__device {
+  width: 54px; height: 92px; border: 4px solid #e8be4c; border-radius: 10px; box-sizing: border-box;
+  animation: rotate-hint-turn 2.4s ease-in-out infinite;
+}
+.rotate-hint b { color: #e8be4c; font-size: 26px; letter-spacing: 0.06em; }
+
+@media (orientation: portrait) and (pointer: coarse) {
+  .rotate-hint { display: flex; }
+}
+
+@keyframes rotate-hint-turn {
+  0%, 25% { transform: rotate(0deg); }
+  55%, 100% { transform: rotate(-90deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rotate-hint__device { animation: none; transform: rotate(-90deg); }
+}

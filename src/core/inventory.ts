@@ -1,5 +1,7 @@
 import { ITEMS } from '../data/equipment';
 import type { WeaponFamily } from '../data/weapons';
+import { readWeaponEnchantment } from './enchant';
+import { readForgedItem } from './forge';
 import type { EquipmentLoadout, EquipmentSlot, HandSlot } from './types';
 import { findWeapon } from './weapons';
 
@@ -29,8 +31,9 @@ export function equipItem(inventory: Inventory, id: string, character: EquipRequ
   const index = inventory.backpack.indexOf(id);
   if (index === -1) return { ok: false, inventory, reason: 'not-owned' };
 
-  const armour = ITEMS.find((piece) => piece.id === id);
-  const weapon = findWeapon(id);
+  const armour = ITEMS.find((piece) => piece.id === readForgedItem(id).baseId);
+  const { baseId } = readForgedItem(readWeaponEnchantment(id).baseId);
+  const weapon = findWeapon(baseId);
   const item = armour ?? weapon;
   if (!item) return { ok: false, inventory, reason: 'unknown-item' };
   if (character.level < item.minLevel) return { ok: false, inventory, reason: 'level' };
@@ -57,7 +60,12 @@ export function unequipItem(inventory: Inventory, slot: EquipmentSlot): Inventor
 /** Convert item IDs into the slot tiers and hand IDs that combat reads. */
 export function equipmentLoadout(equipped: Inventory['equipped']): EquipmentLoadout {
   const loadout: EquipmentLoadout = {};
-  for (const { id, slot, tier } of ITEMS) if (equipped[slot] === id) loadout[slot] = tier;
+  for (const { id, slot, tier } of ITEMS) {
+    const { baseId, level } = readForgedItem(equipped[slot]);
+    if (baseId !== id) continue;
+    loadout[slot] = tier;
+    if (level > 0) (loadout.improvements ??= {})[slot] = level;
+  }
   if (equipped.weapon !== undefined) loadout.weapon = equipped.weapon;
   if (equipped.offHand !== undefined) loadout.offHand = equipped.offHand;
   return loadout;
@@ -65,11 +73,12 @@ export function equipmentLoadout(equipped: Inventory['equipped']): EquipmentLoad
 
 export function equipmentTotals(loadout: Readonly<EquipmentLoadout>): { armour: number; weight: number; fullSet: boolean } {
   const equipped = ITEMS.filter(({ slot, tier }) => loadout[slot] === tier);
-  const armour = equipped.reduce((total, piece) => total + piece.armor, 0);
+  const armour = equipped.reduce((total, piece) => total + piece.armor + (loadout.improvements?.[piece.slot] ?? 0), 0);
   const armourWeight = equipped.reduce((total, piece) => total + piece.weight, 0);
   const handWeight = [loadout.weapon, loadout.offHand].reduce((total, id) => {
     if (id === undefined) return total;
-    const weapon = findWeapon(id);
+    const { baseId } = readForgedItem(readWeaponEnchantment(id).baseId);
+    const weapon = findWeapon(baseId);
     return total + (weapon ? WEAPON_WEIGHT[weapon.family] : 0);
   }, 0);
   const fullSet = equipped.length === 5 && equipped.every(({ tier }) => tier === equipped[0].tier);

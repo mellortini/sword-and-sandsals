@@ -3,21 +3,28 @@ import { deriveStats, resolveAttributes } from '../core/stats';
 import type { Attributes, EquipmentLoadout } from '../core/types';
 import { EQUIP_SLOTS } from '../rig/PaperRig';
 import type { Look } from '../rig/PaperRig';
-import { paperButton, screenTitle } from '../ui/paperWidgets';
+import { goToTitle } from '../ui/backKey';
+import { playBanner } from '../ui/banner';
+import { buttonKeys, keyHint, paperButton, screenTitle } from '../ui/paperWidgets';
 import { StatPanel } from '../ui/statPanel';
 import { comparisonRows } from '../ui/statRows';
 import type { ComparedFighter } from '../ui/statRows';
-import { showArena } from './arena';
-import { W, randomLook } from './common';
+import { boutStartHealth, showArena } from './arena';
+import { careerLoadout } from '../ui/gearRules';
+import { nemesisLine, nemesisRival } from '../ui/nemesisRules';
+import { boutLook, findBout } from '../ui/leagueRules';
+import type { NemesisMemory } from '../core/nemesis';
+import { H, W, randomLook } from './common';
 import { loadSavedGladiator } from './savedGladiator';
 import type { SceneContext, SceneUpdate } from './common';
-import { PORTRAIT_W, portraitCard, removeRigs } from './portrait';
+import { ENEMY_NAMES } from './opponents';
+import { PORTRAIT_W, portraitCard } from './portrait';
 
 export interface PreFightFighter extends ComparedFighter {
   readonly look: Look;
 }
 
-export type PreFightChoice = 'fight' | 'retreat';
+export type PreFightChoice = 'fight' | 'retreat' | 'leave';
 
 /** Equipment tiers worn on the puppet are the same numbers the combat core reads. */
 export function loadoutFromLook(look: Look): EquipmentLoadout {
@@ -26,9 +33,11 @@ export function loadoutFromLook(look: Look): EquipmentLoadout {
   return loadout;
 }
 
-export function preFightFighter(name: string, level: number, look: Look, attributes: Partial<Attributes> = {}): PreFightFighter {
+export function preFightFighter(
+  name: string, level: number, look: Look, attributes: Partial<Attributes> = {}, loadout: EquipmentLoadout = loadoutFromLook(look),
+): PreFightFighter {
   const resolved = resolveAttributes(attributes);
-  return { name, level, look, attributes: resolved, stats: deriveStats(resolved, loadoutFromLook(look)) };
+  return { name, level, look, attributes: resolved, stats: deriveStats(resolved, loadout) };
 }
 
 const PANEL_W = 640;
@@ -37,23 +46,25 @@ const TOP = 170;
 /**
  * Pre-fight comparison: two portraits, names, levels and a stat table, with Fight / Retreat.
  * Draws into `context.world`, resolves with the choice and removes everything it added.
- * Keyboard: Enter = Fight, Escape = Retreat.
+ * Fight · Another foe (Retreat: a new opponent) · Leave (back to the title, #174).
+ * Keyboard (#77): ←/→ choose, Enter presses (Fight first), Escape = Leave.
  */
-export async function openPreFight(context: SceneContext, player: PreFightFighter, enemy: PreFightFighter): Promise<PreFightChoice> {
-  const { world, bgTex, rigs, add } = context;
+export async function openPreFight(
+  context: SceneContext, player: PreFightFighter, enemy: PreFightFighter,
+  /** the nemesis (#209) gets its own title and a line about the feud under its name */
+  labels: { title?: string; enemyNote?: string } = {},
+): Promise<PreFightChoice> {
+  const { world, bgTex } = context;
   const root = new Container();
   world.addChild(root);
 
   const bg = new Sprite(bgTex);
   bg.tint = 0x6e5c58;
-  root.addChild(bg, screenTitle('Arena bout', W / 2, 58));
+  root.addChild(bg, screenTitle(labels.title ?? 'Arena bout', W / 2, 58));
 
-  const rigsBefore = rigs.length;
   const sideX = (W - PANEL_W) / 2 - PORTRAIT_W - 60;
-  await portraitCard(root, add, player, `Level ${player.level}`, sideX, TOP, 1);
-  await portraitCard(root, add, enemy, `Level ${enemy.level}`, W - sideX - PORTRAIT_W, TOP, -1);
-  // the shared ticker renders the portraits until the choice is made; then they are taken out of `rigs`
-  const added = rigs.slice(rigsBefore);
+  await portraitCard(root, context, player, `Level ${player.level}`, sideX, TOP, 1);
+  await portraitCard(root, context, enemy, labels.enemyNote ? `Level ${enemy.level} · ${labels.enemyNote}` : `Level ${enemy.level}`, W - sideX - PORTRAIT_W, TOP, -1);
 
   const panel = new StatPanel(comparisonRows(player, enemy), PANEL_W);
   panel.position.set((W - PANEL_W) / 2, TOP);
@@ -64,22 +75,22 @@ export async function openPreFight(context: SceneContext, player: PreFightFighte
     const keys = new AbortController();
     const done = (choice: PreFightChoice) => {
       keys.abort();
-      removeRigs(rigs, added);
       root.destroy({ children: true });
       resolve(choice);
     };
-    root.addChild(
-      paperButton('Fight', W / 2 - 150, buttonsY, true, () => done('fight')),
-      paperButton('Retreat', W / 2 + 150, buttonsY, false, () => done('retreat')),
-    );
+    const buttons = [
+      paperButton('Fight', W / 2 - 290, buttonsY, true, () => done('fight')),
+      paperButton('Another foe', W / 2, buttonsY, false, () => done('retreat')),
+      paperButton('Leave', W / 2 + 290, buttonsY, false, () => done('leave')),
+    ];
+    root.addChild(...buttons, keyHint('← →  choose    Enter  confirm    Esc  leave', W / 2, buttonsY + 112));
+    buttonKeys(keys.signal).add(...buttons);
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') done('fight');
-      else if (e.key === 'Escape') done('retreat');
+      if (e.key === 'Escape') done('leave');
     }, { signal: keys.signal });
   });
 }
 
-const ENEMY_NAMES = ['Crixus Fold', 'Varro the Creased', 'Spiculus', 'Flamma Pulp', 'Tetraites', 'Priscus Vellum'];
 
 /** Placeholder opponent until the enemy generator (#41): gear tier sets the level, a few extra attribute points. */
 function randomEnemy(tier: number): PreFightFighter {
@@ -95,7 +106,7 @@ function randomEnemy(tier: number): PreFightFighter {
 
 /**
  * `?view=prefight[&tier=N]`: player (default attributes) against a random opponent.
- * Fight → arena with the same two gladiators; Retreat → a new opponent.
+ * Fight → arena with the same two gladiators; Another foe → a new opponent; Leave → title.
  */
 export async function showPreFight(context: SceneContext): Promise<SceneUpdate> {
   // the saved gladiator fights unless the title's Quick bout asks for a random one
@@ -104,23 +115,51 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
   // a saved gladiator meets opponents of the first tier until the leagues (#41) pick them
   const tier = tp ? Math.min(10, Math.max(1, +tp)) : saved ? 1 : 1 + Math.floor(Math.random() * 10);
   const player = saved
-    ? preFightFighter(saved.name, saved.level, saved.look, saved.attributes)
+    ? { ...preFightFighter(saved.name, saved.level, saved.look, saved.attributes, careerLoadout(saved)), health: boutStartHealth(saved.health) }
     : preFightFighter('Player', 1, randomLook(tier));
   context.ui.innerHTML = '<a href="?view=arena">arena</a> · <a href="?view=wardrobe">garderoba</a>';
 
   let update: SceneUpdate | undefined;
   void (async () => {
+    // the title banner (#15) over the dimmed stands, as in the reference, then the comparison screen
+    const backdrop = new Sprite(context.bgTex);
+    backdrop.tint = 0x5a4846;
+    context.world.addChild(backdrop);
+    await playBanner(context.world, context.app.ticker, ['Arena', 'Battle'], { width: W, y: H * 0.46 });
+    backdrop.destroy();
     let choice: PreFightChoice;
     let enemy: PreFightFighter;
+    // a saved gladiator's nemesis (#209) waits first; Another foe gives an ordinary opponent
+    let nemesis: NemesisMemory | undefined = saved?.nemesis;
+    // a league bout chosen on the ladder (#58) comes first; Another foe drops it
+    let bout = saved && context.params.get('bout') ? findBout(saved, context.params.get('bout')!) : undefined;
     do {
-      enemy = randomEnemy(tier);
-      choice = await openPreFight(context, player, enemy);
+      if (bout) {
+        enemy = preFightFighter(bout.name, bout.level, boutLook(bout), bout.setup.attributes, bout.setup.equipment);
+        choice = await openPreFight(context, player, enemy, { title: bout.champion ? 'Champion bout' : 'League bout', enemyNote: bout.champion ? 'League champion' : undefined });
+        if (choice === 'retreat') bout = undefined;
+      } else if (nemesis && saved) {
+        const rival = nemesisRival(nemesis, saved.level);
+        enemy = preFightFighter(rival.name, rival.level, rival.look, rival.attributes, rival.equipment);
+        choice = await openPreFight(context, player, enemy, { title: 'Nemesis bout', enemyNote: nemesisLine(nemesis) });
+        if (choice === 'retreat') nemesis = undefined;
+      } else {
+        enemy = randomEnemy(tier);
+        choice = await openPreFight(context, player, enemy);
+      }
     } while (choice === 'retreat');
+    if (choice === 'leave') {
+      goToTitle();
+      return;
+    }
     context.ui.innerHTML = '';
     update = (await showArena(context, [
-      { look: player.look, name: player.name, attributes: player.attributes },
-      { look: enemy.look, name: enemy.name, attributes: enemy.attributes },
-    ])) ?? undefined;
+      { look: player.look, name: player.name, attributes: player.attributes, level: player.level },
+      {
+        look: enemy.look, name: enemy.name, attributes: enemy.attributes, level: enemy.level, nemesis,
+        ...(bout && { bout: { id: bout.id, profile: bout.profile }, equipment: bout.setup.equipment }),
+      },
+    ], { career: saved ?? undefined })) ?? undefined;
   })();
   return (dt) => update?.(dt);
 }

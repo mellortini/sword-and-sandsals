@@ -1,0 +1,8 @@
+/* Text size (#77, src/ui/textSize.ts): DOM panels zoom by --text-scale; the fight HUD scales in Pixi. */
+#ui, .paper-tooltip, .level-up__panel, .leave-fight__panel, .skill-tree__panel { zoom: var(--text-scale, 1); }
+#ui.creator { max-height: calc(94vh / var(--text-scale, 1)); width: min(calc(34vw / var(--text-scale, 1)), 470px); }
+
+/* keyboard focus is always visible, not only a colour change */
+#ui button:focus-visible, #ui a:focus-visible, #ui input:focus-visible {
+  outline: 2px solid #fff0d0; outline-offset: 2px;
+}

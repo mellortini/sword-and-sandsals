@@ -1,13 +1,22 @@
 import { chooseAction } from '../core/ai';
 import type { AiProfile } from '../core/ai';
-import { getActionOptions, performAction } from '../core/combat';
+import { chooseNemesisAction } from '../core/nemesis';
+import type { NemesisMemory } from '../core/nemesis';
+import { getActionOptions, getCombatSlotOptions, performAction } from '../core/combat';
+import type { TargetedAttack } from '../core/hitZones';
+import type { CombatSlotAction, CombatSlotOption } from '../core/spells';
 import type { ActionOption, CombatAction, CombatEvent, CombatState, FighterSide } from '../core/types';
 
-/** Decides one action for the side whose turn it is. Gets only the options the core allows right now. */
-export type ActionPicker = (state: CombatState, options: readonly ActionOption[]) => Promise<CombatAction>;
+/**
+ * Decides one action for the side whose turn it is. Gets only the options the core allows right now, and the items in
+ * the fighter's combat slots (potions, spells; some may be `unavailable`). Answers with an action or a slot to use.
+ */
+export type ActionPicker = (
+  state: CombatState, options: readonly ActionOption[], slots: readonly CombatSlotOption[],
+) => Promise<CombatAction | CombatSlotAction | TargetedAttack>;
 
 export interface FightLoopOptions {
-  /** who chooses for each side: the radial menu for the player (#12), the AI for the enemy */
+  /** who chooses for each side: the action bar for the player (#147), the AI for the enemy */
   readonly pickers: Readonly<Record<FighterSide, ActionPicker>>;
   /** plays one action's events (CombatPresenter.present); the next choice waits until it resolves */
   readonly present: (events: readonly CombatEvent[], after: CombatState) => Promise<void>;
@@ -34,16 +43,26 @@ export async function runFight(start: CombatState, o: FightLoopOptions): Promise
   const events: CombatEvent[] = [];
   while (state.winner === null && !o.signal?.aborted) {
     const side = state.active;
-    const action = await o.pickers[side](state, getActionOptions(state));
+    const action = await o.pickers[side](state, getActionOptions(state), getCombatSlotOptions(state));
     if (o.signal?.aborted) break;
     const result = performAction(state, action);
-    if (!result.ok) throw new Error(`The ${side} picked "${action}", which is not available (${result.reason}).`);
+    if (!result.ok) throw new Error(`The ${side} picked ${JSON.stringify(action)}, which is not available (${result.reason}).`);
     events.push(...result.events);
     await o.present(result.events, result.state);
     state = result.state;
     if (state.winner === null && o.pause) await o.pause(state.active);
   }
   return { state, events, finished: state.winner !== null };
+}
+
+/** The nemesis's AI (#209): a defender that guards more against the attacks it remembers. */
+export function nemesisPicker(memory: NemesisMemory, seed: number): ActionPicker {
+  let rng = seed >>> 0;
+  return async (state) => {
+    const decision = chooseNemesisAction(state, memory, rng);
+    rng = decision.rngState;
+    return decision.action;
+  };
 }
 
 /** An ActionPicker backed by the enemy AI (#6) with its own random seed. */

@@ -1,9 +1,15 @@
+import type { SkillId } from '../data/skills';
+import { isSkillId } from './skills';
 import type { Look } from '../rig/PaperRig';
 import { ACHIEVEMENT_COUNTERS } from './achievements';
 import type { AchievementProgress } from './achievements';
+import { FORGE_MATERIALS } from './forge';
+import type { ForgeMaterials } from './forge';
+import { LEAGUE_MAX_TIER } from './leagues';
+import type { NemesisMemory } from './nemesis';
 import { MAX_LEVEL } from './progression';
 import { resolveAttributes } from './stats';
-import type { Attributes, EquipmentLoadout } from './types';
+import type { ArmourImprovements, Attributes, EquipmentLoadout } from './types';
 
 const SAVE_VERSION = 1;
 const DATABASE = 'folded-glory';
@@ -20,7 +26,9 @@ export interface SavedCharacter {
   experience: number;
   attributePoints?: number;
   skillPoints?: number;
+  skills?: SkillId[];
   gold: number;
+  health?: number;
   attributes: Attributes;
   /** Appearance, equipped weapon and five independent armour slots. */
   look: Look;
@@ -29,6 +37,11 @@ export interface SavedCharacter {
   inventory: string[];
   achievements?: AchievementProgress;
   rewardedFightIds?: string[];
+  forgeMaterials?: ForgeMaterials;
+  armourImprovements?: ArmourImprovements;
+  nemesis?: NemesisMemory;
+  /** IDs of the league bouts the gladiator has won (#58), in the order they were won. */
+  leagueWins?: string[];
 }
 
 type DecodeFailure = 'invalid' | 'unsupported';
@@ -68,6 +81,21 @@ function isAchievementProgress(value: unknown): value is AchievementProgress {
     && ACHIEVEMENT_COUNTERS.every((key) => within(counters[key], 0));
 }
 
+function isForgeMaterials(value: unknown): value is ForgeMaterials {
+  return isRecord(value) && FORGE_MATERIALS.every((key) => within(value[key], 0));
+}
+
+function isArmourImprovements(value: unknown): value is ArmourImprovements {
+  return isRecord(value) && Object.entries(value).every(([slot, level]) => EQUIPMENT.some((key) => key === slot) && within(level, 1, 10));
+}
+
+function isNemesisMemory(value: unknown): value is NemesisMemory {
+  return isRecord(value) && isItemId(value.id) && isItemId(value.name) && isItemId(value.lastFightId)
+    && typeof value.league === 'string' && Object.hasOwn(LEAGUE_MAX_TIER, value.league)
+    && within(value.seed, 0, 0xffffffff) && within(value.level, 1, MAX_LEVEL)
+    && within(value.encounters, 1, 20) && within(value.charges, 0, 20) && within(value.heavyAttacks, 0, 20);
+}
+
 function isCharacter(value: unknown): value is SavedCharacter {
   if (!isRecord(value)) return false;
   const { attributes, hands, inventory } = value;
@@ -75,12 +103,18 @@ function isCharacter(value: unknown): value is SavedCharacter {
     && within(value.level, 1, MAX_LEVEL) && within(value.experience, 0)
     && (value.attributePoints === undefined || within(value.attributePoints, 0))
     && (value.skillPoints === undefined || within(value.skillPoints, 0)) && within(value.gold, 0)
+    && (value.health === undefined || within(value.health, 0))
+    && (value.skills === undefined || (Array.isArray(value.skills) && value.skills.every(isSkillId)))
     && isRecord(attributes) && ATTRIBUTES.every((key) => within(attributes[key], 0))
     && isLook(value.look)
     && (hands === undefined || (isRecord(hands) && ['weapon', 'offHand'].every((slot) => hands[slot] === undefined || isItemId(hands[slot]))))
     && Array.isArray(inventory) && inventory.every(isItemId)
     && (value.rewardedFightIds === undefined || (Array.isArray(value.rewardedFightIds) && value.rewardedFightIds.every(isItemId)))
-    && (value.achievements === undefined || isAchievementProgress(value.achievements));
+    && (value.achievements === undefined || isAchievementProgress(value.achievements))
+    && (value.forgeMaterials === undefined || isForgeMaterials(value.forgeMaterials))
+    && (value.armourImprovements === undefined || isArmourImprovements(value.armourImprovements))
+    && (value.nemesis === undefined || isNemesisMemory(value.nemesis))
+    && (value.leagueWins === undefined || (Array.isArray(value.leagueWins) && value.leagueWins.length <= 200 && value.leagueWins.every(isItemId)));
 }
 
 export function serializeSave(character: SavedCharacter): string {

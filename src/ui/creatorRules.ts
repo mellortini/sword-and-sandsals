@@ -63,8 +63,8 @@ export function randomSpread(random: () => number = Math.random): PointSpread {
   return s;
 }
 
-/** Trimmed name with inner spaces collapsed. */
-export const cleanName = (name: string) => name.trim().replace(/\s+/g, ' ');
+/** Trimmed name with inner spaces collapsed, letters composed (NFC: `ą` typed as `a` + ogonek counts as one letter). */
+export const cleanName = (name: string) => name.normalize('NFC').trim().replace(/\s+/g, ' ');
 
 /** Why the name cannot be used, or null when it is fine. Letters (any script), spaces, apostrophes and hyphens. */
 export function nameProblem(name: string): string | null {
