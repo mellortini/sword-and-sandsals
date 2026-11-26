@@ -27,6 +27,7 @@ it('keeps ordinary Pulpport starts and applies the Kraftmoor damp with normal re
   const state = createRegionalCombat(7, 'kraftmoor');
   expect(state.fighters.player.position).toBe(6);
   expect(state.fighters.enemy.position).toBe(14);
+  expect(createRegionalCombat(7, 'kraftmoor', { position: undefined }, { position: undefined })).toEqual(state);
   for (const fighter of Object.values(state.fighters)) {
     expect(fighter.statuses).toEqual([{ kind: 'soaked', turns: 2, stacks: 1 }]);
     expect(statusModifiers(fighter.statuses)).toMatchObject({ armourMultiplier: 0.8, movementMultiplier: 0.8 });

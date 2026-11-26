@@ -13,7 +13,9 @@ export function isRegionUnlocked(region: RegionId, character: Pick<SavedCharacte
 export function createRegionalCombat(seed: number, region: RegionId, player: FighterSetup = {}, enemy: FighterSetup = {}): CombatState {
   const { openingStatus, startingPositions } = REGIONS[region];
   const state = startingPositions
-    ? createCombat(seed, { position: startingPositions.player, ...player }, { position: startingPositions.enemy, ...enemy })
+    ? createCombat(seed,
+      { ...player, position: player.position ?? startingPositions.player },
+      { ...enemy, position: enemy.position ?? startingPositions.enemy })
     : createCombat(seed, player, enemy);
   if (!openingStatus) return state;
   return applyCombatStatus(applyCombatStatus(state, 'player', openingStatus), 'enemy', openingStatus);
