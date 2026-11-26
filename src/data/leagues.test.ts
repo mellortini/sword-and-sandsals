@@ -1,6 +1,8 @@
 import { expect, it } from 'vitest';
 import { chooseAction } from '../core/ai';
 import { createCombat, performAction } from '../core/combat';
+import type { League } from '../core/leagues';
+import { CHAMPION_DIALOGUE } from './dialogue';
 import { nextPulpportBronzeBout, PULPPORT_BRONZE, PULPPORT_CHAMPION_WEAPON, PULPPORT_LEAGUES } from './leagues';
 import type { PulpportBout } from './leagues';
 import { WEAPONS } from './weapons';
@@ -62,10 +64,15 @@ it('provides five ordered rosters with distinct IDs, both profiles and unique ch
   expect(new Set(bouts.map(({ id }) => id)).size).toBe(30);
   expect(new Set(bouts.map(({ name }) => name)).size).toBe(30);
   expect(new Set(champions.map((bout) => bout.champion?.weapon.id)).size).toBe(5);
-  for (const league of leagues) {
+  for (const id of Object.keys(PULPPORT_LEAGUES) as League[]) {
+    const league = PULPPORT_LEAGUES[id];
     expect(new Set(league.map(({ profile }) => profile))).toEqual(new Set(['aggressor', 'defender']));
     expect(league.slice(0, -1).every(({ champion }) => !champion)).toBe(true);
-    expect(league.at(-1)?.champion?.line).toBeTruthy();
+    const { before, after } = CHAMPION_DIALOGUE[id];
+    const lines = [...before, after.playerWon, after.playerLost];
+    expect(lines.every((line) => line.trim().length > 0)).toBe(true);
+    expect(new Set(lines).size).toBe(4);
+    expect(league.at(-1)?.champion?.line).toBe(before[0]);
     expect(league.every((bout, index) => !index || bout.level >= league[index - 1].level)).toBe(true);
   }
 });

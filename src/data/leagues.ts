@@ -2,6 +2,7 @@ import type { AiProfile } from '../core/ai';
 import type { League } from '../core/leagues';
 import type { Attributes, FighterSetup } from '../core/types';
 import type { Look } from '../rig/PaperRig';
+import { CHAMPION_DIALOGUE } from './dialogue';
 import { weapon } from './weapons';
 import type { Weapon, WeaponFamily } from './weapons';
 
@@ -41,7 +42,7 @@ export const PULPPORT_BRONZE: readonly PulpportBout[] = [
   {
     ...contender('bronze-champion', 'Varro the Gilded', 4, 'defender', 8, { might: 7, guard: 8, vitality: 7 },
       { helmet: 2, armor: 2, shoulders: 2, greaves: 2, boots: 2, weapon: 'sword3' }),
-    champion: { line: 'Pulpport has heard your name. Now show us what it is worth.', weapon: PULPPORT_CHAMPION_WEAPON },
+    champion: { line: CHAMPION_DIALOGUE.bronze.before[0], weapon: PULPPORT_CHAMPION_WEAPON },
   },
 ];
 
@@ -91,7 +92,7 @@ export const PULPPORT_SILVER: readonly PulpportBout[] = [
   leagueChampion({
     id: 'silver-champion', name: 'Livia of the Floodgate', level: 10, profile: 'defender', face: 5, tier: 4, family: 'spear',
     strengths: { guard: 3, precision: 2, vitality: 4 },
-  }, 'floodgate-standard', 'Floodgate Standard', 'A gate is only as strong as the one who holds it.'),
+  }, 'floodgate-standard', 'Floodgate Standard', CHAMPION_DIALOGUE.silver.before[0]),
 ];
 
 export const PULPPORT_GOLD: readonly PulpportBout[] = [
@@ -103,7 +104,7 @@ export const PULPPORT_GOLD: readonly PulpportBout[] = [
   leagueChampion({
     id: 'gold-champion', name: 'Aurelia Giltbrand', level: 16, profile: 'aggressor', face: 1, tier: 6, family: 'axe',
     strengths: { might: 5, stamina: 3, vitality: 4 },
-  }, 'giltbrand-cleaver', 'Giltbrand Cleaver', 'The gold leaf comes off. The cut stays.'),
+  }, 'giltbrand-cleaver', 'Giltbrand Cleaver', CHAMPION_DIALOGUE.gold.before[0]),
 ];
 
 export const PULPPORT_CHAMPION: readonly PulpportBout[] = [
@@ -115,7 +116,7 @@ export const PULPPORT_CHAMPION: readonly PulpportBout[] = [
   leagueChampion({
     id: 'champion-of-pulpport', name: 'Marcia of the Anvil', level: 22, profile: 'defender', face: 7, tier: 8, family: 'hammer',
     strengths: { guard: 4, vitality: 6, stamina: 3 },
-  }, 'last-impression', 'Last Impression', 'Stand where you like. The floor remembers everyone.'),
+  }, 'last-impression', 'Last Impression', CHAMPION_DIALOGUE.champion.before[0]),
 ];
 
 export const PULPPORT_LEGEND: readonly PulpportBout[] = [
@@ -127,7 +128,7 @@ export const PULPPORT_LEGEND: readonly PulpportBout[] = [
   leagueChampion({
     id: 'legend-champion', name: 'Quintus the First Fold', level: 32, profile: 'aggressor', face: 3, tier: 10, family: 'sword',
     strengths: { might: 8, precision: 5, vitality: 7, stamina: 4 },
-  }, 'first-fold', 'First Fold', 'I made the first crease. I have been undoing it ever since.'),
+  }, 'first-fold', 'First Fold', CHAMPION_DIALOGUE.legend.before[0]),
 ];
 
 export const PULPPORT_LEAGUES: Readonly<Record<League, readonly PulpportBout[]>> = {
