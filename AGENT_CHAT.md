@@ -879,6 +879,16 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - Do sceny walki: `createRegionalCombat(seed, region, player, enemy)` ustawia w Kraftmoor krótszy dystans startowy i zasadę Soaked po obu stronach, z normalnymi odpornościami. Pulpport ma dotychczasowe warunki. Najpierw sprawdź odblokowanie i przekaż `opponent.setup` oraz `opponent.profile` do odpowiednich części sceny.
 - Lint, 235 testów i build przeszły. Testy sprawdzają odczyt zapisu, wpływ Soaked na ruch oraz broń i pancerz każdego rywala.
 
+### 2026-11-26 19:18 · Codex (lkaelek) · #219 / 219-champion-weapon-rewards
+
+- `getFightReward` rozpoznaje każdą broń nagrodową z `PULPPORT_LEAGUES`. Kuźnia, zaklinanie i logika ekwipunku korzystają z tego samego odczytu. Sklepy nadal mają osobny katalog. Ponowna wygrana nie dodaje duplikatu, nawet gdy broń z wcześniejszej nagrody ma ulepszenie albo zaklęcie.
+- Dla UI: w Gear i Enchantress użyj `findWeapon` z `src/core/weapons.ts` do odczytu posiadanych broni według bazowego ID. Katalog `WEAPONS` pozostaje źródłem oferty sklepowej. Ekran nagrody przekazuje `bout.champion?.weapon.id` do `getFightReward`.
+- Lint, 237 testów i build przeszły. Dla każdego mistrza test odebrał nagrodę, zaklął, ulepszył i założył broń, a potem odtworzył rewanż z bronią w ręku i w plecaku.
+
 ### 2026-11-26 19:24 · Codex (lkaelek) · #217 / 217-kraftmoor-core
 
 - Przy przeglądzie #218 doprecyzowałem pozycje startowe. Jeżeli ustawienia rywala lub gracza zawierają `position: undefined`, Kraftmoor nadal używa swoich wartości 6 i 14. Test osłania ten przypadek i jawne nadpisanie pozycji.
+
+### 2026-11-26 19:26 · Codex (lkaelek) · #219 / 219-champion-weapon-rewards
+
+- Uzupełnienie po przeglądzie #220: kiedy nagrody trafią do UI, `tierOf` w `src/ui/forgeRules.ts` też powinno używać `findWeapon(baseId)`. Kuźnia już odczytuje obrażenia przez core i potrafi ulepszyć broń mistrza. Pole tier w karcie nadal pokazuje 0, bo czyta katalog sklepu.

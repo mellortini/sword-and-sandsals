@@ -1,4 +1,4 @@
-import { WEAPONS } from '../data/weapons';
+import { findWeapon } from '../data/weaponLookup';
 import { readForgedItem } from './forge';
 import type { SavedCharacter } from './save';
 import type { StatusKind } from './status';
@@ -18,7 +18,7 @@ export function enchantmentEffect({ element, power }: WeaponEnchantment): { dama
 
 export function enchantmentPrice(id: string, power: EnchantPower): number | undefined {
   const { baseId } = readForgedItem(readWeaponEnchantment(id).baseId);
-  const weapon = WEAPONS.find((entry) => entry.id === baseId);
+  const weapon = findWeapon(baseId);
   return weapon && Object.hasOwn(PRICE_SHARE, power) ? Math.ceil(weapon.price * PRICE_SHARE[power]) : undefined;
 }
 

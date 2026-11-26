@@ -1,11 +1,15 @@
 import { expect, it } from 'vitest';
-import { PULPPORT_CHAMPION_WEAPON } from '../data/leagues';
+import { PULPPORT_CHAMPION_WEAPON, PULPPORT_LEAGUES } from '../data/leagues';
+import { WEAPONS } from '../data/weapons';
 import { createCombat, performAction } from './combat';
+import { enchantWeapon } from './enchant';
+import { upgradeForgeItem } from './forge';
 import { equipItem } from './inventory';
 import { applyFightReward, getFightReward } from './rewards';
 import { deserializeSave, serializeSave } from './save';
 import type { SavedCharacter } from './save';
 import { resolveAttributes } from './stats';
+import { combatWeapon } from './weapons';
 
 const character: SavedCharacter = {
   name: 'Aelia', level: 1, experience: 0, gold: 50, attributes: resolveAttributes(), inventory: ['armor1'],
@@ -63,4 +67,42 @@ it('rejects a reward that would overflow the material balance', () => {
   const full = { ...character, forgeMaterials: { scraps: Number.MAX_SAFE_INTEGER, glue: 0, ink: 0, threads: 0 } };
   expect(() => applyFightReward(full, championWin(), true)).toThrow(RangeError);
   expect(full.forgeMaterials.scraps).toBe(Number.MAX_SAFE_INTEGER);
+});
+
+const leaguePrizes = Object.entries(PULPPORT_LEAGUES).map(([league, bouts]) => ({ league, bout: bouts.at(-1)! }));
+
+it.each(leaguePrizes)('awards and equips the $league champion weapon without adding it to the shop catalogue', ({ league, bout }) => {
+  const prize = bout.champion!.weapon;
+  const state = createCombat(
+    1, { position: 4, attributes: { might: 2_000, precision: 100 } },
+    { ...bout.setup, position: 5 },
+  );
+  expect(state.fighters.enemy.weapon?.id).not.toBe(prize.id);
+  const fight = performAction(state, 'normal').state;
+  const reward = getFightReward(fight, `${league}-first`, prize.id);
+  if (!reward) throw new Error('Expected a completed championship bout.');
+  expect(reward.weapon).toBe(prize);
+  expect(WEAPONS.some(({ id }) => id === prize.id)).toBe(false);
+
+  const claimed = applyFightReward({ ...character, gold: 100_000 }, reward, true);
+  expect(claimed.inventory).toEqual(['armor1', prize.id]);
+  const enchant = enchantWeapon(claimed, prize.id, 'backpack', { element: 'fire', power: 2 });
+  if (!enchant.ok) throw new Error(`Could not enchant ${prize.id}: ${enchant.reason}`);
+  const forged = upgradeForgeItem({
+    inventory: { backpack: enchant.character.inventory, equipped: {} },
+    materials: { scraps: 100, glue: 100, ink: 100, threads: 100 },
+  }, enchant.id);
+  if (!forged.ok) throw new Error(`Could not forge ${prize.id}: ${forged.reason}`);
+  const upgradedId = `${prize.id}^+1~fire~2`;
+  expect(forged.state.inventory.backpack).toEqual(['armor1', upgradedId]);
+  expect(combatWeapon(upgradedId)).toMatchObject({ damage: prize.damage + 1, enchantment: { element: 'fire', power: 2 } });
+  expect(equipItem(forged.state.inventory, upgradedId, { level: 32, might: 100 }, 'offHand')).toMatchObject({
+    ok: true, inventory: { equipped: { offHand: upgradedId } },
+  });
+
+  const rematch = { ...reward, fightId: `${league}-rematch` };
+  const packed = { ...enchant.character, inventory: [...forged.state.inventory.backpack] };
+  expect(applyFightReward(packed, rematch, true).inventory).toEqual(['armor1', upgradedId]);
+  const worn = { ...enchant.character, inventory: ['armor1'], hands: { offHand: upgradedId } };
+  expect(applyFightReward(worn, rematch, true).inventory).toEqual(['armor1']);
 });
