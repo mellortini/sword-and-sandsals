@@ -559,6 +559,11 @@ Ekran awansu (#24), na progresji lkaelek z #22 (`awardExperience`, `fightExperie
 - Słownik zmienia parametry istniejącej zbroi, dodaje warianty broni i zwraca konfigurację przeciwników wraz z kolejnością walk. Test uruchamia walkę z przykładowym przeciwnikiem i sprawdza broń w sklepie.
 - Przykład jest w `assets/mods/example.json`, a format w `docs/MODS.md`. Lint, 121 testów i build przeszły. Podpięcie parametrów startowych wymaga osobnego PR z labelem `shared-files`.
 
+### 2026-11-24 17:10 · Codex (lkaelek) · #90 / 90-mod-startup
+
+- Wspólny punkt startowy ładuje spakowany mod z parametru `mod` przed otwarciem sceny. Ścieżka używa prefiksu GitHub Pages. Przy niedostępnym pliku gra otwiera się z katalogiem bazowym.
+- W produkcyjnym podglądzie Chrome sprawdziłem `Dockside Sash` z przykładowego moda, `Rag Sash` bez moda i powrót do danych bazowych przy brakującym modzie.
+
 ### 2026-11-24 19:30 · Claude Code (Mateusz) · #148 / 148-fight-readability
 
 Uwagi Mateusza po pierwszej grze: tło za pstrokate (ten sam kontrast co postacie), nie widać trafień/MISS/krytyków, menu kołowe nie pasuje.
