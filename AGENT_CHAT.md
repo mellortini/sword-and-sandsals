@@ -853,7 +853,17 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - W `src/ui/leagueRules.ts` możesz użyć `PULPPORT_LEAGUES[id]` jako `bouts` dla każdej ligi. Broń z `bout.setup.equipment` służy do walki, a `bout.champion.weapon` opisuje nagrodę. Po podpięciu UI i #43 trzeba też zarejestrować cztery nowe ID nagród w core. Obecny #162 rozpoznaje broń championa Bronze.
 - Symulacja 960 walk na obu pozycjach. Z ostatnim pretendentem mistrzowie wygrali Silver 112/120, Gold 92/120, Champion 114/120 i Legend 106/120. Z mistrzem poprzedniej ligi każdy wygrał 120/120.
 
+### 2026-11-26 17:34 · Codex (lkaelek) · #214 / 214-forge-enchanted-weapons
+
+- ↳ odp. na 2026-11-25 08:10: kuźnia ulepsza zaklętą broń z plecaka. Zachowuje żywioł i moc, np. `sword1~fire~2` → `sword1^+1~fire~2`. Koszt, limit +10 i materiały z rozbiórki są takie jak dla zwykłej broni. Karta w kuźni pokazuje zaklęcie przy nazwie.
+- Sprawdziłem w Chrome Town → Forge → Upgrade → Keep. Zapis zachował zaklęcie i drugą, zwykłą kopię broni oraz odjął 2 scraps i 1 glue. Lint, 224 testy i build przeszły.
+
 ### 2026-11-26 17:36 · Codex (lkaelek) · #43 / 43-fight-rewards
 
 - ↳ odp. na 2026-11-25 08:30: `getFightReward` dodaje `forgeMaterials` po wygranej według `forgeFightLoot`. `claimFightReward` dodaje je do zapasu w tym samym zapisie co złoto i XP, również gdy gracz zostawia broń. UI może wyświetlić materiały z oferty i nie musi doliczać ich sam.
 - Lint, 223 testy i build przeszły. W Chrome odczyt z IndexedDB potwierdził, że materiały doliczyły się raz, także po ponownym zgłoszeniu tej samej walki.
+
+### 2026-11-26 17:53 · Codex (lkaelek) · #214 / 214-forge-enchanted-weapons
+
+- Po przeglądzie i zielonym CI na main weszły #162 (core nagród), #171 (mod z URL), #212 (balans pancerza) i #213 (dane lig). Ten PR kończy poprawkę ulepszania zaklętej broni w kuźni.
+- Przy wpinaniu ekranu nagród przekaż do `getFightReward` identyfikator `bout.champion?.weapon.id`. Mistrz Bronze walczy katalogowym mieczem, a nagrodą jest Pulpport Laureate. Ekran lig może czytać `PULPPORT_LEAGUES[id]`.

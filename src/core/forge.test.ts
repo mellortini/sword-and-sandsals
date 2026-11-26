@@ -65,3 +65,32 @@ it('keeps the upgrade when an upgraded weapon is enchanted', () => {
   const inventory = { equipped: {}, backpack: ['sword1^+3~fire~2'] };
   expect(equipItem(inventory, 'sword1^+3~fire~2', { level: 1, might: 5 }).ok).toBe(true);
 });
+
+it.each([
+  ['sword1~fire~2', 'sword1', 'sword1^+1~fire~2', 1, 'fire', 2],
+  ['sword1^+9~water~3', 'sword1^+9', 'sword1^+10~water~3', 10, 'water', 3],
+] as const)('upgrades %s while keeping its enchantment and material costs', (id, plainId, nextId, level, element, power) => {
+  const state: ForgeState = { ...initial, inventory: { ...initial.inventory, backpack: [id, plainId] } };
+  const cost = forgeUpgradeCost(id);
+  expect(cost).toBeDefined();
+  expect(cost).toEqual(forgeUpgradeCost(plainId));
+  const result = upgradeForgeItem(state, id);
+  expect(result.ok).toBe(true);
+  expect(result.state.inventory.backpack).toEqual([nextId, plainId]);
+  expect(result.state.materials).toEqual(upgradeForgeItem(state, plainId).state.materials);
+  expect(combatWeapon(nextId)).toMatchObject({ damage: combatWeapon('sword1')!.damage + level, enchantment: { element, power } });
+  expect(forgePresentation(nextId)).toEqual({
+    label: `${forgePresentation('sword1')?.label} +${level} (${element} ${power})`, glow: level / 10,
+  });
+  expect(salvageForgeItem(state, id).state.materials).toEqual(salvageForgeItem(state, plainId).state.materials);
+  if (level === 10) {
+    expect(upgradeForgeItem(result.state, nextId)).toEqual({ ok: false, state: result.state, reason: 'unavailable' });
+  }
+});
+
+it.each(['helmet1~fire~2', 'sword1~fire~4', 'sword1~fire~2^+1'])('does not forge the invalid variant %s', (id) => {
+  const state: ForgeState = { ...initial, inventory: { ...initial.inventory, backpack: [id] } };
+  expect(upgradeForgeItem(state, id)).toEqual({ ok: false, state, reason: 'unavailable' });
+  expect(salvageForgeItem(state, id)).toEqual({ ok: false, state, reason: 'unavailable' });
+  expect(forgePresentation(id)).toBeUndefined();
+});
