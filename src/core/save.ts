@@ -6,7 +6,7 @@ import type { AchievementProgress } from './achievements';
 import { FORGE_MATERIALS } from './forge';
 import type { ForgeMaterials } from './forge';
 import { LEAGUE_MAX_TIER } from './leagues';
-import type { NemesisMemory } from './nemesis';
+import type { NemesisAppearance, NemesisMemory } from './nemesis';
 import { MAX_LEVEL } from './progression';
 import { resolveAttributes } from './stats';
 import type { ArmourImprovements, Attributes, EquipmentLoadout } from './types';
@@ -62,9 +62,12 @@ function within(value: unknown, min: number, max = Number.MAX_SAFE_INTEGER): boo
   return typeof value === 'number' && Number.isSafeInteger(value) && value >= min && value <= max;
 }
 
+function isAppearance(value: unknown): value is NemesisAppearance & Record<string, unknown> {
+  return isRecord(value) && APPEARANCE.every((part) => within(value[part], 0, 9));
+}
+
 function isLook(value: unknown): value is Look {
-  return isRecord(value)
-    && APPEARANCE.every((part) => within(value[part], 0, 9))
+  return isAppearance(value)
     && EQUIPMENT.every((slot) => within(value[slot], 0, 10))
     && typeof value.weapon === 'string';
 }
@@ -92,6 +95,7 @@ function isArmourImprovements(value: unknown): value is ArmourImprovements {
 function isNemesisMemory(value: unknown): value is NemesisMemory {
   return isRecord(value) && isItemId(value.id) && isItemId(value.name) && isItemId(value.lastFightId)
     && typeof value.league === 'string' && Object.hasOwn(LEAGUE_MAX_TIER, value.league)
+    && (value.appearance === undefined || isAppearance(value.appearance))
     && within(value.seed, 0, 0xffffffff) && within(value.level, 1, MAX_LEVEL)
     && within(value.encounters, 1, 20) && within(value.charges, 0, 20) && within(value.heavyAttacks, 0, 20);
 }

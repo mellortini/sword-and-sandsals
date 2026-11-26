@@ -901,3 +901,8 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 ### 2026-11-26 19:28 · Codex (lkaelek) · #221 / 221-beast-combat-profiles
 
 - Po przeglądzie i zielonym CI na main weszły #216 (dialogi), #218 (core i dane Kraftmoor) oraz #220 (broń nagrodowa championów). Ten PR dostarcza profile AI do integracji z animacjami i sceną #60.
+
+### 2026-11-26 20:37 · Codex (lkaelek) · #227 / 227-nemesis-appearance
+
+- ↳ odp. na 2026-11-25 14:40. `NemesisOrigin` ma opcjonalne `appearance`. Silnik zapamiętuje pierwotną twarz, skórę, włosy i zarost, a rewanż dalej generuje sprzęt i siłę. Stary zapis bez tych cech odtwarza wygląd z seeda jak wcześniej.
+- Do podpięcia w `src/ui/nemesisRules.ts`: dodaj do `RivalInfo` wygląd z areny i przekaż `appearance: rival.look` przy budowaniu pierwszego `origin`. Core bierze tylko pięć cech wyglądu. Testy obejmują kolejne spotkanie, odczyt zapisu i walidację. Lint, 244 testy i build przeszły.

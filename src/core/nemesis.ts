@@ -1,3 +1,4 @@
+import type { Look } from '../rig/PaperRig';
 import { chooseAction } from './ai';
 import type { AiDecision } from './ai';
 import { getActionOptions } from './combat';
@@ -7,11 +8,15 @@ import type { League } from './leagues';
 import { MAX_LEVEL } from './progression';
 import type { CombatEvent, CombatState } from './types';
 
+export type NemesisAppearance = Readonly<Pick<Look, 'skin' | 'face' | 'hair' | 'hairColor' | 'beard'>>;
+
 export interface NemesisOrigin {
   readonly id: string;
   readonly seed: number;
   readonly level: number;
   readonly league: League;
+  /** The original opponent's features. Equipment is still generated for the rematch. */
+  readonly appearance?: NemesisAppearance;
 }
 
 export interface NemesisMemory extends NemesisOrigin {
@@ -20,6 +25,10 @@ export interface NemesisMemory extends NemesisOrigin {
   readonly charges: number;
   readonly heavyAttacks: number;
   readonly lastFightId: string;
+}
+
+function copyAppearance({ skin, face, hair, hairColor, beard }: NemesisAppearance): NemesisAppearance {
+  return { skin, face, hair, hairColor, beard };
 }
 
 export function rememberNemesis(
@@ -38,8 +47,10 @@ export function rememberNemesis(
     if (event.kind === 'charge') charges = Math.min(20, charges + 1);
     if (event.kind === 'power') heavyAttacks = Math.min(20, heavyAttacks + 1);
   }
+  const appearance = sameRival?.appearance ?? origin.appearance;
   return {
     ...origin, seed: origin.seed >>> 0, name: sameRival?.name ?? state.fighters.enemy.name,
+    ...(appearance && { appearance: copyAppearance(appearance) }),
     encounters: Math.min(20, (sameRival?.encounters ?? 0) + 1), charges, heavyAttacks, lastFightId: fightId,
   };
 }
@@ -54,7 +65,8 @@ export function nemesisOpponent(memory: NemesisMemory, playerLevel: number): Gen
     guard: opponent.attributes.guard + growth,
     vitality: opponent.attributes.vitality + growth,
   };
-  return { ...opponent, level: Math.max(level, opponent.level), name: memory.name, attributes };
+  const look = memory.appearance ? { ...opponent.look, ...copyAppearance(memory.appearance) } : opponent.look;
+  return { ...opponent, level: Math.max(level, opponent.level), name: memory.name, attributes, look };
 }
 
 export function chooseNemesisAction(state: CombatState, memory: NemesisMemory, rngState: number): AiDecision {
