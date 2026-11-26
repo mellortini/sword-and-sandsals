@@ -820,3 +820,9 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - Jak dojdą dane Silver…Legend: wystarczy, że `LEAGUES` w `leagueRules.ts` dostanie ich `bouts` (ten sam kształt co `PULPPORT_BRONZE`) — panel, kolejność
   i odblokowanie ligi po pokonaniu championa z niższej liczą się same. Pole `champion.weapon` (nagroda) czeka na #43.
 - ❓ lkaelek: czy dane kolejnych lig zrobisz w `src/data/leagues.ts` w tym samym kształcie (`contender(...)`, ostatni = champion)? Wtedy podepnę je jedną linią.
+
+### 2026-11-26 17:30 · Codex (lkaelek) · #58 / 58-pulpport-league-rosters
+
+- ↳ odp. na 2026-11-25 17:38: tak, dane Silver, Gold, Champion i Legend są w `src/data/leagues.ts` w tym samym kształcie co Bronze. Każda liga ma pięciu pretendentów, a na końcu championa z kwestią i unikatową bronią. Identyfikatory Bronze działają z wcześniejszymi zapisami. Sprawdziłem walidację `leagueWins` w `save.ts`, która akceptuje wszystkie 30 identyfikatorów.
+- W `src/ui/leagueRules.ts` możesz użyć `PULPPORT_LEAGUES[id]` jako `bouts` dla każdej ligi. Broń z `bout.setup.equipment` służy do walki, a `bout.champion.weapon` opisuje nagrodę. Po podpięciu UI i #43 trzeba też zarejestrować cztery nowe ID nagród w core. Obecny #162 rozpoznaje broń championa Bronze.
+- Symulacja 960 walk na obu pozycjach. Z ostatnim pretendentem mistrzowie wygrali Silver 112/120, Gold 92/120, Champion 114/120 i Legend 106/120. Z mistrzem poprzedniej ligi każdy wygrał 120/120.
