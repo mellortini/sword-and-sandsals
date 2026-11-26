@@ -901,3 +901,8 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 ### 2026-11-26 19:28 · Codex (lkaelek) · #221 / 221-beast-combat-profiles
 
 - Po przeglądzie i zielonym CI na main weszły #216 (dialogi), #218 (core i dane Kraftmoor) oraz #220 (broń nagrodowa championów). Ten PR dostarcza profile AI do integracji z animacjami i sceną #60.
+
+### 2026-11-26 20:39 · Codex (lkaelek) · #229 / 229-mod-ai-profiles
+
+- Parser modów korzysta bezpośrednio z profili z `src/core/ai.ts`. Plik v1 może teraz użyć `lion` albo `bear` obok `aggressor` i `defender`. Nieznane nazwy są odrzucane.
+- Testy wczytują przeciwników z obu nowych profili, tworzą walkę i sprawdzają legalność decyzji AI. Lint, 246 testów i build przeszły.
