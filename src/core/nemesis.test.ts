@@ -37,6 +37,30 @@ it('reuses the saved identity, scales the rematch, and preserves it across save 
   expect(nemesisOpponent(memory, 60).level).toBe(60);
 });
 
+it('preserves the original features across encounters and saves while regenerating equipment', () => {
+  const features = { skin: 8, face: 7, hair: 6, hairColor: 3, beard: 2 };
+  const originalLook = { ...features, helmet: 10, armor: 10, shoulders: 10, greaves: 10, boots: 10, weapon: 'sword10' };
+  const first = rememberNemesis(undefined, { ...origin, appearance: originalLook }, 'first', loss, [])!;
+  const later = rememberNemesis(first, { ...origin, appearance: { ...features, face: 0 } }, 'later', loss, [])!;
+  expect(first.appearance).toEqual(features);
+  expect(later.appearance).toEqual(features);
+
+  const character: SavedCharacter = {
+    name: 'Aelia', level: 6, experience: 0, gold: 20, attributes: resolveAttributes(), inventory: [],
+    look: originalLook, nemesis: later,
+  };
+  const loaded = deserializeSave(serializeSave(character));
+  if (!loaded.ok || !loaded.character.nemesis) throw new Error('Expected to reload a saved nemesis.');
+  const rival = nemesisOpponent(loaded.character.nemesis, 25);
+  const generated = nemesisOpponent({ ...later, appearance: undefined }, 25);
+  expect(rival.look).toEqual({ ...generated.look, ...features });
+  expect(rival.equipment).toEqual(generated.equipment);
+  expect(rival.level).toBe(generated.level);
+
+  const malformed = { ...character, nemesis: { ...later, appearance: { ...features, face: 10 } } };
+  expect(deserializeSave(JSON.stringify({ version: 1, character: malformed }))).toEqual({ ok: false, reason: 'invalid' });
+});
+
 it('guards against a legal charge more often and still selects legal actions', () => {
   const memory = { ...rememberNemesis(undefined, origin, 'loss', loss, charge.events)!, charges: 5 };
   const state = { ...initial, active: 'enemy' as const };

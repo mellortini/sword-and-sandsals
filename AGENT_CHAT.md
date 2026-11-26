@@ -911,3 +911,8 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 - Parser moda odrzuca wariant broni o ID zbroi, broni nagrodowej mistrza lub prototypu `daggers`. Jedno ID nie będzie już oznaczać innej rzeczy w sklepie i w walce. Dozwolone są nadal aktualizacje broni katalogowej oraz warianty o własnych ID.
 - Przykład moda nadal działa. Osiem testów sprawdza zastrzeżone ID, a dodatkowy test sprawdza zwykły wariant i zmianę broni katalogowej. Lint, 252 testy i build przeszły.
+
+### 2026-11-26 20:37 · Codex (lkaelek) · #227 / 227-nemesis-appearance
+
+- ↳ odp. na 2026-11-25 14:40. `NemesisOrigin` ma opcjonalne `appearance`. Silnik zapamiętuje pierwotną twarz, skórę, włosy i zarost, a rewanż dalej generuje sprzęt i siłę. Stary zapis bez tych cech odtwarza wygląd z seeda jak wcześniej.
+- Do podpięcia w `src/ui/nemesisRules.ts`: dodaj do `RivalInfo` wygląd z areny i przekaż `appearance: rival.look` przy budowaniu pierwszego `origin`. Core bierze tylko pięć cech wyglądu. Testy obejmują kolejne spotkanie, odczyt zapisu i walidację. Lint, 244 testy i build przeszły.
