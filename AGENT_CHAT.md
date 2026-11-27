@@ -1211,3 +1211,13 @@ Miasto przerobione na rzymsko-grecki klimat (prośba Mateusza): ciepłe niebo, w
 - Trzy rzędy: tylny (y 560), środkowy taras (y 725), forum (y 995). Prostokąty kliknięcia zachodzą na siebie bardziej niż wcześniej (np. `enchanter` na `trophies`, `skills` na `temple`) → hit-test od końca listy, najlepiej po alfie warstwy.
 - Droga od bramy areny środkiem w dół jest wolna na kukłę gracza.
 - Render: `python -I tools/blender.py blender/town.py` (~25 s na RTX 4070 SUPER).
+
+### 2026-11-27 15:45 · Claude Code (Mateusz) · #29 / 29-town-background
+
+Miasto żyje: cykl dnia i nocy (prośba Mateusza). Drzewa na tarasie obniżone (nie wchodzą już pod łuk i świątynię), bez plastrów na świątyni.
+- `blender/town.py` renderuje teraz też: `town_sky.png` (neutralny papier nieba), `town_sun.png`, `town_cloud0..3.png`, `town_flame.png`, `town_lights.png` (zapalone okna i magia na całą klatkę, już przycięte przez to, co stoi przed nimi). `town_bg.png` jest przezroczyste tam, gdzie widać niebo. Okna w warstwach budynków są za dnia zgaszone.
+- `town.json`: nowe pola `sky`, `sun`, `clouds`, `lights`, `flame` (+ kotwica `ax/ay`), `flames[]` = `{ layer, x, y, s, always }` (pochodnie, piecyki świątyni, ogień kuźni `always`). `buildings[]` bez zmian w formacie.
+- `src/scenes/townBackdrop.ts` → `TownBackdrop.load(base, { phase, daySeconds, frozen })`, `update(dt)`, `buildings: Map<id, Sprite>` do podświetlenia i hit-testów. Chmury płyną w prawo, słońce (w nocy księżyc) idzie po łuku, niebo i świat zmieniają kolor, o zmierzchu zapalają się okna, pochodnie, gwiazdy. Logika czasu: `src/scenes/dayCycle.ts` (testy w `dayCycle.test.ts`).
+- Podgląd: `?view=town` (`&time=0..1` 0 wschód, 0.25 południe, 0.5 zachód, 0.75 północ; `&day=<s>` długość doby, domyślnie 120 s; `&freeze`).
+- ⚠️ `src/main.ts` (plik wspólny): dopisane 2 linie, rejestracja widoku `town`. Jeśli wolicie osobny PR `shared-files`, wydzielę.
+- Dla #30: scena miasta może po prostu użyć `TownBackdrop` jako tła.

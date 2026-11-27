@@ -11,6 +11,9 @@ Three rows, back to front: the arena between the triumphal arch and the temple (
 academy on the middle terrace (y = 725), the shops on the forum (y = 995). The road from the arena gate down the
 middle stays free for the player's puppet.
 
+The sky, the sun, the clouds, the lit windows (`lights`) and the flames are separate so the game can run a day and
+night cycle: clouds drift, the sun crosses the sky on an arc, lamps, torches and braziers light up at dusk.
+
 Everything is designed in screen pixels of the 1920x1080 frame (x right, y DOWN); P() maps them to the paper plane.
 The camera is orthographic, so every layer lands exactly where it was designed and the layers stack without parallax.
 """
@@ -49,7 +52,7 @@ def glow(name, color, k=1.6):
     return m or pc.glow_mat(name, color, k)
 
 
-SKY, SKY_M, SKY_LO = paper('sky', '#9fc6d6', 'water', 0.07), paper('sky_m', '#cddfd2', 'water', 0.07), paper('sky_lo', '#f5ddb0', 'water', 0.07)
+SKY = paper('sky', '#ffffff', 'water', 0.07)          # neutral paper; the game colours it by the time of day
 CLOUD, SUN, HALO = paper('cloud', '#fff7e8', 'white'), paper('sun', '#fff1bd', 'white'), paper('halo', '#fae0a4', 'water')
 FAR, FAR_D, FAR_W, FAR_R = (paper('far', '#d3c79a', 'water'), paper('far_d', '#bfb585', 'water'),
                             paper('far_w', '#efe1c3', 'water'), paper('far_r', '#d8a07c', 'water'))
@@ -85,6 +88,8 @@ STEEL = sl.foil('steel', '#c3c9d1', metal=0.7, rough=0.35, emit=0.18)
 BRONZE = sl.foil('bronze', '#b9783e', metal=0.65, rough=0.38, emit=0.2)
 FIRE, FIRE_HOT = glow('fire', '#ff7a1a', 1.5), glow('fire_hot', '#ffd25a', 1.7)
 LAMP, MAGIC = glow('lamp', '#ffbe55', 1.15), glow('magic', '#69e6d2', 1.15)
+# by day the lamps and the magic are off: building layers use these, the night `lights` layer the glowing ones
+LIGHT_OFF = {LAMP.name: paper('lamp_off', '#7a5034'), MAGIC.name: paper('magic_off', '#4d8a84')}
 SMOKE = paper('smoke', '#cfc5bd', 'water')
 
 
@@ -201,6 +206,32 @@ def curb(x0, x1, y, mat=None):
     B(x0 + 8, y + 10, x1 - 8, y + 20, PLAZA, 2.3, 0.08, 4)
 
 
+FLAMES = []                                      # animated in the game: [layer, x, y (flame base), size, always]
+layer_key = 'bg'
+
+
+def flame(x, y, s=1.0, always=False):
+    """a flame the game animates; `always` burns day and night (the forge), others light up at dusk"""
+    FLAMES.append(dict(layer=layer_key, x=round(x, 1), y=round(y, 1), s=s, always=always))
+
+
+def torch(x, top, bottom, z, s=0.75):
+    """a wooden torch post with a bronze cup; the flame comes from the game"""
+    B(x - 3.5, top + 10, x + 3.5, bottom, WOOD_D, z, 0.08)
+    for y in (top + 26, top + 40):
+        B(x - 5, y, x + 5, y + 4, BRONZE, z + 0.1, 0.03)
+    poly([(x - 13, top - 2), (x + 13, top - 2), (x + 7, top + 14), (x - 7, top + 14)], BRONZE, z + 0.12, 0.1)
+    B(x - 9, top - 4, x + 9, top + 2, DARK, z + 0.24, 0.03, 2)
+    flame(x, top + 1, s)
+
+
+def oil_lamp(x, y, z, chain=18):
+    """a small bronze oil lamp hanging inside a shop; it glows at night"""
+    B(x - 1, y - chain, x + 1, y, DARK, z, 0.02)
+    poly([(x - 11, y), (x + 11, y), (x + 7, y + 7), (x - 7, y + 7)], BRONZE, z + 0.02, 0.05)
+    E(x + 9, y - 3, 4, 6, LAMP, z + 0.08, 0.03, 12)
+
+
 # ------------------------------------------------------------------ greenery
 def cypress(x, base, h, w, z, far=False):
     if far:
@@ -223,8 +254,8 @@ def umbrella_pine(x, base, h, w, z, lean=0.0):
     poly([(tx, base - h * 0.55), (tx - w * 0.22, base - h + 18), (tx - w * 0.2, base - h + 24)], BARK, z + 0.01, 0.05)
     for i in range(7):
         k = (i + 0.5) / 7
-        E(tx - w / 2 + w * k, base - h + 6 - 14 * math.sin(math.pi * k), w / 7 + 8, 17, PINE_D if i % 2 else PINE, z + 0.1 + i * 0.01, 0.06, 20)
-    E(tx, base - h - 4, w * 0.36, 16, PINE, z + 0.2, 0.05, 24)
+        E(tx - w / 2 + w * k, base - h + 6 - 14 * math.sin(math.pi * k), w / 7 + 8, 17, PINE_D if i % 2 else PINE, z + 0.1 + i * 0.065, 0.06, 20)
+    E(tx, base - h - 4, w * 0.36, 16, PINE, z + 0.6, 0.05, 24)
 
 
 def olive(x, base, s, z):
@@ -233,15 +264,15 @@ def olive(x, base, s, z):
          BARK, z, 0.1)
     for i, (dx, dy, rx, ry) in enumerate(((-46, -88, 36, 24), (0, -108, 44, 28), (44, -90, 38, 24), (-22, -120, 32, 20),
                                          (24, -124, 34, 20), (-58, -70, 22, 15), (60, -72, 22, 15))):
-        E(x + dx * s, base + dy * s, rx * s, ry * s, (OLIVE, OLIVE_D, OLIVE_L)[i % 3], z + 0.12 + i * 0.012, 0.05, 22)
+        E(x + dx * s, base + dy * s, rx * s, ry * s, (OLIVE, OLIVE_D, OLIVE_L)[i % 3], z + 0.12 + i * 0.055, 0.05, 22)
 
 
 def bush(x, y, r, z, flowers=0):
     for i, (dx, dy, k) in enumerate(((-0.6, 0.05, 0.7), (0.6, 0.05, 0.75), (0, -0.25, 0.95))):
-        E(x + dx * r, y + dy * r, r * k, r * k * 0.82, (HEDGE, HEDGE_D, HEDGE)[i], z + i * 0.015, 0.08, 22)
+        E(x + dx * r, y + dy * r, r * k, r * k * 0.82, (HEDGE, HEDGE_D, HEDGE)[i], z + i * 0.085, 0.08, 22)
     for _ in range(flowers):
         a, d = rnd.uniform(0, math.tau), rnd.uniform(0.1, 0.8) * r
-        E(x + math.cos(a) * d * 1.2, y - r * 0.25 + math.sin(a) * d * 0.6, 3.8, 3.8, rnd.choice(FLOWERS[:4]), z + 0.2, 0.03, 10)
+        E(x + math.cos(a) * d * 1.2, y - r * 0.25 + math.sin(a) * d * 0.6, 3.8, 3.8, rnd.choice(FLOWERS[:4]), z + 0.26, 0.03, 10)
 
 
 def flower_bed(x0, x1, y, z, depth=18):
@@ -319,18 +350,7 @@ def road_x(y):
 
 
 def background():
-    # warm sky in three bands, a soft sun and paper clouds
-    B(-30, -30, 1950, 520, SKY, 0.0, 0.1)
-    B(-30, 150, 1950, 520, SKY_M, 0.1, 0.05)
-    B(-30, 280, 1950, 520, SKY_LO, 0.16, 0.05)
-    E(1800, 92, 84, 84, HALO, 0.2, 0.04, 48)
-    E(1800, 92, 56, 56, SUN, 0.26, 0.05, 48)
-    for i in range(8):
-        cx, cy = 90 + i * 250 + rnd.uniform(-60, 60), rnd.uniform(60, 210)
-        if cx > 1660:
-            cx -= 140
-        for j in range(3):
-            E(cx + (j - 1) * 50, cy - (14 if j == 1 else 0), rnd.uniform(44, 70), rnd.uniform(20, 30), CLOUD, 0.3 + j * 0.05, 0.06)
+    # (the sky, the sun and the clouds are separate layers the game moves: sky(), sun(), cloud())
     # far hills: pale olive, little white villas with red roofs, rows of far cypresses
     for layer, (mat, y0, amp, z) in enumerate(((FAR, 360, 40, 0.5), (FAR_D, 405, 34, 0.75))):
         pts = [(-40, 540)]
@@ -346,6 +366,9 @@ def background():
                 bw = rnd.uniform(26, 44)
                 B(x, y - 18, x + bw, y + 4, FAR_W, z + 0.08, 0.03)
                 poly([(x - 4, y - 18), (x + bw / 2, y - 28), (x + bw + 4, y - 18)], FAR_R, z + 0.1, 0.03)
+                for wx in range(int(bw // 12)):
+                    if rnd.random() < 0.7:
+                        B(x + 5 + wx * 12, y - 12, x + 10 + wx * 12, y - 5, LAMP, z + 0.1, 0.02)
             for k in range(rnd.randint(2, 4)):
                 cypress(x + 48 + k * 13, y + 6, rnd.uniform(34, 52), 10, z + 0.1, far=True)
     # the aqueduct striding over the hills (left and right of the arena)
@@ -368,10 +391,10 @@ def background():
     # back terrace: lawn, the travertine walk the back row stands on, rows of tall cypresses
     B(-30, 500, 1950, 600, GRASS, 1.5, 0.1)
     for x in range(-20, 1950, 34):
-        E(x, 502, 22, 9, GRASS_L, 1.52, 0.03, 16)
+        E(x, 502, 22, 9, GRASS_L, 1.52 + (x // 34 % 2) * 0.035, 0.03, 16)
     B(-30, 540, 1950, 578, TRAV, 1.6, 0.06)
     B(-30, 574, 1950, 582, TRAV_D, 1.62, 0.04)
-    for x, h in ((462, 250), (500, 290), (540, 262), (1356, 262), (1396, 296), (1434, 250), (25, 210), (1895, 215)):
+    for x, h in ((462, 250), (500, 290), (540, 262), (1356, 262), (1396, 296), (1434, 250)):
         cypress(x, 556, h, 34, 1.7)
     # retaining wall with a balustrade and steps in the middle
     B(-30, 580, 1950, 650, TRAV_D, 1.9, 0.14)
@@ -389,11 +412,11 @@ def background():
             poly([(x - 5, 600), (x - 7, 592), (x + 7, 592), (x + 5, 600), (x + 7, 606), (x - 7, 606)], TRAV_L, 2.12, 0.05)
     for x, y in ((80, 610), (330, 622), (1610, 612), (1830, 620), (700, 640)):   # ivy over the wall
         for k in range(6):
-            E(x + rnd.uniform(-30, 30), y + rnd.uniform(-12, 22), rnd.uniform(9, 14), rnd.uniform(7, 10), (HEDGE, HEDGE_D, GRASS_D)[k % 3], 2.2, 0.03, 14)
+            E(x + rnd.uniform(-30, 30), y + rnd.uniform(-12, 22), rnd.uniform(9, 14), rnd.uniform(7, 10), (HEDGE, HEDGE_D, GRASS_D)[k % 3], 2.2 + k * 0.035, 0.03, 14)
     # middle terrace: lawn with paths, hedges at its front edge
     B(-30, 648, 1950, 780, GRASS, 2.3, 0.1)
     for x in range(-20, 1950, 30):
-        E(x + rnd.uniform(-6, 6), 650, 20, 8, GRASS_L, 2.32, 0.03, 14)
+        E(x + rnd.uniform(-6, 6), 650, 20, 8, GRASS_L, 2.32 + (x // 30 % 2) * 0.035, 0.03, 14)
     B(-30, 718, 1950, 740, TRAV, 2.34, 0.05, 6)                         # path the middle row stands on
     # steps from the forum up to the arena, then the road itself
     for i in range(5):
@@ -401,11 +424,12 @@ def background():
         l, r = road_x(y)
         B(l - 30, y, r + 30, y + 15, (TRAV_L, TRAV, TRAV_L, TRAV, TRAV_L)[i], 2.4 + i * 0.02, 0.06, 3)
     # hedges and planting on the middle terrace
-    olive(150, 712, 1.15, 2.5)
-    olive(1780, 712, 1.2, 2.5)
-    cypress(1630, 718, 190, 36, 2.45)
-    cypress(1672, 718, 160, 30, 2.47)
-    cypress(278, 718, 170, 32, 2.45)
+    # kept low: the crowns stay under the balustrade, never under the back-row buildings
+    olive(150, 736, 0.86, 2.5)
+    olive(1790, 736, 0.9, 2.5)
+    cypress(1636, 722, 118, 30, 2.45)
+    cypress(1672, 722, 96, 26, 2.47)
+    cypress(282, 722, 112, 28, 2.45)
     for x, r, fl in ((40, 26, 5), (250, 22, 4), (1600, 22, 4), (1900, 28, 5), (1080, 20, 3), (840, 20, 3)):
         bush(x, 712, r, 2.6, fl)
     # fountain on the left of the road, a marble gladiator on the right
@@ -438,7 +462,7 @@ def background():
         B(x0, 752, x1, 784, HEDGE_D, 3.1, 0.12, 12)
         x = x0 + 10
         while x < x1 - 10:
-            E(x, 754, 15, 9, HEDGE, 3.22, 0.04, 16)
+            E(x, 754, 15, 9, HEDGE, 3.22 + (round(x) // 24 % 2) * 0.045, 0.04, 16)
             x += 24
     # the forum: travertine flagstones that grow towards the viewer
     B(-30, 776, 1950, 1110, PLAZA, 3.3, 0.12)
@@ -468,6 +492,8 @@ def background():
             B(a + 3, y, b - 3, y + tall - 4, rnd.choice(ROAD), 3.56, 0.03, 4)
         y += tall
         row += 1
+    for x in (road_x(745)[0] - 26, road_x(745)[1] + 26):        # torches at the foot of the steps
+        torch(x, 664, 748, 3.2, 0.8)
     # tall pots with cypresses flanking the road, flower verge at the bottom of the frame
     for side in (-1, 1):
         l, r = road_x(830)
@@ -477,7 +503,7 @@ def background():
         B(x0, 1048, x1, 1110, GRASS, 3.8, 0.1, 10)
         xx = x0 + 6
         while xx < x1:
-            E(xx, 1050, 13, 7, GRASS_L, 3.9, 0.03, 12)
+            E(xx, 1050, 13, 7, GRASS_L, 3.9 + (round(xx) // 20 % 2) * 0.035, 0.03, 12)
             xx += 20
         flower_bed(x0 + 10, x1 - 10, 1068, 3.95, 20)
 
@@ -550,7 +576,8 @@ def leagues():
             if j == 2 and i == n // 2:
                 continue
             A(cx, top + 34 - lift * 0.55, bottom - 18, step * 0.58, SHADE, z + 0.22, 0.05)
-            A(cx, top + 44 - lift * 0.55, bottom - 18, step * 0.40, SHADE_L, z + 0.28, 0.03)
+            lit = (j == 2 and i % 3 == 1) or (j == 1 and i % 4 == 2)
+            A(cx, top + 44 - lift * 0.55, bottom - 18, step * 0.40, LAMP if lit else SHADE_L, z + 0.28, 0.03)
         B(960 - half - 8, bottom - 18, 960 + half + 8, bottom - 4, TRAV_D, z + 0.32, 0.1, 3)
         pts = [(960 - half - 6, top - 6)] + [(960 - half + 2 * half * i / 20, top - 22 * math.sin(math.pi * i / 20) - 6) for i in range(21)] + [(960 + half + 6, top - 6)]
         poly(pts + [(x, y + 10) for x, y in reversed(pts)], TRAV_D, z + 0.3, 0.06)    # cornice line
@@ -567,6 +594,8 @@ def leagues():
         poly([(x - 28, 412), (x + 28, 412), (x + 28, 496), (x, 520), (x - 28, 496)], (POMP, PURPLE)[i % 2], 1.7, 0.07)
         B(x - 32, 406, x + 32, 414, GOLD, 1.74, 0.05, 2)
         E(x, 454, 12, 12, GOLD, 1.8, 0.05, 20)
+    for x in (874, 1046):
+        torch(x, 456, 540, 1.6, 0.7)
     curb(598, 1322, base)
     for x in (630, 1290):
         pot(x, base - 6, 2.6, 0.8, 'cypress')
@@ -591,18 +620,14 @@ def temple():
     drop(cx, 176, 13, GOLD, 1.4, 0.1)
     for side in (-1, 1):
         E(cx + side * 186, 280, 9, 9, GOLD, 1.6, 0.06, 16)
-    tape = paper('tape', '#d9c58a', 'white')
-    for x, y, a in ((cx - 110, 300, -14), (cx + 96, 446, 24), (cx - 64, 486, -10)):
-        c, s = math.cos(math.radians(a)), math.sin(math.radians(a))
-        poly([(x + u * c - v * s, y + u * s + v * c) for u, v in ((-30, -9), (30, -9), (27, -3), (31, 3), (27, 9), (-30, 9), (-26, 3), (-31, -3))], tape, 1.7, 0.03)
     for i in range(3):
         B(cx - 170 - i * 12, base - 42 + i * 13, cx + 170 + i * 12, base - 28 + i * 13, (MARBLE, MARBLE_D, MARBLE)[i], 1.8 + i * 0.1, 0.1, 2)
     for x in (cx - 196, cx + 196):                                           # bronze braziers
         for d in (-1, 1):
             poly([(x + d * 3, base - 50), (x + d * 7, base - 50), (x + d * 18, base - 4), (x + d * 14, base - 4)], BRONZE, 2.0, 0.06)
         poly([(x - 22, base - 66), (x + 22, base - 66), (x + 14, base - 48), (x - 14, base - 48)], BRONZE, 2.06, 0.1)
-        drop(x, base - 80, 13, FIRE, 2.12, 0.04)
-        drop(x, base - 74, 6, FIRE_HOT, 2.18, 0.03)
+        B(x - 16, base - 70, x + 16, base - 64, DARK, 2.18, 0.03, 2)
+        flame(x, base - 66, 0.85)
     curb(cx - 216, cx + 216, base)
     for x in (cx - 150, cx + 150):
         bush(x, base - 16, 16, 2.5, 3)
@@ -650,7 +675,7 @@ def skills():
     for row in range(3):                                                    # scroll shelves on the back wall
         for i in range(4):
             x0, y0 = cx - 104 + i * 54, 578 + row * 34
-            B(x0, y0, x0 + 46, y0 + 28, SHADE, 0.4, 0.04, 2)
+            B(x0, y0, x0 + 46, y0 + 28, LAMP if (i + row) % 3 == 1 else SHADE, 0.4, 0.04, 2)
             for k in range(3):
                 E(x0 + 9 + k * 14, y0 + 16, 6, 6, (CREAM, PLASTER, YELLOW)[(i + k + row) % 3], 0.46, 0.04, 14)
     tiles(cx - 130, cx + 130, 516, 552, 0.8)
@@ -683,6 +708,7 @@ def weaponsmith():
     for i, x in enumerate((70, 104, 138, 172)):
         gladius(x, 868, 0.8, 0.62, (STEEL, STEEL, BRONZE, STEEL)[i])
     B(52, 848, 204, 856, WOOD_D, 0.9, 0.06)
+    oil_lamp(190, 874, 0.92)
     B(40, 942, 216, 958, MARBLE, 1.1, 0.12, 2)                               # counter
     B(46, 958, 210, base - 2, TRAV_D, 1.0, 0.12)
     poly([(70, 936), (180, 936), (196, 940), (180, 944), (70, 944)], STEEL, 1.3, 0.04)
@@ -715,8 +741,9 @@ def forge():
     tiles(288, 516, 776, 824, 0.8)
     A(372, 852, base - 6, 116, TRAV_D, 0.9, 0.12)
     A(372, 866, base - 6, 90, SHADE, 1.0, 0.05)
-    poly([(334, 984), (340, 948), (354, 962), (364, 920), (378, 952), (392, 930), (410, 984)], FIRE, 1.1, 0.04)
-    poly([(350, 984), (358, 958), (368, 966), (374, 944), (388, 984)], FIRE_HOT, 1.16, 0.04)
+    E(372, 976, 30, 7, FIRE, 1.05, 0.03, 24)                              # embers; the flames come from the game
+    for x, s in ((352, 1.0), (392, 1.05), (372, 1.45)):
+        flame(x, 982, s, always=True)
     B(326, 978, 418, 990, DARK, 1.2, 0.06, 3)
     for x in (434, 454, 474):                                                # tongs and hammers on the wall
         B(x - 2, 852, x + 2, 912, WOOD_D, 0.9, 0.04)
@@ -752,6 +779,7 @@ def armourer():
     scutum(586, 904, 34, 64, 0.8)
     helmet(636, 906, 0.8, POMP, 0.62)
     B(552, 950, 680, 964, MARBLE, 1.1, 0.1, 2)
+    oil_lamp(662, 880, 0.9)
     for i in range(6):                                                       # awning
         x = 548 + i * 23
         poly([(x + 4, 846), (x + 27, 846), (x + 23, 878), (x, 878)], POMP if i % 2 == 0 else CREAM, 1.3, 0.08)
@@ -770,6 +798,7 @@ def trainer():
     base = 995
     B(1172, 852, 1322, base - 10, PLASTER, 0.3, 0.15)
     B(1186, 876, 1238, 966, SHADE, 0.4, 0.04)
+    window(1196, 892, 1228, 928, 0.45)
     door(1286, 900, base - 10, 40, 0.45)
     tiles(1166, 1328, 812, 852, 0.8)
     for x in (1182, 1232, 1282):
@@ -831,17 +860,42 @@ def tavern():
         B(x - 4, 878, x + 4, base - 2, WOOD_D, 1.15, 0.08)
     for i in range(26):
         x = 1528 + i * 13.5 + rnd.uniform(-4, 4)
-        E(x, 872 + rnd.uniform(-8, 8), rnd.uniform(10, 15), rnd.uniform(8, 11), (HEDGE, GRASS_D, CYP_L)[i % 3], 1.3 + (i % 3) * 0.01, 0.04, 14)
+        E(x, 872 + rnd.uniform(-8, 8), rnd.uniform(10, 15), rnd.uniform(8, 11), (HEDGE, GRASS_D, CYP_L)[i % 3], 1.3 + (i % 3) * 0.05, 0.04, 14)
     for x in (1574, 1668, 1812):                                             # grapes
         for k, (dx, dy) in enumerate(((0, 0), (-5, 6), (5, 6), (0, 12), (-3, 18), (3, 18), (0, 24))):
             E(x + dx, 888 + dy, 4, 4, PURPLE, 1.36, 0.03, 10)
     for x, s in ((1858, 0.8), (1838, 0.65)):
         amphora(x, base - 2, s, 1.5 + (0.8 - s))
-    B(1730, 962, 1752, base - 2, WOOD_L, 1.5, 0.08, 2)                       # a bench
+    torch(1741, 898, 990, 1.45, 0.6)
     sign(1528, 830, 1.6, CREAM)
     amphora(1528, 858, 0.48, 1.85, TERRA)
     curb(1516, 1890, base)
     pot(1900, base - 4, 2.5, 0.8)
+
+
+# ------------------------------------------------------------------ sky layers the game animates
+def sky():
+    """neutral paper for the whole sky; the game multiplies it over a gradient that follows the time of day"""
+    B(-30, -30, 1950, 560, SKY, 0.0, 0.1)
+
+
+def sun():
+    E(960, 540, 84, 84, HALO, 0.0, 0.04, 48)
+    E(960, 540, 56, 56, SUN, 0.06, 0.05, 48)
+
+
+def cloud(seed):
+    r = random.Random(seed)
+    n = 3 + seed % 2
+    for j in range(n):
+        E(960 + (j - (n - 1) / 2) * 50, 540 - (14 if j in (1, 2) and n == 4 or j == 1 else 0),
+          r.uniform(44, 70), r.uniform(20, 30), CLOUD, 0.05 * j, 0.06)
+
+
+def flame_sprite():
+    """one paper flame, base at (960, 540); the game sways, stretches and flickers copies of it"""
+    drop(960, 522, 18, FIRE, 0.0, 0.05)
+    drop(960, 530, 9, FIRE_HOT, 0.08, 0.04)
 
 
 # ------------------------------------------------------------------ build, manifest, render
@@ -853,10 +907,13 @@ BUILDINGS = [
     ('weaponsmith', 'Weaponsmith', weaponsmith), ('forge', 'Forge', forge), ('armourer', 'Armourer', armourer),
     ('trainer', 'Trainer', trainer), ('tavern', 'Tavern', tavern),
 ]
+CLOUDS = 4
+EXTRA = [('sky', sky), ('sun', sun), ('flame', flame_sprite)] + [(f'cloud{i}', (lambda i=i: cloud(i))) for i in range(CLOUDS)]
 colls = {}
-for key, build in [('bg', background)] + [(k, f) for k, _, f in BUILDINGS]:
+for key, build in [('bg', background)] + [(k, f) for k, _, f in BUILDINGS] + EXTRA:
     coll = sl.new_coll(key)
     colls[key] = coll
+    layer_key = key
     build()
 
 
@@ -869,14 +926,35 @@ def pixel_box(c, pad=4):
 
 
 bpy.context.view_layer.update()
-boxes = {k: pixel_box(colls[k]) for k, _, _ in BUILDINGS}
+boxes = {k: pixel_box(colls[k]) for k in colls if k != 'bg'}
+WORLD = ['bg'] + [k for k, _, _ in BUILDINGS]
+lit = {o.name: o.data.materials[0] for k in WORLD for o in colls[k].all_objects
+       if o.data.materials and o.data.materials[0] in (LAMP, MAGIC)}   # object -> its glowing material
+
+
+def sprite(k):
+    x, y, w, h = boxes[k]
+    return dict(image=f'town_{k}.png', x=x, y=y, w=w, h=h)
+
+
+fx, fy, fw, fh = boxes['flame']
 manifest = {
     'size': [W, H],
+    # everything below the sky is transparent where the sky shows; the game draws the sky behind it
     'background': 'town_bg.png',
+    'sky': sprite('sky'),
+    # sprites positioned around their centre at (960, 540) in the render; the game places and moves them
+    'sun': dict(image='town_sun.png', w=boxes['sun'][2], h=boxes['sun'][3]),
+    'clouds': [dict(image=f'town_cloud{i}.png', w=boxes[f'cloud{i}'][2], h=boxes[f'cloud{i}'][3]) for i in range(CLOUDS)],
+    # lit windows and magic, full frame, already cut by whatever stands in front of them: fade in at dusk
+    'lights': 'town_lights.png',
+    # flame sprite: anchor = where its base sits (fraction of the sprite)
+    'flame': dict(image='town_flame.png', w=fw, h=fh, ax=round((960 - fx) / fw, 3), ay=round((540 - fy) / fh, 3)),
+    # flames to animate; `layer` = the building they belong to (draw them just above it), `always` = burns by day too
+    'flames': FLAMES,
     # draw in this order at (x, y). The rectangle is the click area; where two overlap, the later one is on top, so
     # hit-test from the end of the list
-    'buildings': [dict(id=k, name=n, image=f'town_{k}.png', x=boxes[k][0], y=boxes[k][1], w=boxes[k][2], h=boxes[k][3])
-                  for k, n, _ in BUILDINGS],
+    'buildings': [dict(id=k, name=n, **sprite(k)) for k, n, _ in BUILDINGS],
 }
 with open(os.path.join(OUT, 'town.json'), 'w', encoding='utf-8', newline='\n') as f:
     json.dump(manifest, f, indent=2)
@@ -889,16 +967,35 @@ cam.data.sensor_fit = 'HORIZONTAL'
 cam.location = (0, 0, 60)
 cam.rotation_euler = (0, 0, 0)
 sc.render.resolution_x, sc.render.resolution_y = W, H
+sc.render.film_transparent = True
+sc.render.image_settings.color_mode = 'RGBA'
 
-for key in colls:
+
+def lamps(on):
+    for name, mat in lit.items():
+        bpy.data.objects[name].data.materials[0] = mat if on else LIGHT_OFF[mat.name]
+
+
+lamps(False)
+for key in list(colls) + ['lights']:
     if ONLY and key not in ONLY:
         continue
-    for k, c in colls.items():
-        c.hide_render = k != key
-    sc.render.film_transparent = key != 'bg'
-    sc.render.image_settings.color_mode = 'RGB' if key == 'bg' else 'RGBA'
-    sc.render.use_border = sc.render.use_crop_to_border = key != 'bg'
-    if key != 'bg':
+    if key == 'lights':
+        # every world layer visible, all but the lamps held out: the lamps come out cut by what stands in front
+        lamps(True)
+        for k, c in colls.items():
+            c.hide_render = k not in WORLD
+        # the layers were built each on its own, so stack them in draw order before they can hide one another
+        cam.location.z, cam.data.clip_end = 400, 1000
+        for i, k in enumerate(WORLD):
+            for o in colls[k].all_objects:
+                o.is_holdout = o.name not in lit
+                o.location.z += 12 * i
+    else:
+        for k, c in colls.items():
+            c.hide_render = k != key
+    sc.render.use_border = sc.render.use_crop_to_border = key in boxes
+    if key in boxes:
         x, y, w, h = boxes[key]
         # Blender's border is a fraction of the frame measured from the bottom left
         sc.render.border_min_x, sc.render.border_max_x = x / W, (x + w) / W

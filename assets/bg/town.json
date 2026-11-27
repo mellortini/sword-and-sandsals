@@ -4,6 +4,120 @@
     1080
   ],
   "background": "town_bg.png",
+  "sky": {
+    "image": "town_sky.png",
+    "x": 0,
+    "y": 0,
+    "w": 1920,
+    "h": 565
+  },
+  "sun": {
+    "image": "town_sun.png",
+    "w": 178,
+    "h": 178
+  },
+  "clouds": [
+    {
+      "image": "town_cloud0.png",
+      "w": 233,
+      "h": 75
+    },
+    {
+      "image": "town_cloud1.png",
+      "w": 269,
+      "h": 78
+    },
+    {
+      "image": "town_cloud2.png",
+      "w": 245,
+      "h": 75
+    },
+    {
+      "image": "town_cloud3.png",
+      "w": 254,
+      "h": 78
+    }
+  ],
+  "lights": "town_lights.png",
+  "flame": {
+    "image": "town_flame.png",
+    "w": 46,
+    "h": 55,
+    "ax": 0.5,
+    "ay": 0.909
+  },
+  "flames": [
+    {
+      "layer": "bg",
+      "x": 817.1,
+      "y": 665,
+      "s": 0.8,
+      "always": false
+    },
+    {
+      "layer": "bg",
+      "x": 1102.9,
+      "y": 665,
+      "s": 0.8,
+      "always": false
+    },
+    {
+      "layer": "leagues",
+      "x": 874,
+      "y": 457,
+      "s": 0.7,
+      "always": false
+    },
+    {
+      "layer": "leagues",
+      "x": 1046,
+      "y": 457,
+      "s": 0.7,
+      "always": false
+    },
+    {
+      "layer": "temple",
+      "x": 1469,
+      "y": 494,
+      "s": 0.85,
+      "always": false
+    },
+    {
+      "layer": "temple",
+      "x": 1861,
+      "y": 494,
+      "s": 0.85,
+      "always": false
+    },
+    {
+      "layer": "forge",
+      "x": 352,
+      "y": 982,
+      "s": 1.0,
+      "always": true
+    },
+    {
+      "layer": "forge",
+      "x": 392,
+      "y": 982,
+      "s": 1.05,
+      "always": true
+    },
+    {
+      "layer": "forge",
+      "x": 372,
+      "y": 982,
+      "s": 1.45,
+      "always": true
+    },
+    {
+      "layer": "tavern",
+      "x": 1741,
+      "y": 899,
+      "s": 0.6,
+      "always": false
+    }
+  ],
   "buildings": [
     {
       "id": "trophies",
