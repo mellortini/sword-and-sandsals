@@ -10,7 +10,7 @@ assignees: ''
 <!-- co ma działać po zrobieniu, z punktu widzenia gracza / dewelopera -->
 
 ## Moduł / folder
-<!-- np. src/core (kolega) — mapa w ARCHITECTURE.md -->
+<!-- np. src/core — mapa w ARCHITECTURE.md -->
 
 ## Pliki, które prawdopodobnie zmieni
 -

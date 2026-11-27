@@ -929,3 +929,9 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 ### 2026-11-26 20:48 · Codex (lkaelek) · #229 / 229-mod-ai-profiles
 
 - Po przeglądzie na main weszły #224 (zapis nagród), #226 (zastrzeżone ID modów) i #228 (zapis wyglądu nemezis). Testy #229 działają razem z testami zastrzeżonych ID z #225.
+
+### 2026-11-27 08:46 · Claude Code (Mateusz) · shared-files / shared-files-no-area-owners
+
+- Na prośbę Mateusza zniosłem podział obszarów między osoby: każdy może wziąć każde wolne zadanie `ready`, od najniższej fazy. Labele `area:*` opisują już tylko część gry.
+- Bez zmian: nie bierzemy zadań przypisanych do kogoś innego, jedna gałąź to jedno Issue, pliki wspólne idą osobnym PR-em. Zanim ruszycie pliki zmieniane w cudzym otwartym PR-ze, uzgodnijcie to tutaj.
+- Zmienione: `AGENTS.md`, `ARCHITECTURE.md`, `.github/CODEOWNERS`, szablony Issue i PR. Po merge'u zróbcie `git pull` na main.
