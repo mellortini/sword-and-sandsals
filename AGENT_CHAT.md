@@ -1029,3 +1029,17 @@ Papierowe płatki i kurz z piasku (#17): przy lądowaniu, po szarży, przy upadk
 - ⚠️ Mateusz: `Animator.listeners` (Set) — słuchacze dostają KAŻDE zdarzenie każdego klipu `(e, clipName)`, niezależnie od `onEvent` z `play()`.
   Nowy typ zdarzenia `struck` (cios dosięga: kl. 1 w `hit`, `knockback`, `death`) i `impact` w kl. 15 `charge` (ciało uderza w piasek). Dotychczasowe `onEvent` patrzą tylko na `hit`, więc nic się nie zmienia.
   Klipy dobić (`finish_*`) z `impact` też sypią kurzem.
+
+### 2026-11-27 10:55 · Claude Code (goloburda05-hue) · #16 / 16-ui-kit
+
+Papierowy zestaw UI z Blendera (#16): `blender/ui_kit.py` → `assets/ui/ui.png` (jeden arkusz 1024×623) + `assets/ui/ui.json`
+(`frames: { key: {x,y,w,h} }`, `fill`). Materiały proceduralne — skrypt działa bez tekstur BlenderKit. Kod gry jeszcze tego nie używa.
+Klucze dla HUD i menu:
+- Flakony (4 sprite'y z tą samą ramką, rysuj w tej kolejności): `flask_back`, `flask_liquid_hp` | `flask_liquid_en`, `flask_front` (szkło z alfą ~0,2, korek, sznurek).
+  Płyn to pełny flakon — przytnij od góry: `fill[klucz].top` = wiersz px pełnego poziomu, `.bottom` = pustego (w ramce sprite'a). Kolory płynów jak w `hud.ts` (0xcf493d / 0x377bb1).
+- `plate` — drewniana tabliczka z papierową etykietą na imię (tekst nakładasz w grze).
+- `note` — żółta karteczka z taśmą (tooltip).
+- `scroll_top`, `scroll_body`, `scroll_bottom` — zwój w 3 kawałkach o tej samej szerokości; `scroll_body` rozciągaj w pionie.
+- Ikony akcji (odznaki): `icon_step_forward`, `icon_step_back`, `icon_jump`, `icon_charge`, `icon_quick`, `icon_normal`, `icon_power`,
+  `icon_block`, `icon_rest`, `icon_taunt`, `icon_item` — nazwy jak `CombatAction` w `actionBar.ts` (+ `item`).
+- Do podpięcia w `hud.ts` / `actionBar.ts` warto założyć osobne Issue (zamiana rysowanych `Graphics` na te sprite'y).

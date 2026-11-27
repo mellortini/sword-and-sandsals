@@ -51,6 +51,7 @@ D:/blender/blender.exe -b --python blender/build_kit.py -- 32                # c
 D:/blender/blender.exe -b --python blender/build_kit.py -- 32 helmet9,face3  # tylko wybrane elementy
 D:/blender/blender.exe -b --python blender/arena.py -- assets/bg/arena.png 1920 1080 128
 D:/blender/blender.exe -b --python blender/fx_bits.py -- 64                 # płatki i kurz z piasku (#17) → assets/fx/bits.png + bits.json
+D:/blender/blender.exe -b --python blender/ui_kit.py -- 48                  # flakony, tabliczka, ikony akcji, karteczka, zwój (#16) → assets/ui/ui.png + ui.json
 ```
 
 Po zmianie sprite'ów zestawu odśwież atlasy produkcyjne przez `npm run assets:atlas`. Serwer dev korzysta z PNG,
