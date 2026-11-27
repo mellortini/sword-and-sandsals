@@ -1198,6 +1198,15 @@ Zaczynamy MVP. Tło miasta Pulpport (#29): `blender/town.py` → `assets/bg/town
   człowieka, czyj głos. Pole `voice` w danych i odtwarzaczu jest gotowe.
 - Mateusz: jeśli masz inną wizję tych scen (kadry, kolejność), łatwo podmienić — każde ujęcie to osobna funkcja w story_act1.py.
 
+### 2026-11-27 15:00 · Claude Code (goloburda05-hue) · #75 / 75-camera-juice
+
+- Kamera w walce: `src/ui/cameraJuice.ts` — mikro-zoom (4%) w stronę krytyka (dobicie mocniej), krótki wstrząs na evencie `impact`
+  (szarża 1, upadek 0.55), powolny dryf. Zawsze 1.5% zapasu i clamp, więc krawędź tła nie wchodzi w kadr (test).
+- `src/ui/motion.ts`: ustawienie „reduce motion” (domyślnie z prefers-reduced-motion, zapis w localStorage, `cycleMotion()` dla #80) — wyłącza całą kamerę.
+- Arena / walka AI / laboratorium: kontener `arena` jest teraz sceną pod kamerą, **HUD przeniesiony na `world`** (stoi w miejscu).
+  `CombatPresenter` ma opcję `camera`. Lab: checkbox „reduce motion”.
+- Kolejność zadań: #60 i #67 (F7) wymagają dużych zmian w `src/core` — zostawiam je, dopóki lkaelek ma #57 i (ew.) #258, żeby się nie zderzyć.
+
 ### 2026-11-27 15:10 · Claude Code (Mateusz) · #29 / 29-town-background
 
 Miasto przerobione na rzymsko-grecki klimat (prośba Mateusza): ciepłe niebo, wzgórza z akweduktem, cyprysy, pinie, oliwki, zadbane trawniki z żywopłotem, fontanna, posąg, forum z trawertynu.
@@ -1218,15 +1227,6 @@ Po uwagach Mateusza: młot i włócznia to broń **dwuręczna**, młot bije znad
   `Animator.play('attack_normal')` sam wybiera wariant dla rodzaju broni z wyglądu — **CombatPresenter nie wymaga zmian**.
 - `Clip.reach`: włócznia trafia z dalszej odległości, więc `lunge` jest o tyle krótszy (2,4 j.) — nie wchodzi w przeciwnika.
 - ❓ goloburda05-hue: jeśli gdzieś odtwarzacie klip po nazwie bez `Animator` (np. `clips[name]`), użyjcie `animator.clipFor(name)`, żeby złapać wariant broni.
-
-### 2026-11-27 15:00 · Claude Code (goloburda05-hue) · #75 / 75-camera-juice
-
-- Kamera w walce: `src/ui/cameraJuice.ts` — mikro-zoom (4%) w stronę krytyka (dobicie mocniej), krótki wstrząs na evencie `impact`
-  (szarża 1, upadek 0.55), powolny dryf. Zawsze 1.5% zapasu i clamp, więc krawędź tła nie wchodzi w kadr (test).
-- `src/ui/motion.ts`: ustawienie „reduce motion” (domyślnie z prefers-reduced-motion, zapis w localStorage, `cycleMotion()` dla #80) — wyłącza całą kamerę.
-- Arena / walka AI / laboratorium: kontener `arena` jest teraz sceną pod kamerą, **HUD przeniesiony na `world`** (stoi w miejscu).
-  `CombatPresenter` ma opcję `camera`. Lab: checkbox „reduce motion”.
-- Kolejność zadań: #60 i #67 (F7) wymagają dużych zmian w `src/core` — zostawiam je, dopóki lkaelek ma #57 i (ew.) #258, żeby się nie zderzyć.
 
 ### 2026-11-27 15:45 · Claude Code (Mateusz) · #29 / 29-town-background
 
