@@ -7,6 +7,8 @@ import type { CombatSlotAction, CombatSlotOption } from '../core/spells';
 import { AIMS, AIM_INFO, aimDescription, aimedChance, aimedCommand } from './aimRules';
 import type { Aim, AimInfo } from './aimRules';
 import type { ActionOption, CombatAction } from '../core/types';
+import { frameCss, loadUiSheet } from './uiSheet';
+import type { UiSheet } from './uiSheet';
 import './actionBar.css';
 
 /** The cards in order, grouped as they sit on the bar. Aim (#195) and slot items (#191) have groups of their own. */
@@ -75,6 +77,9 @@ export function placeBar(barWidth: number, barHeight: number, slot: BarSlot, scr
  * so nothing covers the fighters. Every action always has its card; ones the core does not allow now are faded.
  * Keys 1–9 and 0 pick a card, arrows move between cards, Enter picks the focused one.
  */
+/** px width of the badge icon on a card (#16) */
+const ICON_SIZE = 26;
+
 export class ActionBar {
   private readonly element = document.createElement('div');
   private readonly tooltip = new Tooltip();
@@ -91,6 +96,8 @@ export class ActionBar {
   private aim: Aim = 'body';
   private aimInfo?: AimInfo;
   private readonly aimButtons = new Map<Aim, HTMLButtonElement>();
+  /** the paper UI kit (#16) for the card icons; until it loads the cards show their names only */
+  private sheet: UiSheet | null = null;
 
   constructor(private readonly onAction: (action: CombatAction | CombatSlotAction | TargetedAttack) => void) {
     this.element.className = 'action-bar';
@@ -121,6 +128,18 @@ export class ActionBar {
     this.close();
     document.body.append(this.element);
     window.addEventListener('keydown', this.onKey, { signal: this.listeners.signal });
+    void loadUiSheet().then((s) => {
+      this.sheet = s;
+      for (const icon of this.element.querySelectorAll<HTMLElement>('.action-card__icon')) this.paintIcon(icon);
+    });
+  }
+
+  /** an icon span gets its badge from the sheet (data-icon = frame key) once the sheet is there */
+  private paintIcon(icon: HTMLElement) {
+    const css = this.sheet && frameCss(this.sheet, icon.dataset.icon ?? '', ICON_SIZE);
+    if (!css) return;
+    Object.assign(icon.style, css);
+    icon.hidden = false;
   }
 
   /**
@@ -178,6 +197,7 @@ export class ActionBar {
     card.dataset.action = action;
     card.style.setProperty('--tilt', `${[-1.2, 0.8, -0.4, 1, -0.8, 0.5, -1, 0.7, -0.5, 1.1][index % 10]}deg`);
     card.innerHTML = `<span class="action-card__key" aria-hidden="true">${cardKey(index)}</span>`
+      + `<span class="action-card__icon" data-icon="icon_${action}" aria-hidden="true" hidden></span>`
       + `<span class="action-card__label">${label}</span>`
       + '<span class="action-card__cost"></span><span class="action-card__stamp" aria-hidden="true"></span>';
     this.tooltip.attach(card, () => {
@@ -270,9 +290,11 @@ export class ActionBar {
       const usable = !option.unavailable;
       card.setAttribute('aria-disabled', String(!usable));
       const count = option.quantity === undefined ? '' : `×${option.quantity}`;
-      card.innerHTML = `<span class="action-card__label"></span><span class="action-card__cost">${usable ? (option.energyCost > 0 ? `${option.energyCost} EN` : 'free') : ''}</span>`
+      card.innerHTML = '<span class="action-card__icon" data-icon="icon_item" aria-hidden="true" hidden></span>'
+        + `<span class="action-card__label"></span><span class="action-card__cost">${usable ? (option.energyCost > 0 ? `${option.energyCost} EN` : 'free') : ''}</span>`
         + `<span class="action-card__stamp" aria-hidden="true"${count ? '' : ' hidden'}>${count}</span>`;
       card.querySelector('.action-card__label')!.textContent = option.name;
+      this.paintIcon(card.querySelector<HTMLElement>('.action-card__icon')!);
       card.setAttribute('aria-label', `${option.name}${count ? `, ${option.quantity} left` : ''}${usable ? '' : `, ${UNAVAILABLE_TEXT[option.unavailable!].toLowerCase()}`}`);
       this.tooltip.attach(card, () => ({
         title: option.name,
