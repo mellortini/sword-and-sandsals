@@ -33,6 +33,7 @@ import { loadoutFromLook } from './preFight';
 import { aiPicker, nemesisPicker, runFight } from './turnLoop';
 import type { ActionPicker } from './turnLoop';
 import { arenaBackdrop } from './backdrop';
+import { CrowdFx } from '../ui/crowdFx';
 import { FIGHT_LAYOUT } from './combatPlan';
 import { nextOpponent } from './opponents';
 
@@ -79,6 +80,8 @@ export async function showArena(
   const arena = new Container();
   world.addChild(arena);
   arena.addChild(new Sprite(arenaBackdrop(bgTex)));
+  // the painted stands come alive (#52): over the backdrop, under the fighters
+  const crowdFx = arena.addChild(new CrowdFx());
 
   const tp = params.get('tier');
   const tier = tp ? +tp : undefined;
@@ -109,6 +112,7 @@ export async function showArena(
   const hud = new CombatHud({ fighters: { player: empty, enemy: empty } }, W, H);
   arena.addChild(hud);
   const presenter = new CombatPresenter({
+    crowdFx,
     fighters: { player: rigs.find((r) => r.rig === P)!.anim!, enemy: rigs.find((r) => r.rig === E)!.anim! },
     fx, unit: UNIT, layout: LAYOUT, floorY: FEET_Y, sound: true, crowd,
     onState: (s) => hud.setState(s),
@@ -215,6 +219,7 @@ export async function showArena(
     hud.setPanelScale(Math.min(1.6, hudScaleFor(world.scale.x) * textScale()));
     hud.update(dt);
     fx.update(dt); // damage numbers, MISS and BLOCK animate and fade only while ticked
+    crowdFx.update(dt);
     const gap = hud.panelGap;
     const s = world.scale.x;
     const links = ui.getBoundingClientRect();

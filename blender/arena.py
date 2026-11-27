@@ -5,7 +5,8 @@ barrier wall with banners, sand floor. Perspective camera with shallow DOF so th
 
 Frame at the fighters plane: 50.5 x 28.4 units (x -25.25..25.25, y -9.5..18.9), feet line around y = -4.5.
 """
-import bpy, sys, os, math, random
+import bpy, sys, os, math, random, json
+from mathutils import Vector
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sprite_lib as sl  # noqa: E402
 pc = sl.pc
@@ -82,6 +83,7 @@ SKIN = ['#f2c29b', '#e8a77c', '#c98b66', '#9a6646', '#f6d3b5']
 step = sl.tex_paper('step', '#d6bc95', 'washi', 0.9, scale=0.12)
 step_d = sl.tex_paper('step_d', '#c3a47b', 'washi', 0.9, scale=0.12)
 TIERS = 5
+SEATS = []   # (head object, cloth colour, tier) for assets/bg/arena_crowd.json (#52)
 for t in range(TIERS):
     ytop = 13.4 - t * 1.85
     z = 1.6 + t * 0.9
@@ -97,6 +99,7 @@ for t in range(TIERS):
         b.color = (*pc.lin(rnd.choice(CLOTH))[:3], 1)
         hd = L(pc.xf(pc.ellipse_pts(0.3 * sc_, 0.33 * sc_, 24), x + rnd.uniform(-0.05, 0.05), y + 0.85 * sc_), head_m, z + 0.08, 0.08, name='head')
         hd.color = (*pc.lin(rnd.choice(SKIN))[:3], 1)
+        SEATS.append((hd, b.color, t))
         if rnd.random() < 0.22:          # a raised arm
             a = rnd.uniform(-0.5, 0.5)
             arm = L(pc.xf(pc.rrect(0.22, 1.1, 0.1), x + (0.45 if a > 0 else -0.45), y + 0.9, a), body_m, z - 0.04, 0.06, name='arm')
@@ -150,6 +153,31 @@ cam.data.dof.use_dof = True
 cam.data.dof.focus_distance = dist
 cam.data.dof.aperture_fstop = float(os.environ.get('ARENA_FSTOP', '0.35'))
 cam.data.clip_end = 1000
+
+
+def write_seats():
+    """where every spectator's head lands in the picture (#52): the game raises paper arms over them when the crowd
+    cheers. px from the top-left of the 1920x1080 frame; `k` = px per unit at that seat's depth; `c` = the clothes."""
+    from bpy_extras.object_utils import world_to_camera_view
+    bpy.context.view_layer.update()
+    seats = []
+    for hd, col, tier in SEATS:
+        # pc.layer keeps the outline in absolute xy (the object sits at 0, 0, z): take the middle of its bounds
+        p = sum((hd.matrix_world @ Vector(v) for v in hd.bound_box), Vector()) / 8
+        a = world_to_camera_view(sc, cam, p)
+        b = world_to_camera_view(sc, cam, p + Vector((1.0, 0.0, 0.0)))
+        srgb = [round(255 * (1.055 * c ** (1 / 2.4) - 0.055 if c > 0.0031308 else 12.92 * c)) for c in col[:3]]
+        seats.append({'x': round(a.x * W, 1), 'y': round((1 - a.y) * H, 1), 'k': round((b.x - a.x) * W, 2), 'tier': tier,
+                      'c': '#%02x%02x%02x' % tuple(max(0, min(255, v)) for v in srgb)})
+    path = os.path.join(os.path.dirname(OUT), 'arena_crowd.json')
+    with open(path, 'w', newline='\n') as fh:
+        json.dump({'size': [W, H], 'seats': seats}, fh, separators=(',', ':'))
+    print('SEATS', len(seats), path)
+
+
+write_seats()
+if os.environ.get('ARENA_SEATS_ONLY') == '1':   # only the seat map: the same random crowd as the committed picture
+    sys.exit(0)
 sc.render.filepath = OUT
 bpy.ops.render.render(write_still=True)
 print('ARENA', OUT, 'fighters plane z', fz)

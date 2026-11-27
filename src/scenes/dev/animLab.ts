@@ -13,6 +13,7 @@ import { CombatPresenter } from '../combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from '../common';
 import type { SceneContext, SceneUpdate } from '../common';
 import { arenaBackdrop } from '../backdrop';
+import { CrowdFx } from '../../ui/crowdFx';
 import { FIGHT_LAYOUT, MIN_LUNGE, STRIKE_GAP } from '../combatPlan';
 import { WEAPONS } from '../../data/weapons';
 import { playFoley } from '../../audio/foley';
@@ -24,6 +25,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   const arena = new Container();
   world.addChild(arena);
   arena.addChild(new Sprite(arenaBackdrop(bgTex)));
+  const crowdFx = arena.addChild(new CrowdFx());
   const gsh = groundShadowTexture();
   const tp = params.get('tier');
   // &weapon=hammer8 / &enemy=spear6: try a weapon (and its clip variants, #36) in the lab
@@ -126,6 +128,8 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
         // no damage splat here: it would sit right where the head takes off
         strike(pa, 'attack_power', { then: 'victory', onHit: () => playFinisher(ea, layer, { floorY: FEET_Y }) });
         break;
+      case 'cheer': crowdFx.cheer(1, P.view.x); break;
+      case 'gifts': crowdFx.throw('bouquet', 5, P.view.x, FEET_Y); crowdFx.throw('coin', 4, P.view.x, FEET_Y); break;
       case 'reset':
         hud.visible = false;
         pa.home.x = 640; ea.home.x = 1290; pa.play('idle'); ea.play('idle'); layer.clear(); break;
@@ -137,7 +141,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   ui.innerHTML = `<h3>Animation lab</h3>
     <div class="grid">${btn('walk_back', '&#9664; step')}${btn('walk_fwd', 'step &#9654;')}${btn('jump', 'jump')}${btn('charge', 'charge')}
     ${btn('attack_quick', 'quick')}${btn('attack_normal', 'normal')}${btn('attack_power', 'power')}${btn('block', 'block')}${btn('dodge', 'dodge')}
-    ${btn('taunt', 'taunt')}${btn('rest', 'rest')}${btn('hit', 'hit')}${btn('finish', 'finish')}${btn('victory', 'victory')}${btn('death', 'die')}${btn('reset', 'reset')}${btn('fight', 'core fight')}</div>
+    ${btn('taunt', 'taunt')}${btn('rest', 'rest')}${btn('hit', 'hit')}${btn('finish', 'finish')}${btn('victory', 'victory')}${btn('death', 'die')}${btn('reset', 'reset')}${btn('cheer', 'crowd cheers')}${btn('gifts', 'crowd throws')}${btn('fight', 'core fight')}</div>
     <label>enemy <select id="sResponse"><option value="hit">gets hit</option><option value="block">blocks</option><option value="dodge">dodges (miss)</option></select></label>
     <label><input type="checkbox" id="cbCounter" checked> enemy answers</label>
     <label>gore <select id="sGore">${GORE_MODES.map((m) => `<option value="${m.id}"${m.id === goreMode() ? ' selected' : ''}>${m.name}</option>`).join('')}</select></label>
@@ -149,6 +153,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   // same staging as the arena (#151): bodies never overlap, lunges stretch to the strike point
   const layout = FIGHT_LAYOUT;
   const presenter = new CombatPresenter({
+    crowdFx,
     fighters: { player: pa, enemy: ea }, fx: layer, unit: UNIT, layout, floorY: FEET_Y, sound: true,
     onState: (s) => hud.setState(s),
   });
@@ -203,5 +208,5 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   (document.getElementById('sStatus') as HTMLSelectElement).onchange = (e) => showStatus((e.target as HTMLSelectElement).value);
   (document.getElementById('sSpeed') as HTMLSelectElement).onchange = (e) => { const v = +(e.target as HTMLSelectElement).value; pa.speed = v; ea.speed = v; };
   (window as unknown as { __act: unknown }).__act = act;
-  return (dt) => { layer.update(dt * pa.speed); hud.update(dt * pa.speed); };
+  return (dt) => { layer.update(dt * pa.speed); crowdFx.update(dt * pa.speed); hud.update(dt * pa.speed); };
 }
