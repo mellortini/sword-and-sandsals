@@ -1,6 +1,6 @@
 # Zamysł gry (GDD) — „Folded Glory” (tytuł roboczy)
 
-**Jednym zdaniem:** turowa gra gladiatorska, w której papierowy nikt wywalcza swoje imię w świecie wyciętym z papieru —
+**Jednym zdaniem:** turowa gra gladiatorska, w której Bezimienny niewolnik wywalcza swoje imię w średniowiecznym królestwie (narysowanym w stylu papierowej wycinanki) —
 walka jak w klasycznych flashowych grach arenowych, ale z bogatym ekwipunkiem widocznym na postaci, stylami broni,
 tłumem, żywiołami i światem do zwiedzenia.
 
@@ -9,7 +9,8 @@ Teksty w grze: angielski (z i18n, PL do dodania). Nazwy niżej są robocze.
 ## 1. Filary
 1. **Czytelna walka turowa na dystansie 1D** — każda decyzja ma widoczny % szansy i koszt.
 2. **Wszystko, co kupisz, widać na postaci** — papierowe części zbroi i broni na kukiełce.
-3. **Papier jest mechaniką**: ogień pali, woda rozmiękcza, klej leczy, cięcie rozdziera. Świat i zasady mówią tym samym językiem.
+3. **Papier to styl grafiki, nie świat**: fabuła dzieje się w zwykłym średniowieczu (`SCENARIUSZ.md`). Żywioły w walce to olejki, smoła,
+   ogień grecki i alchemia; leczą medycy i bandaże.
 4. **Szybki rytm**: akcja startuje w klatce kliknięcia, trafienie w pierwszej klatce, walka 2–5 minut.
 5. **Długi rozwój**: od prowincjonalnego dołu do Wielkiej Areny, 4 regiony, dziesiątki championów.
 
