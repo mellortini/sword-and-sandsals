@@ -11,7 +11,7 @@
  */
 import { EXPRESSION_KEYS, EXPRESSION_PIECES, pieceShown } from './expressions';
 import { widthScale } from './builds';
-import { holdShield, isShieldTier } from './shield';
+import { holdShield, isShieldTier, shieldArmInFront } from './shield';
 import { boneOffset, forwardKinematics, holdWithBothHands, looseHead } from './twoHand';
 import { Assets, Container, Rectangle, Renderer, RenderTexture, Sprite, Texture } from 'pixi.js';
 
@@ -293,7 +293,9 @@ export class PaperRig {
     const skin = J.skins[L.skin]?.color ?? J.skins[3].color;
     const hair = J.hair_colors[L.hairColor]?.color ?? J.hair_colors[1].color;
     const face = J.faces[L.face] ?? J.faces[0];
-    for (const layer of J.layers) {
+    // with a shield the arm that carries it is drawn in front of the body (#273)
+    const layers = this.kit.shieldShown(L) ? shieldArmInFront(J.layers) : J.layers;
+    for (const layer of layers) {
       const key = this.kit.resolve(layer, L);
       if (!key || !this.kit.has(key)) continue;
       const m = J.sprites[key];

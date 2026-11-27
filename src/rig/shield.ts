@@ -8,7 +8,7 @@
  * the shield bone so the shield leans with the body (pelvis + torso) whatever the arm does. A clip may still tilt it
  * on top of that with the `shield` pose key (degrees CCW).
  */
-import type { Pose } from './PaperRig';
+import type { KitJson, Pose } from './PaperRig';
 
 export const SHIELD_TIERS = 10;
 /** the last tier with a round shield; from the next one on, a scutum */
@@ -36,4 +36,25 @@ export function shieldName(tier: number | undefined, sets: readonly string[]): s
 export function holdShield(pose: Pose): Pose {
   const arm = ARM.reduce((a, b) => a + (pose[b] ?? 0), 0);
   return { ...pose, shield: (pose.shield ?? 0) - arm };
+}
+
+type Layer = KitJson['layers'][number];
+/** the shield arm's layers in front of the body, drawn like the sword arm: forearm, bracer, upper arm, shoulder, hand */
+const ARM_ORDER: ReadonlyArray<[bone: string, slot: string]> = [
+  ['arm_b_lo', 'body'], ['arm_b_lo', 'armor'], ['arm_b_up', 'body'], ['arm_b_up', 'shoulders'], ['hand_b', 'body'],
+];
+
+/**
+ * The draw order with a shield (#273): the arm that carries it comes out from behind the body, shoulder and all, and is
+ * drawn in full light just under the shield, so the arm reads as the near one holding it. Mirrored, the opponent holds
+ * the shield in the left hand the same way. Without the shield the arm stays behind the body (the kit's own order).
+ */
+export function shieldArmInFront(layers: readonly Layer[]): Layer[] {
+  const isArm = (l: Layer) => ARM_ORDER.some(([bone, slot]) => l.bone === bone && l.slot === slot);
+  const arm = ARM_ORDER.flatMap(([bone, slot]) => layers.filter((l) => l.bone === bone && l.slot === slot))
+    .map((l) => ({ ...l, back: false }));
+  const rest = layers.filter((l) => !isArm(l));
+  const at = rest.findIndex((l) => l.slot === 'shield');
+  if (at < 0) return [...layers];
+  return [...rest.slice(0, at), ...arm, ...rest.slice(at)];
 }

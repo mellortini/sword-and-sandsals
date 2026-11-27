@@ -1356,3 +1356,8 @@ Poprawki po uwagach (goloburda05-hue):
 - Sztylet jest jednoręczny: tarcza działa też przy `daggers` (`leavesHandForShield` wyklucza tylko włócznię i młot). Rig: z tarczą w ręce znika drugi sztylet (`weapon_b`). Mechanika sztyletów (2 uderzenia) bez zmian.
 - Blok trzymany do ciosu: akcja Blok gra nowy `guard_up` (podniesienie bez opuszczania), potem zapętlony `guard` (oba też `@shield`). Gardę opuszcza reakcja na cios (`block` / `hit` / `dodge`), a gdy rdzeń zdejmie ją bez ciosu, presenter wraca do `idle`. ⚠️ `combatPlan`: krok `pose` dla bloku ma teraz `clip: 'guard_up'` (było `'block'`). Klip `block` zostaje jako reakcja na zablokowany cios.
 - `expressions.test.ts`: klipy zapętlone i `guard_up` mogą kończyć się ze zmarszczonymi brwiami (garda trwa).
+
+### 2026-11-27 19:59 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+- Ramię z tarczą na pierwszym planie (prośba goloburda05-hue: bark ręki z tarczą wyglądał, jakby był po drugiej stronie ciała). `shieldArmInFront` w `src/rig/shield.ts`: gdy tarcza jest widoczna, `PaperRig.build` przenosi warstwy tylnego ramienia (przedramię, karwasz, ramię, naramiennik, dłoń) przed tułów, tuż pod tarczę, bez `BACK_TINT`. Ramię z mieczem zostaje nad tarczą. Przeciwnik (lustro) trzyma więc tarczę w lewej, bliższej ręce, a gracz w bliższej (prawej). **`kit.json` bez zmian** — kolejność zmienia się tylko w rigu, bez tarczy wszystko jak dotąd.
+- Testy wizualne (`tests/visual`) nie były uruchamiane; widoki z tarczą to tylko `?view=lineup&shield=1`, `anim`, `strip`.

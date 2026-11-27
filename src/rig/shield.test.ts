@@ -3,7 +3,7 @@ import kitJson from '../../assets/chars/kit/kit.json';
 import { ALL_CLIPS } from '../anim/clips';
 import { bake, sample } from '../anim/clip';
 import type { KitJson, Pose } from './PaperRig';
-import { ROUND_TIERS, SHIELD_TIERS, holdShield, isShieldTier, shieldName, shieldShape } from './shield';
+import { ROUND_TIERS, SHIELD_TIERS, holdShield, isShieldTier, shieldArmInFront, shieldName, shieldShape } from './shield';
 import { forwardKinematics } from './twoHand';
 
 const kit = kitJson as unknown as KitJson;
@@ -70,5 +70,26 @@ describe('shields (#38)', () => {
     for (let t = 1; t <= 10; t++) expect(kit.sprites[`weapon_trident${t}`]?.offhand, `trident${t}`).toBe('weapon_net');
     expect(kit.sprites.weapon_net).toBeDefined();
     expect(kit.sprites.weapon_sword5.offhand).toBeUndefined();
+  });
+});
+
+describe('the shield arm in front (#273)', () => {
+  const at = (layers: KitJson['layers'], bone: string, slot: string) => layers.findIndex((l) => l.bone === bone && l.slot === slot);
+
+  it('brings the whole shield arm, shoulder too, out in front of the body in full light, just under the shield', () => {
+    const layers = shieldArmInFront(kit.layers);
+    expect(layers).toHaveLength(kit.layers.length);
+    const torso = at(layers, 'torso', 'body');
+    const shield = at(layers, 'shield', 'shield');
+    const arm = [['arm_b_lo', 'body'], ['arm_b_lo', 'armor'], ['arm_b_up', 'body'], ['arm_b_up', 'shoulders'], ['hand_b', 'body']]
+      .map(([bone, slot]) => at(layers, bone, slot));
+    expect(arm.every((i) => i > torso && i < shield)).toBe(true);
+    expect(arm).toEqual([...arm].sort((a, b) => a - b));
+    for (const i of arm) expect(layers[i].back).toBe(false);
+    // the sword arm stays over the shield, the legs and the second dagger behind the body
+    expect(at(layers, 'arm_f_up', 'body')).toBeGreaterThan(shield);
+    expect(at(layers, 'weapon_b', 'weapon_b')).toBeLessThan(torso);
+    // the kit's own order is untouched
+    expect(at(kit.layers, 'arm_b_up', 'body')).toBeLessThan(at(kit.layers, 'torso', 'body'));
   });
 });
