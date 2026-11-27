@@ -6,6 +6,7 @@
 import type { Animator } from '../anim/Animator';
 import type { CombatEvent, CombatState, Fighter, FighterSide, MoveKind } from '../core/types';
 import { BlockShield, DamageSplat, FxLayer, MissText } from '../ui/fx';
+import { attachGroundFx } from '../ui/groundFx';
 import { MIN_LUNGE, STRIKE_GAP, forwardDelta, planSteps, screenX } from './combatPlan';
 import type { Layout, Step } from './combatPlan';
 
@@ -26,6 +27,8 @@ export interface PresenterOptions {
   /** px per rig unit (the scene's UNIT) */
   unit: number;
   layout: Layout;
+  /** screen y of the sand: set it and landings, falls and blows kick up paper bits (#17) */
+  floorY?: number;
   /**
    * called whenever the shown health/energy/crowd change (feed it to CombatHud.setState);
    * `gifts` lists what the crowd threw during the action that just ended
@@ -42,7 +45,12 @@ export class CombatPresenter {
   private cancelled = false;
   private pending = new Set<() => void>();
 
-  constructor(options: PresenterOptions) { this.o = options; }
+  constructor(options: PresenterOptions) {
+    this.o = options;
+    if (options.floorY !== undefined) {
+      for (const side of ['player', 'enemy'] as const) attachGroundFx(options.fighters[side], options.fx.ground, options.floorY);
+    }
+  }
 
   get busy() { return this.running; }
 

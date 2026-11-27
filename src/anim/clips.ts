@@ -66,7 +66,7 @@ export const CLIPS: Clip[] = [
   {
     // acrobatic leaping attack: 2-frame wind-up, arc, dive onto the enemy, slide, get up (~1.2 s)
     name: 'charge', length: 36,
-    events: [{ f: 2, type: 'swing' }, { f: 14, type: 'hit' }],
+    events: [{ f: 2, type: 'swing' }, { f: 14, type: 'hit' }, { f: 15, type: 'impact' }],
     keys: [
       { f: 0 },
       { f: 2, ease: 'out', pose: { ...CROUCH, torso: -16, arm_f_up: 150, arm_f_lo: 30, blade: 120, arm_b_up: -60 } },
@@ -125,6 +125,7 @@ export const CLIPS: Clip[] = [
   },
   {
     name: 'hit', length: 16,
+    events: [{ f: 1, type: 'struck' }],
     keys: [
       { f: 0 },
       { f: 2, x: -0.45, ease: 'out', pose: { torso: 16, head: 22, arm_f_up: 6, arm_f_lo: 34, blade: 0, arm_b_up: -46, arm_b_lo: 10, leg_f_up: 22 } },
@@ -146,6 +147,7 @@ export const CLIPS: Clip[] = [
   {
     // the defender after a successful charge: thrown back, stumbles, recovers
     name: 'knockback', length: 30,
+    events: [{ f: 1, type: 'struck' }],
     keys: [
       { f: 0 },
       { f: 3, x: -1.0, ease: 'out', pose: { torso: 28, head: 30, arm_f_up: 60, arm_f_lo: 20, arm_b_up: 70, leg_f_up: 40, leg_f_lo: -20 } },
@@ -179,7 +181,7 @@ export const CLIPS: Clip[] = [
   },
   {
     name: 'death', length: 40, hold: true,
-    events: [{ f: 24, type: 'impact' }],
+    events: [{ f: 1, type: 'struck' }, { f: 24, type: 'impact' }],
     keys: [
       { f: 0 },
       { f: 4, x: -0.4, ease: 'out', pose: { torso: 22, head: 28, arm_f_up: 40, arm_f_lo: 20, arm_b_up: 50 } },

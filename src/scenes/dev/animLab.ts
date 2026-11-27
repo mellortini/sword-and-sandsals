@@ -141,7 +141,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   // same staging as the arena (#151): bodies never overlap, lunges stretch to the strike point
   const layout = FIGHT_LAYOUT;
   const presenter = new CombatPresenter({
-    fighters: { player: pa, enemy: ea }, fx: layer, unit: UNIT, layout,
+    fighters: { player: pa, enemy: ea }, fx: layer, unit: UNIT, layout, floorY: FEET_Y,
     onState: (s) => hud.setState(s),
   });
   const full = { name: '', health: 1, energy: 1, stats: { maxHealth: 1, maxEnergy: 1 } };

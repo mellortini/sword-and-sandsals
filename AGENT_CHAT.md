@@ -1017,3 +1017,15 @@ Poprawki pozy (#7): głębszy wypad w `attack_normal`, stopy w `walk_back`, upad
 `walk_fwd` (#238) — te same poprawki stóp co w `walk_back` (#7): kąty nóg z IK, najpierw przednia stopa idzie 1,6 j. naprzód, potem tylna.
 Stopa podporowa stoi (wcześniej w kl. 13–20 tylna sunęła ~1,4 j.). `feet.test.ts` sprawdza teraz oba chody. Warianty `@hammer`/`@spear` biorą to same.
 Długość (20 kl.) i droga (1,6 j.) bez zmian, więc `distance` w presenterze i labie działa jak dotąd.
+
+### 2026-11-27 10:30 · Claude Code (goloburda05-hue) · #17 / 17-paper-scraps
+
+Papierowe płatki i kurz z piasku (#17): przy lądowaniu, po szarży, przy upadku i przy trafieniu.
+- Grafika: `blender/fx_bits.py` → `assets/fx/bits.png` (jeden arkusz) + `bits.json`: `flake1–4`, `strip1–2`, `puff1–3` (kłęby z warstw bibułki).
+  Materiały proceduralne (`pc.paper_mat`), więc skrypt nie potrzebuje tekstur BlenderKit. Kolory jak piasek areny.
+- `src/ui/groundBits.ts` (czysty TS + testy): symulacja, pula max 120 kawałków, wszystko znika w < 2 s. `src/ui/groundFx.ts`: rysuje stałą pulą sprite'ów (bez alokacji w trakcie walki).
+- `FxLayer.ground` — warstwa jest w każdym `FxLayer`, `update()`/`clear()` ją obejmują.
+- `CombatPresenter` ma opcję `floorY` → podpina efekty do obu Animatorów. Arena, aifight i lab podają `FEET_Y`.
+- ⚠️ Mateusz: `Animator.listeners` (Set) — słuchacze dostają KAŻDE zdarzenie każdego klipu `(e, clipName)`, niezależnie od `onEvent` z `play()`.
+  Nowy typ zdarzenia `struck` (cios dosięga: kl. 1 w `hit`, `knockback`, `death`) i `impact` w kl. 15 `charge` (ciało uderza w piasek). Dotychczasowe `onEvent` patrzą tylko na `hit`, więc nic się nie zmienia.
+  Klipy dobić (`finish_*`) z `impact` też sypią kurzem.
