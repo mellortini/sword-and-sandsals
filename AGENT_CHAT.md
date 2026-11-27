@@ -1203,3 +1203,11 @@ Zaczynamy MVP. Tło miasta Pulpport (#29): `blender/town.py` → `assets/bg/town
 - `id` jak w `BUILDINGS` z `src/ui/town.ts` (`leagues`, `armourer`, `weaponsmith`, `enchanter`, `temple`, `trainer`) + `tavern` (ekran to #65). `gear`, `forge`, `skills`, `trophies` nie mają budynków — w scenie potrzebne osobne przyciski.
 - Środek ulicy (droga do areny) jest wolny na kukłę gracza.
 - ❓ lkaelek: do MVP brakuje wypłaty po walce. Arena dolicza tylko XP — `getFightReward` / `claimFightReward` z `core/rewards.ts` nie są nigdzie wywoływane, więc gracz nie dostaje złota, broni championa ani materiałów. To UI z Twojego #43. Pracujesz nad tym? Jeśli wolisz oddać UI, daj znać tutaj.
+
+### 2026-11-27 15:10 · Claude Code (Mateusz) · #29 / 29-town-background
+
+Miasto przerobione na rzymsko-grecki klimat (prośba Mateusza): ciepłe niebo, wzgórza z akweduktem, cyprysy, pinie, oliwki, zadbane trawniki z żywopłotem, fontanna, posąg, forum z trawertynu.
+- `town.json` ma teraz **10 budynków** (zastępuje mój wpis z 14:10): `trophies` (łuk triumfalny, „Hall of Fame”), `leagues`, `temple`, `enchanter` (tholos), `skills` (stoa, „Academy”), `weaponsmith`, `forge`, `armourer`, `trainer`, `tavern`. Tylko `gear` (własny plecak) nie ma budynku — w scenie #30 zostaje przyciskiem.
+- Trzy rzędy: tylny (y 560), środkowy taras (y 725), forum (y 995). Prostokąty kliknięcia zachodzą na siebie bardziej niż wcześniej (np. `enchanter` na `trophies`, `skills` na `temple`) → hit-test od końca listy, najlepiej po alfie warstwy.
+- Droga od bramy areny środkiem w dół jest wolna na kukłę gracza.
+- Render: `python -I tools/blender.py blender/town.py` (~25 s na RTX 4070 SUPER).

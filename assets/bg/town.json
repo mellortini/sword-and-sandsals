@@ -6,67 +6,94 @@
   "background": "town_bg.png",
   "buildings": [
     {
+      "id": "trophies",
+      "name": "Hall of Fame",
+      "image": "town_trophies.png",
+      "x": 0,
+      "y": 61,
+      "w": 515,
+      "h": 524
+    },
+    {
       "id": "leagues",
       "name": "Arena",
       "image": "town_leagues.png",
-      "x": 592,
-      "y": 45,
-      "w": 736,
-      "h": 574
-    },
-    {
-      "id": "enchanter",
-      "name": "Enchantress",
-      "image": "town_enchanter.png",
-      "x": 140,
-      "y": 80,
-      "w": 379,
-      "h": 539
+      "x": 577,
+      "y": 57,
+      "w": 766,
+      "h": 528
     },
     {
       "id": "temple",
       "name": "Glue Temple",
       "image": "town_temple.png",
-      "x": 1396,
-      "y": 164,
-      "w": 468,
-      "h": 455
+      "x": 1442,
+      "y": 151,
+      "w": 446,
+      "h": 434
+    },
+    {
+      "id": "enchanter",
+      "name": "Enchantress",
+      "image": "town_enchanter.png",
+      "x": 284,
+      "y": 355,
+      "w": 313,
+      "h": 376
+    },
+    {
+      "id": "skills",
+      "name": "Academy",
+      "image": "town_skills.png",
+      "x": 1310,
+      "y": 451,
+      "w": 357,
+      "h": 278
     },
     {
       "id": "weaponsmith",
       "name": "Weaponsmith",
       "image": "town_weaponsmith.png",
-      "x": 22,
-      "y": 578,
-      "w": 398,
-      "h": 343
+      "x": 0,
+      "y": 721,
+      "w": 290,
+      "h": 299
+    },
+    {
+      "id": "forge",
+      "name": "Forge",
+      "image": "town_forge.png",
+      "x": 264,
+      "y": 660,
+      "w": 291,
+      "h": 360
     },
     {
       "id": "armourer",
       "name": "Armourer",
       "image": "town_armourer.png",
-      "x": 431,
-      "y": 607,
-      "w": 306,
-      "h": 314
+      "x": 512,
+      "y": 780,
+      "w": 268,
+      "h": 240
     },
     {
       "id": "trainer",
       "name": "Trainer",
       "image": "town_trainer.png",
-      "x": 1239,
-      "y": 575,
-      "w": 410,
-      "h": 346
+      "x": 1142,
+      "y": 771,
+      "w": 345,
+      "h": 249
     },
     {
       "id": "tavern",
       "name": "Tavern",
       "image": "town_tavern.png",
-      "x": 1619,
-      "y": 585,
-      "w": 301,
-      "h": 336
+      "x": 1485,
+      "y": 728,
+      "w": 435,
+      "h": 292
     }
   ]
 }
