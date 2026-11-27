@@ -67,6 +67,8 @@ for t, fn in weapons.SWORDS.items():
 for fam, table in (('axe', weapons.AXES), ('spear', weapons.SPEARS), ('hammer', weapons.HAMMERS)):
     for t, fn in table.items():
         jobs[f'weapon_{fam}{t}'] = (fn, None, False)
+jobs['weapon_daggers'] = (weapons.daggers, None, False)
+PAIRED = {'weapon_daggers'}   # drawn in both hands: the back hand's copy on the weapon_b bone (#47)
 for t, fn in shields.SHIELDS.items():
     jobs[f'shield{t}'] = (fn, None, False)
 
@@ -101,6 +103,8 @@ for key, (fn, tint, head) in jobs.items():
     fam = key[len('weapon_'):].rstrip('0123456789') if key.startswith('weapon_') else None
     if fam in weapons.GRIP2:   # two-handed: where the back hand holds the haft (weapon-bone units)
         info['grip2'] = list(weapons.GRIP2[fam])
+    if key in PAIRED:
+        info['pair'] = True
     if key in SPRITE_ALPHA:
         info['alpha'] = SPRITE_ALPHA[key]
     sprites[key] = info
@@ -114,7 +118,7 @@ BONES = [
     ('pelvis', None, 0.0, 4.75), ('torso', 'pelvis', 0.0, 0.0), ('head', 'torso', 0.12, 3.35),
     ('arm_b_up', 'torso', -1.35, 2.6), ('arm_b_lo', 'arm_b_up', 0.0, -1.85), ('hand_b', 'arm_b_lo', 0.0, -1.6),
     ('arm_f_up', 'torso', 1.42, 2.6), ('arm_f_lo', 'arm_f_up', 0.0, -1.85), ('hand_f', 'arm_f_lo', 0.0, -1.6),
-    ('weapon', 'hand_f', 0.06, -0.38), ('shield', 'hand_b', 0.0, -0.3),
+    ('weapon', 'hand_f', 0.06, -0.38), ('shield', 'hand_b', 0.0, -0.3), ('weapon_b', 'hand_b', 0.06, -0.38),
     ('leg_b_up', 'pelvis', -0.52, -0.55), ('leg_b_lo', 'leg_b_up', 0.0, -2.1), ('foot_b', 'leg_b_lo', 0.0, -2.0),
     ('leg_f_up', 'pelvis', 0.55, -0.55), ('leg_f_lo', 'leg_f_up', 0.0, -2.1), ('foot_f', 'leg_f_lo', 0.0, -2.0),
 ]
@@ -133,7 +137,8 @@ def limb(side):
 
 
 LAYERS = [dict(bone='head', slot='hair', piece='back')]
-LAYERS += [dict(bone='hand_b', slot='body', piece='hand', back=True),
+# the back hand's weapon (the second dagger, #47) sits behind that hand, like the sword behind the front one
+LAYERS += [dict(bone='weapon_b', slot='weapon_b', piece='', back=True), dict(bone='hand_b', slot='body', piece='hand', back=True),
            dict(bone='arm_b_lo', slot='body', piece='arm_lo', back=True), dict(bone='arm_b_lo', slot='armor', piece='bracer', back=True),
            dict(bone='arm_b_up', slot='body', piece='arm_up', back=True), dict(bone='arm_b_up', slot='shoulders', piece='', back=True)]
 LAYERS += limb('b') + limb('f')
@@ -153,7 +158,7 @@ LAYERS += [dict(bone='torso', slot='body', piece='torso'),
            dict(bone='weapon', slot='weapon', piece='gladius'), dict(bone='hand_f', slot='body', piece='hand')]
 
 POSE = {'pelvis': 0, 'torso': 3, 'head': -3, 'arm_b_up': -18, 'arm_b_lo': 35, 'hand_b': 0,
-        'arm_f_up': 22, 'arm_f_lo': 62, 'hand_f': -10, 'weapon': -40, 'shield': 0,
+        'arm_f_up': 22, 'arm_f_lo': 62, 'hand_f': -10, 'weapon': -40, 'shield': 0, 'weapon_b': -30,
         'leg_b_up': -14, 'leg_b_lo': 4, 'foot_b': 10, 'leg_f_up': 16, 'leg_f_lo': -6, 'foot_f': -10}
 
 kitjson = {

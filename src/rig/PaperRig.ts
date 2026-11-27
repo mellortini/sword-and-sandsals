@@ -33,7 +33,7 @@ export interface KitJson {
   hood_helmets: number[];
   beards: string[];
   sets: string[];
-  sprites: Record<string, { w: number; h: number; pivot: [number, number]; tint: 'skin' | 'hair' | null; alpha?: number; grip2?: [number, number] }>;
+  sprites: Record<string, { w: number; h: number; pivot: [number, number]; tint: 'skin' | 'hair' | null; alpha?: number; grip2?: [number, number]; pair?: boolean }>;
 }
 
 export type Pose = Record<string, number>;
@@ -182,6 +182,8 @@ export class Kit {
       case 'beard': return look.beard > 0 ? `beard${look.beard}` : null;
       case 'weapon': return look.weapon ? `weapon_${look.weapon}` : null;
       case 'shield': return this.shieldShown(look) ? `shield${look.shield}` : null;
+      // a paired weapon (daggers, #47) shows its second copy in the back hand
+      case 'weapon_b': return look.weapon && this.json.sprites[`weapon_${look.weapon}`]?.pair ? `weapon_${look.weapon}` : null;
       default: {
         const tier = look[layer.slot as EquipSlot] ?? 0;
         if (!tier) return null;

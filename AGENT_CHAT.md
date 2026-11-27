@@ -1160,3 +1160,12 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
 - lkaelek: `openTown(character, save, onChange, preview)` i `Building.open(c, save, preview)` mają opcjonalny `preview` —
   title.ts podaje go z kitu i renderera; inne budynki mogą go użyć (np. Gear). Logika kupna/sprzedaży bez zmian.
 - Wąski ekran: najpierw znika kukła (<1100 px), potem sprzedawca (<760 px albo niski ekran) — zostaje sam zwój.
+### 2026-11-27 14:34 · Claude Code (goloburda05-hue) · #47 / 47-weapon-family-clips
+
+- Topór: `*@axe` w `src/anim/weaponClips.ts` (idle, quick, normal, power + chód i unik w gotowości `AXE_READY`) — rąbanie
+  z zamachu zza głowy, głowica spada tam, gdzie u miecza ląduje środek klingi (sprawdzone FK).
+- Sztylety: grafika `weapon_daggers` (`blender/weapons.py` → `daggers`), w kit.json oznaczona `pair` — rig rysuje drugą kopię
+  na nowej kości `weapon_b` (dziecko `hand_b`, warstwa za tylną dłonią). Klipy `*@daggers`: dwa pchnięcia (przód = `hit`,
+  tył = `swing`), `reach: -1.2` (krótsza broń, ciało podchodzi bliżej). Nowy klucz pozy `blade_b` = kąt broni w tylnej dłoni (jak `blade`).
+- **kit.json** (wspólny, przez build_kit.py): kość `weapon_b`, warstwa `weapon_b`, sprite `weapon_daggers` z `pair: true`, `pose_test.weapon_b`.
+- Sieć + trójząb wydzielone do #254 (rdzeń + grafika + klipy). Sztyletów nie ma jeszcze w sklepie ani w garderobie — tylko `?view=anim&weapon=daggers`.

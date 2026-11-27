@@ -57,4 +57,12 @@ describe('shields (#38)', () => {
     expect(shield.x - pelvis.x).toBeGreaterThan(1);   // ahead of the body, towards the enemy
     expect(Math.abs(shield.y - (head.y + 0.8))).toBeLessThan(1.5);   // around face height
   });
+
+  it('draws a paired weapon a second time behind the back hand (#47)', () => {
+    expect(kit.sprites.weapon_daggers.pair).toBe(true);
+    expect(kit.sprites.weapon_sword5.pair).toBeUndefined();
+    expect(kit.bones.find((b) => b.name === 'weapon_b')?.parent).toBe('hand_b');
+    const at = (slot: string, bone: string) => kit.layers.findIndex((l) => l.slot === slot && l.bone === bone);
+    expect(at('weapon_b', 'weapon_b')).toBeLessThan(at('body', 'hand_b'));
+  });
 });

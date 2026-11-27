@@ -39,11 +39,14 @@ export function bake(clip: Clip, stance: Pose): Clip & { full: { f: number; pose
   let pose = { ...stance }, x = 0, y = 0;
   const full = clip.keys.map((k) => {
     const kp = { ...(k.pose ?? {}) };
-    const blade = kp.blade;
+    const blade = kp.blade, bladeB = kp.blade_b;
     delete kp.blade;
+    delete kp.blade_b;
     pose = { ...pose, ...kp };
     // 'blade' = wanted world angle of the sword (deg CCW from +x); solve the weapon bone for it
     if (blade !== undefined) pose.weapon = blade - ((pose.pelvis ?? 0) + (pose.torso ?? 0) + (pose.arm_f_up ?? 0) + (pose.arm_f_lo ?? 0) + (pose.hand_f ?? 0));
+    // 'blade_b' = the same for the back hand's weapon (the second dagger, #47)
+    if (bladeB !== undefined) pose.weapon_b = bladeB - ((pose.pelvis ?? 0) + (pose.torso ?? 0) + (pose.arm_b_up ?? 0) + (pose.arm_b_lo ?? 0) + (pose.hand_b ?? 0));
     // grounded keys keep both soles flat unless a foot angle is given
     if (!k.air) {
       if (kp.foot_f === undefined) pose.foot_f = -((pose.pelvis ?? 0) + (pose.leg_f_up ?? 0) + (pose.leg_f_lo ?? 0));

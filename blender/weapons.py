@@ -382,3 +382,16 @@ def hammer(t):
 AXES = {t: axe(t) for t in range(1, 11)}
 SPEARS = {t: spear(t) for t in range(1, 11)}
 HAMMERS = {t: hammer(t) for t in range(1, 11)}
+
+
+# ================================================================== DAGGERS (#47): a matched pair, one in each hand
+# The core's starting `daggers` strike twice at 0.6 damage. One sprite serves both hands (kit.json marks it `pair`):
+# the rig draws it again on the `weapon_b` bone under the back hand. Grip on the origin like the swords, blade to +x.
+def daggers(c):
+    L(c, R(0.62, 0.22, 0.08, 0.0, 0.0), M('leather_d'), 0.0, 0.1, 'grip')
+    wraps(c, M('leather'), 0.1, n=3, x0=-0.22, x1=0.22, w=0.05, h=0.26)
+    L(c, E(0.13, 0.13, -0.38, 0.0, 24), M('bronze'), 0.02, 0.1, 'pommel')
+    L(c, [(0.3, 0.3), (0.42, 0.28), (0.42, -0.28), (0.3, -0.3)], M('bronze_d'), 0.08, 0.08, 'guard')
+    b = blade_pts(0.4, 1.75, 0.13, 0.08, tip=0.42, leaf=0.04)
+    L(c, b, M('steel'), 0.04, 0.06, 'blade')
+    L(c, [(0.45, 0.03), (1.45, 0.012), (1.6, 0.0), (1.45, -0.012), (0.45, -0.03)], M('steel_d'), 0.1, 0.02, 'fuller')
