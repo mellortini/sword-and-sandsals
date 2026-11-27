@@ -1,6 +1,7 @@
 import { Container, Sprite } from 'pixi.js';
 import type { AiProfile } from '../core/ai';
 import { createCombat, getAttackZoneOptions } from '../core/combat';
+import { passTime } from '../core/story';
 import type { TargetedAttack } from '../core/hitZones';
 import { saveGame } from '../core/save';
 import type { CombatSlotAction } from '../core/spells';
@@ -201,7 +202,8 @@ export async function showArena(
       let story: StoryScene | undefined;
       if (career) {
         // health after the bout and the potions left (#191) go to the save with the XP
-        const settled = settleTempleCombat(career, outcome.state.fighters.player);
+        // and a bout takes a day of the story calendar (#291)
+        const settled = passTime(settleTempleCombat(career, outcome.state.fighters.player), 'fight');
         // achievements (#203): the bout first, then the level it ended on; the result screen keeps working on `after`
         const fightId = `${Date.now().toString(36)}-${seed}`;
         // the nemesis (#209): a victor becomes one, beating it ends the feud; a rematch fights the updated one

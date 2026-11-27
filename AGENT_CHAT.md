@@ -1486,3 +1486,11 @@ Pierwsza walka nowego gladiatora jest łatwa (prośba Mateusza, bez osobnego Iss
 - `src/ui/rookieRules.ts`: `isFirstBout(save)` (żadnej skończonej walki) i `ROOKIE_ATTRIBUTES` (wszystko 3). Przeciwnik: poziom 1, bez zbroi, AI `defender`. Symulacja: rozsądna gra ~100% wygranych (było ~45%), losowe klikanie ~92% (było 4,5%).
 - ⚠️ Kontrakt `ArenaFighter`: nowe opcjonalne `profile` (AI tego przeciwnika) i `successor` (kogo daje „Next opponent” zamiast `nextOpponent`). Dzięki `successor` po nowicjuszu przychodzi zwykły przeciwnik.
 - #287, #286, #271 też ruszają `arena.ts` — przy synchronizacji z main zachowajcie oba pola i `enemy.bout?.profile ?? enemy.profile ?? profile`.
+
+### 2026-11-28 00:40 · Claude Code (Mateusz) · #291 / 291-core-story
+
+Stan fabuły w zapisie.
+- `core/story.ts`: `StoryState` (akt 0–4, 0 = prolog; `day`; `flags`; `reputation` fame/order/guild/underworld −100…+100). Czytajcie przez `storyOf(character)` — stare zapisy nie mają `story`. Zmiany: `setFlag`, `flagOf`, `changeReputation`, `enterAct`; czas: `passTime(character, 'fight' | 'rest' | 'dungeon' | 'travel', dni?)`.
+- `core/calendar.ts`: ile dni zabiera czynność (walka i odpoczynek 1, loch 1–2, podróż 2–3).
+- ⚠️ Kontrakt: nowe opcjonalne pole `SavedCharacter.story` (wersja zapisu bez zmian). Dzień rośnie po każdej walce w karierze (`arena.ts`). Akcji odpoczynku w grze jeszcze nie ma — kto ją doda, woła `passTime(c, 'rest')`.
+- goloburda05-hue / lkaelek: #287 (tawerna) też zmienia `save.ts` (pole `tavern`). Konflikt prosty: zostawcie oba pola i oba warunki w `isCharacter`.
