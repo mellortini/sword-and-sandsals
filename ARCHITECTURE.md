@@ -19,23 +19,23 @@ Gra to statyczna strona (`npm run build` → `dist/`).
    kontekst i aktualizuje kukły we wspólnej pętli renderowania.
 
 ## Mapa modułów
-| folder / plik | moduł | właściciel | uwagi |
-|---|---|---|---|
-| `blender/` (+ `blender/vendor/pc_lib.py`) | pipeline grafiki | Mateusz (@mellortini) | `sprite_lib` (materiały, render części), `kit` (ciało, twarze, włosy, zarost), `armor` (10 kompletów), `build_kit` (render + kit.json), `arena` (tło) |
-| `art_src/` | źródła grafiki | Mateusz | `blenderkit/*/` poza git (licencja), w git tylko `assets.json`, `tex_stats.json` |
-| `assets/` | wyrenderowane assety | Mateusz | generowane — nie edytować ręcznie; `assets/chars/hero/` = stara kukła z F1 (nieużywana, do usunięcia w przyszłości) |
-| `tools/` | narzędzia | Mateusz | `fetch_blenderkit.py` |
-| `src/rig/` | PaperRig, Kit (składanie postaci) | Mateusz | |
-| `src/anim/` | klipy i Animator | Mateusz | |
-| `src/ui/fx.ts` | efekty walki (liczby obrażeń, BLOCK, MISS) | Mateusz | |
-| `src/audio/` *(nowe)* | dźwięk: foley, muzyka, mikser | Mateusz | |
-| `src/core/` *(nowy)* | logika gry bez renderu: walka, tury, AI, statystyki, RNG z ziarnem, zapis | kolega (@lkaelek) | czysty TS, testy (Vitest) |
-| `src/data/` | dane gry: przedmioty, wrogowie, sklepy | kolega (@lkaelek) | `equipment.ts` — 50 przedmiotów, tier 1–10 |
-| `src/ui/` (poza `fx.ts`) | HUD, menu radialne, tooltip, panele | goloburda05-hue (@goloburda05-hue) | `hud.ts`, `tooltip.ts`; #4 menu radialne kończy @lkaelek |
-| `src/scenes/` | sceny gry: arena, garderoba, później miasto, sklep, kreator | goloburda05-hue (@goloburda05-hue) | `arena.ts` (`/`), `wardrobe.ts` (`?view=wardrobe`), `combatPresenter.ts` + `combatPlan.ts` (zdarzenia core → animacje) |
-| `src/scenes/common.ts` | wspólne narzędzia scen | Mateusz + goloburda05-hue | wymiary, `SceneContext`, tworzenie i renderowanie kukieł |
-| `src/scenes/dev/` | narzędzia wizualne | Mateusz (@mellortini) | `lineup.ts`, `faces.ts`, `animLab.ts`, `strip.ts` (`?view=lineup`, `faces`, `anim`, `strip`) |
-| `docs/` | projekt gry | wspólne | każdy dopisuje do swoich dokumentów; `ROADMAP.md` = plik wspólny |
+| folder / plik | moduł | uwagi |
+|---|---|---|
+| `blender/` (+ `blender/vendor/pc_lib.py`) | pipeline grafiki | `sprite_lib` (materiały, render części), `kit` (ciało, twarze, włosy, zarost), `armor` (10 kompletów), `build_kit` (render + kit.json), `arena` (tło) |
+| `art_src/` | źródła grafiki | `blenderkit/*/` poza git (licencja), w git tylko `assets.json`, `tex_stats.json` |
+| `assets/` | wyrenderowane assety | generowane — nie edytować ręcznie; `assets/chars/hero/` = stara kukła z F1 (nieużywana, do usunięcia w przyszłości) |
+| `tools/` | narzędzia | `fetch_blenderkit.py` |
+| `src/rig/` | PaperRig, Kit (składanie postaci) | |
+| `src/anim/` | klipy i Animator | |
+| `src/ui/fx.ts` | efekty walki (liczby obrażeń, BLOCK, MISS) | |
+| `src/audio/` *(nowe)* | dźwięk: foley, muzyka, mikser | |
+| `src/core/` *(nowy)* | logika gry bez renderu: walka, tury, AI, statystyki, RNG z ziarnem, zapis | czysty TS, testy (Vitest) |
+| `src/data/` | dane gry: przedmioty, wrogowie, sklepy | `equipment.ts` — 50 przedmiotów, tier 1–10 |
+| `src/ui/` (poza `fx.ts`) | HUD, menu radialne, tooltip, panele | `hud.ts`, `tooltip.ts` |
+| `src/scenes/` | sceny gry: arena, garderoba, później miasto, sklep, kreator | `arena.ts` (`/`), `wardrobe.ts` (`?view=wardrobe`), `combatPresenter.ts` + `combatPlan.ts` (zdarzenia core → animacje) |
+| `src/scenes/common.ts` | wspólne narzędzia scen | wymiary, `SceneContext`, tworzenie i renderowanie kukieł |
+| `src/scenes/dev/` | narzędzia wizualne | `lineup.ts`, `faces.ts`, `animLab.ts`, `strip.ts` (`?view=lineup`, `faces`, `anim`, `strip`) |
+| `docs/` | projekt gry | każdy dopisuje do dokumentów związanych z zadaniem; `ROADMAP.md` = plik wspólny |
 
 ## Pliki wspólne (osobny mały PR, label `shared-files`)
 `package.json`, `package-lock.json`, `tsconfig.json`, `vite.config.ts`, `index.html`, `src/main.ts`,
@@ -75,3 +75,4 @@ Gra to statyczna strona (`npm run build` → `dist/`).
 | 2026-11-23 | Kolega = @lkaelek (write); CODEOWNERS: core/data/ui/scenes → @lkaelek, reszta → @mellortini. |
 | 2026-11-24 | Trzecia osoba = @goloburda05-hue (write). Podział na warstwy: logika i dane (`core`, `data`, `area:core\|data`) → @lkaelek; interfejs i ekrany (`ui`, `scenes`, `area:ui\|scenes`) → @goloburda05-hue; grafika, animacje, efekty, audio → @mellortini; `area:infra` → wszyscy. Zaczęte zadania zostają u osoby, która je wzięła. |
 | 2026-11-24 | Mergować może każdy z trojga ludzi (rola collaborator w repo prywatnego konta = merge, review, zadania; Maintain/Admin istnieją tylko w organizacjach). Agent merguje wyłącznie na wyraźne polecenie swojego człowieka. |
+| 2026-11-27 | Koniec podziału obszarów między osoby (zastępuje podział z 2026-11-23 i 2026-11-24): każdy może wziąć każde wolne zadanie. Zajęcie zadania = przypisanie w Issue. Labele `area:*` opisują tylko część gry. |

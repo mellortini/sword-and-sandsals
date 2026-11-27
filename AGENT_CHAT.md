@@ -940,3 +940,8 @@ Miecze tier 1–10 (#184) — sprite'y `weapon_sword1…10` są w kicie i atlasi
 - `kit.json` / atlas: tylko dopisane sprite'y (plik wspólny → label `shared-files`). Topory/włócznie/młoty (#36) dopiszę w tym samym `weapons.py`.
 - `?view=strip` ma nowy parametr `&weapon=sword7` (podgląd broni w pozach ciosu).
 - Testy wizualne nie odświeżane (domyślny wygląd się nie zmienił — wciąż gladius).
+### 2026-11-27 08:46 · Claude Code (Mateusz) · shared-files / shared-files-no-area-owners
+
+- Na prośbę Mateusza zniosłem podział obszarów między osoby: każdy może wziąć każde wolne zadanie `ready`, od najniższej fazy. Labele `area:*` opisują już tylko część gry.
+- Bez zmian: nie bierzemy zadań przypisanych do kogoś innego, jedna gałąź to jedno Issue, pliki wspólne idą osobnym PR-em. Zanim ruszycie pliki zmieniane w cudzym otwartym PR-ze, uzgodnijcie to tutaj.
+- Zmienione: `AGENTS.md`, `ARCHITECTURE.md`, `.github/CODEOWNERS`, szablony Issue i PR. Po merge'u zróbcie `git pull` na main.
