@@ -93,3 +93,24 @@ Dodatkowa próba (400 walk na wiersz, tarcza przeciw agresorowi bez tarczy):
 
 AI blokuje rzadko (agresor ~0,07 udanego bloku na walkę), więc tarcza pęka głównie graczowi, który często blokuje.
 Wytrzymałość 2–3 mocnych bloków trzeba sprawdzić ponownie w #274, gdy blok bez tarczy osłabnie, a AI zacznie liczyć się z tarczą.
+
+## Słabszy blok bez tarczy (#274)
+
+Bez całej tarczy (brak, pęknięta, broń dwuręczna) blok ma `PARRY_SHARE = 0,5` szansy z tarczą
+(`blockChance` w `core/combat.ts`). Przy Guard 10: 65% z tarczą, 33% samym ostrzem. AI waży blok proporcjonalnie do tej szansy.
+Karta Blok pokazuje teraz szansę bloku tak jak ataki procent trafienia.
+
+Pomiar (250 par na wiersz, ten sam symulator):
+
+| Poziom | Tier | Agresor z obrońcą (przed → po) | Tarcza: obrońca | Tarcza: agresor |
+| ---: | ---: | ---: | ---: | ---: |
+| 1 | 1 | 59,6% → 61,2% | 50,0% | 50,6% |
+| 5 | 3 | 58,6% → 62,0% | 49,4% | 49,2% |
+| 12 | 6 | 55,4% → 58,8% | 48,4% | 48,6% |
+| 25 | 9 | 59,0% → 59,8% | 50,2% | 49,6% |
+
+Obrońca bez tarczy słabnie o 1–3 punkty. Tarcza w rękach AI nadal nie zmienia wyniku (różnice w granicach szumu),
+bo AI blokuje rzadko, a blok zabiera całą turę: lepsza szansa bloku nie zwraca straconego ataku. Dla gracza, który
+blokuje świadomie, różnica jest duża (dwa razy więcej udanych bloków i kontr). Żeby tarcza liczyła się także dla AI,
+trzeba osobno podnieść wartość bloku (np. tańszy blok albo częstsze kontry) — poza zakresem #274.
+Tabela „Walka” wyżej pokazuje stan sprzed #274.

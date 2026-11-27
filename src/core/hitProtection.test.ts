@@ -23,7 +23,8 @@ it('keeps the rate within three points of 55% and limits the dry streak in 10,00
 });
 
 it('uses one streak per fighter, shows the actual chance, and resets on a block', () => {
-  const initial = createCombat(1, { position: 4 }, { position: 5 });
+  // the guarding enemy holds a shield: the full block chance (#274)
+  const initial = createCombat(1, { position: 4 }, { position: 5, equipment: { offHand: 'shield9' } });
   const player = { ...initial.fighters.player, consecutiveMisses: 3 };
   const enemy = { ...initial.fighters.enemy, guarding: true, consecutiveMisses: 1 };
   const ready = { ...initial, fighters: { player, enemy } };

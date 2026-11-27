@@ -85,8 +85,11 @@ function situationalScore(state: CombatState, option: ActionOption): number {
       return inMelee ? 0.05 : 2;
     case 'step_back':
       return health < 0.35 && foeCanStrike ? 1 : 0.2;
-    case 'block':
-      return foeCanStrike ? (health < 0.5 ? 1.6 : 0.8) : 0.15;
+    case 'block': {
+      // a guard is worth what it blocks (#274): the blade alone parries less often than a shield
+      const worth = (option.blockChance ?? me.stats.blockChance) / Math.max(1, me.stats.blockChance);
+      return (foeCanStrike ? (health < 0.5 ? 1.6 : 0.8) : 0.15) * worth;
+    }
     case 'rest': {
       // out of breath: nothing else helps
       if (me.energy < MIN_MELEE_ENERGY) return 20;

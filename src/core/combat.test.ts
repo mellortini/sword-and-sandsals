@@ -112,7 +112,7 @@ describe('combat options', () => {
 
 describe('combat modifiers', () => {
   it('blocks a hit without damage and clears the stance before the defender acts', () => {
-    const defended = play(atContact(), 'block').state;
+    const defended = play(atContact(1, { equipment: { offHand: 'shield9' } }), 'block').state;
     const result = play(defended, 'normal');
     expect(result.events).toContainEqual(expect.objectContaining({
       type: 'attack', hit: true, blocked: true, crit: false, damage: 0,

@@ -1373,3 +1373,9 @@ Poprawki po uwagach (goloburda05-hue):
 
 - `rest@shield` (`clips.ts`, z klipu `rest`): przy obrocie 3/4 ręka z mieczem zwisająca pionowo miała łokieć w brzuchu. Teraz zwisa lekko do przodu: łokieć na krawędzi piersi, przedramię przy udzie, ostrze w dół.
 - `PaperRig`: tekstura postaci ma 9,5 j. za miednicą (było 6,5; szerokość 19 → 22). Leżący na plecach gladiator z tarczą miał ją uciętą. Pozycja na ekranie bez zmian (kotwica liczona z `origin`).
+
+### 2026-11-27 20:19 · Claude Code (goloburda05-hue) · #274 / 274-weaker-parry
+
+- #273 zmergowane (#276). Teraz #274: bez całej tarczy blok ma połowę szansy (`PARRY_SHARE = 0,5`, `blockChance(fighter)` w `core/combat.ts`). Z tarczą bez zmian.
+- ⚠️ Kontrakt: `ActionOption` dla `block` ma `blockChance` (karta Blok pokazuje procent, podpowiedź „Block chance”). Testy, które sprawdzają skutki udanego bloku (kontry, zaklęcia, seria pudeł, umiejętności), dają blokującemu `offHand: 'shield9'` — te same rzuty co wcześniej.
+- AI waży blok proporcjonalnie do tej szansy. Balans: obrońca bez tarczy traci 1–3 pkt; tarcza w rękach AI nadal ~50% (AI rzadko blokuje, blok zabiera turę). Szczegóły w `docs/BALANS.md`.

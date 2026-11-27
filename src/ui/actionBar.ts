@@ -26,7 +26,7 @@ const ACTION_INFO = {
   quick: { label: 'Quick', description: 'A light attack with a higher chance to hit.' },
   normal: { label: 'Normal', description: 'An attack with balanced damage and accuracy.' },
   power: { label: 'Power', description: 'A heavy attack with a lower chance to hit.' },
-  block: { label: 'Block', description: 'Take a defensive stance against the next attack.' },
+  block: { label: 'Block', description: 'Take a defensive stance against the next attack. A shield blocks far more often than the blade alone.' },
   rest: { label: 'Rest', description: 'Recover energy for later turns.' },
   taunt: { label: 'Taunt', description: 'Distract the opponent before their next action.' },
 } satisfies Record<CombatAction, { label: string; description: string }>;
@@ -206,7 +206,7 @@ export class ActionBar {
       return {
         title: option.counter ? `${label} · counter` : label,
         description: option.counter ? `${description} A counter-attack costs no energy.` : description,
-        energyCost: option.energyCost, hitChance: option.hitChance,
+        energyCost: option.energyCost, hitChance: option.hitChance, blockChance: option.blockChance,
       };
     });
     card.addEventListener('click', () => this.pick(action));
@@ -225,10 +225,13 @@ export class ActionBar {
     const aimed = typeof aimedCommand(action, this.aim, this.aimInfo) !== 'string';
     card.classList.toggle('aimed', aimed);
     const stamp = card.querySelector<HTMLElement>('.action-card__stamp')!;
-    stamp.textContent = hitChance === undefined ? '' : `${hitChance}%`;
-    stamp.hidden = hitChance === undefined;
+    // the Block card shows its chance to block (#274), attacks their chance to hit
+    const shown = hitChance ?? option?.blockChance;
+    stamp.textContent = shown === undefined ? '' : `${shown}%`;
+    stamp.hidden = shown === undefined;
     const at = aimed ? ` at the ${AIM_INFO[this.aim].label.toLowerCase()}` : '';
-    const chance = hitChance === undefined ? '' : `, ${hitChance}% to hit${at}`;
+    const chance = hitChance !== undefined ? `, ${hitChance}% to hit${at}`
+      : option?.blockChance !== undefined ? `, ${option.blockChance}% to block` : '';
     card.setAttribute('aria-label', `${label}${chance}${option ? '' : ', not possible now'}`);
   }
 
