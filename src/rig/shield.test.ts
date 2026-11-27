@@ -1,0 +1,60 @@
+import { describe, expect, it } from 'vitest';
+import kitJson from '../../assets/chars/kit/kit.json';
+import { ALL_CLIPS } from '../anim/clips';
+import { bake, sample } from '../anim/clip';
+import type { KitJson, Pose } from './PaperRig';
+import { ROUND_TIERS, SHIELD_TIERS, holdShield, isShieldTier, shieldName, shieldShape } from './shield';
+import { forwardKinematics } from './twoHand';
+
+const kit = kitJson as unknown as KitJson;
+
+describe('shields (#38)', () => {
+  it('has a sprite for every tier, and a shield bone on the back hand', () => {
+    for (let t = 1; t <= SHIELD_TIERS; t++) expect(kit.sprites[`shield${t}`], `tier ${t}`).toBeDefined();
+    expect(kit.bones.find((b) => b.name === 'shield')?.parent).toBe('hand_b');
+    expect(kit.layers.some((l) => l.slot === 'shield' && l.bone === 'shield')).toBe(true);
+  });
+
+  it('draws the shield over the body but under the sword arm', () => {
+    const at = (slot: string, bone?: string) => kit.layers.findIndex((l) => l.slot === slot && (!bone || l.bone === bone));
+    expect(at('shield')).toBeGreaterThan(at('armor', 'torso'));
+    expect(at('shield')).toBeLessThan(at('body', 'arm_f_lo'));
+  });
+
+  it('gives the early tiers a round parma and the legion era a bigger scutum', () => {
+    expect([1, 2, 3, 4, 5, 10].map(shieldShape)).toEqual(['round', 'round', 'round', 'round', 'scutum', 'scutum']);
+    expect(ROUND_TIERS).toBe(4);
+    const size = (t: number) => kit.sprites[`shield${t}`].h;   // taller with every tier
+    for (let t = 2; t <= SHIELD_TIERS; t++) expect(size(t), `tier ${t}`).toBeGreaterThan(size(t - 1));
+    const s = (t: number) => kit.sprites[`shield${t}`];
+    expect(s(4).h / s(4).w).toBeCloseTo(1, 1);   // round
+    expect(s(5).h / s(5).w).toBeGreaterThan(1.5);   // tall
+  });
+
+  it('names shields', () => {
+    for (const bad of [undefined, 0, 11, 2.5]) expect(isShieldTier(bad)).toBe(false);
+    expect(shieldName(3, kit.sets)).toBe('Parma · Padded Linen');
+    expect(shieldName(8, kit.sets)).toBe('Scutum · Legion Plate');
+    expect(shieldName(0, kit.sets)).toBe('—');
+  });
+
+  it('keeps the shield leaning with the body whatever the arm does', () => {
+    const world = (pose: Pose) => forwardKinematics(kit.bones, holdShield(pose)).get('shield')!.r * 180 / Math.PI;
+    const body = { pelvis: 2, torso: 6 };
+    const arms: Pose[] = [{ arm_b_up: -18, arm_b_lo: 35 }, { arm_b_up: 78, arm_b_lo: 58, hand_b: 10 }, { arm_b_up: -46, arm_b_lo: 10 }];
+    for (const arm of arms) {
+      expect(world({ ...body, ...arm })).toBeCloseTo(8, 6);
+      expect(world({ ...body, ...arm, shield: -5 })).toBeCloseTo(3, 6);
+    }
+  });
+
+  it('raises the shield in front of the face when blocking', () => {
+    const clip = ALL_CLIPS.find((c) => c.name === 'block@shield')!;
+    expect(clip.events).toContainEqual({ f: 2, type: 'block' });
+    const pose = sample(bake(clip, kit.pose_test), 2).pose;
+    const J = forwardKinematics(kit.bones, holdShield(pose));
+    const shield = J.get('shield')!, head = J.get('head')!, pelvis = J.get('pelvis')!;
+    expect(shield.x - pelvis.x).toBeGreaterThan(1);   // ahead of the body, towards the enemy
+    expect(Math.abs(shield.y - (head.y + 0.8))).toBeLessThan(1.5);   // around face height
+  });
+});

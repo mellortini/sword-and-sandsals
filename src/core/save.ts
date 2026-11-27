@@ -70,7 +70,8 @@ function isLook(value: unknown): value is Look {
   return isAppearance(value)
     && EQUIPMENT.every((slot) => within(value[slot], 0, 10))
     && typeof value.weapon === 'string'
-    && (value.build === undefined || within(value.build, 0, 2));
+    && (value.build === undefined || within(value.build, 0, 2))
+    && (value.shield === undefined || within(value.shield, 0, 10));
 }
 
 function isItemId(id: unknown): id is string {

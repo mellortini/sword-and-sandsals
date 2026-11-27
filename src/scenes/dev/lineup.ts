@@ -9,6 +9,8 @@ export async function showLineup({ world, kit, add, params }: SceneContext) {
   const J = kit.json;
   // &build=0|1|2: every fighter in that body build (#27)
   const build = params.has('build') ? Math.max(0, Math.min(BUILDS.length - 1, Math.floor(+params.get('build')!) || 0)) : undefined;
+  // &shield=1: every fighter carries the shield of its set's tier (#38)
+  const shield = params.has('shield');
   world.addChild(label(`Armour sets: tier 1 → 10${build === undefined ? '' : ` · ${BUILDS[build].name}`}`, W / 2, 18, 34));
   for (let t = 1; t <= 10; t++) {
     const col = (t - 1) % 5, row = Math.floor((t - 1) / 5);
@@ -16,6 +18,7 @@ export async function showLineup({ world, kit, add, params }: SceneContext) {
     const look: Look = { ...DEFAULT_LOOK, skin: (t * 3) % 10, face: t - 1, hair: (t + 2) % 10, hairColor: (t * 7) % 10, beard: (t * 3) % 10 };
     for (const s of EQUIP_SLOTS) look[s] = t;
     if (build !== undefined) look.build = build;
+    if (shield) look.shield = t;
     await add(look, x, feet - PELVIS_ABOVE_FEET * 32, 32, 1, world, t * 0.3, true);
     const sum = EQUIP_SLOTS.reduce((a, s) => a + (item(s, t)?.armor ?? 0), 0);
     const price = EQUIP_SLOTS.reduce((a, s) => a + (item(s, t)?.price ?? 0), 0);

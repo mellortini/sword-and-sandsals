@@ -224,7 +224,26 @@ export const CLIP_FACES: Readonly<Record<string, Readonly<Record<number, Pose>>>
   charge: { 2: { brows: 1 }, 36: { brows: 0 } },
   taunt: { 6: { brows: 1, mouth: 1 }, 44: { brows: 0, mouth: 0 } },
   block: { 2: { brows: 1 }, 18: { brows: 0 } },
+  'block@shield': { 2: { brows: 1 }, 18: { brows: 0 } },
 };
+
+/**
+ * Shield clips (#38): the Animator plays `block@shield` instead of `block` when the fighter carries a shield.
+ * The back arm swings the shield up in front of the chest and face (its centre ~1.6 ahead of the pelvis, at head
+ * height); the sword arm stays cocked low behind it instead of parrying. The rig keeps the shield upright (src/rig/shield.ts).
+ */
+export const SHIELD_CLIPS: Clip[] = [
+  {
+    name: 'block@shield', length: 18,
+    events: [{ f: 2, type: 'block' }],
+    keys: [
+      { f: 0 },
+      { f: 2, x: -0.15, ease: 'out', pose: { torso: 10, head: 6, arm_b_up: 78, arm_b_lo: 58, hand_b: 0, arm_f_up: 14, arm_f_lo: 74, hand_f: -10, blade: 58, leg_b_up: -22 } },
+      { f: 12, x: -0.2, pose: { torso: 9 } },
+      { f: 18, x: 0, pose: { torso: 3, head: -3, arm_f_up: 22, arm_f_lo: 62, hand_f: -10, weapon: -40, arm_b_up: -18, arm_b_lo: 35, leg_b_up: -14 } },
+    ],
+  },
+];
 
 function withFace(c: Clip): Clip {
   const faces = CLIP_FACES[c.name];
@@ -233,7 +252,7 @@ function withFace(c: Clip): Clip {
 }
 
 /** every clip including the weapon-family variants (`attack_power@hammer`, src/anim/weaponClips.ts), with faces */
-export const ALL_CLIPS: Clip[] = [...CLIPS, ...FINISHER_CLIPS, ...WEAPON_CLIPS, ...heldWalks(CLIPS), ...heldDodges(CLIPS)].map(withFace);
+export const ALL_CLIPS: Clip[] = [...CLIPS, ...FINISHER_CLIPS, ...WEAPON_CLIPS, ...heldWalks(CLIPS), ...heldDodges(CLIPS), ...SHIELD_CLIPS].map(withFace);
 
 export function bakeAll(stance: Pose): Record<string, Baked> {
   const o: Record<string, Baked> = {};

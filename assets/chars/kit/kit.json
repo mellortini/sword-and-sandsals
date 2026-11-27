@@ -77,6 +77,12 @@
    "y": -0.38
   },
   {
+   "name": "shield",
+   "parent": "hand_b",
+   "x": 0.0,
+   "y": -0.3
+  },
+  {
    "name": "leg_b_up",
    "parent": "pelvis",
    "x": -0.52,
@@ -339,6 +345,11 @@
    "piece": ""
   },
   {
+   "bone": "shield",
+   "slot": "shield",
+   "piece": ""
+  },
+  {
    "bone": "arm_f_lo",
    "slot": "body",
    "piece": "arm_lo"
@@ -380,6 +391,7 @@
   "arm_f_lo": 62,
   "hand_f": -10,
   "weapon": -40,
+  "shield": 0,
   "leg_b_up": -14,
   "leg_b_lo": 4,
   "foot_b": 10,
@@ -2810,6 +2822,96 @@
     191.47
    ],
    "tint": "hair"
+  },
+  "shield1": {
+   "w": 239,
+   "h": 238,
+   "pivot": [
+    119.23,
+    118.76
+   ],
+   "tint": null
+  },
+  "shield2": {
+   "w": 251,
+   "h": 251,
+   "pivot": [
+    125.1,
+    125.9
+   ],
+   "tint": null
+  },
+  "shield3": {
+   "w": 265,
+   "h": 265,
+   "pivot": [
+    132.3,
+    132.7
+   ],
+   "tint": null
+  },
+  "shield4": {
+   "w": 280,
+   "h": 280,
+   "pivot": [
+    139.5,
+    140.5
+   ],
+   "tint": null
+  },
+  "shield5": {
+   "w": 208,
+   "h": 352,
+   "pivot": [
+    103.95,
+    176.05
+   ],
+   "tint": null
+  },
+  "shield6": {
+   "w": 216,
+   "h": 365,
+   "pivot": [
+    107.55,
+    182.75
+   ],
+   "tint": null
+  },
+  "shield7": {
+   "w": 223,
+   "h": 378,
+   "pivot": [
+    111.15,
+    189.45
+   ],
+   "tint": null
+  },
+  "shield8": {
+   "w": 230,
+   "h": 390,
+   "pivot": [
+    114.75,
+    195.15
+   ],
+   "tint": null
+  },
+  "shield9": {
+   "w": 237,
+   "h": 403,
+   "pivot": [
+    118.35,
+    201.85
+   ],
+   "tint": null
+  },
+  "shield10": {
+   "w": 244,
+   "h": 415,
+   "pivot": [
+    121.95,
+    207.55
+   ],
+   "tint": null
   }
  }
 }

@@ -25,7 +25,8 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   const tp = params.get('tier');
   // &weapon=hammer8 / &enemy=spear6: try a weapon (and its clip variants, #36) in the lab
   const armed = (look: ReturnType<typeof randomLook>, w: string | null) => (w ? { ...look, weapon: w } : look);
-  const L0 = armed(randomLook(tp ? +tp : 4), params.get('weapon')), L1 = armed(randomLook(tp ? +tp : 6), params.get('enemy'));
+  // &shield=4 / &eshield=7: a shield of that tier on the back hand (#38)
+  const L0 = { ...armed(randomLook(tp ? +tp : 4), params.get('weapon')), shield: +(params.get('shield') ?? 0) }, L1 = { ...armed(randomLook(tp ? +tp : 6), params.get('enemy')), shield: +(params.get('eshield') ?? 0) };
   const pY = FEET_Y - PELVIS_ABOVE_FEET * UNIT;
   const shadows: Sprite[] = [];
   for (let i = 0; i < 2; i++) {
