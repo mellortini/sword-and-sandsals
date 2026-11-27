@@ -126,7 +126,9 @@ export class Animator {
     const yPos = s.air ? y : y + this.baseLow - this.rig.soleLow(pose);
     this.rig.pose = s.head ? poseWithLooseHead(pose, s.head, x, yPos, this.baseLow) : pose;
     const k = this.unit;
-    this.rig.view.position.set(this.home.x + x * k * this.rig.facing, this.home.y - yPos * k);
+    // a taller puppet (stature) keeps its soles where a normal one has them: heights follow the drawn size, steps don't
+    const rise = (this.rig.kit.json.bones[0].y - this.baseLow) * (this.rig.scale - k);
+    this.rig.view.position.set(this.home.x + x * k * this.rig.facing, this.home.y - rise - yPos * this.rig.scale);
     if (!c.loop && this.frame >= c.length && !this.done) { this.done = true; this.finish(); }
   }
 

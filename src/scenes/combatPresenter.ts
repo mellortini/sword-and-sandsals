@@ -14,6 +14,7 @@ import type { CrowdFx } from '../ui/crowdFx';
 import type { CameraJuice } from '../ui/cameraJuice';
 import { attachGroundFx } from '../ui/groundFx';
 import { attachFoley, blowSound, playFoley } from '../audio/foley';
+import { statureFor } from '../rig/stature';
 import type { CrowdAmbience } from '../audio/crowd';
 import { playSever } from '../audio/sever';
 import { MIN_LUNGE, STRIKE_GAP, forwardDelta, planSteps, screenX } from './combatPlan';
@@ -95,6 +96,8 @@ export class CombatPresenter {
     this.shown = { player: { ...state.fighters.player }, enemy: { ...state.fighters.enemy } };
     for (const side of ['player', 'enemy'] as const) {
       const a = this.o.fighters[side];
+      // Might shows as height, the bout's own Might (skills included)
+      a.rig.setStature(statureFor(state.fighters[side].attributes.might));
       // a shield broken in the last bout is whole again (#273), and a cut-off arm is back (#275)
       const shield = state.fighters[side].shield;
       if (a.rig.look.armCut) void a.rig.setLook({ armCut: false });
@@ -184,7 +187,7 @@ export class CombatPresenter {
 
   private head(side: FighterSide) {
     const r = this.o.fighters[side].rig;
-    return { x: r.view.x + 0.3 * this.o.unit * r.facing, y: r.view.y - 8.9 * this.o.unit };
+    return { x: r.view.x + 0.3 * r.scale * r.facing, y: r.view.y - 8.9 * r.scale };
   }
 
   /** play a move clip so that its root motion carries the fighter from `from` to `to` */
@@ -281,7 +284,8 @@ export class CombatPresenter {
         const gap = Math.abs(fighters.enemy.home.x - fighters.player.home.x) / unit;
         await this.clip(anim, `attack_${step.attack.kind}`, {
           blend: 1,
-          lunge: Math.max(MIN_LUNGE, gap - STRIKE_GAP[step.attack.kind]),
+          // a taller fighter's blade reaches further, so the body steps in that much less
+          lunge: Math.max(MIN_LUNGE, gap - STRIKE_GAP[step.attack.kind] * anim.rig.stature),
           onEvent: (e) => { if (e.type === 'hit') reaction = this.react(step.attack, step.fatal, step.push); },
         });
         await reaction;

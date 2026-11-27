@@ -238,7 +238,10 @@ export class PaperRig {
   readonly kit: Kit;
   pose: Pose;
   facing: 1 | -1;
+  /** px per rig unit as drawn: the scene's size times the fighter's stature */
   scale: number;
+  /** the scene's size, before stature */
+  private readonly baseScale: number;
   shadow: ShadowStyle;
   look: Look = { ...DEFAULT_LOOK };
 
@@ -252,18 +255,31 @@ export class PaperRig {
 
   constructor(kit: Kit, opts: { scale: number; facing: 1 | -1; shadow?: ShadowStyle }) {
     this.kit = kit;
-    this.scale = opts.scale;
+    this.scale = this.baseScale = opts.scale;
     this.facing = opts.facing;
     this.shadow = { ...(opts.shadow ?? DEFAULT_SHADOW) };
     this.pose = { ...kit.json.pose_test };
     // 12.5 units ahead of the pelvis: room for a spear thrust (#36); 9.5 behind it: a fighter fallen on the back with
     // a shield on the arm (#273) used to be cut off at 6.5
-    const wU = 22, hU = 18;
+    const wU = 22, hU = 18;   // setStature resizes to the same box
     this.origin = { x: 9.5 * this.scale, y: 11.8 * this.scale };
     const resolution = window.matchMedia('(pointer: coarse)').matches ? 1 : 2;
     this.rt = RenderTexture.create({ width: Math.ceil(wU * this.scale), height: Math.ceil(hU * this.scale), resolution, antialias: true });
     this.view = new Sprite(this.rt);
     this.setFacing(opts.facing);
+  }
+
+  /** how tall this fighter is drawn, 1 = normal (Might, stature.ts) */
+  get stature() { return this.scale / this.baseScale; }
+
+  setStature(stature: number) {
+    const scale = this.baseScale * stature;
+    if (scale === this.scale) return;
+    this.scale = scale;
+    this.origin = { x: 9.5 * scale, y: 11.8 * scale };
+    this.rt.resize(Math.ceil(22 * scale), Math.ceil(18 * scale));
+    this.invalidateStillFrame();
+    this.setFacing(this.facing);
   }
 
   setFacing(f: 1 | -1) {

@@ -1407,6 +1407,18 @@ Poprawki po uwagach (goloburda05-hue):
 - ⚠️ Kontrakt: `ActionOption` dla `block` ma `blockChance` (karta Blok pokazuje procent, podpowiedź „Block chance”). Testy, które sprawdzają skutki udanego bloku (kontry, zaklęcia, seria pudeł, umiejętności), dają blokującemu `offHand: 'shield9'` — te same rzuty co wcześniej.
 - AI waży blok proporcjonalnie do tej szansy. Balans: obrońca bez tarczy traci 1–3 pkt; tarcza w rękach AI nadal ~50% (AI rzadko blokuje, blok zabiera turę). Szczegóły w `docs/BALANS.md`.
 
+### 2026-11-27 20:20 · Claude Code (Mateusz) · might-height
+
+Siła (Might) zwiększa teraz wzrost postaci (prośba Mateusza). Tylko wygląd: zasięg w polach, kroki i liczby walki bez zmian.
+- `src/rig/stature.ts`: `statureFor(might)` = 1 + 1,5% za punkt powyżej 5, maks. 1,18 (od 17 punktów).
+- `PaperRig.setStature()` / `rig.stature`: rośnie cała kukła z bronią i zbroją; `rig.scale` to już rozmiar z uwzględnieniem wzrostu,
+  a rozmiar sceny (`Animator.unit`) zostaje do ruchu w poziomie. Animator sam trzyma stopy na piasku (`home` bez zmian).
+  ⚠️ Pozycje przy ciele liczcie z `rig.scale` (albo `rig.screenPoint`), nie z `UNIT`.
+- Ustawia to `CombatPresenter.reset` (Might z walki, razem z umiejętnościami) i kreator postaci. Inne podglądy (sklep, portrety,
+  garderoba, anim lab) pokazują dalej normalny wzrost.
+- Wyższy napastnik robi krótszy wypad (`STRIKE_GAP * stature`).
+- Podgląd: `?view=arena&might=17&emight=5` albo kreator.
+
 ### 2026-11-27 20:21 · Claude Code (goloburda05-hue) · #275 / 275-shield-arm-cut
 
 - Odcięcie ręki z tarczą: `severChance` (`core/combat.ts`). **Nigdy, gdy obrońca blokował w chwili ataku** (stan gardy sprzed pierwszego uderzenia). Poza tym: power/charge, cała tarcza, trafienie z obrażeniami, obrońca żyje, przewaga Might (0,5 pkt/pkt, topór ×1,5, maks. 5%). Rzut tylko przy szansie > 0 — reszta walk losuje jak dotąd.

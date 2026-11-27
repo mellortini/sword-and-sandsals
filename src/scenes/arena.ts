@@ -93,8 +93,12 @@ export async function showArena(
   const tier = tp ? +tp : undefined;
   // a direct visit may hand out shields (#273): `&shield=3&eshield=6` (the look's shield becomes a real one in the bout)
   const shieldOf = (key: string) => (params.has(key) ? { shield: +params.get(key)! } : {});
-  const [player, firstEnemy]: readonly [ArenaFighter, ArenaFighter] = fighters
-    ?? [{ name: 'Player', look: { ...randomLook(tier), ...shieldOf('shield') } }, { name: 'Opponent', look: { ...randomLook(tier), ...shieldOf('eshield') } }];
+  // &might=17&emight=5: try fighters of different Might (and so of different height)
+  const mightOf = (key: string) => (params.has(key) ? { attributes: { might: Math.max(0, Math.floor(+params.get(key)!) || 0) } } : {});
+  const [player, firstEnemy]: readonly [ArenaFighter, ArenaFighter] = fighters ?? [
+    { name: 'Player', look: { ...randomLook(tier), ...shieldOf('shield') }, ...mightOf('might') },
+    { name: 'Opponent', look: { ...randomLook(tier), ...shieldOf('eshield') }, ...mightOf('emight') },
+  ];
   let enemy: ArenaFighter = firstEnemy;
   const asked = params.get('ai');
   const profile: AiProfile = asked === 'aggressor' || asked === 'defender' ? asked : PROFILES[Math.floor(Math.random() * PROFILES.length)];
@@ -247,13 +251,14 @@ export async function showArena(
     menu.place({
       left: world.position.x + gap.left * s, right: world.position.x + gap.right * s, bottom: world.position.y + gap.bottom * s,
       ceiling: (links.top < 60 ? links.bottom : 0) + 6,
-      floor: world.position.y + (FEET_Y - FIGHTER_HEIGHT) * s,
+      floor: world.position.y + (FEET_Y - FIGHTER_HEIGHT * Math.max(P.stature, E.stature)) * s,
     });
     for (const [rig, g] of [[P, shadows[0]], [E, shadows[1]]] as const) {
-      const lift = Math.max(0, (pelvisY - rig.view.y) / UNIT);
+      // a taller fighter's pelvis rests higher (stature): that is not a jump
+      const lift = Math.max(0, (FEET_Y - PELVIS_ABOVE_FEET * rig.scale - rig.view.y) / UNIT);
       g.position.set(rig.view.x + 0.35 * UNIT * rig.facing, FEET_Y);
       g.alpha = Math.max(0.25, 1 - lift * 0.18);
-      g.width = 5.2 * UNIT * Math.max(0.6, 1 - lift * 0.08);
+      g.width = 5.2 * rig.scale * Math.max(0.6, 1 - lift * 0.08);
     }
   };
 }
