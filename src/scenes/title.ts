@@ -4,6 +4,7 @@ import type { SavedCharacter } from '../core/save';
 import { PaperMenu } from '../ui/paperMenu';
 import { openTown, townNote } from '../ui/town';
 import { openSettings } from '../ui/settings';
+import { startMusic } from '../audio/music';
 import { lookPreview } from '../ui/lookPreview';
 import { TEXT_SIZES, cycleTextSize } from '../ui/textSize';
 import type { PaperMenuEntry } from '../ui/paperMenu';
@@ -85,6 +86,8 @@ export async function showTitle({ app, world, bgTex, ui, add, kit }: SceneContex
   const changeSetting = (i: number, step: 1 | -1) => {
     if (items[i].setting === 'textSize') menu.setNote(i, TEXT_SIZES[cycleTextSize(step)].name);
   };
+  // the town's theme plays over the title and the town panels (#73); the page changes view by reloading
+  startMusic('town');
   let gladiator = saved;
   // the shops put gear on the gladiator before buying it (#34): one still puppet, drawn only when asked
   const tryOn = lookPreview(kit, app.renderer);

@@ -10,8 +10,8 @@ import { textSizeIndex } from './textSize';
 const row = <T extends ChoiceRow | SliderRow>(id: string) => SETTINGS.find((r) => r.id === id) as T;
 
 describe('settings (#80)', () => {
-  it('has every switch the game reads: text, gore, motion, shadows and three volumes', () => {
-    expect(SETTINGS.map((r) => r.id)).toEqual(['text', 'gore', 'motion', 'shadows', 'volume-master', 'volume-foley', 'volume-crowd']);
+  it('has every switch the game reads: text, gore, motion, shadows and the volumes', () => {
+    expect(SETTINGS.map((r) => r.id)).toEqual(['text', 'gore', 'motion', 'shadows', 'volume-master', 'volume-foley', 'volume-crowd', 'volume-music', 'volume-voices']);
     for (const r of SETTINGS) expect(r.hint.length).toBeGreaterThan(5);
   });
 

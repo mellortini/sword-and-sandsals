@@ -1273,3 +1273,12 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
   cienie papieru, głośność ogólna / walki / tłumu. Każda zmiana zapisuje się od razu; ↑/↓ wiersze, ←/→ zmiana, Esc zamyka.
 - Wiersze jako dane w `src/ui/settingsRules.ts` (testy) — nowe ustawienie = jeden wpis. Nowe `src/ui/graphics.ts` (`paperShadows`):
   `createRigCollection().add` tworzy kukły z cieniem albo bez (działa od następnej sceny).
+
+### 2026-11-27 15:10 · Claude Code (goloburda05-hue) · #73 / 73-music
+
+- Muzyka syntezowana jak foley (bez plików): `src/audio/music.ts` — lira (szarpana) nad cichym burdonem, na arenie bęben ramowy.
+  Arena: D dorycka, 92 BPM; miasto: G pentatonika, 72 BPM. Melodia generowana takt po takcie z ziarna (`barNotes`, testy), harmonia co 4 takty.
+  `startMusic(theme)` — arena / walka AI grają motyw areny (stop przy zniszczeniu sceny), tytuł i panele miasta motyw miasta.
+- Mikser: nowe kanały `music` (domyślnie 0.35) i `voices` (0.8) w `volume.ts` / `mixer.ts`; w Ustawieniach pojawiły się suwaki Music i Voices.
+  Lektor scen (#260, gdy powstanie) gra przez `voices`.
+- Mateusz: widok `?view=town` może po prostu wywołać `startMusic('town')`.

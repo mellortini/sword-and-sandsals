@@ -17,6 +17,7 @@ import { loadoutFromLook } from './preFight';
 import { aiPicker, runFight } from './turnLoop';
 import { arenaBackdrop } from './backdrop';
 import { CrowdFx } from '../ui/crowdFx';
+import { startMusic } from '../audio/music';
 import { CameraJuice, applyCamera } from '../ui/cameraJuice';
 import { reduceMotion } from '../ui/motion';
 import { FIGHT_LAYOUT } from './combatPlan';
@@ -66,7 +67,9 @@ export async function showAiFight(context: SceneContext): Promise<SceneUpdate> {
   arena.addChild(fx);
   // the crowd murmurs while the arena is shown (#18); it fades out with the scene
   const crowd = startCrowd();
-  arena.on('destroyed', () => crowd.stop());
+  // a quiet arena theme under it all (#73)
+  const music = startMusic('arena');
+  arena.on('destroyed', () => { crowd.stop(); music.stop(); });
 
   const empty = { name: '', health: 1, energy: 1, stats: { maxHealth: 1, maxEnergy: 1 } };
   const hud = new CombatHud({ fighters: { player: empty, enemy: empty } }, W, H);

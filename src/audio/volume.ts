@@ -1,13 +1,14 @@
 /**
- * Volume settings (#18): master, foley (fight sounds) and crowd, 0..1 each, saved in the browser.
+ * Volume settings (#18, #73): master, foley (fight sounds), crowd, music and voices, 0..1 each, saved in the browser.
  * Pure: the mixer (src/audio/mixer.ts) applies them, the settings screen (#80) only has to call setVolume.
  * Quiet by default: the fight is heard, nothing dominates.
  */
-export const CHANNELS = ['master', 'foley', 'crowd'] as const;
+export const CHANNELS = ['master', 'foley', 'crowd', 'music', 'voices'] as const;
 export type Channel = (typeof CHANNELS)[number];
 export type Volumes = Record<Channel, number>;
 
-export const DEFAULT_VOLUMES: Readonly<Volumes> = { master: 0.6, foley: 0.8, crowd: 0.5 };
+/** music sits under everything (#73); voices (the story's narrator) are clear */
+export const DEFAULT_VOLUMES: Readonly<Volumes> = { master: 0.6, foley: 0.8, crowd: 0.5, music: 0.35, voices: 0.8 };
 const KEY = 'folded-glory.volume';
 
 const clamp = (v: unknown, fallback: number) => (typeof v === 'number' && Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : fallback);
