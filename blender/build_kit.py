@@ -49,6 +49,9 @@ for i, f in enumerate(kit.FACES):
         jobs[f'face{i}_lids'] = ((lambda c, f=f: kit.face_lids(c, f)), 'skin', True)
     jobs[f'face{i}_brows'] = ((lambda c, f=f: kit.face_brows(c, f)), 'hair', True)
     jobs[f'face{i}_nose'] = ((lambda c, f=f: kit.face_nose(c, f)), 'skin', True)
+    jobs[f'face{i}_lids_closed'] = ((lambda c, f=f: kit.face_lids_closed(c, f)), 'skin', True)
+    jobs[f'face{i}_mouth_open'] = ((lambda c, f=f: kit.face_mouth_open(c, f)), 'skin', True)
+    jobs[f'face{i}_brows_angry'] = ((lambda c, f=f: kit.face_brows_angry(c, f)), 'hair', True)
 HAIR_PARTS = {}
 for i, (name, fn) in enumerate(kit.HAIRS):
     jobs[f'hair{i}_front'] = ((lambda c, fn=fn: fn(c, sl.new_coll('_trash'))), 'hair', True)
@@ -137,8 +140,9 @@ LAYERS += [dict(bone='torso', slot='body', piece='torso'),
            dict(bone='torso', slot='armor', piece='torso'), dict(bone='torso', slot='cut', piece='torso_tissue'),
            dict(bone='pelvis', slot='body', piece='pelvis'), dict(bone='pelvis', slot='armor', piece='skirt'),
            dict(bone='head', slot='cut', piece='head_tissue'), dict(bone='head', slot='cut', piece='head_edge'),
-           dict(bone='head', slot='cut', piece='head_neck'), dict(bone='head', slot='face', piece='head'), dict(bone='head', slot='face', piece='eyes'), dict(bone='head', slot='face', piece='lids'),
-           dict(bone='head', slot='face', piece='brows'), dict(bone='head', slot='beard', piece=''), dict(bone='head', slot='face', piece='nose'),
+           dict(bone='head', slot='cut', piece='head_neck'), dict(bone='head', slot='face', piece='head'), dict(bone='head', slot='face', piece='mouth_open'),
+           dict(bone='head', slot='face', piece='eyes'), dict(bone='head', slot='face', piece='lids'), dict(bone='head', slot='face', piece='lids_closed'),
+           dict(bone='head', slot='face', piece='brows'), dict(bone='head', slot='face', piece='brows_angry'), dict(bone='head', slot='beard', piece=''), dict(bone='head', slot='face', piece='nose'),
            dict(bone='head', slot='hair', piece='front'), dict(bone='head', slot='helmet', piece=''),
            dict(bone='arm_f_lo', slot='body', piece='arm_lo'), dict(bone='arm_f_lo', slot='armor', piece='bracer'),
            dict(bone='arm_f_up', slot='body', piece='arm_up'), dict(bone='arm_f_up', slot='shoulders', piece=''),

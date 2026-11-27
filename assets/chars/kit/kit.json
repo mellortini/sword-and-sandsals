@@ -291,6 +291,11 @@
   {
    "bone": "head",
    "slot": "face",
+   "piece": "mouth_open"
+  },
+  {
+   "bone": "head",
+   "slot": "face",
    "piece": "eyes"
   },
   {
@@ -301,7 +306,17 @@
   {
    "bone": "head",
    "slot": "face",
+   "piece": "lids_closed"
+  },
+  {
+   "bone": "head",
+   "slot": "face",
    "piece": "brows"
+  },
+  {
+   "bone": "head",
+   "slot": "face",
+   "piece": "brows_angry"
   },
   {
    "bone": "head",
@@ -2525,6 +2540,276 @@
     61.55
    ],
    "tint": "skin"
+  },
+  "face0_lids_closed": {
+   "w": 154,
+   "h": 76,
+   "pivot": [
+    43.7,
+    175.45
+   ],
+   "tint": "skin"
+  },
+  "face0_mouth_open": {
+   "w": 73,
+   "h": 58,
+   "pivot": [
+    -9.36,
+    64.84
+   ],
+   "tint": "skin"
+  },
+  "face0_brows_angry": {
+   "w": 152,
+   "h": 55,
+   "pivot": [
+    42.85,
+    191.19
+   ],
+   "tint": "hair"
+  },
+  "face1_lids_closed": {
+   "w": 141,
+   "h": 66,
+   "pivot": [
+    36.81,
+    170.37
+   ],
+   "tint": "skin"
+  },
+  "face1_mouth_open": {
+   "w": 73,
+   "h": 58,
+   "pivot": [
+    -9.36,
+    55.26
+   ],
+   "tint": "skin"
+  },
+  "face1_brows_angry": {
+   "w": 157,
+   "h": 61,
+   "pivot": [
+    45.5,
+    185.86
+   ],
+   "tint": "hair"
+  },
+  "face2_lids_closed": {
+   "w": 163,
+   "h": 88,
+   "pivot": [
+    48.3,
+    181.3
+   ],
+   "tint": "skin"
+  },
+  "face2_mouth_open": {
+   "w": 73,
+   "h": 58,
+   "pivot": [
+    -9.36,
+    73.41
+   ],
+   "tint": "skin"
+  },
+  "face2_brows_angry": {
+   "w": 145,
+   "h": 48,
+   "pivot": [
+    39.24,
+    193.81
+   ],
+   "tint": "hair"
+  },
+  "face3_lids_closed": {
+   "w": 152,
+   "h": 61,
+   "pivot": [
+    42.56,
+    167.83
+   ],
+   "tint": "skin"
+  },
+  "face3_mouth_open": {
+   "w": 73,
+   "h": 58,
+   "pivot": [
+    -9.36,
+    45.18
+   ],
+   "tint": "skin"
+  },
+  "face3_brows_angry": {
+   "w": 155,
+   "h": 57,
+   "pivot": [
+    44.37,
+    188.86
+   ],
+   "tint": "hair"
+  },
+  "face4_lids_closed": {
+   "w": 156,
+   "h": 78,
+   "pivot": [
+    44.85,
+    176.22
+   ],
+   "tint": "skin"
+  },
+  "face4_mouth_open": {
+   "w": 73,
+   "h": 58,
+   "pivot": [
+    -9.36,
+    67.36
+   ],
+   "tint": "skin"
+  },
+  "face4_brows_angry": {
+   "w": 147,
+   "h": 51,
+   "pivot": [
+    40.33,
+    197.28
+   ],
+   "tint": "hair"
+  },
+  "face5_lids_closed": {
+   "w": 152,
+   "h": 68,
+   "pivot": [
+    42.56,
+    171.14
+   ],
+   "tint": "skin"
+  },
+  "face5_mouth_open": {
+   "w": 73,
+   "h": 58,
+   "pivot": [
+    -9.36,
+    59.29
+   ],
+   "tint": "skin"
+  },
+  "face5_brows_angry": {
+   "w": 149,
+   "h": 51,
+   "pivot": [
+    41.24,
+    191.32
+   ],
+   "tint": "hair"
+  },
+  "face6_lids_closed": {
+   "w": 149,
+   "h": 71,
+   "pivot": [
+    41.41,
+    172.91
+   ],
+   "tint": "skin"
+  },
+  "face6_mouth_open": {
+   "w": 73,
+   "h": 58,
+   "pivot": [
+    -9.36,
+    62.32
+   ],
+   "tint": "skin"
+  },
+  "face6_brows_angry": {
+   "w": 155,
+   "h": 59,
+   "pivot": [
+    44.46,
+    187.02
+   ],
+   "tint": "hair"
+  },
+  "face7_lids_closed": {
+   "w": 144,
+   "h": 66,
+   "pivot": [
+    37.96,
+    170.37
+   ],
+   "tint": "skin"
+  },
+  "face7_mouth_open": {
+   "w": 73,
+   "h": 58,
+   "pivot": [
+    -9.36,
+    61.31
+   ],
+   "tint": "skin"
+  },
+  "face7_brows_angry": {
+   "w": 162,
+   "h": 65,
+   "pivot": [
+    48.46,
+    198.17
+   ],
+   "tint": "hair"
+  },
+  "face8_lids_closed": {
+   "w": 165,
+   "h": 91,
+   "pivot": [
+    49.45,
+    183.07
+   ],
+   "tint": "skin"
+  },
+  "face8_mouth_open": {
+   "w": 73,
+   "h": 58,
+   "pivot": [
+    -9.36,
+    69.37
+   ],
+   "tint": "skin"
+  },
+  "face8_brows_angry": {
+   "w": 147,
+   "h": 52,
+   "pivot": [
+    40.37,
+    201.9
+   ],
+   "tint": "hair"
+  },
+  "face9_lids_closed": {
+   "w": 152,
+   "h": 73,
+   "pivot": [
+    42.55,
+    173.68
+   ],
+   "tint": "skin"
+  },
+  "face9_mouth_open": {
+   "w": 73,
+   "h": 58,
+   "pivot": [
+    -9.36,
+    57.28
+   ],
+   "tint": "skin"
+  },
+  "face9_brows_angry": {
+   "w": 147,
+   "h": 49,
+   "pivot": [
+    40.2,
+    191.47
+   ],
+   "tint": "hair"
   }
  }
 }

@@ -1076,3 +1076,14 @@ Pipeline grafiki działa na drugim komputerze (#8, Windows 11, Blender 5.3 w `Pr
 - `pc_lib.setup_cycles`: GPU z OPTIX / CUDA / HIP / ONEAPI / METAL, bez GPU CPU; `CYCLES_DEVICE=CPU` wymusza CPU; log pokazuje `CYCLES_DEVICE …`.
 - `build_kit.py` / `fx_bits.py` zapisują JSON z LF — na Windowsie `kit.json` po renderze nie wisiał już jako „zmieniony” przez CRLF.
 - Mateusz: u Ciebie nic się nie zmienia (`D:/blender/blender.exe` jest na liście szukanych ścieżek), ale `BLENDER` jest wygodniejsze.
+
+### 2026-11-27 12:45 · Claude Code (goloburda05-hue) · #26 / 26-expressions
+
+Wymienne miny (#26): mrugnięcie, ból, gniew, triumf.
+- Grafika: w `kit.py` 3 nowe części na twarz → `face<i>_lids_closed` (skóra), `face<i>_mouth_open` (skóra), `face<i>_brows_angry` (kolor włosów); 30 sprite'ów,
+  w `kit.json` (plik wspólny, tylko dopisane) 3 nowe warstwy `face`: `mouth_open` za głową, `lids_closed` za powiekami, `brows_angry` za brwiami. Atlasy przepakowane.
+- `src/rig/expressions.ts`: miny to klucze pozy `eyes` / `mouth` / `brows` (0..1, próg 0,5) — klipy animują je jak kości. `PaperRig` pokazuje/ukrywa te warstwy (jak `cut` przy dobiciu).
+- `CLIP_FACES` w `clips.ts`: ból w `hit` / `knockback` / `death`, okrzyk w `victory`, wysiłek (brwi) w `attack_power` (+ `@hammer` / `@spear`), `charge`, `taunt`, `block`. `attack_normal` bez zmian (wzorzec `strip.png`).
+- `Animator`: mrugnięcie co 2–6 s na ~0,12 s (`blinks = false` wyłącza; nigdy w klipie `hold`).
+- Podgląd: `?view=faces&expr=pain|anger|triumph|blink`.
+- Mateusz: jeśli robisz nowe klipy, dodaj miny do `CLIP_FACES` (klatka musi być kluczem klipu — test to sprawdza).

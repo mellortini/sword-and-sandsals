@@ -209,8 +209,31 @@ export const CLIPS: Clip[] = [
   },
 ];
 
-/** every clip including the weapon-family variants (`attack_power@hammer`, src/anim/weaponClips.ts) */
-export const ALL_CLIPS: Clip[] = [...CLIPS, ...FINISHER_CLIPS, ...WEAPON_CLIPS, ...heldWalks(CLIPS), ...heldDodges(CLIPS)];
+/**
+ * Faces in the clips (#26): expression keys (src/rig/expressions.ts) set on existing key frames, 1 = shown.
+ * Pain when struck or falling, a shout of triumph, the brows pulled down for effort.
+ */
+export const CLIP_FACES: Readonly<Record<string, Readonly<Record<number, Pose>>>> = {
+  hit: { 2: { eyes: 1, mouth: 1 }, 16: { eyes: 0, mouth: 0 } },
+  knockback: { 3: { eyes: 1, mouth: 1 }, 20: { eyes: 0, mouth: 0 } },
+  death: { 4: { eyes: 1, mouth: 1 } },
+  victory: { 6: { mouth: 1 } },
+  attack_power: { 5: { brows: 1 }, 7: { mouth: 1 }, 26: { brows: 0, mouth: 0 } },
+  'attack_power@hammer': { 7: { brows: 1 }, 10: { mouth: 1 }, 32: { brows: 0, mouth: 0 } },
+  'attack_power@spear': { 5: { brows: 1 }, 7: { mouth: 1 }, 26: { brows: 0, mouth: 0 } },
+  charge: { 2: { brows: 1 }, 36: { brows: 0 } },
+  taunt: { 6: { brows: 1, mouth: 1 }, 44: { brows: 0, mouth: 0 } },
+  block: { 2: { brows: 1 }, 18: { brows: 0 } },
+};
+
+function withFace(c: Clip): Clip {
+  const faces = CLIP_FACES[c.name];
+  if (!faces) return c;
+  return { ...c, keys: c.keys.map((k) => (faces[k.f] ? { ...k, pose: { ...(k.pose ?? {}), ...faces[k.f] } } : k)) };
+}
+
+/** every clip including the weapon-family variants (`attack_power@hammer`, src/anim/weaponClips.ts), with faces */
+export const ALL_CLIPS: Clip[] = [...CLIPS, ...FINISHER_CLIPS, ...WEAPON_CLIPS, ...heldWalks(CLIPS), ...heldDodges(CLIPS)].map(withFace);
 
 export function bakeAll(stance: Pose): Record<string, Baked> {
   const o: Record<string, Baked> = {};
