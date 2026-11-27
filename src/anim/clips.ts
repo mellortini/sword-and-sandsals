@@ -13,6 +13,11 @@ import { FINISHER_CLIPS } from './finisherClips';
 
 const CROUCH: Pose = { leg_f_up: 48, leg_f_lo: -82, leg_b_up: 24, leg_b_lo: -76, torso: -12 };
 
+/** the raised guard: sword across the face, back arm up (the `block` clip and the held guard, #273) */
+const GUARD_POSE = { torso: 8, head: 4, arm_f_up: 96, arm_f_lo: 70, hand_f: -10, blade: 78, arm_b_up: 40, arm_b_lo: 70, leg_b_up: -22 };
+/** the guard behind a shield (#38): shield before the chest and face, sword cocked low behind it */
+const SHIELD_GUARD_POSE = { torso: 10, head: 6, arm_b_up: 78, arm_b_lo: 58, hand_b: 0, arm_f_up: 14, arm_f_lo: 74, hand_f: -10, blade: 58, leg_b_up: -22 };
+
 export const CLIPS: Clip[] = [
   {
     name: 'idle', length: 60, loop: true,
@@ -120,9 +125,28 @@ export const CLIPS: Clip[] = [
     events: [{ f: 2, type: 'block' }],
     keys: [
       { f: 0 },
-      { f: 2, x: -0.25, ease: 'out', pose: { torso: 8, head: 4, arm_f_up: 96, arm_f_lo: 70, hand_f: -10, blade: 78, arm_b_up: 40, arm_b_lo: 70, leg_b_up: -22 } },
+      { f: 2, x: -0.25, ease: 'out', pose: GUARD_POSE },
       { f: 12, x: -0.3, pose: { torso: 7 } },
       { f: 18, x: 0, pose: { torso: 3, head: -3, arm_f_up: 22, arm_f_lo: 62, hand_f: -10, weapon: -40, arm_b_up: -18, arm_b_lo: 35, leg_b_up: -14 } },
+    ],
+  },
+  // the Block action (#273): the guard goes up and stays up until a blow lands or the guard ends with the turn;
+  // the presenter plays `guard_up`, then holds `guard`, and the reaction (`block`, `hit`, `dodge`) lowers it
+  {
+    name: 'guard_up', length: 8,
+    events: [{ f: 2, type: 'block' }],
+    keys: [
+      { f: 0 },
+      { f: 2, x: -0.25, ease: 'out', pose: GUARD_POSE },
+      { f: 8, x: -0.3, pose: { torso: 7 } },
+    ],
+  },
+  {
+    name: 'guard', length: 48, loop: true,
+    keys: [
+      { f: 0, x: -0.3, pose: { ...GUARD_POSE, torso: 7 } },
+      { f: 24, x: -0.3, pose: { torso: 9, head: 5, arm_f_up: 98 } },
+      { f: 48, x: -0.3, pose: { torso: 7, head: 4, arm_f_up: 96 } },
     ],
   },
   {
@@ -225,6 +249,10 @@ export const CLIP_FACES: Readonly<Record<string, Readonly<Record<number, Pose>>>
   taunt: { 6: { brows: 1, mouth: 1 }, 44: { brows: 0, mouth: 0 } },
   block: { 2: { brows: 1 }, 18: { brows: 0 } },
   'block@shield': { 2: { brows: 1 }, 18: { brows: 0 } },
+  guard_up: { 2: { brows: 1 } },
+  'guard_up@shield': { 2: { brows: 1 } },
+  guard: { 0: { brows: 1 } },
+  'guard@shield': { 0: { brows: 1 } },
 };
 
 /**
@@ -238,9 +266,27 @@ export const SHIELD_CLIPS: Clip[] = [
     events: [{ f: 2, type: 'block' }],
     keys: [
       { f: 0 },
-      { f: 2, x: -0.15, ease: 'out', pose: { torso: 10, head: 6, arm_b_up: 78, arm_b_lo: 58, hand_b: 0, arm_f_up: 14, arm_f_lo: 74, hand_f: -10, blade: 58, leg_b_up: -22 } },
+      { f: 2, x: -0.15, ease: 'out', pose: SHIELD_GUARD_POSE },
       { f: 12, x: -0.2, pose: { torso: 9 } },
       { f: 18, x: 0, pose: { torso: 3, head: -3, arm_f_up: 22, arm_f_lo: 62, hand_f: -10, weapon: -40, arm_b_up: -18, arm_b_lo: 35, leg_b_up: -14 } },
+    ],
+  },
+  {
+    // the Block action behind a shield (#273): raised and held until the blow, like `guard_up` / `guard`
+    name: 'guard_up@shield', length: 8,
+    events: [{ f: 2, type: 'block' }],
+    keys: [
+      { f: 0 },
+      { f: 2, x: -0.15, ease: 'out', pose: SHIELD_GUARD_POSE },
+      { f: 8, x: -0.2, pose: { torso: 9 } },
+    ],
+  },
+  {
+    name: 'guard@shield', length: 48, loop: true,
+    keys: [
+      { f: 0, x: -0.2, pose: { ...SHIELD_GUARD_POSE, torso: 9 } },
+      { f: 24, x: -0.2, pose: { torso: 11, head: 7, arm_b_up: 80 } },
+      { f: 48, x: -0.2, pose: { torso: 9, head: 6, arm_b_up: 78 } },
     ],
   },
 ];

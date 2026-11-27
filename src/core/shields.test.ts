@@ -58,13 +58,14 @@ describe('shield in the inventory (#273)', () => {
 });
 
 describe('shield in combat (#273)', () => {
-  it('comes to the bout whole, but not with a two-handed weapon or the dagger pair', () => {
+  it('comes to the bout whole, but not with a two-handed weapon', () => {
     const state = createCombat(1, { equipment: { offHand: 'shield3' } });
     expect(state.fighters.player.shield).toEqual({ id: 'shield3', tier: 3, health: 42, maxHealth: 42 });
     expect(createCombat(1, { equipment: { weapon: 'sword3', offHand: 'shield3' } }).fighters.player.shield).toBeDefined();
     expect(createCombat(1, { equipment: { weapon: 'spear3', offHand: 'shield3' } }).fighters.player.shield).toBeUndefined();
     expect(createCombat(1, { equipment: { weapon: 'hammer3', offHand: 'shield3' } }).fighters.player.shield).toBeUndefined();
-    expect(createCombat(1, { weapon: 'daggers', equipment: { offHand: 'shield3' } }).fighters.player.shield).toBeUndefined();
+    // a dagger is one-handed: the shield goes in the other hand
+    expect(createCombat(1, { weapon: 'daggers', equipment: { offHand: 'shield3' } }).fighters.player.shield).toBeDefined();
     expect(createCombat(1, { equipment: { offHand: 'sword1' } }).fighters.player.shield).toBeUndefined();
   });
 

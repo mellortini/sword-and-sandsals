@@ -1349,3 +1349,10 @@ Tarcza jest teraz prawdziwym przedmiotem walki (zaplanowane trzy kroki: #273 →
 - Scena: `loadoutFromLook` daje tarczę przeciwnikom z `look.shield` (dziś żaden jej nie ma). Presenter pokazuje BLOCK z „−N”, przy pęknięciu rdzawy BROKEN i zdejmuje tarczę z kukły (`reset` ją przywraca). HUD: odznaka z HP tarczy na końcu tabliczki z imieniem.
 - `tools/balance.ts`: cena zestawu liczy tylko 5 części zbroi (wyniki w BALANS.md bez zmian); nowe wiersze `shieldDefender` / `shieldAggressor` = 50,0% (tarcza nie zmienia jeszcze wyniku). AI blokuje rzadko, tarcza pęka w 0–2% walk.
 - Dev: `?view=arena&shield=3&eshield=6` daje losowym postaciom tarcze.
+
+### 2026-11-27 19:51 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+Poprawki po uwagach (goloburda05-hue):
+- Sztylet jest jednoręczny: tarcza działa też przy `daggers` (`leavesHandForShield` wyklucza tylko włócznię i młot). Rig: z tarczą w ręce znika drugi sztylet (`weapon_b`). Mechanika sztyletów (2 uderzenia) bez zmian.
+- Blok trzymany do ciosu: akcja Blok gra nowy `guard_up` (podniesienie bez opuszczania), potem zapętlony `guard` (oba też `@shield`). Gardę opuszcza reakcja na cios (`block` / `hit` / `dodge`), a gdy rdzeń zdejmie ją bez ciosu, presenter wraca do `idle`. ⚠️ `combatPlan`: krok `pose` dla bloku ma teraz `clip: 'guard_up'` (było `'block'`). Klip `block` zostaje jako reakcja na zablokowany cios.
+- `expressions.test.ts`: klipy zapętlone i `guard_up` mogą kończyć się ze zmarszczonymi brwiami (garda trwa).

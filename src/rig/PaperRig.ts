@@ -182,10 +182,12 @@ export class Kit {
       case 'beard': return look.beard > 0 ? `beard${look.beard}` : null;
       case 'weapon': return look.weapon ? `weapon_${look.weapon}` : null;
       case 'shield': return this.shieldShown(look) ? `shield${look.shield}` : null;
-      // the back hand holds a paired weapon's second copy (daggers, #47) or the weapon's companion (the trident's net, #254)
+      // the back hand holds a paired weapon's second copy (daggers, #47) or the weapon's companion (the trident's net, #254);
+      // a shield (#273) takes that hand instead of the second dagger
       case 'weapon_b': {
         const main = look.weapon ? this.json.sprites[`weapon_${look.weapon}`] : undefined;
-        return main?.pair ? `weapon_${look.weapon}` : main?.offhand ?? null;
+        if (main?.pair) return this.shieldShown(look) ? null : `weapon_${look.weapon}`;
+        return main?.offhand ?? null;
       }
       default: {
         const tier = look[layer.slot as EquipSlot] ?? 0;

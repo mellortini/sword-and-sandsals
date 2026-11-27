@@ -119,6 +119,9 @@ export class CombatPresenter {
       this.shown = { player: { ...after.fighters.player }, enemy: { ...after.fighters.enemy } };
       for (const side of ['player', 'enemy'] as const) {
         this.o.fighters[side].home.x = screenX(this.o.layout, side, after.fighters[side].position);
+        // the guard ended with no blow (the opponent rested, moved, …): lower it now
+        const anim = this.o.fighters[side];
+        if (!after.fighters[side].guarding && anim.clip.startsWith('guard')) anim.play('idle');
       }
       // the crowd reacts once the action has played out; a bouquet's health is already in `after`
       const gifts = events.filter((e): e is CrowdGiftEvent => e.type === 'crowd_gift');
@@ -241,7 +244,8 @@ export class CombatPresenter {
         return;
       }
       case 'pose':
-        await this.clip(fighters[step.side], step.clip);
+        // a raised guard is held (`guard`, looping) until a blow's reaction or the end of the guard lowers it (#273)
+        await this.clip(fighters[step.side], step.clip, step.clip === 'guard_up' ? { then: 'guard' } : {});
         return;
       case 'item':
         // no own clip or pop-up yet: the user pauses as when resting and the target's bar moves when it ends

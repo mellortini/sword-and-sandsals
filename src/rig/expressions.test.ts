@@ -30,7 +30,9 @@ describe('expressions (#26)', () => {
       expect(clip, name).toBeDefined();
       for (const f of Object.keys(frames)) expect(clip!.keys.some((k) => k.f === +f), `${name} f${f}`).toBe(true);
       const end = sample(baked[name], clip!.length).pose;
-      if (!clip!.hold) for (const k of ['eyes', 'mouth', 'brows']) expect(end[k] ?? 0, `${name} ${k}`).toBeLessThan(0.5);
+      // a looping clip has no end, and the raised guard (#273) runs into its held loop: both keep their frown
+      const held = clip!.hold || clip!.loop || name.startsWith('guard_up');
+      if (!held) for (const k of ['eyes', 'mouth', 'brows']) expect(end[k] ?? 0, `${name} ${k}`).toBeLessThan(0.5);
     }
     expect(sample(baked.hit, 4).pose.eyes).toBeGreaterThan(0.5);
     expect(sample(baked.victory, 12).pose.mouth).toBeGreaterThan(0.5);

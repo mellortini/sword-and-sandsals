@@ -77,7 +77,7 @@ export interface Fighter {
   stats: Readonly<FighterStats>;
   armourByZone: ZonedArmour;
   weapon?: CombatWeapon;
-  /** a shield in the off hand; a two-handed weapon (or the dagger pair) leaves no hand for one */
+  /** a shield in the off hand; a two-handed weapon (spear, hammer) leaves no hand for one */
   shield?: FighterShield;
   position: number;
   health: number;
