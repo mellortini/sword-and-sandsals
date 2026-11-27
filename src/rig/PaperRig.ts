@@ -244,8 +244,10 @@ export class PaperRig {
     this.facing = opts.facing;
     this.shadow = { ...(opts.shadow ?? DEFAULT_SHADOW) };
     this.pose = { ...kit.json.pose_test };
-    const wU = 19, hU = 18;   // 12.5 units ahead of the pelvis: room for a spear thrust (#36)
-    this.origin = { x: 6.5 * this.scale, y: 11.8 * this.scale };
+    // 12.5 units ahead of the pelvis: room for a spear thrust (#36); 9.5 behind it: a fighter fallen on the back with
+    // a shield on the arm (#273) used to be cut off at 6.5
+    const wU = 22, hU = 18;
+    this.origin = { x: 9.5 * this.scale, y: 11.8 * this.scale };
     const resolution = window.matchMedia('(pointer: coarse)').matches ? 1 : 2;
     this.rt = RenderTexture.create({ width: Math.ceil(wU * this.scale), height: Math.ceil(hU * this.scale), resolution, antialias: true });
     this.view = new Sprite(this.rt);

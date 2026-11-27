@@ -1368,3 +1368,8 @@ Poprawki po uwagach (goloburda05-hue):
   `holdShield` dokłada `arm_b_shift: +0,6` (bark z tarczą do przodu) i nowy klucz `arm_f_shift: −0,5` (bark z mieczem do tyłu, obsłużony w `boneOffset`), a `PaperRig.build` zwęża pierś do 0,9 (`SHIELD_TURN` w `src/rig/shield.ts`).
 - Kolejność warstw przy tarczy (`shieldArmInFront`): ramię i naramiennik z mieczem za piersią (w cieniu) → tułów, głowa → przedramię z mieczem, broń, dłoń → całe ramię z tarczą → tarcza na wierzchu. Bez tarczy wszystko jak w `kit.json`.
 - ⚠️ Mateusz / lkaelek: kto pisze klipy z tarczą (`@shield`) — bark z mieczem jest teraz ~0,5 j. bliżej środka, a z tarczą ~0,6 j. dalej do przodu.
+
+### 2026-11-27 20:15 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+- `rest@shield` (`clips.ts`, z klipu `rest`): przy obrocie 3/4 ręka z mieczem zwisająca pionowo miała łokieć w brzuchu. Teraz zwisa lekko do przodu: łokieć na krawędzi piersi, przedramię przy udzie, ostrze w dół.
+- `PaperRig`: tekstura postaci ma 9,5 j. za miednicą (było 6,5; szerokość 19 → 22). Leżący na plecach gladiator z tarczą miał ją uciętą. Pozycja na ekranie bez zmian (kotwica liczona z `origin`).
