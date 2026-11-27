@@ -53,6 +53,10 @@ export interface ArenaFighter {
   readonly nemesis?: NemesisMemory;
   /** set for a league fighter (#58): its AI profile, and its wins are saved on the ladder */
   readonly bout?: { readonly id: string; readonly profile: AiProfile };
+  /** this opponent's own AI; without it (and without a bout) the arena picks one */
+  readonly profile?: AiProfile;
+  /** who "Next opponent" brings instead of one grown from this opponent (the first bout's rookie) */
+  readonly successor?: ArenaFighter;
   /** the gear the fighter really fights with when it is more than its look shows (weapon, league fighters) */
   readonly equipment?: EquipmentLoadout;
 }
@@ -184,7 +188,7 @@ export async function showArena(
       menu.setVisible(true);
       fighting = true;
       const outcome = await runFight(start, {
-        pickers: { player: playerPicker, enemy: enemy.nemesis ? nemesisPicker(enemy.nemesis, seed ^ 0x85ebca6b) : aiPicker(enemy.bout?.profile ?? profile, seed ^ 0x85ebca6b) },
+        pickers: { player: playerPicker, enemy: enemy.nemesis ? nemesisPicker(enemy.nemesis, seed ^ 0x85ebca6b) : aiPicker(enemy.bout?.profile ?? enemy.profile ?? profile, seed ^ 0x85ebca6b) },
         present: (events, after) => presenter.present(events, after),
         pause: (next: FighterSide) => (next === 'enemy' ? pause(ENEMY_PAUSE) : Promise.resolve()),
       });
@@ -236,7 +240,8 @@ export async function showArena(
       }
       if (choice === 'next') {
         // #187: same gear, at most 5% stronger, at most one level above the player
-        enemy = { ...nextOpponent(enemy, career?.level ?? player.level ?? 1), nemesis: undefined, bout: undefined, equipment: undefined };
+        enemy = enemy.successor
+          ?? { ...nextOpponent(enemy, career?.level ?? player.level ?? 1), nemesis: undefined, bout: undefined, equipment: undefined, profile: undefined };
         await E.setLook(drawableLook(context.kit, enemy.look));
       }
       seed++;

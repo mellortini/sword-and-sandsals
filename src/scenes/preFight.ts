@@ -14,6 +14,7 @@ import { boutStartHealth, showArena } from './arena';
 import { careerLoadout } from '../ui/gearRules';
 import { nemesisLine, nemesisRival } from '../ui/nemesisRules';
 import { boutLook, findBout } from '../ui/leagueRules';
+import { ROOKIE_ATTRIBUTES, isFirstBout } from '../ui/rookieRules';
 import type { NemesisMemory } from '../core/nemesis';
 import { H, W, randomLook } from './common';
 import { loadSavedGladiator } from './savedGladiator';
@@ -106,6 +107,13 @@ function randomEnemy(tier: number): PreFightFighter {
   return preFightFighter(ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)], level, look, attributes);
 }
 
+/** The easy opponent of a new gladiator's first bout: bare, level 1, weak attributes. */
+function rookieEnemy(): PreFightFighter {
+  const look = randomLook(1);
+  for (const slot of EQUIP_SLOTS) look[slot] = 0;
+  return preFightFighter(ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)], 1, look, ROOKIE_ATTRIBUTES);
+}
+
 /**
  * `?view=prefight[&tier=N]`: player (default attributes) against a random opponent.
  * Fight → arena with the same two gladiators; Another foe → a new opponent; Leave → title.
@@ -135,7 +143,11 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
     let nemesis: NemesisMemory | undefined = saved?.nemesis;
     // a league bout chosen on the ladder (#58) comes first; Another foe drops it
     let bout = saved && context.params.get('bout') ? findBout(saved, context.params.get('bout')!) : undefined;
+    // a gladiator fresh from the creator starts against a rookie; an asked-for tier skips it
+    const firstBout = !tp && !!saved && isFirstBout(saved);
+    let rookie: boolean;
     do {
+      rookie = false;
       if (bout) {
         enemy = preFightFighter(bout.name, bout.level, boutLook(bout), bout.setup.attributes, bout.setup.equipment);
         choice = await openPreFight(context, player, enemy, { title: bout.champion ? 'Champion bout' : 'League bout', enemyNote: bout.champion ? 'League champion' : undefined });
@@ -146,7 +158,8 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
         choice = await openPreFight(context, player, enemy, { title: 'Nemesis bout', enemyNote: nemesisLine(nemesis) });
         if (choice === 'retreat') nemesis = undefined;
       } else {
-        enemy = randomEnemy(tier);
+        rookie = firstBout;
+        enemy = rookie ? rookieEnemy() : randomEnemy(tier);
         choice = await openPreFight(context, player, enemy);
       }
     } while (choice === 'retreat');
@@ -160,6 +173,8 @@ export async function showPreFight(context: SceneContext): Promise<SceneUpdate> 
       {
         look: enemy.look, name: enemy.name, attributes: enemy.attributes, level: enemy.level, nemesis,
         ...(bout && { bout: { id: bout.id, profile: bout.profile }, equipment: bout.setup.equipment }),
+        // "Next opponent" after the rookie is an ordinary one, not another near-rookie
+        ...(rookie && { profile: 'defender' as const, successor: randomEnemy(tier) }),
       },
     ], { career: saved ?? undefined })) ?? undefined;
   })();
