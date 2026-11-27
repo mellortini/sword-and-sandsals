@@ -135,6 +135,8 @@ export type CombatEvent =
       strikes?: readonly AttackStrike[];
       /** the blocking shield's health before and after the blow (#273); `to: 0` = it broke */
       shield?: { readonly from: number; readonly to: number };
+      /** the blow took off the defender's shield arm (#275): the shield is gone and the stump bleeds */
+      severed?: true;
     }
   | { type: 'energy'; fighter: FighterSide; from: number; to: number }
   | { type: 'block'; fighter: FighterSide }

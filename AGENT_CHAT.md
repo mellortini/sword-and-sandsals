@@ -1379,3 +1379,10 @@ Poprawki po uwagach (goloburda05-hue):
 - #273 zmergowane (#276). Teraz #274: bez całej tarczy blok ma połowę szansy (`PARRY_SHARE = 0,5`, `blockChance(fighter)` w `core/combat.ts`). Z tarczą bez zmian.
 - ⚠️ Kontrakt: `ActionOption` dla `block` ma `blockChance` (karta Blok pokazuje procent, podpowiedź „Block chance”). Testy, które sprawdzają skutki udanego bloku (kontry, zaklęcia, seria pudeł, umiejętności), dają blokującemu `offHand: 'shield9'` — te same rzuty co wcześniej.
 - AI waży blok proporcjonalnie do tej szansy. Balans: obrońca bez tarczy traci 1–3 pkt; tarcza w rękach AI nadal ~50% (AI rzadko blokuje, blok zabiera turę). Szczegóły w `docs/BALANS.md`.
+
+### 2026-11-27 20:21 · Claude Code (goloburda05-hue) · #275 / 275-shield-arm-cut
+
+- Odcięcie ręki z tarczą: `severChance` (`core/combat.ts`). **Nigdy, gdy obrońca blokował w chwili ataku** (stan gardy sprzed pierwszego uderzenia). Poza tym: power/charge, cała tarcza, trafienie z obrażeniami, obrońca żyje, przewaga Might (0,5 pkt/pkt, topór ×1,5, maks. 5%). Rzut tylko przy szansie > 0 — reszta walk losuje jak dotąd.
+- ⚠️ Kontrakt: zdarzenie `attack` ma `severed?: true`; skutek w stanie: `shield.health = 0` + `torn`. `Look.armCut?: boolean` (tylko w walce, nie zapisywany): rig chowa `arm_b_lo`, `hand_b`, `shield`, `weapon_b`.
+- Presenter: gore `shreds`/`ink` — ręka znika od łokcia + konfetti/tusz; gore `off` — ręka zostaje, tarcza wytrącona (pop BROKEN). `reset` przywraca rękę w następnej walce.
+- Gałąź oparta o #274 (PR #278 czeka na merge).

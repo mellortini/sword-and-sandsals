@@ -48,7 +48,12 @@ export interface Look {
   build?: number;
   /** off-hand shield tier (#38): 0/undefined = none, 1-4 a round parma, 5-10 a scutum - src/rig/shield.ts */
   shield?: number;
+  /** the shield arm was cut off at the elbow in this bout (#275): no forearm, hand or shield; never saved */
+  armCut?: boolean;
 }
+
+/** what goes with the shield arm below the elbow (#275) */
+const CUT_ARM_BONES = new Set(['arm_b_lo', 'hand_b', 'shield', 'weapon_b']);
 
 export const DEFAULT_LOOK: Look = { skin: 3, face: 0, hair: 1, hairColor: 1, beard: 2, helmet: 0, armor: 0, shoulders: 0, greaves: 0, boots: 0, weapon: 'gladius' };
 
@@ -168,6 +173,7 @@ export class Kit {
 
   /** sprite key for a layer under a look (null = nothing drawn) */
   resolve(layer: KitJson['layers'][number], look: Look): string | null {
+    if (look.armCut && CUT_ARM_BONES.has(layer.bone)) return null;
     const p = layer.piece;
     switch (layer.slot) {
       case 'body': return `body_${p}`;
@@ -199,7 +205,7 @@ export class Kit {
 
   /** a shield is drawn when the look has one and the back hand is free (not on the haft of a two-handed weapon) */
   shieldShown(look: Look): boolean {
-    return isShieldTier(look.shield) && !this.json.sprites[`weapon_${look.weapon}`]?.grip2;
+    return isShieldTier(look.shield) && !look.armCut && !this.json.sprites[`weapon_${look.weapon}`]?.grip2;
   }
 
   keysFor(look: Look): string[] {

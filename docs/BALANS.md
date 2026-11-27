@@ -114,3 +114,11 @@ bo AI blokuje rzadko, a blok zabiera całą turę: lepsza szansa bloku nie zwrac
 blokuje świadomie, różnica jest duża (dwa razy więcej udanych bloków i kontr). Żeby tarcza liczyła się także dla AI,
 trzeba osobno podnieść wartość bloku (np. tańszy blok albo częstsze kontry) — poza zakresem #274.
 Tabela „Walka” wyżej pokazuje stan sprzed #274.
+
+## Odcięcie ręki z tarczą (#275)
+
+`severChance` w `core/combat.ts`: tylko mocny cios albo szarża, tylko gdy obrońca **nie blokował w chwili ataku**, tylko
+w całą tarczę i tylko przy przewadze Might napastnika: 0,5 pkt procentowego za punkt przewagi, topór ×1,5, maksymalnie 5%.
+Skutek: tarcza na 0 (blok samym ostrzem, #274) i stan `torn`. Rzut losuje się tylko przy szansie > 0, więc walki bez
+tych warunków (w tym cały symulator, który ma równe Might) losują dokładnie jak wcześniej i tabele wyżej się nie zmieniają.
+Test: przy przewadze 20 Might około 5% trafionych mocnych ciosów odcina rękę; przy bloku 0 na 3000 ciosów.

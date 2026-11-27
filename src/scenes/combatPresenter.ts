@@ -7,6 +7,8 @@ import type { Animator } from '../anim/Animator';
 import type { ClipEvent } from '../anim/clip';
 import type { CombatEvent, CombatState, Fighter, FighterSide, MoveKind } from '../core/types';
 import { BlockShield, DamageSplat, FxLayer, MissText } from '../ui/fx';
+import { goreMode } from '../ui/gore';
+import { PaperScraps } from '../ui/scraps';
 import type { CrowdFx } from '../ui/crowdFx';
 import type { CameraJuice } from '../ui/cameraJuice';
 import { attachGroundFx } from '../ui/groundFx';
@@ -91,8 +93,9 @@ export class CombatPresenter {
     this.shown = { player: { ...state.fighters.player }, enemy: { ...state.fighters.enemy } };
     for (const side of ['player', 'enemy'] as const) {
       const a = this.o.fighters[side];
-      // a shield broken in the last bout is whole again (#273)
+      // a shield broken in the last bout is whole again (#273), and a cut-off arm is back (#275)
       const shield = state.fighters[side].shield;
+      if (a.rig.look.armCut) void a.rig.setLook({ armCut: false });
       if (shield && a.rig.look.shield !== shield.tier) void a.rig.setLook({ shield: shield.tier });
       a.home.x = screenX(this.o.layout, side, state.fighters[side].position);
       a.play('idle', { blend: 0 });
@@ -214,9 +217,34 @@ export class CombatPresenter {
       return push ? knockback() : this.clip(def, 'block');
     }
     this.o.fx.show(slot, new DamageSplat(a.damage, a.crit), h.x + 34 * facingDef, h.y);
+    if (a.severed) this.sever(a.target);
     if (this.shown) this.setShown(a.target, { health: Math.max(0, this.shown[a.target].health - a.damage) });
     if (fatal) return this.clip(def, 'death', { then: null });
     return push ? knockback() : this.clip(def, 'hit');
+  }
+
+  /**
+   * The shield arm comes off (#275). With gore on, the forearm, hand and shield are gone at the elbow in a burst of
+   * paper shreds (or red ink); with gore off the arm stays and the shield is knocked out of the hand.
+   */
+  private sever(side: FighterSide) {
+    const rig = this.o.fighters[side].rig;
+    const mode = goreMode();
+    const elbow = rig.screenPoint('arm_b_lo');
+    if (this.o.floorY !== undefined) {
+      const scraps = new PaperScraps(mode, this.o.floorY);
+      this.o.fx.addScraps(scraps);
+      scraps.burst({ ...elbow, count: mode === 'off' ? 18 : 30, angle: -Math.PI / 2 - 0.5 * rig.facing, spread: 1.3, speed: 22 });
+      if (mode !== 'off') scraps.spray(() => rig.screenPoint('arm_b_up', 0, -1.7), 18);
+    }
+    if (mode === 'off') {
+      const h = this.head(side);
+      this.o.fx.show((side === 'player' ? 'p' : 'e') + 'b', new BlockShield({ lost: 0, broken: true }), h.x - 30 * rig.facing, h.y + 6);
+      void rig.setLook({ shield: 0 });
+    } else {
+      void rig.setLook({ armCut: true, shield: 0 });
+    }
+    if (this.shown?.[side].shield) this.setShown(side, { shield: { ...this.shown[side].shield!, health: 0 } });
   }
 
   private async play(step: Step): Promise<void> {
