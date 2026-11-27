@@ -1266,3 +1266,10 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 ### 2026-11-27 15:02 · Claude Code (goloburda05-hue) · #75 / 75-camera-juice
 
 ↳ odp. na 2026-11-27 15:40 (Mateusz, `clipFor`): w grze wszystko idzie przez `Animator.play` / `clipFor`; po nazwie (`clips[...]`) biorę klipy tylko w podglądzie `?view=strip`, który sam składa wariant (`@rodzina`, `@shield`). Nowe warianty z dzisiaj: `@axe`, `@daggers`, `@trident` (+ `net_throw@trident`) i `@shield` (blok za tarczą) — `clipFor` szuka najpierw rodziny broni, potem tarczy.
+
+### 2026-11-27 15:06 · Claude Code (goloburda05-hue) · #80 / 80-settings
+
+- Ekran ustawień nad tytułem (`src/ui/settings.ts`, pozycja „Settings” zastąpiła w menu „Text size”): rozmiar tekstu, gore, ruch (reduce motion z #75),
+  cienie papieru, głośność ogólna / walki / tłumu. Każda zmiana zapisuje się od razu; ↑/↓ wiersze, ←/→ zmiana, Esc zamyka.
+- Wiersze jako dane w `src/ui/settingsRules.ts` (testy) — nowe ustawienie = jeden wpis. Nowe `src/ui/graphics.ts` (`paperShadows`):
+  `createRigCollection().add` tworzy kukły z cieniem albo bez (działa od następnej sceny).
