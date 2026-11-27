@@ -4,6 +4,7 @@ import { createCombat } from '../core/combat';
 import type { FighterSide } from '../core/types';
 import { summarizeFight } from '../ui/fightSummary';
 import { FxLayer } from '../ui/fx';
+import { startCrowd } from '../audio/crowd';
 import { CombatHud } from '../ui/hud';
 import { leaveFightOnEscape } from '../ui/leaveFight';
 import { hudScaleFor } from '../ui/phone';
@@ -58,13 +59,16 @@ export async function showAiFight(context: SceneContext): Promise<SceneUpdate> {
   const E = await add(fighters.enemy.look, W - LAYOUT.left, pelvisY, UNIT, -1, arena, 0.7);
   const fx = new FxLayer();
   arena.addChild(fx);
+  // the crowd murmurs while the arena is shown (#18); it fades out with the scene
+  const crowd = startCrowd();
+  arena.on('destroyed', () => crowd.stop());
 
   const empty = { name: '', health: 1, energy: 1, stats: { maxHealth: 1, maxEnergy: 1 } };
   const hud = new CombatHud({ fighters: { player: empty, enemy: empty } }, W, H);
   arena.addChild(hud);
   const presenter = new CombatPresenter({
     fighters: { player: rigs.find((r) => r.rig === P)!.anim!, enemy: rigs.find((r) => r.rig === E)!.anim! },
-    fx, unit: UNIT, layout: LAYOUT, floorY: FEET_Y,
+    fx, unit: UNIT, layout: LAYOUT, floorY: FEET_Y, sound: true, crowd,
     onState: (s) => hud.setState(s),
   });
 

@@ -7,6 +7,8 @@ import type { Animator } from '../anim/Animator';
 import type { CombatEvent, CombatState, Fighter, FighterSide, MoveKind } from '../core/types';
 import { BlockShield, DamageSplat, FxLayer, MissText } from '../ui/fx';
 import { attachGroundFx } from '../ui/groundFx';
+import { attachFoley, playFoley } from '../audio/foley';
+import type { CrowdAmbience } from '../audio/crowd';
 import { MIN_LUNGE, STRIKE_GAP, forwardDelta, planSteps, screenX } from './combatPlan';
 import type { Layout, Step } from './combatPlan';
 
@@ -29,6 +31,10 @@ export interface PresenterOptions {
   layout: Layout;
   /** screen y of the sand: set it and landings, falls and blows kick up paper bits (#17) */
   floorY?: number;
+  /** play the paper foley (#18): footsteps, swings, landings from the clips, and each blow's result */
+  sound?: boolean;
+  /** the crowd cheers a critical blow and the end of a bout */
+  crowd?: CrowdAmbience;
   /**
    * called whenever the shown health/energy/crowd change (feed it to CombatHud.setState);
    * `gifts` lists what the crowd threw during the action that just ended
@@ -50,6 +56,7 @@ export class CombatPresenter {
     if (options.floorY !== undefined) {
       for (const side of ['player', 'enemy'] as const) attachGroundFx(options.fighters[side], options.fx.ground, options.floorY);
     }
+    if (options.sound) for (const side of ['player', 'enemy'] as const) attachFoley(options.fighters[side]);
   }
 
   get busy() { return this.running; }
@@ -128,6 +135,8 @@ export class CombatPresenter {
     const slot = a.target === 'player' ? 'p' : 'e';
     const h = this.head(a.target);
     const facingDef = def.rig.facing;
+    if (this.o.sound) playFoley(!a.hit ? 'miss' : a.blocked ? 'block' : a.crit ? 'crit' : 'hit');
+    if (a.hit && !a.blocked && (a.crit || fatal)) this.o.crowd?.cheer(fatal ? 1.4 : 0.8);
     if (!a.hit) {
       this.o.fx.show(slot, new MissText(), h.x + 34 * facingDef, h.y);
       // the blow passes: the defender leans away from it and steps back in (#13)
