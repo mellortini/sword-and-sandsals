@@ -11,7 +11,8 @@
  */
 import { EXPRESSION_KEYS, EXPRESSION_PIECES, pieceShown } from './expressions';
 import { widthScale } from './builds';
-import { SHIELD_TURN, holdShield, isShieldTier, shieldArmInFront } from './shield';
+import { woundSprite } from './wounds';
+import { QUARTER_TURN, holdShield, isShieldTier, quarterTurn, turnedLayers } from './shield';
 import { boneOffset, forwardKinematics, holdWithBothHands, looseHead } from './twoHand';
 import { Assets, Container, Rectangle, Renderer, RenderTexture, Sprite, Texture } from 'pixi.js';
 
@@ -33,6 +34,8 @@ export interface KitJson {
   hood_helmets: number[];
   beards: string[];
   sets: string[];
+  /** body damage overlays (#284): part -> the sprite of each of the ten stages (null = unhurt there) */
+  wounds?: Record<string, (string | null)[]>;
   sprites: Record<string, { w: number; h: number; pivot: [number, number]; tint: 'skin' | 'hair' | null; alpha?: number; grip2?: [number, number]; pair?: boolean; offhand?: string }>;
 }
 
@@ -48,7 +51,14 @@ export interface Look {
   build?: number;
   /** off-hand shield tier (#38): 0/undefined = none, 1-4 a round parma, 5-10 a scutum - src/rig/shield.ts */
   shield?: number;
+  /** the shield arm was cut off at the elbow in this bout (#275): no forearm, hand or shield; never saved */
+  armCut?: boolean;
+  /** damage stage 1-10 (#284), 1/undefined = unhurt; follows the health in a bout, never saved */
+  wounds?: number;
 }
+
+/** what goes with the shield arm below the elbow (#275) */
+const CUT_ARM_BONES = new Set(['arm_b_lo', 'hand_b', 'shield', 'weapon_b']);
 
 export const DEFAULT_LOOK: Look = { skin: 3, face: 0, hair: 1, hairColor: 1, beard: 2, helmet: 0, armor: 0, shoulders: 0, greaves: 0, boots: 0, weapon: 'gladius' };
 
@@ -168,10 +178,12 @@ export class Kit {
 
   /** sprite key for a layer under a look (null = nothing drawn) */
   resolve(layer: KitJson['layers'][number], look: Look): string | null {
+    if (look.armCut && CUT_ARM_BONES.has(layer.bone)) return null;
     const p = layer.piece;
     switch (layer.slot) {
       case 'body': return `body_${p}`;
       case 'cut': return `cut_${p}`;
+      case 'wound': return woundSprite(this.json.wounds, p, look.wounds);
       case 'face': return `face${look.face}_${p}`;
       case 'hair':
         if (look.helmet > 0) {
@@ -199,7 +211,7 @@ export class Kit {
 
   /** a shield is drawn when the look has one and the back hand is free (not on the haft of a two-handed weapon) */
   shieldShown(look: Look): boolean {
-    return isShieldTier(look.shield) && !this.json.sprites[`weapon_${look.weapon}`]?.grip2;
+    return isShieldTier(look.shield) && !look.armCut && !this.json.sprites[`weapon_${look.weapon}`]?.grip2;
   }
 
   keysFor(look: Look): string[] {
@@ -311,9 +323,8 @@ export class PaperRig {
     const skin = J.skins[L.skin]?.color ?? J.skins[3].color;
     const hair = J.hair_colors[L.hairColor]?.color ?? J.hair_colors[1].color;
     const face = J.faces[L.face] ?? J.faces[0];
-    // behind a shield the body stands in a quarter turn (#273): shield arm in front, sword shoulder behind, narrower chest
-    const turned = this.kit.shieldShown(L);
-    const layers = turned ? shieldArmInFront(J.layers) : J.layers;
+    // every fighter stands in a quarter turn (#273, #280): near arm in front, weapon shoulder behind, narrower chest
+    const layers = turnedLayers(J.layers);
     for (const layer of layers) {
       const key = this.kit.resolve(layer, L);
       if (!key || !this.kit.has(key)) continue;
@@ -322,14 +333,15 @@ export class PaperRig {
       const s = new Sprite(this.kit.texture(key, color));
       s.anchor.set(m.pivot[0] / m.w, m.pivot[1] / m.h);
       if (layer.back) s.tint = BACK_TINT;
-      const flat = (m.alpha ?? 1) < 1;
-      if (flat) s.alpha = m.alpha!;
+      // a see-through layer and a wound lie flat on what is under them: no paper shadow of their own
+      const flat = (m.alpha ?? 1) < 1 || layer.slot === 'wound';
+      if (m.alpha !== undefined) s.alpha = m.alpha;
       const sh = new Sprite(this.kit.shadow(key, this.shadow.blur));
       sh.anchor.set((m.pivot[0] + SHADOW_PAD) / (m.w + SHADOW_PAD * 2), (m.pivot[1] + SHADOW_PAD) / (m.h + SHADOW_PAD * 2));
       sh.blendMode = 'multiply';
       // beards are drawn on the reference jaw: stretch them to this face's jaw around the jaw centre
       // a build widens the paper across its bone (#27); armour on the bone follows, so every set fits
-      let sx = widthScale(L.build, layer.bone) * (turned && layer.bone === 'torso' ? SHIELD_TURN.chestWidth : 1), sy = 1, ox = 0, oy = 0;
+      let sx = widthScale(L.build, layer.bone) * (layer.bone === 'torso' ? QUARTER_TURN.chestWidth : 1), sy = 1, ox = 0, oy = 0;
       if (layer.slot === 'beard') {
         sx = face.jaw[0] / J.ref_jaw[0];
         sy = face.jaw[1] / J.ref_jaw[1];
@@ -398,8 +410,10 @@ export class PaperRig {
   heldPose(pose: Pose = this.pose): Pose {
     const key = this.look.weapon ? `weapon_${this.look.weapon}` : null;
     const grip2 = key ? this.kit.json.sprites[key]?.grip2 : undefined;
-    if (grip2) return holdWithBothHands(this.kit.json.bones, pose, grip2);
-    return this.hasShield() ? holdShield(pose) : pose;
+    // the quarter turn first (#280): the two-handed grip and the shield work from the turned shoulders
+    const turned = quarterTurn(pose);
+    if (grip2) return holdWithBothHands(this.kit.json.bones, turned, grip2);
+    return this.hasShield() ? holdShield(turned) : turned;
   }
 
   private solve(): Map<string, { x: number; y: number; r: number }> {

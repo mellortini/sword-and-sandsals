@@ -31,7 +31,8 @@ const ENERGY_COSTS: Record<CombatAction, number> = {
   charge: 10,
   quick: 3,
   normal: 5,
-  power: 8,
+  // #282: the heaviest blow per turn now costs its tempo (was 8)
+  power: 11,
   block: 2,
   rest: 0,
   taunt: 2,
@@ -124,6 +125,37 @@ export function getDistance(state: CombatState): number {
   return roundPosition(state.fighters.enemy.position - state.fighters.player.position);
 }
 
+/**
+ * Without a shield the blade parries alone (#274): a fighter with no shield, a broken one or a two-handed weapon
+ * blocks with this share of the block chance. A whole shield blocks at the full chance.
+ */
+export const PARRY_SHARE = 0.5;
+
+/** the most a blow can have of cutting off the shield arm, in percentage points (#275) */
+export const SEVER_MAX = 5;
+/** percentage points per point of Might the attacker has over the defender */
+const SEVER_PER_MIGHT = 0.5;
+
+/**
+ * Chance (percentage points) that a landed heavy blow takes off the defender's shield arm (#275). Never while the
+ * defender guards: a raised guard always protects the arm. Only power blows and charges, only against a whole shield,
+ * and only with more Might than the defender: it grows smoothly with that edge up to `SEVER_MAX`; an axe bites deeper.
+ */
+export function severChance(kind: AttackKind, attacker: Readonly<Fighter>, defender: Readonly<Fighter>, guarding = defender.guarding): number {
+  if (guarding || (kind !== 'power' && kind !== 'charge')) return 0;
+  if (!defender.shield || defender.shield.health <= 0) return 0;
+  const edge = attacker.attributes.might - defender.attributes.might;
+  if (edge <= 0) return 0;
+  const axe = attacker.weapon?.family === 'axe' ? 1.5 : 1;
+  return Math.min(SEVER_MAX, edge * SEVER_PER_MIGHT * axe);
+}
+
+/** Percentage points to block a landed strike while guarding: full behind a whole shield, less with the blade alone. */
+export function blockChance(fighter: Readonly<Fighter>): number {
+  const shielded = fighter.shield !== undefined && fighter.shield.health > 0;
+  return shielded ? fighter.stats.blockChance : Math.round(fighter.stats.blockChance * PARRY_SHARE);
+}
+
 export function getActionOptions(state: CombatState): ActionOption[] {
   if (state.winner !== null) return [];
 
@@ -143,7 +175,7 @@ export function getActionOptions(state: CombatState): ActionOption[] {
 
     options.push(isAttack(action)
       ? { action, energyCost, hitChance: hitChance(action, fighter, opponent), ...(counter ? { counter: true } : {}) }
-      : { action, energyCost });
+      : action === 'block' ? { action, energyCost, blockChance: blockChance(fighter) } : { action, energyCost });
   }
   return options;
 }
@@ -393,11 +425,15 @@ function resolveAttack(
   };
   const strikes: AttackStrike[] = [];
   let shield: { from: number; to: number } | undefined;
+  // the guard as the attack begins (#275): a strike that broke the guard does not count as an unguarded arm
+  const guardedAtStart = defender.guarding;
+  let severed = false;
 
   for (let i = 0; i < traits.strikes && defender.health > 0; i++) {
     const hit = roll() < chance;
     // A defensive stance can block an incoming strike; a skilled block may earn a free counter. Crits need an unblocked hit.
-    const blocked = hit && defender.guarding && roll() < defender.stats.blockChance;
+    // behind a whole shield at the full chance, with the blade alone at less (#274); the shield's state before this strike
+    const blocked = hit && defender.guarding && roll() < blockChance(defender);
     if (blocked && !defender.counterReady) {
       const chanceToCounter = Math.min(70, counterChance(defender.attributes.guard) + defender.skillRules.counterBonus);
       if (chanceToCounter > 0 && roll() < chanceToCounter) defender.counterReady = true;
@@ -412,6 +448,16 @@ function resolveAttack(
     const crit = hit && !blocked && roll() < attacker.stats.criticalChance;
     const damage = hit && !blocked ? Math.min(defender.health, attackDamage(kind, offense, defense, crit)) : 0;
     defender.health -= damage;
+    // a heavy blow on an unguarded shield arm may take it off (#275); no roll at all when there is no chance,
+    // so every other bout draws exactly the same numbers as before
+    if (damage > 0 && defender.health > 0 && !severed) {
+      const chance = severChance(kind, attacker, defender, guardedAtStart);
+      if (chance > 0 && roll() < chance) {
+        severed = true;
+        defender.shield = { ...defender.shield!, health: 0 };
+        defender.statuses = applyStatus(defender.statuses, 'torn', defender.statusResistances);
+      }
+    }
     if (hit) defender.guarding = false;
     strikes.push({ hit, blocked, crit, damage });
   }
@@ -426,5 +472,6 @@ function resolveAttack(
     ...(traits.strikes > 1 ? { strikes } : {}),
     ...(zone ? { zone } : {}),
     ...(shield ? { shield } : {}),
+    ...(severed ? { severed: true as const } : {}),
   };
 }

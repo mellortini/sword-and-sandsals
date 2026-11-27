@@ -43,7 +43,8 @@ it('equips a saved enchantment as a real weapon and deals all four elements at t
 });
 
 it('does not trigger the enchantment when the attack is blocked', () => {
-  const initial = createCombat(1, { position: 4, equipment: { weapon: 'sword1~fire~3' } }, { position: 5 });
+  // a shield blocks at the full chance (#274)
+  const initial = createCombat(1, { position: 4, equipment: { weapon: 'sword1~fire~3' } }, { position: 5, equipment: { offHand: 'shield9' } });
   const enemy = { ...initial.fighters.enemy, guarding: true };
   const result = performAction({ ...initial, fighters: { ...initial.fighters, enemy } }, 'normal');
   expect(result.events).toContainEqual(expect.objectContaining({ type: 'attack', blocked: true }));

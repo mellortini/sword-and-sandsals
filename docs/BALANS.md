@@ -16,10 +16,12 @@ Porównanie AI używa takiego samego kompletnego wyposażenia po obu stronach. P
 
 | Poziom | Tier | Wygrane agresora z obrońcą | Śr. akcji | Wygrane kompletu z brakiem pancerza | Śr. akcji |
 | ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 | 1 | 59,6% | 36,9 | 68,2% | 30,5 |
-| 5 | 3 | 58,6% | 28,3 | 80,4% | 20,9 |
-| 12 | 6 | 55,4% | 24,2 | 95,2% | 13,2 |
-| 25 | 9 | 59,0% | 24,9 | 98,8% | 10,4 |
+| 1 | 1 | 52,6% | 37,1 | 70,0% | 33,1 |
+| 5 | 3 | 52,6% | 29,0 | 81,6% | 22,4 |
+| 12 | 6 | 52,8% | 24,8 | 96,2% | 14,3 |
+| 25 | 9 | 54,6% | 24,8 | 99,6% | 10,9 |
+
+Stan po #282 (przed nim agresor wygrywał 59,6 / 58,6 / 55,4 / 59,0%).
 
 Przewaga pełnej zbroi szybko rośnie w tych scenariuszach. Kolejny pomiar powinien porównać sąsiednie tiery i mieszane zestawy, bliższe rzeczywistej ścieżce gracza.
 
@@ -29,10 +31,12 @@ Cena obejmuje pięć części kompletu i miecz jednego tieru przy Charm 5. Symul
 
 | Poziom | Cena zestawu | Złoto na wygraną | Złoto na próbę | Wygrane do zakupu | Próby do zakupu |
 | ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 | 59 | 24,5 | 14,9 | 3 | 4 |
-| 5 | 415 | 46,6 | 27,4 | 9 | 16 |
-| 12 | 3 445 | 85,4 | 47,5 | 41 | 73 |
-| 25 | 19 975 | 163,1 | 96,4 | 123 | 208 |
+| 1 | 59 | 23,9 | 12,9 | 3 | 5 |
+| 5 | 415 | 45,6 | 24,1 | 10 | 18 |
+| 12 | 3 445 | 84,3 | 44,6 | 41 | 78 |
+| 25 | 19 975 | 162,5 | 89,0 | 123 | 225 |
+
+Stan po #282: agresor wygrywa rzadziej, więc na próbę przypada mniej złota (zakup zestawu wymaga więcej prób).
 
 Ceny rosną szybciej niż wpływy z samych walk. Przed strojeniem późnych lig trzeba określić, ile wyposażenia zapewniają nagrody i jaki udział ma mieć zakup.
 
@@ -93,3 +97,55 @@ Dodatkowa próba (400 walk na wiersz, tarcza przeciw agresorowi bez tarczy):
 
 AI blokuje rzadko (agresor ~0,07 udanego bloku na walkę), więc tarcza pęka głównie graczowi, który często blokuje.
 Wytrzymałość 2–3 mocnych bloków trzeba sprawdzić ponownie w #274, gdy blok bez tarczy osłabnie, a AI zacznie liczyć się z tarczą.
+
+## Słabszy blok bez tarczy (#274)
+
+Bez całej tarczy (brak, pęknięta, broń dwuręczna) blok ma `PARRY_SHARE = 0,5` szansy z tarczą
+(`blockChance` w `core/combat.ts`). Przy Guard 10: 65% z tarczą, 33% samym ostrzem. AI waży blok proporcjonalnie do tej szansy.
+Karta Blok pokazuje teraz szansę bloku tak jak ataki procent trafienia.
+
+Pomiar (250 par na wiersz, ten sam symulator):
+
+| Poziom | Tier | Agresor z obrońcą (przed → po) | Tarcza: obrońca | Tarcza: agresor |
+| ---: | ---: | ---: | ---: | ---: |
+| 1 | 1 | 59,6% → 61,2% | 50,0% | 50,6% |
+| 5 | 3 | 58,6% → 62,0% | 49,4% | 49,2% |
+| 12 | 6 | 55,4% → 58,8% | 48,4% | 48,6% |
+| 25 | 9 | 59,0% → 59,8% | 50,2% | 49,6% |
+
+Obrońca bez tarczy słabnie o 1–3 punkty. Tarcza w rękach AI nadal nie zmienia wyniku (różnice w granicach szumu),
+bo AI blokuje rzadko, a blok zabiera całą turę: lepsza szansa bloku nie zwraca straconego ataku. Dla gracza, który
+blokuje świadomie, różnica jest duża (dwa razy więcej udanych bloków i kontr). Żeby tarcza liczyła się także dla AI,
+trzeba osobno podnieść wartość bloku (np. tańszy blok albo częstsze kontry) — poza zakresem #274.
+Tabela „Walka” wyżej pokazuje stan sprzed #274.
+
+## Odcięcie ręki z tarczą (#275)
+
+`severChance` w `core/combat.ts`: tylko mocny cios albo szarża, tylko gdy obrońca **nie blokował w chwili ataku**, tylko
+w całą tarczę i tylko przy przewadze Might napastnika: 0,5 pkt procentowego za punkt przewagi, topór ×1,5, maksymalnie 5%.
+Skutek: tarcza na 0 (blok samym ostrzem, #274) i stan `torn`. Rzut losuje się tylko przy szansie > 0, więc walki bez
+tych warunków (w tym cały symulator, który ma równe Might) losują dokładnie jak wcześniej i tabele wyżej się nie zmieniają.
+Test: przy przewadze 20 Might około 5% trafionych mocnych ciosów odcina rękę; przy bloku 0 na 3000 ciosów.
+
+## Tempo: agresor kontra obrońca bliżej 50/50 (#282)
+
+Analiza (2000 walk na wariant, agresor kontra obrońca, równy sprzęt bez tarcz, start: agresor 60,5%):
+
+| Strategia | Agresor wygrywa |
+| --- | ---: |
+| Darmowy blok | 60,4% |
+| Blok odnawia 4 energii | 60,0% |
+| Nieudany blok połowi obrażenia | 59,5% |
+| Częstsze kontry | 60,3% |
+| Udany blok zabiera napastnikowi 5 energii | 60,1% |
+| Droższa szarża (14) | 60,0% |
+| Obrońca w AI mniej pasywny | 55,8% |
+| Mocny cios droższy (11) | 56,9% |
+| Mocny cios mniej celny (48) | 56,6% |
+| AI obrońcy + mocny cios 11 + celność 48 | 52,9% |
+
+Zmiany bloku nic nie dają: udanych bloków jest 0,11 na walkę. O wyniku decyduje tempo: mocny cios zadaje najwięcej
+obrażeń na turę (agresor ~8,5 HP na użycie wobec ~6 HP szybkiego), a energia rzadko go hamuje; agresor zadaje pierwszy
+cios w 60% walk. Wdrożone: profil `defender` w AI mniej pasywny (więcej ataków, blok 1,2 → 1,0), mocny cios kosztuje
+11 energii (było 8) i ma celność 48 (było 55). Wynik w pełnym symulatorze: 52,6 / 52,6 / 52,8 / 54,6% (średnio 53,2%),
+obrońca z tarczą przeciw agresorowi bez tarczy 46–51%. Dotyczy to też gracza: mocny cios jest teraz droższy i mniej pewny.

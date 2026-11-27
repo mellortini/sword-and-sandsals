@@ -2,7 +2,7 @@ import { expect, it } from 'vitest';
 import { applyCombatStatus, createCombat, getActionOptions, performAction } from './combat';
 import { protectedHitChance } from './hitProtection';
 
-it('keeps the rate within three points of 55% and limits the dry streak in 10,000 actual attacks', () => {
+it('keeps the rate within three points of the 48% Power accuracy and limits the dry streak in 10,000 actual attacks', () => {
   let state = createCombat(11, { position: 4 }, { position: 5, attributes: { vitality: 100_000 } });
   let hits = 0;
   let misses = 0;
@@ -17,13 +17,15 @@ it('keeps the rate within three points of 55% and limits the dry streak in 10,00
     state = action.state;
   }
 
-  expect(hits / 100).toBeGreaterThanOrEqual(52);
-  expect(hits / 100).toBeLessThanOrEqual(58);
+  // Power accuracy is 48% since #282 (was 55%)
+  expect(hits / 100).toBeGreaterThanOrEqual(45);
+  expect(hits / 100).toBeLessThanOrEqual(51);
   expect(longest).toBe(3);
 });
 
 it('uses one streak per fighter, shows the actual chance, and resets on a block', () => {
-  const initial = createCombat(1, { position: 4 }, { position: 5 });
+  // the guarding enemy holds a shield: the full block chance (#274)
+  const initial = createCombat(1, { position: 4 }, { position: 5, equipment: { offHand: 'shield9' } });
   const player = { ...initial.fighters.player, consecutiveMisses: 3 };
   const enemy = { ...initial.fighters.enemy, guarding: true, consecutiveMisses: 1 };
   const ready = { ...initial, fighters: { player, enemy } };

@@ -1339,6 +1339,33 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - ⚠️ `AGENTS.md` (plik wspólny): nowa sekcja „Przegląd kodu — codebase memory” (prośba Mateusza, oszczędza tokeny).
   Kod przeglądamy najpierw przez codebase-memory-mcp; grep i czytanie plików, gdy graf nie wystarcza albo nie macie tego serwera.
 
+### 2026-11-27 20:00 · Claude Code (Mateusz) · sever-sounds
+
+Dźwięki odcięcia: trzy nagrania od Mateusza w `assets/sfx/gore/squelch_1..3.wav` (LFS), kod w `src/audio/sever.ts`.
+- Głowa już gra: `playFinisher` woła `playSever(mode)` w klatce `cut`. W walce w arenie dobicie nadal nie jest podpięte (patrz wpis #20),
+  na razie słychać je w `?view=anim` → **finish**.
+- **Kończyny (#275), dla osoby, która je robi** (goloburda05-hue, jeśli to Ty): w klatce, w której ręka / kończyna odpada, wywołaj
+  `playSever()` z `src/audio/sever.ts`. Nic więcej: sam losuje wariant (nigdy dwa razy ten sam z rzędu), idzie przez kanał foley
+  (master + dźwięki walki), przy gore `off` milczy, a dwa cięcia w tej samej chwili dają jeden dźwięk. Jeśli obraz rysujesz z innym
+  trybem gore niż zapisany, podaj go: `playSever(mode)`. Wytrącenie tarczy przy gore `off` nie gra tego dźwięku.
+- Nagrania wczytują się z góry przez `attachFoley` (czyli na starcie walki z dźwiękiem). Bez tego (np. anim lab) pierwsze cięcie
+  może być ciche: nagranie spóźnione o ponad 0,25 s nie jest grane. Poza walką możesz wywołać `preloadSever()`.
+- Głośność: `SEVER_GAIN = 0.3` (pliki mają szczyt na 100%).
+
+### 2026-11-27 20:03 · Claude Code (Mateusz) · sever-sounds
+
+Uderzenie bronią w tarczę to teraz nagranie od Mateusza: `assets/sfx/combat/shield_thud.wav` (LFS), zamiast syntetycznego `block`.
+- API bez zmian: dalej `playFoley('block')`. Mapa nagrań: `SAMPLES` w `src/audio/foley.ts`; wczytywanie i odtwarzanie plików
+  (też dla `sever.ts`) w `src/audio/sample.ts`. Zanim plik się wczyta, gra stary syntetyczny dźwięk.
+- ⚠️ #276 (tarcza z HP): dziś każdy blok gra ten dźwięk. Gdy da się blokować bez tarczy, trzeba będzie wybrać dla takiego bloku inny.
+
+### 2026-11-27 20:10 · Claude Code (Mateusz) · sever-sounds
+
+Trafienie mieczem ma nagranie od Mateusza: `assets/sfx/combat/sword_hit.wav` (LFS; przycięte z początkowej ciszy, 44,1 kHz / 16 bit).
+- Gra, gdy broń napastnika ma `family === 'sword'` i cios wchodzi w przeciwnika (crit trochę głośniej). Pudło, blok na tarczy
+  i zamach bez zmian; pozostałe bronie (też sztylety) mają dalej syntetyczne `hit` / `crit`.
+- Nowe dźwięki `sword_hit` / `sword_crit` i funkcja `blowSound(cios, rodzinaBroni)` w `src/audio/foley.ts`; używa jej presenter i anim lab.
+- Mały ruch w `combatPresenter.ts` (jedna linia z dźwiękiem ciosu) — ten plik rusza też #276; przy konflikcie zostawcie wywołanie `blowSound`.
 ### 2026-11-27 19:46 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
 
 Tarcza jest teraz prawdziwym przedmiotem walki (zaplanowane trzy kroki: #273 → #274 słabszy blok bez tarczy → #275 odcięcie ręki z tarczą, tylko gdy obrońca nie blokuje).
@@ -1374,6 +1401,12 @@ Poprawki po uwagach (goloburda05-hue):
 - `rest@shield` (`clips.ts`, z klipu `rest`): przy obrocie 3/4 ręka z mieczem zwisająca pionowo miała łokieć w brzuchu. Teraz zwisa lekko do przodu: łokieć na krawędzi piersi, przedramię przy udzie, ostrze w dół.
 - `PaperRig`: tekstura postaci ma 9,5 j. za miednicą (było 6,5; szerokość 19 → 22). Leżący na plecach gladiator z tarczą miał ją uciętą. Pozycja na ekranie bez zmian (kotwica liczona z `origin`).
 
+### 2026-11-27 20:19 · Claude Code (goloburda05-hue) · #274 / 274-weaker-parry
+
+- #273 zmergowane (#276). Teraz #274: bez całej tarczy blok ma połowę szansy (`PARRY_SHARE = 0,5`, `blockChance(fighter)` w `core/combat.ts`). Z tarczą bez zmian.
+- ⚠️ Kontrakt: `ActionOption` dla `block` ma `blockChance` (karta Blok pokazuje procent, podpowiedź „Block chance”). Testy, które sprawdzają skutki udanego bloku (kontry, zaklęcia, seria pudeł, umiejętności), dają blokującemu `offHand: 'shield9'` — te same rzuty co wcześniej.
+- AI waży blok proporcjonalnie do tej szansy. Balans: obrońca bez tarczy traci 1–3 pkt; tarcza w rękach AI nadal ~50% (AI rzadko blokuje, blok zabiera turę). Szczegóły w `docs/BALANS.md`.
+
 ### 2026-11-27 20:20 · Claude Code (Mateusz) · might-height
 
 Siła (Might) zwiększa teraz wzrost postaci (prośba Mateusza). Tylko wygląd: zasięg w polach, kroki i liczby walki bez zmian.
@@ -1385,3 +1418,36 @@ Siła (Might) zwiększa teraz wzrost postaci (prośba Mateusza). Tylko wygląd: 
   garderoba, anim lab) pokazują dalej normalny wzrost.
 - Wyższy napastnik robi krótszy wypad (`STRIKE_GAP * stature`).
 - Podgląd: `?view=arena&might=17&emight=5` albo kreator.
+
+### 2026-11-27 20:21 · Claude Code (goloburda05-hue) · #275 / 275-shield-arm-cut
+
+- Odcięcie ręki z tarczą: `severChance` (`core/combat.ts`). **Nigdy, gdy obrońca blokował w chwili ataku** (stan gardy sprzed pierwszego uderzenia). Poza tym: power/charge, cała tarcza, trafienie z obrażeniami, obrońca żyje, przewaga Might (0,5 pkt/pkt, topór ×1,5, maks. 5%). Rzut tylko przy szansie > 0 — reszta walk losuje jak dotąd.
+- ⚠️ Kontrakt: zdarzenie `attack` ma `severed?: true`; skutek w stanie: `shield.health = 0` + `torn`. `Look.armCut?: boolean` (tylko w walce, nie zapisywany): rig chowa `arm_b_lo`, `hand_b`, `shield`, `weapon_b`.
+- Presenter: gore `shreds`/`ink` — ręka znika od łokcia + konfetti/tusz; gore `off` — ręka zostaje, tarcza wytrącona (pop BROKEN). `reset` przywraca rękę w następnej walce.
+- Gałąź oparta o #274 (PR #278 czeka na merge).
+
+### 2026-11-27 20:28 · Claude Code (goloburda05-hue) · #280 / 280-quarter-turn-all
+
+- ⚠️ **Każda postać stoi teraz w obrocie 3/4** (prośba goloburda05-hue), nie tylko z tarczą. `quarterTurn(pose)` w `src/rig/shield.ts` (barki: bliższy +0,6, z bronią −0,5), `turnedLayers` (kolejność: ramię z bronią za piersią → tułów, głowa → przedramię z bronią → całe bliższe ramię z drugim sztyletem/siecią → tarcza), pierś ×0,9. `kit.json` bez zmian.
+- `holdWithBothHands` (włócznia, młot) liczy przesunięcie tylnego barku od pozycji po obrocie. `holdShield` robi już tylko pochylenie tarczy.
+- `rest`: ręka z bronią zwisa lekko do przodu (łokieć nie wpada w biodro); `rest@shield` usunięty. Etykieta „Shoulders” na manekinie przesunięta.
+- Sprawdzone klatki: 20 klipów z mieczem, idle/chód/ataki/blok/unik dla topora, włóczni, młota, sztyletów, trójzębu, rzut siecią, klipy z tarczą; portrety, miasto, manekin.
+- Mateusz / lkaelek: nowe klipy rysujcie z myślą o obrocie (bark z bronią ~0,5 j. bliżej środka, bliższy ~0,6 j. dalej do przodu). Wzorce testów wizualnych odświeżone z artefaktu CI (Ubuntu 24.04).
+
+### 2026-11-27 20:41 · Claude Code (goloburda05-hue) · #282 / 282-balance-tempo
+
+- Balans agresor kontra obrońca: 60,5% → 53,2% (symulator, równy sprzęt). Analiza 10 strategii w `docs/BALANS.md`: zmiany bloku nic nie dają (0,11 udanego bloku na walkę), przewagę daje tempo mocnego ciosu.
+- ⚠️ Wdrożone (dotyczy też gracza): mocny cios kosztuje **11** energii (było 8) i ma celność **48** (było 55); profil AI `defender` mniej pasywny (więcej ataków, blok 1,2 → 1,0).
+- Testy: energia (`combat.test.ts`) i ochrona przed pudłami (`hitProtection.test.ts`, baza 48%) przeliczone. Tabele „Walka” i „Złoto i ceny” w BALANS.md zaktualizowane.
+- lkaelek: jeśli ligi/bossy mają ustawiony profil `defender` z myślą o pasywnym stylu — teraz atakuje częściej.
+### 2026-11-27 20:55 · Claude Code (Mateusz) · #284 / 284-damage-stages
+
+- Obrażenia ciała: co 10 % HP przybywa ran (nakładki `wound_*` z `blender/wounds.py`, `kit.json` → `wounds`, 38 sprite'ów; w `kit.json` same dopiski). Etap ustawia `CombatPresenter` z pokazywanego HP; przy „gore off” ran nie ma.
+- ⚠️ Kontrakt: nowy slot warstwy `wound` (tuż nad gołą skórą) i `Look.wounds?: 1–10` (tylko w walce). Dopisałem `wound` do `ARM_ORDER` i `SWORD_SHOULDER` w `shield.ts`. Kto dokłada nową kolejność warstw, przenosi `wound` razem ze skórą.
+- goloburda05-hue: dostosowane do obrotu 3/4 (#280): bogatszy zestaw ran na ramieniu dostało bliższe ramię (`arm_b_up`), bo ramię z mieczem chowa się za klatką.
+
+### 2026-11-27 21:20 · Claude Code (Mateusz) · sever-sounds
+
+Synchronizacja z main (po #285) przed merge'em PR #277.
+- Dźwięk odcinanej ręki (#275) podłączyłem sam: `CombatPresenter.sever()` woła `playSever(mode)`. goloburda05-hue: nie musisz już nic robić z prośby wyżej.
+- Nagranie `shield_thud` gra tylko, gdy cios przyjęła cała tarcza (`attack.shield`). Blok samym ostrzem (#274) ma nowy dźwięk `parry` (dawny syntetyczny brzęk). To odpowiada na moje ostrzeżenie z 20:03.

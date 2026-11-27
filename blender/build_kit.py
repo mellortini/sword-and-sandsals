@@ -13,6 +13,7 @@ import kit  # noqa: E402
 import armor  # noqa: E402
 import weapons  # noqa: E402
 import shields  # noqa: E402
+import wounds  # noqa: E402
 
 pc = sl.pc
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
@@ -74,6 +75,8 @@ for t, fn in weapons.TRIDENTS.items():
 PAIRED = {'weapon_daggers'}   # drawn in both hands: the back hand's copy on the weapon_b bone (#47)
 for t, fn in shields.SHIELDS.items():
     jobs[f'shield{t}'] = (fn, None, False)
+for key, (fn, head) in wounds.jobs().items():   # body damage overlays (#284)
+    jobs[key] = (fn, None, head)
 
 meta_path = os.path.join(OUT, 'kit.json')
 old = json.load(open(meta_path)) if (ONLY and os.path.exists(meta_path)) else {}
@@ -134,9 +137,9 @@ def limb(side):
     s = '_' + side
     return [
         dict(bone='foot' + s, slot='body', piece='foot', back=b), dict(bone='foot' + s, slot='boots', piece='foot', back=b),
-        dict(bone='leg' + s + '_lo', slot='body', piece='leg_lo', back=b), dict(bone='leg' + s + '_lo', slot='boots', piece='cuff', back=b),
+        dict(bone='leg' + s + '_lo', slot='body', piece='leg_lo', back=b), dict(bone='leg' + s + '_lo', slot='wound', piece='leg' + s + '_lo', back=b), dict(bone='leg' + s + '_lo', slot='boots', piece='cuff', back=b),
         dict(bone='leg' + s + '_lo', slot='greaves', piece='shin', back=b),
-        dict(bone='leg' + s + '_up', slot='body', piece='leg_up', back=b),
+        dict(bone='leg' + s + '_up', slot='body', piece='leg_up', back=b), dict(bone='leg' + s + '_up', slot='wound', piece='leg' + s + '_up', back=b),
         dict(bone='leg' + s + '_lo', slot='greaves', piece='knee', back=b),
     ]
 
@@ -144,22 +147,22 @@ def limb(side):
 LAYERS = [dict(bone='head', slot='hair', piece='back')]
 # the back hand's weapon (the second dagger, #47) sits behind that hand, like the sword behind the front one
 LAYERS += [dict(bone='weapon_b', slot='weapon_b', piece='', back=True), dict(bone='hand_b', slot='body', piece='hand', back=True),
-           dict(bone='arm_b_lo', slot='body', piece='arm_lo', back=True), dict(bone='arm_b_lo', slot='armor', piece='bracer', back=True),
-           dict(bone='arm_b_up', slot='body', piece='arm_up', back=True), dict(bone='arm_b_up', slot='shoulders', piece='', back=True)]
+           dict(bone='arm_b_lo', slot='body', piece='arm_lo', back=True), dict(bone='arm_b_lo', slot='wound', piece='arm_b_lo', back=True), dict(bone='arm_b_lo', slot='armor', piece='bracer', back=True),
+           dict(bone='arm_b_up', slot='body', piece='arm_up', back=True), dict(bone='arm_b_up', slot='wound', piece='arm_b_up', back=True), dict(bone='arm_b_up', slot='shoulders', piece='', back=True)]
 LAYERS += limb('b') + limb('f')
 # slot 'cut' = the two halves of a torn neck, drawn only for a pose with `neck_cut` (finishers, #20)
 LAYERS += [dict(bone='torso', slot='body', piece='torso'),
-           dict(bone='torso', slot='cut', piece='torso_edge'), dict(bone='torso', slot='cut', piece='torso'),
+           dict(bone='torso', slot='cut', piece='torso_edge'), dict(bone='torso', slot='cut', piece='torso'), dict(bone='torso', slot='wound', piece='torso'),
            dict(bone='torso', slot='armor', piece='torso'), dict(bone='torso', slot='cut', piece='torso_tissue'),
            dict(bone='pelvis', slot='body', piece='pelvis'), dict(bone='pelvis', slot='armor', piece='skirt'),
            dict(bone='head', slot='cut', piece='head_tissue'), dict(bone='head', slot='cut', piece='head_edge'),
-           dict(bone='head', slot='cut', piece='head_neck'), dict(bone='head', slot='face', piece='head'), dict(bone='head', slot='face', piece='mouth_open'),
+           dict(bone='head', slot='cut', piece='head_neck'), dict(bone='head', slot='face', piece='head'), dict(bone='head', slot='face', piece='mouth_open'), dict(bone='head', slot='wound', piece='face_under'),
            dict(bone='head', slot='face', piece='eyes'), dict(bone='head', slot='face', piece='lids'), dict(bone='head', slot='face', piece='lids_closed'),
-           dict(bone='head', slot='face', piece='brows'), dict(bone='head', slot='face', piece='brows_angry'), dict(bone='head', slot='beard', piece=''), dict(bone='head', slot='face', piece='nose'),
+           dict(bone='head', slot='face', piece='brows'), dict(bone='head', slot='face', piece='brows_angry'), dict(bone='head', slot='beard', piece=''), dict(bone='head', slot='face', piece='nose'), dict(bone='head', slot='wound', piece='face'),
            dict(bone='head', slot='hair', piece='front'), dict(bone='head', slot='helmet', piece=''),
            dict(bone='shield', slot='shield', piece=''),   # off hand (#38): in front of the body, under the sword arm
-           dict(bone='arm_f_lo', slot='body', piece='arm_lo'), dict(bone='arm_f_lo', slot='armor', piece='bracer'),
-           dict(bone='arm_f_up', slot='body', piece='arm_up'), dict(bone='arm_f_up', slot='shoulders', piece=''),
+           dict(bone='arm_f_lo', slot='body', piece='arm_lo'), dict(bone='arm_f_lo', slot='wound', piece='arm_f_lo'), dict(bone='arm_f_lo', slot='armor', piece='bracer'),
+           dict(bone='arm_f_up', slot='body', piece='arm_up'), dict(bone='arm_f_up', slot='wound', piece='arm_f_up'), dict(bone='arm_f_up', slot='shoulders', piece=''),
            dict(bone='weapon', slot='weapon', piece='gladius'), dict(bone='hand_f', slot='body', piece='hand')]
 
 POSE = {'pelvis': 0, 'torso': 3, 'head': -3, 'arm_b_up': -18, 'arm_b_lo': 35, 'hand_b': 0,
@@ -177,6 +180,7 @@ kitjson = {
     'hairs': [h[0] for h in kit.HAIRS], 'beards': [b[0] for b in kit.BEARDS],
     'hair_top_back': [5, 9], 'hood_helmets': [3, 7],
     'sets': armor.SET_NAMES,
+    'wounds': wounds.table(),
     'sprites': sprites,
 }
 # LF on every OS: kit.json is tracked in git and must not show up as changed after a render on Windows

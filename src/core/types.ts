@@ -106,6 +106,8 @@ export interface ActionOption {
   energyCost: number;
   /** Percentage from 5 to 100 for attacks. */
   hitChance?: number;
+  /** Percentage to block a landed strike, for the Block action (#274): lower without a whole shield. */
+  blockChance?: number;
   counter?: true;
 }
 
@@ -133,6 +135,8 @@ export type CombatEvent =
       strikes?: readonly AttackStrike[];
       /** the blocking shield's health before and after the blow (#273); `to: 0` = it broke */
       shield?: { readonly from: number; readonly to: number };
+      /** the blow took off the defender's shield arm (#275): the shield is gone and the stump bleeds */
+      severed?: true;
     }
   | { type: 'energy'; fighter: FighterSide; from: number; to: number }
   | { type: 'block'; fighter: FighterSide }
