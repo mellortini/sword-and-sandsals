@@ -189,7 +189,7 @@ SWORDS = {t: globals()[f'sword{t}'] for t in range(1, 11)}
 # ================================================================== AXES, SPEARS, HAMMERS (#36)
 # Two-handed weapons: where the BACK hand holds the haft, in weapon-bone units (front hand = origin).
 # build_kit writes it into kit.json (sprite 'grip2'); PaperRig bends the back arm to reach it.
-GRIP2 = {'spear': (-1.9, 0.0), 'hammer': (-1.5, 0.0)}
+GRIP2 = {'spear': (-1.8, 0.0), 'hammer': (-1.5, 0.0)}
 
 
 # Same tier ladder as the swords. The axe and hammer are held at the end of the haft, the spear on the shaft
@@ -299,13 +299,14 @@ def axe(t):
     return build
 
 
-# ------------------------------------------------------------------ SPEAR: two-handed, the point far past a sword
-# front hand on the origin, back hand at GRIP2['spear'] further down the shaft (the rig bends the back arm to it)
+# ------------------------------------------------------------------ SPEAR: two-handed, longer than the fighter
+# both hands near the butt (front hand on the origin, back hand at GRIP2['spear']; the rig bends the back arm to it),
+# so most of the shaft is ahead: the point lands on an enemy standing at spear range (#36).
 def spear(t):
     def build(c):
         haft, grip, head, head_d, fit, torn = _tier(t)
         k = 0.88 + 0.03 * t
-        x0, x1 = -2.9, 5.6 + 0.04 * t
+        x0, x1 = -2.4, 4.73 + 0.01 * t   # held at the butt end: ~6.6 units ahead of the front hand
         w = 0.18
         _haft(c, t, x0, x1 + 0.1, w, grips=(0.0, GRIP2['spear'][0]))
         _butt(c, t, x0, w)

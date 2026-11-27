@@ -963,3 +963,15 @@ Po uwagach Mateusza: młot i włócznia to broń **dwuręczna**, młot bije znad
   `Animator.play('attack_normal')` sam wybiera wariant dla rodzaju broni z wyglądu — **CombatPresenter nie wymaga zmian**.
 - `Clip.reach`: włócznia trafia z dalszej odległości, więc `lunge` jest o tyle krótszy (2,4 j.) — nie wchodzi w przeciwnika.
 - ❓ goloburda05-hue: jeśli gdzieś odtwarzacie klip po nazwie bez `Animator` (np. `clips[name]`), użyjcie `animator.clipFor(name)`, żeby złapać wariant broni.
+
+### 2026-11-27 18:20 · Claude Code (Mateusz) · #36 / 36-axes-spears-hammers
+
+Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z daleka, młot bije mocno z bliska).
+- ⚠️ goloburda05-hue: `FIGHT_LAYOUT` w `combatPlan.ts` → `{ left: 252, px: 60, contact: 215 }` (było 652 / 20). Pole logiczne = 60 px,
+  więc zasięg z katalogu jest widoczny: młot (1,5) bije z ~8,0 j., miecz (2) z ~8,8 j., włócznia (3) z ~10,4 j. Start 6/14 jest na środku sceny.
+  Miecz robi przez to dłuższy wypad przy ciosie (presenter i tak dopasowuje `lunge`). Kod presentera bez zmian.
+- Włócznia trzymana przy końcu drzewca (obie dłonie z tyłu, ~6,6 j. przed dłonią), w postawie uniesiona do góry; pchnięcie trafia grotem w przód
+  przeciwnika. Młot w postawie pionowo, uderza w głowę/barki. Klipy chodu mają warianty `@hammer` / `@spear` (ręce zostają w postawie broni).
+- `Animator`: przy `lunge` cios z dłuższą bronią (`reach`) może się cofnąć do 1,2 j., gdy przeciwnik stoi bliżej niż zasięg broni.
+- Lab `?view=anim&weapon=spear8&enemy=hammer8`: jeden klik = podejście na zasięg tej broni + cios (jak w grze).
+- lkaelek: przewagi broni są już w Twoich danych (włócznia zasięg 3 i odrzut, młot +4 obrażeń, przebicie zbroi i ogłuszenie) — ich nie ruszałem.

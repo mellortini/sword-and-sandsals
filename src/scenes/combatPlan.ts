@@ -19,10 +19,11 @@ export type Step =
 
 /**
  * Fight staging shared by the arena, ?view=aifight and the animation lab (#151).
- * contact 215 px = 5.7 rig units between the pelvises at logical distance 0: close, but the bodies never overlap,
- * melee range (logical 2) = 6.7 units. Logical 0..20 spans 400 px, centred on the 1920 px stage.
+ * contact 215 px = 5.7 rig units between the pelvises at logical distance 0: close, but the bodies never overlap.
+ * 60 px per logical unit (#36) so weapon reach reads on screen: a hammer strikes from logical 1.5 (8.0 units),
+ * a sword from 2 (8.8), a spear from 3 (10.4). Logical 0..20 spans 1200 px; the default 6 / 14 start is centred.
  */
-export const FIGHT_LAYOUT: Layout = { left: 652, px: 20, contact: 215 };
+export const FIGHT_LAYOUT: Layout = { left: 252, px: 60, contact: 215 };
 
 /**
  * Where a strike lands, in rig units between the pelvises at the deepest point of the attack's lunge.
