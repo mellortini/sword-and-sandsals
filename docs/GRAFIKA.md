@@ -1,7 +1,7 @@
 # Grafika do gry: jak dodać albo zmienić asset
 
-Dla ludzi i agentów (Claude Code, Codex). Opisuje grafikę **gry**. Skill `papercraft-3d-short` dotyczy filmów;
-do gry nie trzeba go czytać w całości.
+Dla ludzi i agentów (Claude Code, Codex). Opisuje grafikę **gry**. Sam styl opisuje skill
+[`papercraft-3d-short`](../.claude/skills/papercraft-3d-short/SKILL.md); jego części o filmach do gry nie są potrzebne.
 
 Przed pierwszym renderem: `SETUP.md` → punkt 5 (Blender 5.3, Python, pobranie i rozpakowanie tekstur).
 Wszystkie komendy uruchamiaj w katalogu repo. `<blender>` to ścieżka do programu. Blender działa w tle (`-b`),

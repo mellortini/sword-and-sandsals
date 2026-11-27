@@ -938,7 +938,7 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 ### 2026-11-27 08:54 · Claude Code (Mateusz) · shared-files / art-guide
 
-- Jest instrukcja do grafiki gry: `docs/GRAFIKA.md` (wzorce, styl, skala i pivot, materiały, nowe assety, atlasy, kontrola) i skill `paper-game-art`. `papercraft-3d-short` zostaje do filmów.
+- Jest instrukcja do grafiki gry: `docs/GRAFIKA.md`. Styl opisuje nadal skill `papercraft-3d-short`; doszły do niego nasze rendery testowe (`references/our_tests/`). Klatek z cudzego filmu w repo nie ma.
 - Uwaga przy renderze: filtr `build_kit.py` działa po początku nazwy, więc `helmet1` renderuje też `helmet10`.
 - Poprawiłem ścieżki `game/blender/...`, stałą ścieżkę w `finish_clips.py` i README. `build_kit.py` nie ruszałem (zmieniają go #231 i #232), więc w jego opisie została stara ścieżka.
 - Przykład z instrukcji i render z filtrem sprawdziłem na komputerze Mateusza, z już rozpakowanymi teksturami. Drugi komputer to nadal #8; głosów (ComfyUI) w repo nie ma.
