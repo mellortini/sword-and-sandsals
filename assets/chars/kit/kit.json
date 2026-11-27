@@ -83,6 +83,12 @@
    "y": -0.3
   },
   {
+   "name": "weapon_b",
+   "parent": "hand_b",
+   "x": 0.06,
+   "y": -0.38
+  },
+  {
    "name": "leg_b_up",
    "parent": "pelvis",
    "x": -0.52,
@@ -124,6 +130,12 @@
    "bone": "head",
    "slot": "hair",
    "piece": "back"
+  },
+  {
+   "bone": "weapon_b",
+   "slot": "weapon_b",
+   "piece": "",
+   "back": true
   },
   {
    "bone": "hand_b",
@@ -392,6 +404,7 @@
   "hand_f": -10,
   "weapon": -40,
   "shield": 0,
+  "weapon_b": -30,
   "leg_b_up": -14,
   "leg_b_lo": 4,
   "foot_b": 10,
@@ -2912,6 +2925,16 @@
     207.55
    ],
    "tint": null
+  },
+  "weapon_daggers": {
+   "w": 231,
+   "h": 78,
+   "pivot": [
+    57.61,
+    39.14
+   ],
+   "tint": null,
+   "pair": true
   }
  }
 }

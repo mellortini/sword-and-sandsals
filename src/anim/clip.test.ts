@@ -42,8 +42,8 @@ describe('dodge (#13)', () => {
     expect(sample(c, c.length).x).toBe(0);
   });
 
-  it('has hammer and spear variants that keep the weapon in its ready angle while leaning', () => {
-    for (const fam of ['hammer', 'spear']) {
+  it('has hammer, spear and axe variants that keep the weapon in its ready angle while leaning', () => {
+    for (const fam of ['hammer', 'spear', 'axe']) {
       const v = baked[`dodge@${fam}`];
       const ready = baked[`idle@${fam}`].full[0].pose;
       const mid = sample(v, 3).pose;
@@ -51,5 +51,36 @@ describe('dodge (#13)', () => {
       expect(mid.torso).toBeGreaterThan(15);
       expect(sample(v, v.length).x).toBe(0);
     }
+  });
+
+  it('chops with the axe (#47): wound up behind the head, the head comes down on the hit and the clip ends at rest', () => {
+    for (const kind of ['quick', 'normal', 'power']) {
+      const c = baked[`attack_${kind}@axe`];
+      const hit = c.events!.find((e) => e.type === 'hit')!.f;
+      const windup = c.full.reduce((a, k) => (k.f < hit && (k.pose.arm_f_up ?? 0) > (a.pose.arm_f_up ?? 0) ? k : a), c.full[0]);
+      const at = sample(c, hit).pose;
+      // the axe points down-forward on the hit, after being raised over the shoulder
+      const blade = (p: typeof at) => (p.pelvis ?? 0) + (p.torso ?? 0) + (p.arm_f_up ?? 0) + (p.arm_f_lo ?? 0) + (p.hand_f ?? 0) + (p.weapon ?? 0);
+      expect(blade(windup.pose), kind).toBeGreaterThan(140);
+      expect(blade(at), kind).toBeLessThan(0);
+      expect(sample(c, c.length).x).toBe(0);
+      expect(sample(c, c.length).pose.arm_f_up).toBeCloseTo(baked['idle@axe'].full[0].pose.arm_f_up ?? 0);
+    }
+  });
+
+  it('stabs twice with the daggers (#47): front hand on the hit, back hand after it, both blades solved', () => {
+    for (const kind of ['quick', 'normal']) {
+      const c = baked[`attack_${kind}@daggers`];
+      const hit = c.events!.find((e) => e.type === 'hit')!.f;
+      const second = c.events!.find((e) => e.type === 'swing')!.f;
+      expect(second, kind).toBeGreaterThan(hit);
+      expect(sample(c, hit).pose.arm_f_up, kind).toBeGreaterThan(70);
+      expect(sample(c, second).pose.arm_b_up, kind).toBeGreaterThan(70);
+      expect(c.reach).toBeLessThan(0);
+    }
+    // blade_b is the back weapon's world angle, like blade for the front one
+    const p = sample(baked['idle@daggers'], 0).pose;
+    expect((p.pelvis ?? 0) + (p.torso ?? 0) + (p.arm_b_up ?? 0) + (p.arm_b_lo ?? 0) + (p.hand_b ?? 0) + (p.weapon_b ?? 0)).toBeCloseTo(34);
+    expect(p.blade_b).toBeUndefined();
   });
 });
