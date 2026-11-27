@@ -1339,6 +1339,22 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - ⚠️ `AGENTS.md` (plik wspólny): nowa sekcja „Przegląd kodu — codebase memory” (prośba Mateusza, oszczędza tokeny).
   Kod przeglądamy najpierw przez codebase-memory-mcp; grep i czytanie plików, gdy graf nie wystarcza albo nie macie tego serwera.
 
+### 2026-11-27 19:28 · Claude Code (Mateusz) · #272 / 272-arena-kraftmoor
+
+- Druga arena walki: Kraftmoor (tektura, pochmurno, kałuże, wielka prasa). Podgląd: `?view=arena&arena=kraftmoor`.
+- `blender/arena_lib.py`: wspólna kamera, linia piasku i mapa miejsc publiczności dla nowych aren; `blender/arena.py` bez zmian.
+- `src/scenes/arenas.ts`: lista aren (puste trybuny, widzowie, opcjonalnie `stands` = przyciemnienie trybun w `backdrop.ts`).
+  `ArenaOptions.arena` wybiera arenę. Pulpport domyślnie.
+- Uwaga: gra rozmywa i przyciemnia wszystko nad podłogą — pochmurny render potrzebował jaśniejszego `stands`.
+- Jeszcze żaden ekran gry sam nie wybiera Kraftmoor (walki regionu nie są podpięte do UI).
+- Antyk zamiast przemysłu (uwaga Mateusza): w tle Kraftmoor góry, świątynia, akwedukt, drewniane wieże i prasa, kosze z ogniem.
+- Nowa publiczność na obu arenach (prośba Mateusza): każdy widz to osobny sprite na pustych trybunach
+  (`*_empty.png` + `*_people.png/.json` z `arena_lib.export_people`; Pulpport: `ARENA_PEOPLE=1 ... blender/arena.py`).
+  Większość delikatnie kołysze się na boki, kilku wiwatuje obiema rękami (`crowdPose`). `arena_crowd.json` usunięty,
+  `arena.png` bez zmian (inne ekrany). Sceny walki budują tło przez `buildArenaStage` (`arenaStage.ts`);
+  też AI fight i anim lab. Zmienia się wygląd walk — wzorce testów wizualnych nie były odświeżane.
+- ⚠️ `src/scenes/arena.ts` zmienia też otwarty PR #271 (inne miejsca w pliku) — po jego merge'u robię rebase.
+
 ### 2026-11-27 20:00 · Claude Code (Mateusz) · sever-sounds
 
 Dźwięki odcięcia: trzy nagrania od Mateusza w `assets/sfx/gore/squelch_1..3.wav` (LFS), kod w `src/audio/sever.ts`.

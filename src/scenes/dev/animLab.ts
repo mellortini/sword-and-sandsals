@@ -12,8 +12,7 @@ import type { GoreMode } from '../../ui/gore';
 import { CombatPresenter } from '../combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from '../common';
 import type { SceneContext, SceneUpdate } from '../common';
-import { arenaBackdrop } from '../backdrop';
-import { CrowdFx } from '../../ui/crowdFx';
+import { buildArenaStage } from '../arenaStage';
 import { CameraJuice, applyCamera } from '../../ui/cameraJuice';
 import { reduceMotion, setMotionMode } from '../../ui/motion';
 import { FIGHT_LAYOUT, MIN_LUNGE, STRIKE_GAP } from '../combatPlan';
@@ -23,11 +22,10 @@ import { setVolume, volumes } from '../../audio/volume';
 
 const STATUS_KINDS: readonly StatusKind[] = ['burning', 'soaked', 'stunned', 'taped', 'torn', 'feared', 'slowed'];
 
-export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: SceneContext): Promise<SceneUpdate> {
+export async function showAnimLab({ app, world, params, ui, add, rigs }: SceneContext): Promise<SceneUpdate> {
   const arena = new Container();
   world.addChild(arena);
-  arena.addChild(new Sprite(arenaBackdrop(bgTex)));
-  const crowdFx = arena.addChild(new CrowdFx());
+  const crowdFx = await buildArenaStage(arena);
   // the camera's juice (#75): crit zoom, charge shake, drift; the checkbox below is the "reduce motion" setting
   const camera = new CameraJuice(W, H, reduceMotion);
   const gsh = groundShadowTexture();
