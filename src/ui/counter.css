@@ -121,6 +121,34 @@
 .ware.locked { cursor: help; background: rgba(60, 40, 30, 0.12); }
 .ware.locked .ware__pic img { filter: brightness(0) opacity(0.45); }
 .ware.locked .ware__price { color: #7a5a3a; font-family: 'Alegreya', Georgia, serif; font-style: italic; font-weight: 400; }
+/* already the gladiator's: framed in green, nothing left to buy */
+.ware.owned { cursor: default; border-color: #3f6d27; box-shadow: inset 0 0 0 0.35vh #3f6d27; }
+.ware.owned .ware__price { color: #2f6b2a; }
+
+/* ---------------------------------------------------------------- weapons lie on dark velvet in gilt frames, so they stand out */
+.counter--weaponsmith .wall-item,
+.counter--weaponsmith .ware {
+  background: radial-gradient(ellipse at 50% 38%, #7a2c36 0%, #4a1822 55%, #2a0d15 100%);
+  border: 0.35vh solid #d9a441; box-shadow: inset 0 0 0 0.25vh #3a1a0c, 0 0.6vh 0 rgba(40, 18, 8, 0.45); color: #fff3d6;
+}
+.counter--weaponsmith .wall-item { padding: 1.4vh 0.6vh; }
+.counter--weaponsmith .wall-item small { color: #ffd98a; font-size: max(11px, 1.6vh); text-align: center; line-height: 1.15; min-height: 2.3em; }
+.counter--weaponsmith .wall-item:hover, .counter--weaponsmith .wall-item:focus-visible,
+.counter--weaponsmith .ware:hover, .counter--weaponsmith .ware:focus-visible {
+  background: radial-gradient(ellipse at 50% 38%, #a33f46 0%, #632231 55%, #35121c 100%); border-color: #ffe08a;
+}
+.counter--weaponsmith .wall-item__pic img, .counter--weaponsmith .ware__pic img.blade {
+  filter: drop-shadow(0 0 0.7vh rgba(255, 206, 128, 0.5));
+}
+.counter--weaponsmith .ware__price { color: #ffd45e; }
+.counter--weaponsmith .ware.poor { opacity: 1; }
+.counter--weaponsmith .ware.poor .ware__pic { opacity: 0.7; }
+.counter--weaponsmith .ware.poor .ware__price { color: #ff8f7a; }
+.counter--weaponsmith .ware.owned { border-color: #8fd46a; box-shadow: inset 0 0 0 0.35vh #4f8a30, 0 0.6vh 0 rgba(40, 18, 8, 0.45); }
+.counter--weaponsmith .ware.owned .ware__price { color: #b6ef90; }
+.counter--weaponsmith .ware.locked { background: linear-gradient(180deg, #3b2c2c 0%, #241a1c 100%); border-color: #7c6650; color: #cdbba4; }
+.counter--weaponsmith .ware.locked .ware__pic img { filter: brightness(0) invert(0.55) opacity(0.4); }
+.counter--weaponsmith .ware.locked .ware__price { color: #b9a58c; }
 .counter__note { margin: 0; font-size: max(12px, 2vh); font-style: italic; color: #6b4a2a; }
 .counter__empty { margin: auto; font-size: max(14px, 2.6vh); font-style: italic; color: #6b4a2a; }
 

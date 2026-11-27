@@ -1,0 +1,98 @@
+/*
+ * Medallion boards (skill trees, Hall of Fame): a wide parchment in the building's room; on it columns of round
+ * medallions joined by a leather cord, each with a dark card. The buttons stand under the board.
+ * The doubled class names beat the counter frame's rules for a building's own panel (counter.css).
+ */
+.counter-room .medal-panel.medal-panel {
+  position: absolute; left: 50%; right: auto; top: 1.6vh; transform: translateX(-50%);
+  width: min(96vw, 176vh); height: auto; max-height: 97vh; overflow: visible; box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: center; gap: 1.2vh; padding: 0; border: 0;
+  background: none; filter: none; clip-path: none; box-shadow: none;
+  /* the board is sized to the screen: zooming it whole (textSize.css) would push it off, so Text size grows the cards' words */
+  zoom: 1;
+}
+.medal-board {
+  width: 100%; min-height: 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 1.2vh; padding: 2vh 3vh 2.2vh;
+  color: #3a2320;
+  background: radial-gradient(ellipse at 35% 25%, #fbe9bd 0%, transparent 62%), linear-gradient(160deg, #f1d89f 0%, #e3bf7e 55%, #d0a462 100%);
+  filter: drop-shadow(0.6vh 0.9vh 0 rgba(30, 14, 10, 0.4));
+  clip-path: polygon(0.6% 0.8%, 12% 0.2%, 27% 0.7%, 41% 0%, 58% 0.6%, 73% 0.1%, 75% 1.8%, 76% 0.3%, 88% 0.7%, 99.5% 0.3%, 100% 18%, 99.4% 37%, 100% 58%, 99.5% 79%, 99.8% 99.4%,
+    84% 99%, 66% 100%, 49% 99.2%, 31% 99.9%, 14% 99.1%, 0.4% 99.7%, 0% 80%, 0.6% 61%, 0.1% 40%, 0.5% 17%, 1.4% 14.5%, 0.2% 13%);
+}
+.medal-head { display: flex; align-items: baseline; gap: 1.6vh; }
+.medal-board h3 { margin: 0; font-size: max(20px, 4.2vh); line-height: 1.1; text-transform: uppercase; }
+.medal-head__name { font-style: italic; font-size: max(13px, 2.2vh); color: #6b4a2a; }
+.medal-head__score {
+  margin-left: auto; font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: max(13px, 2.1vh); letter-spacing: 0.06em;
+  text-transform: uppercase; color: #5c2a1c;
+}
+.medal-head__score b { margin-left: 0.6vh; font-size: 1.5em; color: #2f6b2a; }
+
+.medal-grid { min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.6vh 2vh; padding: 0.4vh 1vh 0.8vh; }
+.medal-tree { display: flex; flex-direction: column; min-width: 0; }
+.medal-board .medal-tree h4 {
+  margin: 0 0 0.9vh; text-align: center; font-family: 'Cinzel', Georgia, serif; font-weight: 800; font-size: max(12px, 2.1vh);
+  letter-spacing: 0.08em; text-transform: uppercase; color: #6b2416;
+}
+
+/* one row: the medallion on the cord, the card beside it */
+.medal-node {
+  --size: 6.9vh;
+  position: relative; display: flex; align-items: center; gap: 1.3vh; min-height: var(--size); margin: 0 0 0.9vh; padding: 0;
+  border: 0; background: none; text-align: left; color: inherit; font: inherit; list-style: none;
+}
+.medal-node:last-child { margin-bottom: 0; }
+/* the cord runs from this medallion down to the next one */
+.medal-node:not(:last-child)::before {
+  content: ''; position: absolute; left: calc(var(--size) / 2 - 0.55vh); top: 50%; width: 1.1vh; height: calc(100% + 0.9vh);
+  background: #7a4a28; box-shadow: inset 0 0 0 0.2vh #4a2814;
+}
+
+.medal {
+  position: relative; z-index: 1; flex: none; width: var(--size); height: var(--size); box-sizing: border-box; border-radius: 50%;
+  display: grid; place-items: center; border: 0.6vh solid #5a3118;
+  background: radial-gradient(circle at 38% 30%, color-mix(in srgb, var(--disc) 72%, #fff2cc) 0%, var(--disc) 55%, color-mix(in srgb, var(--disc) 78%, #1c0c08) 100%);
+  box-shadow: inset 0 0 0 0.25vh #e0b266, 0 0.5vh 0 rgba(50, 24, 10, 0.4);
+}
+.medal__art { width: 88%; height: 88%; overflow: visible; filter: drop-shadow(0.2vh 0.3vh 0 rgba(30, 12, 6, 0.35)); }
+.medal__lock { position: absolute; right: -0.9vh; bottom: -0.8vh; width: 3vh; height: 3vh; display: none; }
+
+.medal-card {
+  position: relative; z-index: 1; flex: 0 1 auto; min-width: min(100%, 24vh); display: grid; grid-template-columns: 1fr auto; align-content: center;
+  gap: 0 1.2vh; padding: 0.6vh 1.2vh 0.7vh; border-radius: 0.7vh; background: #62412e; color: #f6e5c4;
+  box-shadow: inset 0 0 0 0.2vh #8a6244, 0 0.4vh 0 rgba(50, 24, 10, 0.35);
+}
+/* the short link between medallion and card */
+.medal-card::before { content: ''; position: absolute; right: 100%; top: 50%; width: 1.4vh; height: 1vh; margin-top: -0.5vh; background: #7a4a28; }
+.medal-card__name { font-weight: 700; font-size: calc(max(12px, 2.15vh) * var(--text-scale, 1)); line-height: 1.15; color: #fff3d6; }
+.medal-card__state { align-self: start; font-style: italic; font-size: calc(max(10px, 1.45vh) * var(--text-scale, 1)); color: #d9bf94; white-space: nowrap; }
+.medal-card__text { grid-column: 1 / -1; font-size: calc(max(11px, 1.72vh) * var(--text-scale, 1)); line-height: 1.18; color: #efdcb8; }
+
+/* done (learned / earned): the medallion glows and the card is rimmed in gold */
+.medal-node.is-done .medal { box-shadow: inset 0 0 0 0.25vh #ffe6a0, 0 0 0.7vh 0.5vh #ffe9a8, 0 0 2.6vh 1.2vh rgba(255, 224, 130, 0.75); }
+.medal-node.is-done .medal-card { box-shadow: inset 0 0 0 0.3vh #f2c14e, 0 0.4vh 0 rgba(50, 24, 10, 0.35); }
+.medal-node.is-done .medal-card__state { font-style: normal; font-weight: 700; color: #ffd96b; }
+/* locked: a padlock and a faded card; the words say it too, never colour alone */
+.medal-node.is-locked .medal { filter: saturate(0.65) brightness(0.9); }
+.medal-node.is-locked .medal__lock { display: block; }
+.medal-node.is-locked .medal-card { background: #8a6d55; box-shadow: inset 0 0 0 0.2vh #a5876b; }
+.medal-node.is-locked .medal-card__name, .medal-node.is-locked .medal-card__text { color: #f3e4c6; }
+.medal-node.is-locked .medal-card__state { color: #ecd9b4; }
+
+.medal-actions { display: flex; justify-content: center; gap: 3vh; width: 100%; }
+.counter-room .medal-actions button {
+  width: min(30vw, 30vh); padding: 0.9vh 0; border: 0; border-radius: 0.8vh; cursor: pointer;
+  font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: max(15px, 2.7vh); color: #f6e5c4; background: #62412e;
+  box-shadow: inset 0 0 0 0.2vh #8a6244, 0 0.5vh 0 rgba(30, 14, 10, 0.45);
+}
+.counter-room .medal-actions .keep { background: #9a6a2e; }
+.counter-room .medal-actions button:disabled { background: #cfa873; color: #fff3d6; opacity: 0.75; cursor: default; }
+.counter-room .medal-actions button:focus-visible { outline: 0.4vh solid #fff0d0; outline-offset: 0.3vh; }
+
+/* narrow screens: two columns, then one; the grid scrolls */
+@media (max-aspect-ratio: 4 / 3) {
+  .medal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .medal-grid { grid-template-columns: 1fr; }
+}

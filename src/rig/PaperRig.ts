@@ -236,12 +236,8 @@ export class PaperRig {
   private lookGen = 0;
   private lookReady: Promise<void> = Promise.resolve();
 
-  /** a carved wooden mannequin instead of a person (the armourer's stand, #267): this paper colour, no face, hair or beard */
-  readonly mannequin?: string;
-
-  constructor(kit: Kit, opts: { scale: number; facing: 1 | -1; shadow?: ShadowStyle; mannequin?: string }) {
+  constructor(kit: Kit, opts: { scale: number; facing: 1 | -1; shadow?: ShadowStyle }) {
     this.kit = kit;
-    this.mannequin = opts.mannequin;
     this.scale = opts.scale;
     this.facing = opts.facing;
     this.shadow = { ...(opts.shadow ?? DEFAULT_SHADOW) };
@@ -292,11 +288,10 @@ export class PaperRig {
     this.inner.removeChildren();
     this.parts = [];
     const J = this.kit.json;
-    const skin = this.mannequin ?? J.skins[L.skin]?.color ?? J.skins[3].color;
+    const skin = J.skins[L.skin]?.color ?? J.skins[3].color;
     const hair = J.hair_colors[L.hairColor]?.color ?? J.hair_colors[1].color;
     const face = J.faces[L.face] ?? J.faces[0];
     for (const layer of J.layers) {
-      if (this.mannequin && (layer.slot === 'hair' || layer.slot === 'beard' || (layer.slot === 'face' && layer.piece !== 'head'))) continue;
       const key = this.kit.resolve(layer, L);
       if (!key || !this.kit.has(key)) continue;
       const m = J.sprites[key];

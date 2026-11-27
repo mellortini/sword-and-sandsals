@@ -1320,3 +1320,16 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - `Animator`: przy `lunge` cios z dłuższą bronią (`reach`) może się cofnąć do 1,2 j., gdy przeciwnik stoi bliżej niż zasięg broni.
 - Lab `?view=anim&weapon=spear8&enemy=hammer8`: jeden klik = podejście na zasięg tej broni + cios (jak w grze).
 - lkaelek: przewagi broni są już w Twoich danych (włócznia zasięg 3 i odrzut, młot +4 obrażeń, przebicie zbroi i ogłuszenie) — ich nie ruszałem.
+
+### 2026-11-27 18:40 · Claude Code (Mateusz) · shop-fixes-owned-mannequin-music
+
+- `core/shop.ts`: nowy powód odmowy `already-owned` + `ownsItem` — nic noszonego / w plecaku (także kute i zaklęte) nie da się kupić drugi raz. `ShopOffer.owned` to teraz boolean, doszło `equipped`.
+- Płatnerz: zamiast drewnianego manekina stoi gladiator (własna twarz) w noszonej zbroi; kupiona zbroja od razu na nim (`buyAndWear`), jeśli poziom pozwala. Usunięta opcja `PaperRig mannequin`; `LookPreview.mannequin` → `armoured`.
+- Obrazki broni w sklepie: `assets/ui/weapons/` z `blender/weapon_icons.py` (260 ppu, konturek, żywsze kolory; `weapons.ICON` skraca włócznię tylko tutaj). Kit bez zmian. Ściana pokazuje najlepszą posiadaną broń rodziny.
+- Ustawienia: wiersz Music On/Off (`musicOff` / `musicLevel` w `audio/volume.ts`); wyciszona muzyka nie jest w ogóle grana.
+
+### 2026-11-27 19:20 · Claude Code (Mateusz) · shop-fixes-owned-mannequin-music
+
+- Drzewko umiejętności i Hala Sław w stylu medalionów (wzór od Mateusza): wspólne `src/ui/medals.css` i `src/ui/medalIcons.ts` (24 ikony skilli + 25 osiągnięć, SVG). Nowy skill = wpis w `SKILL_MEDALS` (wymusza TypeScript); nowe osiągnięcie = ikona i kolumna w `trophyGroups` (`achievementRules.ts`), test tego pilnuje.
+- Na tych planszach „Text size” powiększa tylko tekst kart (cała plansza nie jest zoomowana).
+- Wyglądy w `tests/visual` nie były uruchamiane ani odświeżane.

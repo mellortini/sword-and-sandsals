@@ -2,7 +2,7 @@
  * The settings screen (#80), as data: every row reads and changes one saved setting. Choices step left / right
  * (wrapping), volumes are sliders 0..100 %. The screen (src/ui/settings.ts) only draws these rows.
  */
-import { CHANNELS, setVolume, volumes } from '../audio/volume';
+import { CHANNELS, musicOff, setMusicOff, setVolume, volumes } from '../audio/volume';
 import type { Channel } from '../audio/volume';
 import { GORE_MODES, goreMode, setGoreMode } from './gore';
 import { paperShadows, setPaperShadows } from './graphics';
@@ -37,7 +37,7 @@ function cycle<T extends { id: string }>(list: readonly T[], now: string, dir: 1
   return list[(i + dir + list.length) % list.length];
 }
 
-const VOLUME_NAMES: Readonly<Record<Channel, string>> = { master: 'Volume', foley: 'Fight sounds', crowd: 'Crowd', music: 'Music', voices: 'Voices' };
+const VOLUME_NAMES: Readonly<Record<Channel, string>> = { master: 'Volume', foley: 'Fight sounds', crowd: 'Crowd', music: 'Music volume', voices: 'Voices' };
 const VOLUME_HINTS: Readonly<Record<Channel, string>> = {
   master: 'Everything you hear', foley: 'Blows, steps, blocks', crowd: 'The stands', music: 'The arena and town themes', voices: 'The narrator of the story',
 };
@@ -58,6 +58,10 @@ export const SETTINGS: readonly SettingRow[] = [
   {
     kind: 'choice', id: 'shadows', label: 'Paper shadows', hint: 'Soft shadows under the puppets (off is faster)',
     value: () => (paperShadows() ? 'On' : 'Off'), step: () => setPaperShadows(!paperShadows()),
+  },
+  {
+    kind: 'choice', id: 'music', label: 'Music', hint: 'The arena and town themes, on or off',
+    value: () => (musicOff() ? 'Off' : 'On'), step: () => setMusicOff(!musicOff()),
   },
   ...CHANNELS.map((c): SliderRow => ({
     kind: 'slider', id: `volume-${c}`, label: VOLUME_NAMES[c], hint: VOLUME_HINTS[c],

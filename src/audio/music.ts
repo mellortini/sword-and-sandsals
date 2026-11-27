@@ -5,6 +5,7 @@
  * always gives the same music. It sits on the mixer's music channel, under everything else.
  */
 import { getMixer } from './mixer';
+import { musicLevel } from './volume';
 
 export type Theme = 'arena' | 'town';
 export type Voice = 'lyre' | 'drone' | 'drum';
@@ -164,7 +165,8 @@ export function startMusic(theme: Theme, seed = Math.floor(Math.random() * 1000)
   const timer = setInterval(() => {
     if (stopped) return;
     while (barStart < ctx.currentTime + 0.4) {
-      for (const n of barNotes(theme, bar, seed)) play(n, barStart + n.beat * secPerBeat);
+      // muted music is not played at all (the bars still count on)
+      if (musicLevel() > 0) for (const n of barNotes(theme, bar, seed)) play(n, barStart + n.beat * secPerBeat);
       bar++;
       barStart += BEATS_PER_BAR * secPerBeat;
     }

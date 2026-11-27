@@ -190,6 +190,8 @@ SWORDS = {t: globals()[f'sword{t}'] for t in range(1, 11)}
 # Two-handed weapons: where the BACK hand holds the haft, in weapon-bone units (front hand = origin).
 # build_kit writes it into kit.json (sprite 'grip2'); PaperRig bends the back arm to reach it.
 GRIP2 = {'spear': (-1.8, 0.0), 'hammer': (-1.5, 0.0)}
+# set by weapon_icons.py: builders may change proportions for the shop pictures (never for the kit)
+ICON = False
 
 
 # Same tier ladder as the swords. The axe and hammer are held at the end of the haft, the spear on the shaft
@@ -307,8 +309,11 @@ def spear(t):
         haft, grip, head, head_d, fit, torn = _tier(t)
         k = 0.88 + 0.03 * t
         x0, x1 = -2.4, 4.73 + 0.01 * t   # held at the butt end: ~6.6 units ahead of the front hand
+        grips = (0.0, GRIP2['spear'][0])
+        if ICON:   # shop picture: a short shaft, so the head is big enough to see
+            x0, x1, grips = -1.2, 2.3 + 0.01 * t, (0.0,)
         w = 0.18
-        _haft(c, t, x0, x1 + 0.1, w, grips=(0.0, GRIP2['spear'][0]))
+        _haft(c, t, x0, x1 + 0.1, w, grips=grips)
         _butt(c, t, x0, w)
         hl = 1.6 * k
         if t == 1:   # a sharpened, fire-hardened pole

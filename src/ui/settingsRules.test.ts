@@ -11,7 +11,7 @@ const row = <T extends ChoiceRow | SliderRow>(id: string) => SETTINGS.find((r) =
 
 describe('settings (#80)', () => {
   it('has every switch the game reads: text, gore, motion, shadows and the volumes', () => {
-    expect(SETTINGS.map((r) => r.id)).toEqual(['text', 'gore', 'motion', 'shadows', 'volume-master', 'volume-foley', 'volume-crowd', 'volume-music', 'volume-voices']);
+    expect(SETTINGS.map((r) => r.id)).toEqual(['text', 'gore', 'motion', 'shadows', 'music', 'volume-master', 'volume-foley', 'volume-crowd', 'volume-music', 'volume-voices']);
     for (const r of SETTINGS) expect(r.hint.length).toBeGreaterThan(5);
   });
 

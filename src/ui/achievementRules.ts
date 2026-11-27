@@ -26,4 +26,23 @@ export function trophyList(character: SavedCharacter): { badge: Achievement; ear
   return ACHIEVEMENTS.map((badge) => ({ badge, earned: earned.has(badge.id) }));
 }
 
+/** the Hall of Fame's columns, in reading order; each runs from the first step to the hardest */
+const GROUPS: readonly { name: string; ids: readonly string[] }[] = [
+  { name: 'Victories', ids: ['first-win', 'ten-wins', 'fifty-wins', 'hundred-wins'] },
+  { name: 'Strikes', ids: ['first-critical', 'twenty-criticals', 'first-charge', 'ten-charges'] },
+  { name: 'Guard', ids: ['first-block', 'twenty-blocks', 'win-without-block', 'perfect-win'] },
+  { name: 'The Crowd', ids: ['first-gift', 'taunting-win', 'high-favour', 'max-favour'] },
+  { name: 'Feats', ids: ['win-without-rest', 'close-win', 'first-finisher', 'full-set'] },
+  { name: 'Career', ids: ['first-loss', 'ten-fights', 'fifty-fights', 'level-thirty', 'level-sixty'] },
+];
+
+/** every badge sorted into its column; a badge no column names yet is listed under "More", never lost */
+export function trophyGroups(character: SavedCharacter): { name: string; ids: string[] }[] {
+  const all = trophyList(character).map(({ badge }) => badge.id);
+  const groups = GROUPS.map((g) => ({ name: g.name, ids: g.ids.filter((id) => all.includes(id)) }));
+  const grouped = new Set(groups.flatMap((g) => g.ids));
+  const rest = all.filter((id) => !grouped.has(id));
+  return [...groups, { name: 'More', ids: rest }].filter((g) => g.ids.length);
+}
+
 export const trophyCount = (character: SavedCharacter) => `${character.achievements?.unlocked.length ?? 0} / ${ACHIEVEMENTS.length}`;

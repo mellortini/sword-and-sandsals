@@ -2,7 +2,7 @@
  * One Web Audio graph for the game (#18): sources -> foley / crowd bus -> master -> speakers, with the saved volumes.
  * The context is created on first use and resumed on the first click or key press (browsers keep audio locked until then).
  */
-import { onVolumeChange, volumes } from './volume';
+import { musicLevel, onVolumeChange, volumes } from './volume';
 import type { Volumes } from './volume';
 
 export interface Mixer {
@@ -44,12 +44,16 @@ export function getMixer(): Mixer | null {
     master.gain.setTargetAtTime(v.master, t, 0.03);
     foley.gain.setTargetAtTime(v.foley, t, 0.03);
     crowd.gain.setTargetAtTime(v.crowd, t, 0.03);
-    music.gain.setTargetAtTime(v.music, t, 0.08);
+    const level = musicLevel(v);
+    music.gain.cancelScheduledValues(t);
+    // silence is set outright: no fade that could leave the theme audible
+    if (level === 0) music.gain.setValueAtTime(0, t);
+    else music.gain.setTargetAtTime(level, t, 0.08);
   };
   master.gain.value = volumes().master;
   foley.gain.value = volumes().foley;
   crowd.gain.value = volumes().crowd;
-  music.gain.value = volumes().music;
+  music.gain.value = musicLevel();
   onVolumeChange(apply);
   const unlock = () => { void ctx.resume(); };
   for (const ev of ['pointerdown', 'keydown'] as const) window.addEventListener(ev, unlock, { passive: true });
