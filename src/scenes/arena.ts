@@ -14,7 +14,10 @@ import { startCrowd } from '../audio/crowd';
 import { hudScaleFor } from '../ui/phone';
 import { textScale } from '../ui/textSize';
 import { openLevelUp } from '../ui/levelUp';
-import { applyFightExperience } from '../ui/levelUpRules';
+import { getFightReward, takePrizeWeapon } from '../core/rewards';
+import { championPrizeId, payFightReward } from '../ui/rewardRules';
+import type { FightPayout } from '../ui/rewardRules';
+import { openRewardScroll } from '../ui/rewardScroll';
 import type { FightProgress } from '../ui/levelUpRules';
 import { CombatHud } from '../ui/hud';
 import { ActionBar } from '../ui/actionBar';
@@ -57,7 +60,7 @@ export interface ArenaFighter {
 }
 
 export interface ArenaOptions {
-  /** the saved gladiator fighting as the player: wins add XP to the save and the result screen shows the XP bar (#24) */
+  /** the saved gladiator fighting as the player: fights pay gold and XP into the save (#43), the result screen shows the XP bar (#24) */
   readonly career?: SavedCharacter;
 }
 
@@ -185,6 +188,7 @@ export async function showArena(
       await pause(1.2);
       let progress: FightProgress | undefined;
       let story: StoryScene | undefined;
+      let payout: FightPayout | undefined;
       if (career) {
         // health after the bout and the potions left (#191) go to the save with the XP
         const settled = settleTempleCombat(career, outcome.state.fighters.player);
@@ -203,7 +207,10 @@ export async function showArena(
           showNotice('League', `${enemy.name} is beaten`, next ? `Next on the ladder: ${next.bout.name}.` : 'Every league with fighters is cleared.');
         }
         const fought = recordForCareer(leagueWon, { type: 'fight', id: fightId, state: outcome.state, events: outcome.events });
-        progress = applyFightExperience(fought.character, outcome.state.rewards?.experience ?? 0);
+        // gold, XP and forge materials go to the save at once (#43); a prize weapon waits for the reward scroll
+        const reward = getFightReward(outcome.state, fightId, championPrizeId(enemy.bout?.id));
+        if (reward) payout = payFightReward(fought.character, reward);
+        progress = payout?.progress ?? { earned: 0, before: fought.character, after: fought.character };
         const leveled = recordForCareer(progress.after, { type: 'level', level: progress.after.level });
         progress = { ...progress, after: leveled.character };
         career = progress.after;
@@ -214,6 +221,15 @@ export async function showArena(
       if (story) {
         await playStory(story);
         story = undefined;
+      }
+      // a won fight shows its spoils; a defeat pays no gold, so it goes straight to the result
+      if (career && progress && payout && outcome.state.winner === 'player') {
+        const { offer } = payout;
+        if (await openRewardScroll(payout.reward, offer) && offer) {
+          career = takePrizeWeapon(career, offer.id);
+          progress = { ...progress, after: career };
+          await saveGame(career).catch(() => undefined);
+        }
       }
       const choice = await openFightResult(context, {
         player, enemy, summary: summarizeFight(outcome.events), progress, spendPoints: career ? spendPoints : undefined,

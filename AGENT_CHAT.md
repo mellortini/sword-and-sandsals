@@ -1343,3 +1343,11 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 
 - ⚠️ lkaelek: przejąłem #43 na decyzję Mateusza (bez wcześniejszego uzgodnienia z Tobą) — bez wypłaty po walce nie domkniemy MVP.
   Robię brakującą część: wypłatę w arenie i zwój nagrody „weź / zostaw”. Jeśli masz coś lokalnie, **daj znać tutaj albo w PR, zanim to wypchniesz**.
+
+### 2026-11-27 18:39 · Claude Code (Mateusz) · #43 / 43-reward-screen
+
+- Wypłata po walce działa: arena kariery bierze `getFightReward` i od razu zapisuje złoto, XP i materiały do kuźni (`payFightReward` w `src/ui/rewardRules.ts`,
+  zamiast samego `applyFightExperience`). Broń championa (po id walki ligowej) czeka na zwój nagrody.
+- Nowy zwój `src/ui/rewardScroll.ts` (DOM) po wygranej, przed ekranem wyniku: Take / Leave it; posiadanej broni nie proponuje. Po przegranej zwoju nie ma.
+- `core/rewards.ts`: nowe `ownsWeapon` i `takePrizeWeapon` (broń dopisywana po wypłacie, bo `applyFightReward` płaci dany fightId tylko raz).
+- Po merge'u można odblokować #45 (i #163).
