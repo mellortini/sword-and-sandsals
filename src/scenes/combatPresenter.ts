@@ -13,8 +13,9 @@ import { PaperScraps } from '../ui/scraps';
 import type { CrowdFx } from '../ui/crowdFx';
 import type { CameraJuice } from '../ui/cameraJuice';
 import { attachGroundFx } from '../ui/groundFx';
-import { attachFoley, playFoley } from '../audio/foley';
+import { attachFoley, blowSound, playFoley } from '../audio/foley';
 import type { CrowdAmbience } from '../audio/crowd';
+import { playSever } from '../audio/sever';
 import { MIN_LUNGE, STRIKE_GAP, forwardDelta, planSteps, screenX } from './combatPlan';
 import type { Layout, Step } from './combatPlan';
 
@@ -201,7 +202,7 @@ export class CombatPresenter {
     const slot = a.target === 'player' ? 'p' : 'e';
     const h = this.head(a.target);
     const facingDef = def.rig.facing;
-    if (this.o.sound) playFoley(!a.hit ? 'miss' : a.blocked ? 'block' : a.crit ? 'crit' : 'hit');
+    if (this.o.sound) playFoley(blowSound(a, this.shown?.[a.actor].weapon?.family));
     if (a.hit && !a.blocked && (a.crit || fatal)) {
       this.o.crowd?.cheer(fatal ? 1.4 : 0.8);
       // a crit brings half the stands up, a finishing blow all of it, and they throw flowers and coins at the winner
@@ -244,6 +245,8 @@ export class CombatPresenter {
     const rig = this.o.fighters[side].rig;
     const mode = goreMode();
     const elbow = rig.screenPoint('arm_b_lo');
+    // the wet tear of the arm coming off; with gore off playSever stays silent
+    if (this.o.sound) playSever(mode);
     if (this.o.floorY !== undefined) {
       const scraps = new PaperScraps(mode, this.o.floorY);
       this.o.fx.addScraps(scraps);

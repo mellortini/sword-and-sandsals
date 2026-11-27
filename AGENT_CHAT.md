@@ -1339,6 +1339,33 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - ⚠️ `AGENTS.md` (plik wspólny): nowa sekcja „Przegląd kodu — codebase memory” (prośba Mateusza, oszczędza tokeny).
   Kod przeglądamy najpierw przez codebase-memory-mcp; grep i czytanie plików, gdy graf nie wystarcza albo nie macie tego serwera.
 
+### 2026-11-27 20:00 · Claude Code (Mateusz) · sever-sounds
+
+Dźwięki odcięcia: trzy nagrania od Mateusza w `assets/sfx/gore/squelch_1..3.wav` (LFS), kod w `src/audio/sever.ts`.
+- Głowa już gra: `playFinisher` woła `playSever(mode)` w klatce `cut`. W walce w arenie dobicie nadal nie jest podpięte (patrz wpis #20),
+  na razie słychać je w `?view=anim` → **finish**.
+- **Kończyny (#275), dla osoby, która je robi** (goloburda05-hue, jeśli to Ty): w klatce, w której ręka / kończyna odpada, wywołaj
+  `playSever()` z `src/audio/sever.ts`. Nic więcej: sam losuje wariant (nigdy dwa razy ten sam z rzędu), idzie przez kanał foley
+  (master + dźwięki walki), przy gore `off` milczy, a dwa cięcia w tej samej chwili dają jeden dźwięk. Jeśli obraz rysujesz z innym
+  trybem gore niż zapisany, podaj go: `playSever(mode)`. Wytrącenie tarczy przy gore `off` nie gra tego dźwięku.
+- Nagrania wczytują się z góry przez `attachFoley` (czyli na starcie walki z dźwiękiem). Bez tego (np. anim lab) pierwsze cięcie
+  może być ciche: nagranie spóźnione o ponad 0,25 s nie jest grane. Poza walką możesz wywołać `preloadSever()`.
+- Głośność: `SEVER_GAIN = 0.3` (pliki mają szczyt na 100%).
+
+### 2026-11-27 20:03 · Claude Code (Mateusz) · sever-sounds
+
+Uderzenie bronią w tarczę to teraz nagranie od Mateusza: `assets/sfx/combat/shield_thud.wav` (LFS), zamiast syntetycznego `block`.
+- API bez zmian: dalej `playFoley('block')`. Mapa nagrań: `SAMPLES` w `src/audio/foley.ts`; wczytywanie i odtwarzanie plików
+  (też dla `sever.ts`) w `src/audio/sample.ts`. Zanim plik się wczyta, gra stary syntetyczny dźwięk.
+- ⚠️ #276 (tarcza z HP): dziś każdy blok gra ten dźwięk. Gdy da się blokować bez tarczy, trzeba będzie wybrać dla takiego bloku inny.
+
+### 2026-11-27 20:10 · Claude Code (Mateusz) · sever-sounds
+
+Trafienie mieczem ma nagranie od Mateusza: `assets/sfx/combat/sword_hit.wav` (LFS; przycięte z początkowej ciszy, 44,1 kHz / 16 bit).
+- Gra, gdy broń napastnika ma `family === 'sword'` i cios wchodzi w przeciwnika (crit trochę głośniej). Pudło, blok na tarczy
+  i zamach bez zmian; pozostałe bronie (też sztylety) mają dalej syntetyczne `hit` / `crit`.
+- Nowe dźwięki `sword_hit` / `sword_crit` i funkcja `blowSound(cios, rodzinaBroni)` w `src/audio/foley.ts`; używa jej presenter i anim lab.
+- Mały ruch w `combatPresenter.ts` (jedna linia z dźwiękiem ciosu) — ten plik rusza też #276; przy konflikcie zostawcie wywołanie `blowSound`.
 ### 2026-11-27 19:46 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
 
 Tarcza jest teraz prawdziwym przedmiotem walki (zaplanowane trzy kroki: #273 → #274 słabszy blok bez tarczy → #275 odcięcie ręki z tarczą, tylko gdy obrońca nie blokuje).
@@ -1406,3 +1433,9 @@ Poprawki po uwagach (goloburda05-hue):
 - Obrażenia ciała: co 10 % HP przybywa ran (nakładki `wound_*` z `blender/wounds.py`, `kit.json` → `wounds`, 38 sprite'ów; w `kit.json` same dopiski). Etap ustawia `CombatPresenter` z pokazywanego HP; przy „gore off” ran nie ma.
 - ⚠️ Kontrakt: nowy slot warstwy `wound` (tuż nad gołą skórą) i `Look.wounds?: 1–10` (tylko w walce). Dopisałem `wound` do `ARM_ORDER` i `SWORD_SHOULDER` w `shield.ts`. Kto dokłada nową kolejność warstw, przenosi `wound` razem ze skórą.
 - goloburda05-hue: dostosowane do obrotu 3/4 (#280): bogatszy zestaw ran na ramieniu dostało bliższe ramię (`arm_b_up`), bo ramię z mieczem chowa się za klatką.
+
+### 2026-11-27 21:20 · Claude Code (Mateusz) · sever-sounds
+
+Synchronizacja z main (po #285) przed merge'em PR #277.
+- Dźwięk odcinanej ręki (#275) podłączyłem sam: `CombatPresenter.sever()` woła `playSever(mode)`. goloburda05-hue: nie musisz już nic robić z prośby wyżej.
+- Nagranie `shield_thud` gra tylko, gdy cios przyjęła cała tarcza (`attack.shield`). Blok samym ostrzem (#274) ma nowy dźwięk `parry` (dawny syntetyczny brzęk). To odpowiada na moje ostrzeżenie z 20:03.
