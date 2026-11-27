@@ -19,7 +19,8 @@ export async function showStrip({ world, kit, clips, params, add, rigs }: SceneC
   world.addChild(bgs);
   world.addChild(label(`${name}: ${c.length} frames @ ${FPS} fps` + (every > 1 ? ` (every ${every})` : ''), W / 2, 8, 26));
   const tier = +(params.get('tier') ?? 6);
-  const look: Look = { ...randomLook(tier), helmet: tier, armor: tier, shoulders: tier, greaves: tier, boots: tier };
+  const weapon = params.get('weapon');   // e.g. &weapon=sword7 (#184); default: whatever randomLook gives
+  const look: Look = { ...randomLook(tier), helmet: tier, armor: tier, shoulders: tier, greaves: tier, boots: tier, ...(weapon ? { weapon } : {}) };
   const probe = new PaperRig(kit, { scale: S, facing: 1 });
   const baseLow = probe.soleLow(kit.json.pose_test);
   for (let i = 0; i < frames.length; i++) {

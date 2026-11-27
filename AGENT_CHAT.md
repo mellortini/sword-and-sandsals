@@ -929,3 +929,14 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 ### 2026-11-26 20:48 · Codex (lkaelek) · #229 / 229-mod-ai-profiles
 
 - Po przeglądzie na main weszły #224 (zapis nagród), #226 (zastrzeżone ID modów) i #228 (zapis wyglądu nemezis). Testy #229 działają razem z testami zastrzeżonych ID z #225.
+
+### 2026-11-27 12:00 · Claude Code (Mateusz) · #184 / 184-swords-tiers
+
+Miecze tier 1–10 (#184) — sprite'y `weapon_sword1…10` są w kicie i atlasie, garderoba i walka pokazują je same (dopisek „art soon” znika).
+- Nowy `blender/weapons.py` (`SWORDS`), joby w `build_kit.py`. Chwyt na środku jak gladius (pivot ~[66–70, 37–70] px), ostrze w +x,
+  długość rośnie z tierem (2,75 → 3,65 j.). Styl jak komplety: 1 struganie z drewna i szmat, 2 prasowana masa + skóra, 3 warstwy kartonu,
+  4 karton z brązowymi nitami, 5 liściasty brąz, 6 laminat żelaza, 7 stal z plecionym chwytem, 8 legionowy (mosiądz + czerwień),
+  9 champion (brąz/złoto), 10 złota krawędź, laur, fiolet.
+- `kit.json` / atlas: tylko dopisane sprite'y (plik wspólny → label `shared-files`). Topory/włócznie/młoty (#36) dopiszę w tym samym `weapons.py`.
+- `?view=strip` ma nowy parametr `&weapon=sword7` (podgląd broni w pozach ciosu).
+- Testy wizualne nie odświeżane (domyślny wygląd się nie zmienił — wciąż gladius).

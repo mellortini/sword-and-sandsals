@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sprite_lib as sl  # noqa: E402
 import kit  # noqa: E402
 import armor  # noqa: E402
+import weapons  # noqa: E402
 
 pc = sl.pc
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
@@ -55,6 +56,8 @@ for i, (name, fn) in enumerate(kit.BEARDS):
 for key, (fn, bone, slot, piece, t) in armor.pieces().items():
     jobs[key] = (fn, None, bone == 'head')
 jobs['weapon_gladius'] = (gladius, None, False)
+for t, fn in weapons.SWORDS.items():
+    jobs[f'weapon_sword{t}'] = (fn, None, False)
 
 meta_path = os.path.join(OUT, 'kit.json')
 old = json.load(open(meta_path)) if (ONLY and os.path.exists(meta_path)) else {}
