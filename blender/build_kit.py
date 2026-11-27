@@ -90,6 +90,9 @@ for key, (fn, tint, head) in jobs.items():
             o.scale = (o.scale[0] * HEAD_S, o.scale[1] * HEAD_S, 1.0)
     info = sl.render_coll(coll, os.path.join(SPR, key + '.png'))
     info['tint'] = tint
+    fam = key[len('weapon_'):].rstrip('0123456789') if key.startswith('weapon_') else None
+    if fam in weapons.GRIP2:   # two-handed: where the back hand holds the haft (weapon-bone units)
+        info['grip2'] = list(weapons.GRIP2[fam])
     if key in SPRITE_ALPHA:
         info['alpha'] = SPRITE_ALPHA[key]
     sprites[key] = info

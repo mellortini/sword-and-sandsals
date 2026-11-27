@@ -9,6 +9,7 @@
  * - every part gets a soft paper shadow drawn right before it; 'multiply' is patched so shadows only darken paper that
  *   is already in the puppet texture (like canvas source-atop)
  */
+import { boneOffset, forwardKinematics, holdWithBothHands } from './twoHand';
 import { Assets, Container, Rectangle, Renderer, RenderTexture, Sprite, Texture } from 'pixi.js';
 
 export interface KitJson {
@@ -29,7 +30,7 @@ export interface KitJson {
   hood_helmets: number[];
   beards: string[];
   sets: string[];
-  sprites: Record<string, { w: number; h: number; pivot: [number, number]; tint: 'skin' | 'hair' | null; alpha?: number }>;
+  sprites: Record<string, { w: number; h: number; pivot: [number, number]; tint: 'skin' | 'hair' | null; alpha?: number; grip2?: [number, number] }>;
 }
 
 export type Pose = Record<string, number>;
@@ -217,7 +218,7 @@ export class PaperRig {
     this.facing = opts.facing;
     this.shadow = { ...(opts.shadow ?? DEFAULT_SHADOW) };
     this.pose = { ...kit.json.pose_test };
-    const wU = 15, hU = 18;
+    const wU = 19, hU = 18;   // 12.5 units ahead of the pelvis: room for a spear thrust (#36)
     this.origin = { x: 6.5 * this.scale, y: 11.8 * this.scale };
     const resolution = window.matchMedia('(pointer: coarse)').matches ? 1 : 2;
     this.rt = RenderTexture.create({ width: Math.ceil(wU * this.scale), height: Math.ceil(hU * this.scale), resolution, antialias: true });
@@ -310,15 +311,7 @@ export class PaperRig {
 
   /** forward kinematics in rig units (y up, pelvis joint at its rest place), rotations in radians CCW */
   fk(pose: Pose): Map<string, { x: number; y: number; r: number }> {
-    const out = new Map<string, { x: number; y: number; r: number }>();
-    for (const b of this.kit.json.bones) {
-      const rot = ((pose[b.name] ?? 0) * Math.PI) / 180;
-      if (!b.parent) { out.set(b.name, { x: b.x, y: b.y, r: rot }); continue; }
-      const p = out.get(b.parent)!;
-      const c = Math.cos(p.r), s = Math.sin(p.r);
-      out.set(b.name, { x: p.x + b.x * c - b.y * s, y: p.y + b.x * s + b.y * c, r: p.r + rot });
-    }
-    return out;
+    return forwardKinematics(this.kit.json.bones, pose);
   }
 
   /** lowest point of both soles (heel / toe), rig units */
@@ -333,14 +326,26 @@ export class PaperRig {
     return low;
   }
 
+  /**
+   * The pose as drawn: with a two-handed weapon (sprite meta `grip2`, #36) the back arm is bent so its hand holds the
+   * haft, whatever the clip says about the back arm.
+   */
+  heldPose(pose: Pose = this.pose): Pose {
+    const key = this.look.weapon ? `weapon_${this.look.weapon}` : null;
+    const grip2 = key ? this.kit.json.sprites[key]?.grip2 : undefined;
+    return grip2 ? holdWithBothHands(this.kit.json.bones, pose, grip2) : pose;
+  }
+
   private solve(): Map<string, { x: number; y: number; r: number }> {
     const out = new Map<string, { x: number; y: number; r: number }>();
     const k = this.scale;
+    const pose = this.heldPose();
     for (const b of this.kit.json.bones) {
-      const rot = ((this.pose[b.name] ?? 0) * Math.PI) / 180;
+      const rot = ((pose[b.name] ?? 0) * Math.PI) / 180;
       if (!b.parent) { out.set(b.name, { x: this.origin.x, y: this.origin.y, r: -rot }); continue; }
       const p = out.get(b.parent)!;
-      const lx = b.x * k, ly = -b.y * k;
+      const o = boneOffset(b, pose);
+      const lx = o.x * k, ly = -o.y * k;
       const c = Math.cos(p.r), s = Math.sin(p.r);
       out.set(b.name, { x: p.x + lx * c - ly * s, y: p.y + lx * s + ly * c, r: p.r - rot });
     }

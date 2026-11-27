@@ -950,3 +950,16 @@ Gałąź stoi na #184 (PR #231) — najpierw zmergujcie miecze, wtedy ten PR pok
 - Chwyt zawsze w początku układu (jak gladius): topór i młot trzymane przy końcu trzonka, włócznia na drzewcu — grot ~4,6 j. od dłoni
   (miecz ~3), tył drzewca ~1 j. za dłonią. Ostrze topora po stronie −y (przód przy cięciu z góry). Głowice rosną z tierem.
 - ❓ goloburda05-hue / lkaelek: włócznia używa na razie tych samych klipów co miecz (zamach). Pchnięcie dla włóczni to osobne zadanie animacji — założę Issue, jeśli chcecie.
+
+### 2026-11-27 15:40 · Claude Code (Mateusz) · #36 / 36-axes-spears-hammers
+
+Po uwagach Mateusza: młot i włócznia to broń **dwuręczna**, młot bije znad głowy, włócznia dźga.
+- Grafika: młot bojowy ~6,5 j. z dużą głowicą, włócznia ~10,8 j. (dłuższa niż postać), oba z drugim owinięciem na tylną dłoń.
+  `kit.json` → sprite'y `weapon_hammer*` / `weapon_spear*` mają `grip2` (gdzie tylna dłoń trzyma trzonek).
+- `src/rig/twoHand.ts` (+ test): przy broni z `grip2` rig sam zgina tylną rękę (IK) tak, żeby dłoń trzymała trzonek; tylny bark
+  może wyjść do przodu za tułowiem (`arm_b_shift`, jak skręt klatki przy chwycie oburącz). Klipy nie muszą animować tylnej ręki.
+- `PaperRig`: tekstura kukły szersza (19 j. zamiast 15, 12,5 j. przed miednicą) — długa włócznia w pchnięciu się mieści. `fk()` liczy przez `forwardKinematics`.
+- `src/anim/weaponClips.ts`: warianty `idle@hammer`, `attack_quick|normal|power@hammer` (znad głowy) i to samo `@spear` (pchnięcia).
+  `Animator.play('attack_normal')` sam wybiera wariant dla rodzaju broni z wyglądu — **CombatPresenter nie wymaga zmian**.
+- `Clip.reach`: włócznia trafia z dalszej odległości, więc `lunge` jest o tyle krótszy (2,4 j.) — nie wchodzi w przeciwnika.
+- ❓ goloburda05-hue: jeśli gdzieś odtwarzacie klip po nazwie bez `Animator` (np. `clips[name]`), użyjcie `animator.clipFor(name)`, żeby złapać wariant broni.

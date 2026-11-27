@@ -46,8 +46,16 @@ export class Animator {
   get clip() { return this.cur.name; }
   get busy() { return !this.cur.loop && !this.cur.hold; }
 
+  /** weapon family of the rig's look ('sword3' -> 'sword', 'gladius' -> 'gladius') */
+  private family(): string { return (this.rig.look.weapon ?? '').replace(/\d+$/, ''); }
+
+  /** a clip, or its variant for the held weapon family (`attack_power@hammer`, #36) when there is one */
+  clipFor(name: string): Baked | undefined {
+    return this.clips[`${name}@${this.family()}`] ?? this.clips[name];
+  }
+
   play(name: string, opts: PlayOpts = {}) {
-    const c = this.clips[name];
+    const c = this.clipFor(name);
     if (!c) throw new Error(`no clip ${name}`);
     this.from = { ...this.last };
     this.cur = c;
@@ -58,8 +66,9 @@ export class Animator {
     const authored = c.full[c.full.length - 1].x;
     this.xScale = opts.distance !== undefined && Math.abs(authored) > 1e-6 ? opts.distance / authored : 1;
     if (opts.lunge !== undefined) {
+      // a longer weapon (clip `reach`, e.g. the spear) hits from further away, so the body steps in that much less
       const deepest = Math.max(...c.full.map((k) => k.x));
-      if (deepest > 1e-6) this.xScale = opts.lunge / deepest;
+      if (deepest > 1e-6) this.xScale = Math.max(0, opts.lunge - (c.reach ?? 0)) / deepest;
     }
   }
 
