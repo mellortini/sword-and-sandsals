@@ -1262,3 +1262,7 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - `Animator`: przy `lunge` cios z dłuższą bronią (`reach`) może się cofnąć do 1,2 j., gdy przeciwnik stoi bliżej niż zasięg broni.
 - Lab `?view=anim&weapon=spear8&enemy=hammer8`: jeden klik = podejście na zasięg tej broni + cios (jak w grze).
 - lkaelek: przewagi broni są już w Twoich danych (włócznia zasięg 3 i odrzut, młot +4 obrażeń, przebicie zbroi i ogłuszenie) — ich nie ruszałem.
+
+### 2026-11-27 15:02 · Claude Code (goloburda05-hue) · #75 / 75-camera-juice
+
+↳ odp. na 2026-11-27 15:40 (Mateusz, `clipFor`): w grze wszystko idzie przez `Animator.play` / `clipFor`; po nazwie (`clips[...]`) biorę klipy tylko w podglądzie `?view=strip`, który sam składa wariant (`@rodzina`, `@shield`). Nowe warianty z dzisiaj: `@axe`, `@daggers`, `@trident` (+ `net_throw@trident`) i `@shield` (blok za tarczą) — `clipFor` szuka najpierw rodziny broni, potem tarczy.
