@@ -11,7 +11,7 @@ Na start każdej sesji przeczytaj: ten plik → `ARCHITECTURE.md` (mapa modułó
 ## Start pracy
 ```
 git checkout main && git pull
-gh issue list --label ready --label area:core --milestone "F3 Walka" --search "no:assignee"   # wolne: swój obszar, najniższa faza
+gh issue list --label ready --milestone "F3 Walka" --search "no:assignee"   # wolne: najniższa faza
 gh issue list --label ready --search "no:assignee"                # wszystkie wolne
 gh issue view <nr>                                              # przeczytaj cel, moduł, pliki, "gotowe"
 gh issue edit <nr> --add-assignee @me --add-label in-progress --remove-label ready
@@ -24,10 +24,8 @@ gh pr create --draft --title "<krótki tytuł>" --body "Closes #<nr>"
 ```
 
 Który wybrać: **najpierw najniższy milestone** (F3 → F4 → F5 …, „Infrastruktura” w każdej chwili),
-**w swoim obszarze**: `area:core|data` = lkaelek (logika, dane), `area:ui|scenes` = goloburda05-hue (interfejs, ekrany),
-`area:art|anim|fx|audio` = Mateusz (grafika, animacje, efekty, dźwięk), `area:infra` = wszyscy.
-Zadanie z dwoma obszarami (np. `area:core` + `area:ui`) bierze właściciel pierwszej części, drugą robi właściciel drugiej
-(osobne Issue albo wpis w `AGENT_CHAT.md`).
+potem dowolne wolne zadanie `ready`. Nie ma podziału obszarów między osoby: każdy może wziąć każde wolne zadanie.
+Labele `area:*` mówią tylko, której części gry dotyczy zadanie. Zadanie jest zajęte, gdy ktoś jest do niego przypisany.
 Zadania z labelem `blocked` czekają na inne (sekcja „Zależności” w opisie) — nie bierz ich.
 
 ## Komendy projektu
@@ -51,8 +49,8 @@ Styl papierowy (materiały, światło, warstwy, post): skill `.claude/skills/pap
 Claude Code ładuje go sam, Codex: przeczytaj go przed zadaniem `area:art` / `area:fx` dotyczącym wyglądu.
 
 ## Granice
-- **Zmieniaj tylko pliki modułu z zadania** (mapa w `ARCHITECTURE.md`). Potrzebujesz czegoś w cudzym module →
-  napisz w `AGENT_CHAT.md` albo załóż Issue, nie edytuj sam.
+- **Zmieniaj tylko pliki potrzebne do zadania** (mapa modułów w `ARCHITECTURE.md`). Niezwiązana zmiana → osobne Issue.
+  Te same pliki rusza otwarty PR kogoś innego (`gh pr list`) → najpierw uzgodnij w `AGENT_CHAT.md`.
 - **Pliki wspólne** — tylko w osobnym, małym PR z labelem `shared-files` (nie mieszaj z pracą nad modułem):
   `package.json`, `package-lock.json`, `tsconfig.json`, `vite.config.ts`, `index.html`, `src/main.ts`,
   `assets/chars/kit/kit.json` (generowany — zmieniaj przez `blender/build_kit.py`, nie ręcznie),
@@ -101,7 +99,7 @@ git push --force-with-lease     # tylko własna gałąź
    gh pr checks <nr> --watch
    gh pr merge <nr> --squash
    ```
-   Gałąź usuwa się sama. Zmiany z cudzego modułu mergujesz, gdy właściciel nie zgłasza zastrzeżeń (review w PR albo wpis w czacie).
+   Gałąź usuwa się sama. Cudzy PR mergujesz, gdy nie ma w nim nierozwiązanych zastrzeżeń (review w PR albo wpis w czacie).
 6. Po merge'u odblokuj zadania, które czekały na Twoje (gdy WSZYSTKIE ich zależności są zamknięte):
    ```
    gh issue list --label blocked --search "\"po #<nr>\" in:body"

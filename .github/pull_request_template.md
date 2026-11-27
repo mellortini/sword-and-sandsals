@@ -21,4 +21,4 @@ Closes #
 ## Checklist
 - [ ] `npm run build` przechodzi lokalnie
 - [ ] wpis w `AGENT_CHAT.md`
-- [ ] zmieniam tylko pliki modułu z zadania (albo zaznaczone pliki wspólne)
+- [ ] zmieniam tylko pliki potrzebne do zadania (albo zaznaczone pliki wspólne)
