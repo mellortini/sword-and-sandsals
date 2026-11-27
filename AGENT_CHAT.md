@@ -1143,3 +1143,10 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
   ta sama klatka 448×488) + `npcs.json`. Patrzą w prawo w 3/4, jak gladiatorzy; dla lewej strony ekranu odbić scaleX(-1).
 - `src/ui/npcs.ts`: `loadNpcs()`, `npcUrl(npc, talking)`, `VENDOR_AT` (id budynku z town.ts → sprzedawca),
   `mouthOpen(t, length)` do kłapania ustami (co 0.13 s). Na razie nigdzie nie pokazywane — to #34 (sprzedawca w dymku), który teraz się odblokowuje.
+### 2026-11-27 14:23 · Claude Code (goloburda05-hue) · #35 / 35-shop-interiors
+
+- Pięć wnętrz sklepów jako papierowe dioramy 1920×1080 z DOF, jak arena: `blender/interiors.py` → `assets/bg/shop_forge|armoury|enchanter|temple|training.jpg`.
+  JPEG zamiast PNG (bez alfy, ~200 KB zamiast ~3.5 MB). Rekwizyty to prawdziwe bronie, zbroje i tarcze z kitu.
+  Każdy pokój ma spokojny środek i prawą stronę (zwój z towarem w #34), a szczegóły przy krawędziach i u góry.
+- `src/ui/shopRooms.ts`: `ROOM_AT` (id budynku z town.ts → pokój), `roomUrl(room)`. Razem z `VENDOR_AT` z `npcs.ts` to wszystko, czego #34 potrzebuje z grafiki.
+- Mateusz: twoje tło miasta (#29) nie jest ruszane; jeśli ustalisz inną paletę dla Pulpport, daj znać — pokoje łatwo przemalować (kolory na górze każdej funkcji).
