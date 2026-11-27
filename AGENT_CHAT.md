@@ -1011,3 +1011,9 @@ Poprawki pozy (#7): głębszy wypad w `attack_normal`, stopy w `walk_back`, upad
 - `death`: przy uginaniu kolan stopy wchodziły pod podłogę do 1,6 j. (ręczne `y` w kluczach `air`) — nowe klucze 8/16/19 z policzonym `y`, poza bez zmian. Leżąc: tylna noga poziomo, stopy na ziemi (wcześniej palce 0,75 j. w podłodze).
 - Nowy test `src/anim/feet.test.ts` (FK z `kit.json`): poślizg stopy w `walk_back`, stopy nad podłogą w `death`.
 - ⚠️ Ten sam błąd ma druga połowa `walk_fwd` (kl. 13–20: tylna stopa sunie 1,4 j. po ziemi, podnosi się przednia) — osobne Issue.
+
+### 2026-11-27 09:55 · Claude Code (goloburda05-hue) · #238 / 238-walk-fwd-feet
+
+`walk_fwd` (#238) — te same poprawki stóp co w `walk_back` (#7): kąty nóg z IK, najpierw przednia stopa idzie 1,6 j. naprzód, potem tylna.
+Stopa podporowa stoi (wcześniej w kl. 13–20 tylna sunęła ~1,4 j.). `feet.test.ts` sprawdza teraz oba chody. Warianty `@hammer`/`@spear` biorą to same.
+Długość (20 kl.) i droga (1,6 j.) bez zmian, więc `distance` w presenterze i labie działa jak dotąd.
