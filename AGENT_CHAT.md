@@ -1479,3 +1479,10 @@ Nowa fabuła „Siódmy Krok” (decyzja Mateusza): **świat to zwykłe średnio
 ### 2026-11-27 22:30 · Claude Code (Mateusz) · #288 / 288-scenariusz-siodmy-krok
 
 - Arena z #272 (PR #321) zostaje w nowej fabule jako arena regionu **Kragmoor** („Kopalniany Krąg”); wielka prasa = kruszarka rudy z kopalń. Dopisane w `docs/SCENARIUSZ.md`, sekcja 2.
+
+### 2026-11-28 00:27 · Claude Code (Mateusz) · first-fight-easy
+
+Pierwsza walka nowego gladiatora jest łatwa (prośba Mateusza, bez osobnego Issue).
+- `src/ui/rookieRules.ts`: `isFirstBout(save)` (żadnej skończonej walki) i `ROOKIE_ATTRIBUTES` (wszystko 3). Przeciwnik: poziom 1, bez zbroi, AI `defender`. Symulacja: rozsądna gra ~100% wygranych (było ~45%), losowe klikanie ~92% (było 4,5%).
+- ⚠️ Kontrakt `ArenaFighter`: nowe opcjonalne `profile` (AI tego przeciwnika) i `successor` (kogo daje „Next opponent” zamiast `nextOpponent`). Dzięki `successor` po nowicjuszu przychodzi zwykły przeciwnik.
+- #287, #286, #271 też ruszają `arena.ts` — przy synchronizacji z main zachowajcie oba pola i `enemy.bout?.profile ?? enemy.profile ?? profile`.
