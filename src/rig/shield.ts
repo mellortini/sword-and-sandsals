@@ -57,10 +57,13 @@ export function holdShield(pose: Pose): Pose {
 type Layer = KitJson['layers'][number];
 /** the near (back-bone) arm's layers, drawn like a near arm: forearm, bracer, upper arm, shoulder, hand */
 const ARM_ORDER: ReadonlyArray<[bone: string, slot: string]> = [
-  ['arm_b_lo', 'body'], ['arm_b_lo', 'armor'], ['arm_b_up', 'body'], ['arm_b_up', 'shoulders'], ['hand_b', 'body'],
+  ['arm_b_lo', 'body'], ['arm_b_lo', 'wound'], ['arm_b_lo', 'armor'],
+  ['arm_b_up', 'body'], ['arm_b_up', 'wound'], ['arm_b_up', 'shoulders'], ['hand_b', 'body'],
 ];
 /** the sword arm's upper arm and shoulder pad: behind the turned chest */
-const SWORD_SHOULDER: ReadonlyArray<[bone: string, slot: string]> = [['arm_f_up', 'body'], ['arm_f_up', 'shoulders']];
+const SWORD_SHOULDER: ReadonlyArray<[bone: string, slot: string]> = [
+  ['arm_f_up', 'body'], ['arm_f_up', 'wound'], ['arm_f_up', 'shoulders'],
+];
 
 const pick = (layers: readonly Layer[], which: ReadonlyArray<[string, string]>) =>
   which.flatMap(([bone, slot]) => layers.filter((l) => l.bone === bone && l.slot === slot));

@@ -1401,3 +1401,8 @@ Poprawki po uwagach (goloburda05-hue):
 - ⚠️ Wdrożone (dotyczy też gracza): mocny cios kosztuje **11** energii (było 8) i ma celność **48** (było 55); profil AI `defender` mniej pasywny (więcej ataków, blok 1,2 → 1,0).
 - Testy: energia (`combat.test.ts`) i ochrona przed pudłami (`hitProtection.test.ts`, baza 48%) przeliczone. Tabele „Walka” i „Złoto i ceny” w BALANS.md zaktualizowane.
 - lkaelek: jeśli ligi/bossy mają ustawiony profil `defender` z myślą o pasywnym stylu — teraz atakuje częściej.
+### 2026-11-27 20:55 · Claude Code (Mateusz) · #284 / 284-damage-stages
+
+- Obrażenia ciała: co 10 % HP przybywa ran (nakładki `wound_*` z `blender/wounds.py`, `kit.json` → `wounds`, 38 sprite'ów; w `kit.json` same dopiski). Etap ustawia `CombatPresenter` z pokazywanego HP; przy „gore off” ran nie ma.
+- ⚠️ Kontrakt: nowy slot warstwy `wound` (tuż nad gołą skórą) i `Look.wounds?: 1–10` (tylko w walce). Dopisałem `wound` do `ARM_ORDER` i `SWORD_SHOULDER` w `shield.ts`. Kto dokłada nową kolejność warstw, przenosi `wound` razem ze skórą.
+- goloburda05-hue: dostosowane do obrotu 3/4 (#280): bogatszy zestaw ran na ramieniu dostało bliższe ramię (`arm_b_up`), bo ramię z mieczem chowa się za klatką.
