@@ -4,7 +4,7 @@ import type { PaperRig } from '../../rig/PaperRig';
 import { createCombat, getActionOptions, performAction } from '../../core/combat';
 import type { ActionOption, CombatAction, CombatState } from '../../core/types';
 import { CombatHud } from '../../ui/hud';
-import { BlockShield, DamageSplat, FxLayer } from '../../ui/fx';
+import { BlockShield, DamageSplat, FxLayer, MissText } from '../../ui/fx';
 import { CombatPresenter } from '../combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from '../common';
 import type { SceneContext, SceneUpdate } from '../common';
@@ -57,12 +57,14 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   const queue: { at: number; fn: () => void }[] = [];
   let clock = 0;
   const later = (sec: number, fn: () => void) => queue.push({ at: clock + sec, fn });
-  const state = { response: 'hit' as 'hit' | 'block', counter: true };
+  const state = { response: 'hit' as 'hit' | 'block' | 'dodge', counter: true };
   const head = (r: PaperRig) => ({ x: r.view.x + 0.3 * UNIT * r.facing, y: r.view.y - 8.9 * UNIT });
   const dmg = (who: PaperRig, n: number, crit = false) => { const h = head(who); layer.show(who === P ? 'p' : 'e', new DamageSplat(n, crit), h.x + 34 * who.facing, h.y); };
+  const miss = (who: PaperRig) => { const h = head(who); layer.show(who === P ? 'p' : 'e', new MissText(), h.x + 34 * who.facing, h.y); };
   const shield = (who: PaperRig) => { const h = head(who); layer.show(who === P ? 'pb' : 'eb', new BlockShield(), h.x - 30 * who.facing, h.y + 6); };
   const defend = (def: Animator, power: number, crit = false) => {
-    if (state.response === 'block' && Math.random() < 0.9) { def.play('block'); shield(def.rig); }
+    if (state.response === 'dodge') { def.play('dodge'); miss(def.rig); }
+    else if (state.response === 'block' && Math.random() < 0.9) { def.play('block'); shield(def.rig); }
     else { def.play('hit'); dmg(def.rig, Math.round(power * (0.7 + Math.random() * 0.6)), crit); }
   };
   /**
@@ -100,7 +102,8 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
         pa.play('charge', {
           commit: true, distance: Math.max(0.5, g - 3.4), onEnd: enemyTurn, onEvent: (e) => {
             if (e.type !== 'hit') return;
-            if (state.response === 'block') { ea.play('block'); shield(E); }
+            if (state.response === 'dodge') { ea.play('dodge'); miss(E); }
+            else if (state.response === 'block') { ea.play('block'); shield(E); }
             else { ea.play('knockback', { commit: true }); dmg(E, 7 + Math.floor(Math.random() * 6)); }
           },
         });
@@ -123,9 +126,9 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   ui.classList.add('lab');
   ui.innerHTML = `<h3>Animation lab</h3>
     <div class="grid">${btn('walk_back', '&#9664; step')}${btn('walk_fwd', 'step &#9654;')}${btn('jump', 'jump')}${btn('charge', 'charge')}
-    ${btn('attack_quick', 'quick')}${btn('attack_normal', 'normal')}${btn('attack_power', 'power')}${btn('block', 'block')}
+    ${btn('attack_quick', 'quick')}${btn('attack_normal', 'normal')}${btn('attack_power', 'power')}${btn('block', 'block')}${btn('dodge', 'dodge')}
     ${btn('taunt', 'taunt')}${btn('rest', 'rest')}${btn('hit', 'hit')}${btn('finish', 'finish')}${btn('victory', 'victory')}${btn('death', 'die')}${btn('reset', 'reset')}${btn('fight', 'core fight')}</div>
-    <label><input type="checkbox" id="cbBlock"> enemy blocks</label>
+    <label>enemy <select id="sResponse"><option value="hit">gets hit</option><option value="block">blocks</option><option value="dodge">dodges (miss)</option></select></label>
     <label><input type="checkbox" id="cbCounter" checked> enemy answers</label>
     <label>speed <select id="sSpeed"><option value="1">1x</option><option value="0.5">0.5x</option><option value="0.25">0.25x</option><option value="0.1">0.1x</option></select></label>
     <div class="small"><a href="?view=arena">arena</a> &middot; <a href="?view=wardrobe">wardrobe</a> &middot; <a href="?view=strip&clip=attack_normal">frame strips</a></div>`;
@@ -174,7 +177,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   (window as unknown as { __fight: unknown }).__fight = coreFight;
 
   ui.addEventListener('click', (e) => { const a = (e.target as HTMLElement).dataset.a; if (a === 'fight') void coreFight(); else if (a) act(a); });
-  (document.getElementById('cbBlock') as HTMLInputElement).onchange = (e) => (state.response = (e.target as HTMLInputElement).checked ? 'block' : 'hit');
+  (document.getElementById('sResponse') as HTMLSelectElement).onchange = (e) => (state.response = (e.target as HTMLSelectElement).value as typeof state.response);
   (document.getElementById('cbCounter') as HTMLInputElement).onchange = (e) => (state.counter = (e.target as HTMLInputElement).checked);
   (document.getElementById('sSpeed') as HTMLSelectElement).onchange = (e) => { const v = +(e.target as HTMLSelectElement).value; pa.speed = v; ea.speed = v; };
   (window as unknown as { __act: unknown }).__act = act;

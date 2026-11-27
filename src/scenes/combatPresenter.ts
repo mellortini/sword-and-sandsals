@@ -122,7 +122,8 @@ export class CombatPresenter {
     const facingDef = def.rig.facing;
     if (!a.hit) {
       this.o.fx.show(slot, new MissText(), h.x + 34 * facingDef, h.y);
-      return Promise.resolve();
+      // the blow passes: the defender leans away from it and steps back in (#13)
+      return this.clip(def, 'dodge');
     }
     if (a.blocked) {
       this.o.fx.show(slot + 'b', new BlockShield(), h.x - 30 * facingDef, h.y + 6);

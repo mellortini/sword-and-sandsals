@@ -28,3 +28,28 @@ describe('bake: root height', () => {
     }
   });
 });
+
+describe('dodge (#13)', () => {
+  const baked = bakeAll({});
+
+  it('lasts 10-14 frames, leans away with a step back and ends where it started', () => {
+    const c = baked.dodge;
+    expect(c.length).toBeGreaterThanOrEqual(10);
+    expect(c.length).toBeLessThanOrEqual(14);
+    const deepest = sample(c, 3);
+    expect(deepest.x).toBeLessThan(-0.5);
+    expect(deepest.pose.torso).toBeGreaterThan(15);
+    expect(sample(c, c.length).x).toBe(0);
+  });
+
+  it('has hammer and spear variants that keep the weapon in its ready angle while leaning', () => {
+    for (const fam of ['hammer', 'spear']) {
+      const v = baked[`dodge@${fam}`];
+      const ready = baked[`idle@${fam}`].full[0].pose;
+      const mid = sample(v, 3).pose;
+      expect(mid.arm_f_up).toBeCloseTo(ready.arm_f_up ?? 0);
+      expect(mid.torso).toBeGreaterThan(15);
+      expect(sample(v, v.length).x).toBe(0);
+    }
+  });
+});
