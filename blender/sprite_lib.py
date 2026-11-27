@@ -1,7 +1,7 @@
 """Sprite pipeline for the paper gladiator game (Blender Cycles, headless).
 
 Builds on the papercraft skill's pc_lib (layers, shapes, ZK, sun) and adds:
-- materials that use the BlenderKit paper scans in game/art_src/blenderkit (fibres + tooth + real normal maps)
+- materials that use the BlenderKit paper scans in art_src/blenderkit (fibres + tooth + real normal maps)
 - per-part orthographic renders with transparent background and a recorded pivot (joint) in pixels
 - an "assembly" render of the whole puppet with true Cycles shadows, to judge the runtime compositor against
 

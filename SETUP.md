@@ -66,6 +66,8 @@ python -I tools/fetch_blenderkit.py                                     # darmow
 <blender> -b --disable-autoexec --python blender/unpack_blenderkit.py   # rozpakowanie tekstur do art_src/blenderkit/*/tex
 <blender> -b --python blender/build_kit.py -- 32 helmet1                # próbny render jednego elementu
 ```
+Jak dodać lub zmienić asset i z czym porównać wygląd: [`docs/GRAFIKA.md`](docs/GRAFIKA.md).
+
 `<blender>` = ścieżka do programu, np. `D:/blender/blender.exe`, `/Applications/Blender.app/Contents/MacOS/Blender`, `blender`.
 
 ## 6. Problemy

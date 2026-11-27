@@ -1,17 +1,20 @@
 ---
 name: papercraft-3d-short
-description: [VIDEO STYLE · Blender Cycles] Make a ~45-70 s vertical (1080x1920) science/body-explainer short in the "papercraft diorama" style - cut-paper and quilled-paper layers with real depth and soft shadows, macro camera with shallow depth of field, warm practical light (candles, a glowing flame hero with a face) against deep maroon darkness, deadpan flat-faced paper characters, dive-through-a-hole transitions, no outlines, no captions - rendered with Blender Cycles (primary) or three.js inside Remotion (fallback). Measured from a 59 s reference (birthday man -> belly slit -> flame judged by pointing hands -> family of candles -> quilled cell -> red paper town, sugar-cube and key/jar metaphors). Use when the user wants a video "in this papercraft style", "like the flame / metabolism video", "paper cut / quilling / diorama style", "w stylu papierowym / papercraft", or says "use the papercraft skill".
+description: [VIDEO STYLE · Blender Cycles] For videos only; for the game's own art use paper-game-art. Make a ~45-70 s vertical (1080x1920) science/body-explainer short in the "papercraft diorama" style - cut-paper and quilled-paper layers with real depth and soft shadows, macro camera with shallow depth of field, warm practical light (candles, a glowing flame hero with a face) against deep maroon darkness, deadpan flat-faced paper characters, dive-through-a-hole transitions, no outlines, no captions - rendered with Blender Cycles (primary) or three.js inside Remotion (fallback). Measured from a 59 s reference (birthday man -> belly slit -> flame judged by pointing hands -> family of candles -> quilled cell -> red paper town, sugar-cube and key/jar metaphors). Use when the user wants a video "in this papercraft style", "like the flame / metabolism video", "paper cut / quilling / diorama style", "w stylu papierowym / papercraft", or says "use the papercraft skill".
 ---
 
 # Papercraft 3D short (Blender Cycles primary, three.js fallback)
 
+> **Ten skill jest do filmów.** Grafika do gry: skill `paper-game-art` i [`docs/GRAFIKA.md`](../../../docs/GRAFIKA.md).
+>
 > **Kopia w repo gry.** To ten sam skill, którym Mateusz ustalił papierowy wygląd gry (materiał papieru z „ząbkiem”,
 > ściśnięte warstwy `ZK = 0.65`, słońce z lewej góry, Cycles + OptiX). Gra korzysta z jego biblioteki przez
 > `blender/vendor/pc_lib.py` (to samo co `blender/pc_lib.py` tutaj) — zmieniaj tam, nie tutaj.
 > Ścieżki poniżej są względne do katalogu repo; `D:/blender/blender.exe` zamień na swoją ścieżkę Blendera 5.3.
 > **Nie ma tu** `references/frames|sheets|crops|our_tests` (klatki z cudzego filmu referencyjnego i nasze testowe
 > rendery, 31 MB) — prawa autorskie i rozmiar. Notatki z pomiarów (`references/*.md`, `references/data/`) są.
-> Codex: ten plik nie ładuje się sam — przeczytaj go przed zadaniem `area:art`, gdy chodzi o wygląd papieru.
+> Kroki i linki niżej, które wskazują na te brakujące foldery albo na `compare/`, pomiń.
+> Wariant three.js wymaga osobnego projektu z `three` i Remotion; zależności gry ich nie zawierają.
 
 **Use Blender Cycles for the final look.** The user compared both: the three.js stills looked flat and "not similar"; the same scenes
 in Cycles (global illumination, soft light bounced between paper layers, subsurface in thin paper, real depth of field) are much closer.
@@ -67,9 +70,9 @@ Read in this order:
 4. `templates/papercraft/*.ts` - working three.js building blocks. `templates/sandbox/` - a Remotion test composition.
 5. `references/our_tests/` - stills rendered from these templates (what the starter code already reaches).
 
-## User rules that apply (from memory)
-- Language: narration and any text in English only; talk to the user in Polish.
-- Narrator: Qwen3-TTS VoiceClone through the user's ComfyUI with the workflow from Pictures. Never edge-tts.
+## Rules for the author's own videos (they do not apply to the game)
+- Language: narration and any text in English only.
+- Narrator: Qwen3-TTS VoiceClone through ComfyUI. The workflow and voice sample are not in this repo. Never edge-tts.
 - Quiet sound design: no loud effects, the narrator stays clearly audible. The reference has dense foley at -14 LUFS
   and no speech; keep the idea (a tiny sound per visual event) but mix it low and duck it under the voice.
 - No captions or labels in the picture (the reference has none either).
@@ -82,7 +85,7 @@ Read in this order:
 2. **Script** (~3.5 words/s, 45-70 s) using the skeleton in STYLE_BIBLE section 2: hook gag, time-passing montage, the
    problem, dive inside, hero doubted, everyone has one, measuring gag, zoom into tissue, mechanism in a paper town,
    fix, payoff with the hero happy. Never describe what the viewer already sees. Facts first, with sources, then jokes.
-3. **Voice** via ComfyUI (see memory), then word timings `words.json`. Every visual reaction lands 0-3 frames before its word.
+3. **Voice** via ComfyUI, then word timings `words.json`. Every visual reaction lands 0-3 frames before its word.
 4. **Shot plan** (`story.ts` in `src/videos/<name>/`): per shot id, a/b frames, scene builder, camera keys, light look
    (`dark` / `inside` / `day`), DOF on/off. Use the rhythm of SHOT_LIST: montage hits 0.33-0.5 s, holds 3-8 s, dive 0.5 s.
 5. **Build the world** with `templates/papercraft/`:
@@ -106,7 +109,7 @@ Read in this order:
 ```bash
 mkdir -p ref_style/test && cp -r .claude/skills/papercraft-3d-short/templates/papercraft ref_style/test/papercraft
 cp .claude/skills/papercraft-3d-short/templates/sandbox/*.tsx ref_style/test/
-cd /d/animacje   # the folder that has node_modules with three + remotion (three 0.170)
+# run from a project whose node_modules has three (0.170) + remotion; the game repo does not
 npx remotion still ref_style/test/index.tsx PaperTest out/cell.png --props='{"scene":"cell","dof":true}' --gl=angle --frame=10 --image-format=png
 # scene = cell | cave | cave_hands | party | belt | breakfast | breakfast_stripes | breakfast_gingham | family | town | jars | pipes
 ```

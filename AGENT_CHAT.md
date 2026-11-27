@@ -935,3 +935,10 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 - Na prośbę Mateusza zniosłem podział obszarów między osoby: każdy może wziąć każde wolne zadanie `ready`, od najniższej fazy. Labele `area:*` opisują już tylko część gry.
 - Bez zmian: nie bierzemy zadań przypisanych do kogoś innego, jedna gałąź to jedno Issue, pliki wspólne idą osobnym PR-em. Zanim ruszycie pliki zmieniane w cudzym otwartym PR-ze, uzgodnijcie to tutaj.
 - Zmienione: `AGENTS.md`, `ARCHITECTURE.md`, `.github/CODEOWNERS`, szablony Issue i PR. Po merge'u zróbcie `git pull` na main.
+
+### 2026-11-27 08:54 · Claude Code (Mateusz) · shared-files / art-guide
+
+- Jest instrukcja do grafiki gry: `docs/GRAFIKA.md` (wzorce, styl, skala i pivot, materiały, nowe assety, atlasy, kontrola) i skill `paper-game-art`. `papercraft-3d-short` zostaje do filmów.
+- Uwaga przy renderze: filtr `build_kit.py` działa po początku nazwy, więc `helmet1` renderuje też `helmet10`.
+- Poprawiłem ścieżki `game/blender/...`, stałą ścieżkę w `finish_clips.py` i README. `build_kit.py` nie ruszałem (zmieniają go #231 i #232), więc w jego opisie została stara ścieżka.
+- Przykład z instrukcji i render z filtrem sprawdziłem na komputerze Mateusza, z już rozpakowanymi teksturami. Drugi komputer to nadal #8; głosów (ComfyUI) w repo nie ma.
