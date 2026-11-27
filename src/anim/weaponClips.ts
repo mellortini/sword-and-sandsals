@@ -24,6 +24,8 @@ export const HAMMER_READY: Pose = { torso: 4, head: -3, arm_f_up: -4, arm_f_lo: 
 export const AXE_READY: Pose = { torso: 4, head: -3, arm_f_up: 26, arm_f_lo: 92, hand_f: 0, blade: 78, ...LEGS };
 /** guard with the daggers (#47): both hands low in front, points up at the enemy, a little crouched */
 export const DAGGERS_READY: Pose = { torso: 8, head: -4, arm_f_up: 42, arm_f_lo: 66, hand_f: 0, blade: 28, arm_b_up: 36, arm_b_lo: 64, hand_b: 0, blade_b: 34, ...LEGS };
+/** ready with the trident and net (#254): the trident level at the enemy in one hand, the net hanging from the other */
+export const TRIDENT_READY: Pose = { torso: 5, head: -3, arm_f_up: 34, arm_f_lo: 64, hand_f: 0, blade: 12, arm_b_up: 14, arm_b_lo: 26, hand_b: 0, blade_b: 0, ...LEGS };
 /** ready with the spear: raised at 50 degrees, so the point stays clear of an enemy standing at melee distance */
 export const SPEAR_READY: Pose = { torso: 2, head: -2, arm_f_up: 13, arm_f_lo: 120, hand_f: 0, blade: 50, ...LEGS };
 
@@ -162,6 +164,60 @@ export const WEAPON_CLIPS: Clip[] = [
       { f: 28, x: 0, pose: { ...DAGGERS_READY, leg_b_up: -14, leg_b_lo: 4 } },
     ],
   },
+  // ------------------------------------------------------------------ trident + net (#254): one-handed thrusts from further away
+  // than a sword (the prongs reach ~1.5 units past a sword's point), and the net thrown from the back hand
+  {
+    name: 'idle@trident', length: 60, loop: true,
+    keys: [
+      { f: 0, pose: TRIDENT_READY },
+      { f: 30, pose: { torso: 6.5, head: -4.5, arm_f_up: 36, arm_f_lo: 66, blade: 10, arm_b_up: 16, blade_b: 6 } },
+      { f: 60, pose: TRIDENT_READY },
+    ],
+  },
+  {
+    name: 'attack_quick@trident', length: 12, reach: 1.5,
+    events: [{ f: 1, type: 'hit' }],
+    keys: [
+      { f: 0, x: 0.15, ease: 'step', pose: { torso: 4, arm_f_up: 4, arm_f_lo: 104, blade: 6 } },
+      { f: 1, x: 0.4, ease: 'out', pose: { torso: -10, head: -3, arm_f_up: 74, arm_f_lo: 10, blade: 2, leg_f_up: 28, leg_f_lo: -14 } },
+      { f: 5, x: 0.42, pose: { torso: -10 } },
+      { f: 12, x: 0, pose: { ...TRIDENT_READY, leg_f_up: 16, leg_f_lo: -6 } },
+    ],
+  },
+  {
+    name: 'attack_normal@trident', length: 16, reach: 1.5,
+    events: [{ f: 2, type: 'hit' }],
+    keys: [
+      { f: 0, x: 0.1, ease: 'step', pose: { torso: 8, head: 2, arm_f_up: -10, arm_f_lo: 110, blade: 4, arm_b_up: 30, blade_b: 20 } },
+      { f: 2, x: 0.8, ease: 'out', pose: { torso: -18, head: -4, arm_f_up: 82, arm_f_lo: 4, blade: 0, arm_b_up: -30, blade_b: -20, ...LUNGE } },
+      { f: 9, x: 0.85, pose: { torso: -17 } },
+      { f: 16, x: 0, pose: { ...TRIDENT_READY, leg_b_up: -14, leg_b_lo: 4 } },
+    ],
+  },
+  {
+    // raised over the head, prongs forward, then driven down at the collarbone with the whole body
+    name: 'attack_power@trident', length: 26, reach: 1.3,
+    events: [{ f: 5, type: 'swing' }, { f: 7, type: 'hit' }],
+    keys: [
+      { f: 0, pose: TRIDENT_READY },
+      { f: 5, x: -0.2, ease: 'out', pose: { torso: 14, head: 6, arm_f_up: 165, arm_f_lo: 20, hand_f: 0, blade: 8, arm_b_up: 40, arm_b_lo: 40, blade_b: 30, leg_f_up: 22, leg_f_lo: -8 } },
+      { f: 7, x: 1.05, ease: 'in', pose: { torso: -24, head: -6, arm_f_up: 104, arm_f_lo: 0, hand_f: 0, blade: -24, arm_b_up: -50, arm_b_lo: 20, blade_b: -30, ...DEEP_LUNGE } },
+      { f: 16, x: 1.1, pose: { torso: -23 } },
+      { f: 26, x: 0, pose: { ...TRIDENT_READY, leg_b_up: -14, leg_b_lo: 4 } },
+    ],
+  },
+  {
+    // the net: swung back low, then flung forward and up over the enemy (the net stays in hand: the cast is the gesture)
+    name: 'net_throw@trident', length: 24,
+    events: [{ f: 9, type: 'swing' }],
+    keys: [
+      { f: 0, pose: TRIDENT_READY },
+      { f: 6, x: -0.1, ease: 'out', pose: { torso: 12, head: 4, arm_b_up: -70, arm_b_lo: 20, hand_b: 0, blade_b: 40, arm_f_up: 20, arm_f_lo: 70 } },
+      { f: 9, x: 0.3, ease: 'in', pose: { torso: -16, head: -4, arm_b_up: 132, arm_b_lo: -8, blade_b: 120, leg_f_up: 30, leg_f_lo: -16 } },
+      { f: 14, x: 0.32, pose: { torso: -14, arm_b_up: 120, blade_b: 100 } },
+      { f: 24, x: 0, pose: { ...TRIDENT_READY, leg_f_up: 16, leg_f_lo: -6 } },
+    ],
+  },
   // ------------------------------------------------------------------ spear
   {
     name: 'idle@spear', length: 60, loop: true,
@@ -215,7 +271,7 @@ const ARMS = ['torso', 'head', 'arm_f_up', 'arm_f_lo', 'hand_f', 'blade'] as con
  */
 export function heldWalks(clips: readonly Clip[]): Clip[] {
   const out: Clip[] = [];
-  for (const [family, ready] of [['hammer', HAMMER_READY], ['spear', SPEAR_READY], ['axe', AXE_READY], ['daggers', DAGGERS_READY]] as const) {
+  for (const [family, ready] of [['hammer', HAMMER_READY], ['spear', SPEAR_READY], ['axe', AXE_READY], ['daggers', DAGGERS_READY], ['trident', TRIDENT_READY]] as const) {
     const arms: Pose = Object.fromEntries(ARMS.map((k) => [k, ready[k] ?? 0]));
     for (const c of clips.filter((x) => x.name === 'walk_fwd' || x.name === 'walk_back')) {
       out.push({ ...c, name: `${c.name}@${family}`, keys: c.keys.map((k) => ({ ...k, pose: { ...(k.pose ?? {}), ...arms } })) });
@@ -233,7 +289,7 @@ const GRIP = ['arm_f_up', 'arm_f_lo', 'hand_f', 'blade'] as const;
 export function heldDodges(clips: readonly Clip[]): Clip[] {
   const dodge = clips.find((c) => c.name === 'dodge');
   if (!dodge) return [];
-  return ([['hammer', HAMMER_READY], ['spear', SPEAR_READY], ['axe', AXE_READY], ['daggers', DAGGERS_READY]] as const).map(([family, ready]) => {
+  return ([['hammer', HAMMER_READY], ['spear', SPEAR_READY], ['axe', AXE_READY], ['daggers', DAGGERS_READY], ['trident', TRIDENT_READY]] as const).map(([family, ready]) => {
     const grip: Pose = Object.fromEntries(GRIP.map((k) => [k, ready[k] ?? 0]));
     return { ...dodge, name: `dodge@${family}`, keys: dodge.keys.map((k) => ({ ...k, pose: { ...(k.pose ?? {}), ...grip } })) }; // 'blade' wins over 'weapon' in bake()
   });

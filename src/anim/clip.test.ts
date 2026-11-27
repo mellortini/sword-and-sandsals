@@ -83,4 +83,17 @@ describe('dodge (#13)', () => {
     expect((p.pelvis ?? 0) + (p.torso ?? 0) + (p.arm_b_up ?? 0) + (p.arm_b_lo ?? 0) + (p.hand_b ?? 0) + (p.weapon_b ?? 0)).toBeCloseTo(34);
     expect(p.blade_b).toBeUndefined();
   });
+
+  it('thrusts with the trident from further than a sword and flings the net from the back hand (#254)', () => {
+    for (const kind of ['quick', 'normal', 'power']) {
+      const c = baked[`attack_${kind}@trident`];
+      expect(c.reach, kind).toBeGreaterThan(1);
+      expect(sample(c, c.length).x).toBe(0);
+    }
+    const net = baked['net_throw@trident'];
+    const cast = net.events!.find((e) => e.type === 'swing')!.f;
+    expect(sample(net, cast).pose.arm_b_up).toBeGreaterThan(110);   // the back arm is up and forward on the cast
+    expect(Math.min(...net.full.map((k) => k.pose.arm_b_up ?? 0))).toBeLessThan(-50);   // after swinging back
+    expect(baked.net_throw).toBeUndefined();   // only a fighter with a net throws one
+  });
 });

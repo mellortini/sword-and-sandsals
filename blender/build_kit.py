@@ -68,6 +68,9 @@ for fam, table in (('axe', weapons.AXES), ('spear', weapons.SPEARS), ('hammer', 
     for t, fn in table.items():
         jobs[f'weapon_{fam}{t}'] = (fn, None, False)
 jobs['weapon_daggers'] = (weapons.daggers, None, False)
+jobs['weapon_net'] = (weapons.net, None, False)
+for t, fn in weapons.TRIDENTS.items():
+    jobs[f'weapon_trident{t}'] = (fn, None, False)
 PAIRED = {'weapon_daggers'}   # drawn in both hands: the back hand's copy on the weapon_b bone (#47)
 for t, fn in shields.SHIELDS.items():
     jobs[f'shield{t}'] = (fn, None, False)
@@ -105,6 +108,8 @@ for key, (fn, tint, head) in jobs.items():
         info['grip2'] = list(weapons.GRIP2[fam])
     if key in PAIRED:
         info['pair'] = True
+    if key.startswith('weapon_trident'):   # the retiarius holds the net in the other hand (#254)
+        info['offhand'] = 'weapon_net'
     if key in SPRITE_ALPHA:
         info['alpha'] = SPRITE_ALPHA[key]
     sprites[key] = info

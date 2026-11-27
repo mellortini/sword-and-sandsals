@@ -128,6 +128,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
         // no damage splat here: it would sit right where the head takes off
         strike(pa, 'attack_power', { then: 'victory', onHit: () => playFinisher(ea, layer, { floorY: FEET_Y }) });
         break;
+      case 'net_throw': if (pa.clipFor('net_throw')) pa.play('net_throw'); break;
       case 'cheer': crowdFx.cheer(1, P.view.x); break;
       case 'gifts': crowdFx.throw('bouquet', 5, P.view.x, FEET_Y); crowdFx.throw('coin', 4, P.view.x, FEET_Y); break;
       case 'reset':
@@ -141,7 +142,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   ui.innerHTML = `<h3>Animation lab</h3>
     <div class="grid">${btn('walk_back', '&#9664; step')}${btn('walk_fwd', 'step &#9654;')}${btn('jump', 'jump')}${btn('charge', 'charge')}
     ${btn('attack_quick', 'quick')}${btn('attack_normal', 'normal')}${btn('attack_power', 'power')}${btn('block', 'block')}${btn('dodge', 'dodge')}
-    ${btn('taunt', 'taunt')}${btn('rest', 'rest')}${btn('hit', 'hit')}${btn('finish', 'finish')}${btn('victory', 'victory')}${btn('death', 'die')}${btn('reset', 'reset')}${btn('cheer', 'crowd cheers')}${btn('gifts', 'crowd throws')}${btn('fight', 'core fight')}</div>
+    ${btn('taunt', 'taunt')}${btn('rest', 'rest')}${btn('hit', 'hit')}${btn('finish', 'finish')}${btn('victory', 'victory')}${btn('death', 'die')}${btn('reset', 'reset')}${btn('net_throw', 'throw net')}${btn('cheer', 'crowd cheers')}${btn('gifts', 'crowd throws')}${btn('fight', 'core fight')}</div>
     <label>enemy <select id="sResponse"><option value="hit">gets hit</option><option value="block">blocks</option><option value="dodge">dodges (miss)</option></select></label>
     <label><input type="checkbox" id="cbCounter" checked> enemy answers</label>
     <label>gore <select id="sGore">${GORE_MODES.map((m) => `<option value="${m.id}"${m.id === goreMode() ? ' selected' : ''}>${m.name}</option>`).join('')}</select></label>

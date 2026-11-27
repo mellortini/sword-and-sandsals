@@ -395,3 +395,72 @@ def daggers(c):
     b = blade_pts(0.4, 1.75, 0.13, 0.08, tip=0.42, leaf=0.04)
     L(c, b, M('steel'), 0.04, 0.06, 'blade')
     L(c, [(0.45, 0.03), (1.45, 0.012), (1.6, 0.0), (1.45, -0.012), (0.45, -0.03)], M('steel_d'), 0.1, 0.02, 'fuller')
+
+
+# ================================================================== TRIDENT + NET (#254): the retiarius
+# One-handed, held a third of the way up the shaft (front hand on the origin), three prongs ahead; the net hangs from the
+# back hand (sprite `weapon_net`, kit.json links it from every trident as `offhand`; the rig draws it on `weapon_b`).
+def trident(t):
+    def build(c):
+        haft, grip, head, head_d, fit, torn = _tier(t)
+        k = 0.9 + 0.025 * t
+        x0, x1 = -1.5, 3.4 + 0.02 * t
+        w = 0.16
+        _haft(c, t, x0, x1, w)
+        _butt(c, t, x0, w)
+        pl = 1.05 * k                            # prong length past the crossbar
+        if t == 1:   # a fishing fork: whittled wood, the prongs lashed on
+            wood = _wood('fork', '#8a6a48')
+            L(c, sl.torn(R(0.18, 0.75, 0.05, x1, 0.0), 0.02, 120), wood, 0.06, 0.06, 'bar')
+            for y in (-0.3, 0.0, 0.3):
+                L(c, sl.torn([(x1, y + 0.06), (x1 + pl * (1.1 if y == 0 else 0.9), y), (x1, y - 0.06)], 0.012, 121 + int(y * 10)), wood, 0.04, 0.05, 'prong')
+            L(c, sl.torn(R(0.3, 0.3, 0.05, x1 - 0.12, 0.0), 0.02, 124), M('rag'), 0.12, 0.04, 'lashing')
+            return
+        L(c, R(0.2, 0.82 * k, 0.06, x1, 0.0), head_d, 0.06, 0.08, 'bar')
+        for y in (-0.34 * k, 0.0, 0.34 * k):
+            ln = pl * (1.12 if y == 0 else 0.92)
+            L(c, [(x1 + 0.05, y + 0.06), (x1 + ln - 0.22, y + 0.05), (x1 + ln, y), (x1 + ln - 0.22, y - 0.05), (x1 + 0.05, y - 0.06)], head, 0.08, 0.06, 'prong')
+            if y != 0:   # barbs on the outer prongs, pointing back
+                s_ = 1 if y > 0 else -1
+                L(c, [(x1 + ln - 0.24, y + 0.05 * s_), (x1 + ln - 0.5, y + 0.16 * s_), (x1 + ln - 0.36, y + 0.04 * s_)], head_d, 0.1, 0.04, 'barb')
+        L(c, R(0.45, 0.28, 0.08, x1 - 0.2, 0.0), fit if t >= 4 else head_d, 0.12, 0.06, 'socket')
+        if t >= 8:
+            col = {8: M('red'), 9: M('red_d'), 10: M('purple')}[t]
+            L(c, [(x1 - 0.42, 0.0), (x1 - 0.3, 0.05), (x1 - 0.85, 0.32), (x1 - 0.95, 0.24)], col, 0.04, 0.03, 'tassel')
+        if t >= 6:
+            _collar(c, t, x1 - 0.5, w)
+    return build
+
+
+def net(c):
+    """a fishing net bunched in the fist, hanging down (origin = the fist, -y = down): real holes in the mesh so the body
+    shows through, rope folds, lead weights on the hem"""
+    rope = sl.tex_board('net_rope', 'craft', tint='#cdb183', scale=0.3)
+    k = 1.25
+    outline = [(x * k, y * k) for x, y in [(-0.12, 0.1), (0.14, 0.1), (0.5, -0.5), (0.62, -1.3), (0.35, -1.75), (-0.15, -1.85),
+                                            (-0.55, -1.6), (-0.6, -0.9), (-0.3, -0.35)]]
+
+    def inside(px, py):
+        hit = False
+        for i in range(len(outline)):
+            (x1, y1), (x2, y2) = outline[i], outline[(i + 1) % len(outline)]
+            if (y1 > py) != (y2 > py) and px < (x2 - x1) * (py - y1) / ((y2 - y1) or 1e-9) + x1:
+                hit = not hit
+        return hit
+    holes = []
+    step, r = 0.2, 0.088
+    for i in range(-6, 7):
+        for j in range(1, 26):
+            cx, cy = i * step + (j % 2) * step / 2, -0.15 - j * step * 0.5
+            diamond = [(cx + r, cy), (cx, cy + r), (cx - r, cy), (cx, cy - r)]
+            if all(inside(x + (0.03 if x > cx else -0.03 if x < cx else 0), y + (0.03 if y > cy else -0.03 if y < cy else 0)) for x, y in diamond):
+                holes.append(list(reversed(diamond)))
+    pc.layer(outline, rope, h=0.04, z=0.0, holes=holes, coll=c, name='net', bevel=0.004)
+    for i, (x, y) in enumerate(((0.15, -0.75), (-0.25, -1.25), (0.38, -1.55))):   # thicker folds of rope
+        L(c, R(0.05, 0.8, 0.02, x, y, 0.2 - i * 0.25), M('leather_l'), 0.05, 0.02, 'fold')
+    for x, y in ((0.68, -1.8), (0.3, -2.25), (-0.2, -2.33), (-0.65, -2.08), (-0.75, -1.4)):
+        L(c, E(0.08, 0.08, x, y, 16), M('iron_d'), 0.06, 0.05, 'weight')
+    L(c, E(0.18, 0.14, 0.0, 0.0, 20), M('leather_l'), 0.08, 0.05, 'knot')
+
+
+TRIDENTS = {t: trident(t) for t in range(1, 11)}
