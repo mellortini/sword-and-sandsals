@@ -106,6 +106,8 @@ export interface ActionOption {
   energyCost: number;
   /** Percentage from 5 to 100 for attacks. */
   hitChance?: number;
+  /** Percentage to block a landed strike, for the Block action (#274): lower without a whole shield. */
+  blockChance?: number;
   counter?: true;
 }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SHIELDS, findShield } from '../data/shields';
-import { createCombat, performAction } from './combat';
+import { PARRY_SHARE, blockChance, createCombat, getActionOptions, performAction } from './combat';
 import { equipItem, equipmentTotals } from './inventory';
 import { getShopStock } from './shop';
 import { shieldDamage } from './stats';
@@ -110,5 +110,44 @@ describe('shield in combat (#273)', () => {
     const { attack } = blockedBlow({});
     expect(attack.shield).toBeUndefined();
     expect(attack.damage).toBe(0);
+  });
+});
+
+describe('the blade alone parries less (#274)', () => {
+  const guard = { attributes: { guard: 10 } };   // 25 + 4 x 10 = 65%
+
+  it('blocks at the full chance behind a whole shield, and at a share of it without one', () => {
+    const shielded = createCombat(1, { ...guard, equipment: { offHand: 'shield3' } }).fighters.player;
+    const bare = createCombat(1, guard).fighters.player;
+    const twoHanded = createCombat(1, { ...guard, equipment: { weapon: 'spear3', offHand: 'shield3' } }).fighters.player;
+    expect(blockChance(shielded)).toBe(65);
+    expect(blockChance(bare)).toBe(Math.round(65 * PARRY_SHARE));
+    expect(blockChance(twoHanded)).toBe(Math.round(65 * PARRY_SHARE));
+    expect(blockChance({ ...shielded, shield: { ...shielded.shield!, health: 0 } })).toBe(Math.round(65 * PARRY_SHARE));
+    expect(PARRY_SHARE).toBeLessThan(1);
+  });
+
+  it('shows the chance on the Block option', () => {
+    const shielded = createCombat(1, { ...guard, equipment: { offHand: 'shield3' } });
+    expect(getActionOptions(shielded)).toContainEqual({ action: 'block', energyCost: 2, blockChance: 65 });
+    expect(getActionOptions(createCombat(1, guard))).toContainEqual({ action: 'block', energyCost: 2, blockChance: Math.round(65 * PARRY_SHARE) });
+  });
+
+  it('blocks about that often in real strikes', () => {
+    const rate = (player: FighterSetup) => {
+      let hits = 0, blocks = 0;
+      for (let seed = 1; seed <= 1500; seed++) {
+        const guarded = performAction(atContact(seed, player), 'block');
+        if (!guarded.ok) throw new Error('block rejected');
+        const blow = performAction(guarded.state, 'normal');
+        if (!blow.ok) throw new Error('blow rejected');
+        const attack = blow.events.find((e): e is AttackEvent => e.type === 'attack')!;
+        if (attack.hit) hits++;
+        if (attack.blocked) blocks++;
+      }
+      return blocks / hits;
+    };
+    expect(rate({ ...guard, equipment: { offHand: 'shield9' } })).toBeCloseTo(0.65, 1);
+    expect(rate(guard)).toBeCloseTo(Math.round(65 * PARRY_SHARE) / 100, 1);
   });
 });

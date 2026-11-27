@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { applyCombatStatus, counterChance, createCombat, getActionOptions, performAction } from './combat';
 import type { CombatState } from './types';
 
+// the blocker holds a whole shield, so the block chance is the full one (#274: the blade alone parries less)
 function afterBlock(seed: number, guard: number, energy = 40): CombatState {
-  const initial = createCombat(seed, { position: 4, attributes: { guard } }, { position: 6 });
+  const initial = createCombat(seed, { position: 4, attributes: { guard }, equipment: { offHand: 'shield9' } }, { position: 6 });
   const start = { ...initial, fighters: { ...initial.fighters, player: { ...initial.fighters.player, energy } } };
   const defending = performAction(start, 'block').state;
   const blocked = performAction(defending, 'normal');
@@ -38,7 +39,7 @@ describe('block counters', () => {
     expect(getActionOptions(next).find(({ action }) => action === 'quick')).toMatchObject({ energyCost: 3 });
   });
   it('expires if the opponent was blocked but a stun skips the opportunity', () => {
-    const start = createCombat(2, { position: 4, attributes: { guard: 12 } }, { position: 6 });
+    const start = createCombat(2, { position: 4, attributes: { guard: 12 }, equipment: { offHand: 'shield9' } }, { position: 6 });
     const defending = performAction(start, 'block').state;
     const stunned = applyCombatStatus(defending, 'player', 'stunned');
     const blocked = performAction(stunned, 'normal');

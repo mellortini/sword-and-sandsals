@@ -124,6 +124,18 @@ export function getDistance(state: CombatState): number {
   return roundPosition(state.fighters.enemy.position - state.fighters.player.position);
 }
 
+/**
+ * Without a shield the blade parries alone (#274): a fighter with no shield, a broken one or a two-handed weapon
+ * blocks with this share of the block chance. A whole shield blocks at the full chance.
+ */
+export const PARRY_SHARE = 0.5;
+
+/** Percentage points to block a landed strike while guarding: full behind a whole shield, less with the blade alone. */
+export function blockChance(fighter: Readonly<Fighter>): number {
+  const shielded = fighter.shield !== undefined && fighter.shield.health > 0;
+  return shielded ? fighter.stats.blockChance : Math.round(fighter.stats.blockChance * PARRY_SHARE);
+}
+
 export function getActionOptions(state: CombatState): ActionOption[] {
   if (state.winner !== null) return [];
 
@@ -143,7 +155,7 @@ export function getActionOptions(state: CombatState): ActionOption[] {
 
     options.push(isAttack(action)
       ? { action, energyCost, hitChance: hitChance(action, fighter, opponent), ...(counter ? { counter: true } : {}) }
-      : { action, energyCost });
+      : action === 'block' ? { action, energyCost, blockChance: blockChance(fighter) } : { action, energyCost });
   }
   return options;
 }
@@ -397,7 +409,8 @@ function resolveAttack(
   for (let i = 0; i < traits.strikes && defender.health > 0; i++) {
     const hit = roll() < chance;
     // A defensive stance can block an incoming strike; a skilled block may earn a free counter. Crits need an unblocked hit.
-    const blocked = hit && defender.guarding && roll() < defender.stats.blockChance;
+    // behind a whole shield at the full chance, with the blade alone at less (#274); the shield's state before this strike
+    const blocked = hit && defender.guarding && roll() < blockChance(defender);
     if (blocked && !defender.counterReady) {
       const chanceToCounter = Math.min(70, counterChance(defender.attributes.guard) + defender.skillRules.counterBonus);
       if (chanceToCounter > 0 && roll() < chanceToCounter) defender.counterReady = true;
