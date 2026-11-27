@@ -1228,3 +1228,9 @@ Poprawki miasta po uwagach Mateusza (okiennice i światła w sklepach z c22401a 
 - Zostaje: bez turkusowych kropli, mniejszy i spokojniejszy ogień kuźni, wolniejsze płomienie. Drzwi tholosu są teraz zwykłą turkusową farbą (nie świecą w nocy).
 - Fontanna: `town.json` → `fountain: { x, y }`; `TownBackdrop` rysuje krople płynące po strumieniach i rozchodzące się kręgi na wodzie.
 - Głębia: mgiełka powietrza w kolorze horyzontu nad tylnym rzędem (mocniej) i środkowym tarasem (słabiej), lekkie rozmycie tylnego rzędu, miękkie cienie pod budynkami. Rzędy z `y + h` sprite'a (`ROWS` w `townBackdrop.ts`).
+
+### 2026-11-27 17:15 · Claude Code (Mateusz) · #29 / 29-town-background
+
+- Rozmycie tylko dla krainy za koloseum: nowa warstwa `town_far.png` (wzgórza, wille, akwedukt, pinie; pełna klatka, `far` w `town.json`), rysowana między niebem a `town_bg.png` z BlurFilter. Budynki znów ostre (mgiełka i cienie zostają).
+- Dym z komina kuźni animowany: `smoke` (sprite) + `chimneys[]` `{ layer, x, y }` w `town.json`; kłęby wznoszą się, rosną i znikają.
+- Fontanna: `fountain.clip` — animacja wody nie wchodzi już na cyprys w donicy przy drodze.

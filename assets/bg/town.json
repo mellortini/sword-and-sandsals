@@ -4,6 +4,19 @@
     1080
   ],
   "background": "town_bg.png",
+  "far": "town_far.png",
+  "smoke": {
+    "image": "town_smoke.png",
+    "w": 54,
+    "h": 46
+  },
+  "chimneys": [
+    {
+      "layer": "forge",
+      "x": 469,
+      "y": 736
+    }
+  ],
   "sky": {
     "image": "town_sky.png",
     "x": 0,
@@ -120,7 +133,8 @@
   ],
   "fountain": {
     "x": 690,
-    "y": 742
+    "y": 742,
+    "clip": 768
   },
   "buildings": [
     {
@@ -182,9 +196,9 @@
       "name": "Forge",
       "image": "town_forge.png",
       "x": 264,
-      "y": 660,
+      "y": 733,
       "w": 291,
-      "h": 360
+      "h": 287
     },
     {
       "id": "armourer",

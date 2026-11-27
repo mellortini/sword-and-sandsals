@@ -21,11 +21,15 @@ interface TownManifest {
   flame: { image: string; w: number; h: number; ax: number; ay: number };
   flames: { layer: string; x: number; y: number; s: number; always: boolean }[];
   buildings: (Rect & { id: string; name: string })[];
-  fountain?: { x: number; y: number };
+  fountain?: { x: number; y: number; clip?: number };
+  far?: string;
+  smoke?: { image: string; w: number; h: number };
+  chimneys?: { layer: string; x: number; y: number }[];
 }
 
 interface Flame { root: Container; fire: Sprite; glow: Sprite; s: number; always: boolean; ph: number }
 interface Cloud { sprite: Sprite; speed: number }
+interface Chimney { x: number; y: number; puffs: { s: Sprite; age: number; life: number; drift: number }[]; next: number }
 
 export interface TownOptions {
   /** seconds for a whole day and night (default 120) */
@@ -71,10 +75,10 @@ const shadowTexture = () => canvasTexture(128, 32, (g) => {
  * (y + h of its sprite): back (the arena's terrace), middle terrace, front (the forum).
  */
 const ROWS = [
-  // [baseline up to, haze over everything drawn so far: top, bottom, strength, blur of the row's sprites]
-  { until: 600, haze: [40, 640, 0.3], blur: 0.9 },
-  { until: 800, haze: [330, 790, 0.16], blur: 0.35 },
-  { until: Infinity, haze: null, blur: 0 },
+  // [baseline up to, haze over everything drawn so far: top, bottom, strength]
+  { until: 600, haze: [40, 640, 0.3] },
+  { until: 800, haze: [330, 790, 0.16] },
+  { until: Infinity, haze: null },
 ] as const;
 
 function glowTexture(): Texture {
@@ -107,14 +111,16 @@ export class TownBackdrop extends Container {
   private readonly lights: Sprite;
   private readonly hazes: { sprite: Sprite; strength: number }[] = [];
   private readonly water = new Graphics();
-  private readonly fountain?: { x: number; y: number };
+  private readonly fountain?: { x: number; y: number; clip?: number };
+  private readonly chimneys: Chimney[] = [];
+  private smokeTex?: Texture;
   private time = 0;
   private lastSky = -1;
 
   static async load(base: string, options: TownOptions = {}): Promise<TownBackdrop> {
     const dir = `${base}bg/`;
     const manifest: TownManifest = await (await fetch(`${dir}town.json`)).json();
-    const files = [manifest.background, manifest.sky.image, manifest.sun.image, manifest.lights, manifest.flame.image,
+    const files = [...(manifest.far ? [manifest.far] : []), ...(manifest.smoke ? [manifest.smoke.image] : []), manifest.background, manifest.sky.image, manifest.sun.image, manifest.lights, manifest.flame.image,
       ...manifest.clouds.map((c) => c.image), ...manifest.buildings.map((b) => b.image)];
     const tex = new Map<string, Texture>();
     await Promise.all(files.map(async (f) => tex.set(f, await Assets.load(dir + f))));
@@ -181,12 +187,41 @@ export class TownBackdrop extends Container {
       }
     };
 
+    if (m.far) {
+      // only the land behind the arena goes out of focus
+      const far = new Sprite(tex.get(m.far)!);
+      far.filters = [new BlurFilter({ strength: 2.2, quality: 3 })];
+      this.tinted.push(far);
+      this.addChild(far);
+    }
+    this.smokeTex = m.smoke ? tex.get(m.smoke.image) : undefined;
+    const chimneysOf = (layer: string) => {
+      for (const c of m.chimneys?.filter((q) => q.layer === layer) ?? []) {
+        const ch: Chimney = { x: c.x, y: c.y, puffs: [], next: 0 };
+        // a fixed pool of puffs, recycled as they fade
+        for (let i = 0; i < 9; i++) {
+          const s = new Sprite(this.smokeTex!);
+          s.anchor.set(0.5);
+          s.visible = false;
+          ch.puffs.push({ s, age: 0, life: 0, drift: 0 });
+          this.addChild(s);
+        }
+        this.chimneys.push(ch);
+      }
+    };
+
     const bg = new Sprite(tex.get(m.background)!);
     this.tinted.push(bg);
     this.addChild(bg);
     this.fountain = m.fountain;
     this.tinted.push(this.water as unknown as Sprite);
     this.addChild(this.water);
+    if (m.fountain?.clip) {
+      // the potted cypress beside the road stands in front of the basin
+      const mask = new Graphics().rect(0, 0, m.fountain.clip, m.size[1]).fill(0xffffff);
+      this.addChild(mask);
+      this.water.mask = mask;
+    }
     flamesOf('bg');
     const haze = hazeTexture(), shadow = shadowTexture();
     let row = 0;
@@ -212,13 +247,13 @@ export class TownBackdrop extends Container {
       sh.height = 26 + row * 10;
       this.addChild(sh);
       const s = new Sprite(tex.get(b.image)!);
-      if (ROWS[row].blur) s.filters = [new BlurFilter({ strength: ROWS[row].blur, quality: 2 })];
       s.position.set(b.x, b.y);
       s.label = b.id;
       this.buildings.set(b.id, s);
       this.tinted.push(s);
       this.addChild(s);
       flamesOf(b.id);
+      chimneysOf(b.id);
     }
     for (; row < ROWS.length; row++) if (ROWS[row].haze) addHaze(ROWS[row].haze!);
     this.lights = new Sprite(tex.get(m.lights)!);
@@ -236,7 +271,35 @@ export class TownBackdrop extends Container {
       const half = Math.abs(c.sprite.width) / 2;
       if (c.sprite.x - half > W) c.sprite.x = -half;
     }
+    this.updateSmoke(dt);
     this.apply(dayState(this.phase));
+  }
+
+  /** puffs leave the chimney every ~0.7 s, rise slowly, swell, lean with the breeze and fade */
+  private updateSmoke(dt: number) {
+    for (const c of this.chimneys) {
+      c.next -= dt;
+      if (c.next <= 0) {
+        const free = c.puffs.find((p) => !p.s.visible);
+        if (free) {
+          free.age = 0;
+          free.life = 3.6 + Math.random() * 1.2;
+          free.drift = 4 + Math.random() * 5;
+          free.s.visible = true;
+        }
+        c.next = 0.6 + Math.random() * 0.3;
+      }
+      for (const p of c.puffs) {
+        if (!p.s.visible) continue;
+        p.age += dt;
+        const u = p.age / p.life;
+        if (u >= 1) { p.s.visible = false; continue; }
+        p.s.position.set(c.x + p.drift * p.age + 4 * Math.sin(p.age * 1.3 + p.drift), c.y - 4 - 17 * p.age);
+        p.s.scale.set(0.35 + 0.85 * u);
+        p.s.alpha = 0.85 * Math.min(1, u * 6) * (1 - u);
+        p.s.rotation = 0.3 * p.age;
+      }
+    }
   }
 
   private apply(s: DayState) {
@@ -256,6 +319,7 @@ export class TownBackdrop extends Container {
     this.body.scale.set(s.body.moon ? 0.55 : 1);
     for (const c of this.clouds) c.sprite.tint = s.cloud;
     for (const t of this.tinted) t.tint = s.tint;
+    for (const c of this.chimneys) for (const p of c.puffs) p.s.tint = s.tint;
     this.lights.alpha = s.lights;
     // the air takes the colour of the sky at the horizon, a little paler by day
     const air = mixColor(s.skyBottom, 0xffffff, 0.35 * (1 - s.lights));

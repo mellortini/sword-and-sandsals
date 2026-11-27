@@ -207,6 +207,7 @@ def curb(x0, x1, y, mat=None):
 
 
 FOUNTAIN = (690, 742)                            # basin centre; the game animates the water over it
+CHIMNEYS = []                                    # smoking chimney tops: [layer, x, y]
 FLAMES = []                                      # animated in the game: [layer, x, y (flame base), size, always]
 layer_key = 'bg'
 
@@ -350,7 +351,8 @@ def road_x(y):
     return 900 - 160 * k, 1020 + 160 * k
 
 
-def background():
+def far():
+    """the land behind the arena (hills, villas, the aqueduct, umbrella pines): its own layer so the game can blur it"""
     # (the sky, the sun and the clouds are separate layers the game moves: sky(), sun(), cloud())
     # far hills: pale olive, little white villas with red roofs, rows of far cypresses
     for layer, (mat, y0, amp, z) in enumerate(((FAR, 360, 40, 0.5), (FAR_D, 405, 34, 0.75))):
@@ -389,6 +391,9 @@ def background():
     poly(pts, HILL_D, 1.2, 0.08)
     for x, h, w, lean in ((70, 120, 170, -0.08), (470, 104, 150, 0.06), (1420, 112, 160, -0.05), (1880, 124, 180, 0.07)):
         umbrella_pine(x, 470, h, w, 1.3, lean)
+
+
+def background():
     # back terrace: lawn, the travertine walk the back row stands on, rows of tall cypresses
     B(-30, 500, 1950, 600, GRASS, 1.5, 0.1)
     for x in range(-20, 1950, 34):
@@ -727,8 +732,7 @@ def forge():
     base = 995
     B(452, 744, 486, 820, BRICK_D, 0.2, 0.18)
     B(446, 738, 492, 750, TRAV_D, 0.4, 0.1, 2)
-    for x, y, r in ((470, 724, 12), (458, 708, 15), (474, 690, 13), (462, 674, 10)):
-        E(x, y, r, r * 0.85, SMOKE, 0.5, 0.05)
+    CHIMNEYS.append(dict(layer=layer_key, x=469, y=736))                    # smoke comes from the game
     B(292, 822, 512, base, BRICK, 0.4, 0.2)
     for j in range(8):                                                       # brick courses
         for i in range(9):
@@ -890,6 +894,12 @@ def cloud(seed):
           r.uniform(44, 70), r.uniform(20, 30), CLOUD, 0.05 * j, 0.06)
 
 
+def smoke_sprite():
+    """one paper puff of smoke around (960, 540)"""
+    E(960, 540, 22, 18, SMOKE, 0.0, 0.06, 30)
+    E(952, 534, 10, 8, paper('smoke_l', '#e2dad2', 'water'), 0.08, 0.03, 20)
+
+
 def flame_sprite():
     """one paper flame, base at (960, 540); the game sways, stretches and flickers copies of it"""
     drop(960, 522, 18, FIRE, 0.0, 0.05)
@@ -906,9 +916,9 @@ BUILDINGS = [
     ('trainer', 'Trainer', trainer), ('tavern', 'Tavern', tavern),
 ]
 CLOUDS = 4
-EXTRA = [('sky', sky), ('sun', sun), ('flame', flame_sprite)] + [(f'cloud{i}', (lambda i=i: cloud(i))) for i in range(CLOUDS)]
+EXTRA = [('sky', sky), ('sun', sun), ('flame', flame_sprite), ('smoke', smoke_sprite)] + [(f'cloud{i}', (lambda i=i: cloud(i))) for i in range(CLOUDS)]
 colls = {}
-for key, build in [('bg', background)] + [(k, f) for k, _, f in BUILDINGS] + EXTRA:
+for key, build in [('far', far), ('bg', background)] + [(k, f) for k, _, f in BUILDINGS] + EXTRA:
     coll = sl.new_coll(key)
     colls[key] = coll
     layer_key = key
@@ -924,8 +934,8 @@ def pixel_box(c, pad=4):
 
 
 bpy.context.view_layer.update()
-boxes = {k: pixel_box(colls[k]) for k in colls if k != 'bg'}
-WORLD = ['bg'] + [k for k, _, _ in BUILDINGS]
+boxes = {k: pixel_box(colls[k]) for k in colls if k not in ('far', 'bg')}
+WORLD = ['far', 'bg'] + [k for k, _, _ in BUILDINGS]
 lit = {o.name: o.data.materials[0] for k in WORLD for o in colls[k].all_objects
        if o.data.materials and o.data.materials[0] in (LAMP, MAGIC)}   # object -> its glowing material
 
@@ -940,6 +950,10 @@ manifest = {
     'size': [W, H],
     # everything below the sky is transparent where the sky shows; the game draws the sky behind it
     'background': 'town_bg.png',
+    # the land behind the arena, full frame, drawn (blurred) between the sky and the background
+    'far': 'town_far.png',
+    'smoke': dict(image='town_smoke.png', w=boxes['smoke'][2], h=boxes['smoke'][3]),
+    'chimneys': CHIMNEYS,
     'sky': sprite('sky'),
     # sprites positioned around their centre at (960, 540) in the render; the game places and moves them
     'sun': dict(image='town_sun.png', w=boxes['sun'][2], h=boxes['sun'][3]),
@@ -951,7 +965,8 @@ manifest = {
     # flames to animate; `layer` = the building they belong to (draw them just above it), `always` = burns by day too
     'flames': FLAMES,
     # fountain basin centre (the background layer); the game adds moving drops and ripples over the painted water
-    'fountain': dict(x=FOUNTAIN[0], y=FOUNTAIN[1]),
+    # `clip`: x where the potted cypress beside the road starts; the water animation stays left of it
+    'fountain': dict(x=FOUNTAIN[0], y=FOUNTAIN[1], clip=round(road_x(830)[0] - 34 - 15)),
     # draw in this order at (x, y). The rectangle is the click area; where two overlap, the later one is on top, so
     # hit-test from the end of the list
     'buildings': [dict(id=k, name=n, **sprite(k)) for k, n, _ in BUILDINGS],
