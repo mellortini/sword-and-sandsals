@@ -40,6 +40,8 @@ def gladius(c):
 jobs = {}
 for part, fn in kit.BODY.items():
     jobs['body_' + part] = (fn, kit.BODY_TINT[part], False)
+for part, (fn, tint) in kit.CUT.items():
+    jobs['cut_' + part] = (fn, tint, False)
 for i, f in enumerate(kit.FACES):
     jobs[f'face{i}_head'] = ((lambda c, f=f: kit.face_head(c, f)), 'skin', True)
     jobs[f'face{i}_eyes'] = ((lambda c, f=f: kit.face_eyes(c, f)), None, True)
@@ -129,9 +131,13 @@ LAYERS += [dict(bone='hand_b', slot='body', piece='hand', back=True),
            dict(bone='arm_b_lo', slot='body', piece='arm_lo', back=True), dict(bone='arm_b_lo', slot='armor', piece='bracer', back=True),
            dict(bone='arm_b_up', slot='body', piece='arm_up', back=True), dict(bone='arm_b_up', slot='shoulders', piece='', back=True)]
 LAYERS += limb('b') + limb('f')
-LAYERS += [dict(bone='torso', slot='body', piece='torso'), dict(bone='torso', slot='armor', piece='torso'),
+# slot 'cut' = the two halves of a torn neck, drawn only for a pose with `neck_cut` (finishers, #20)
+LAYERS += [dict(bone='torso', slot='body', piece='torso'),
+           dict(bone='torso', slot='cut', piece='torso_edge'), dict(bone='torso', slot='cut', piece='torso'),
+           dict(bone='torso', slot='armor', piece='torso'), dict(bone='torso', slot='cut', piece='torso_tissue'),
            dict(bone='pelvis', slot='body', piece='pelvis'), dict(bone='pelvis', slot='armor', piece='skirt'),
-           dict(bone='head', slot='face', piece='head'), dict(bone='head', slot='face', piece='eyes'), dict(bone='head', slot='face', piece='lids'),
+           dict(bone='head', slot='cut', piece='head_tissue'), dict(bone='head', slot='cut', piece='head_edge'),
+           dict(bone='head', slot='cut', piece='head_neck'), dict(bone='head', slot='face', piece='head'), dict(bone='head', slot='face', piece='eyes'), dict(bone='head', slot='face', piece='lids'),
            dict(bone='head', slot='face', piece='brows'), dict(bone='head', slot='beard', piece=''), dict(bone='head', slot='face', piece='nose'),
            dict(bone='head', slot='hair', piece='front'), dict(bone='head', slot='helmet', piece=''),
            dict(bone='arm_f_lo', slot='body', piece='arm_lo'), dict(bone='arm_f_lo', slot='armor', piece='bracer'),

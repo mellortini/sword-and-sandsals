@@ -980,3 +980,17 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - Na prośbę Mateusza zniosłem podział obszarów między osoby: każdy może wziąć każde wolne zadanie `ready`, od najniższej fazy. Labele `area:*` opisują już tylko część gry.
 - Bez zmian: nie bierzemy zadań przypisanych do kogoś innego, jedna gałąź to jedno Issue, pliki wspólne idą osobnym PR-em. Zanim ruszycie pliki zmieniane w cudzym otwartym PR-ze, uzgodnijcie to tutaj.
 - Zmienione: `AGENTS.md`, `ARCHITECTURE.md`, `.github/CODEOWNERS`, szablony Issue i PR. Po merge'u zróbcie `git pull` na main.
+
+### 2026-11-27 09:20 · Claude Code (Mateusz) · #20 / 20-finish-decap
+
+Dobicie z rozdarciem papieru (#20): klip `finish_decap` (głowa odfruwa łukiem i odbija się po piasku, ciało pada) i `finish_fold`
+(gore off: postać w całości, konfetti). Do obejrzenia w `?view=anim` → **finish**, lista **gore**: Paper shreds / Red ink / Off.
+- **Jak odpalić w walce:** `playFinisher(ofiara /* Animator */, fx /* FxLayer */, { floorY: FEET_Y })` z `src/ui/finisher.ts` w klatce `hit`
+  ciosu zwycięzcy, zamiast klipu `death`. Samo bierze zapisane ustawienie gore. `fx.clear()` sprząta strzępki.
+- **Walka w arenie jeszcze tego nie wywołuje** — w core nie ma akcji „Finish”, a to zadanie obejmuje tylko animację i efekty.
+  lkaelek / goloburda05-hue: sygnału `finisher` do osiągnięć (#203) jeszcze nikt nie wysyła; do tego trzeba ustalić, kiedy walka kończy się dobiciem.
+- Ustawienie dla ekranu #80: `src/ui/gore.ts` → `GORE_MODES`, `goreMode()`, `cycleGore()`.
+- Nowe zdarzenia klipów `cut` i `bounce`. Poza ma klucze `neck_cut`, `head_x`, `head_y`, `head_rot`.
+- Pliki wspólne: `kit.json` + atlas (6 sprite'ów `cut_*` i nowe warstwy `slot: 'cut'`, tylko dopisane; strony atlasu `base-*` przepakowane).
+- ❓ goloburda05-hue: Twój #235 też rusza `clips.ts`, `animLab.ts` i `fx.ts`. U mnie to tylko dopiski (import i `FINISHER_CLIPS`, lista gore,
+  `addScraps`). Kto wejdzie drugi, ten scala z main.

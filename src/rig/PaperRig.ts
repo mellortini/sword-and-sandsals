@@ -9,7 +9,7 @@
  * - every part gets a soft paper shadow drawn right before it; 'multiply' is patched so shadows only darken paper that
  *   is already in the puppet texture (like canvas source-atop)
  */
-import { boneOffset, forwardKinematics, holdWithBothHands } from './twoHand';
+import { boneOffset, forwardKinematics, holdWithBothHands, looseHead } from './twoHand';
 import { Assets, Container, Rectangle, Renderer, RenderTexture, Sprite, Texture } from 'pixi.js';
 
 export interface KitJson {
@@ -164,6 +164,7 @@ export class Kit {
     const p = layer.piece;
     switch (layer.slot) {
       case 'body': return `body_${p}`;
+      case 'cut': return `cut_${p}`;
       case 'face': return `face${look.face}_${p}`;
       case 'hair':
         if (look.helmet > 0) {
@@ -186,7 +187,11 @@ export class Kit {
   }
 }
 
-interface Part { bone: string; sprite: Sprite; shadow: Sprite; sx: number; sy: number; ox: number; oy: number; flat: boolean }
+/** `cut` = drawn only with a torn neck (true) or only with a whole one (false); undefined = always */
+interface Part { bone: string; sprite: Sprite; shadow: Sprite; sx: number; sy: number; ox: number; oy: number; flat: boolean; cut?: boolean }
+
+/** pose keys beyond the bones that change the picture */
+const EXTRA_POSE_KEYS = ['neck_cut', 'head_x', 'head_y', 'head_rot'];
 
 interface StillFrame {
   pose: Pose;
@@ -289,7 +294,8 @@ export class PaperRig {
         oy = J.jaw_center[1] * (1 - sy);
       }
       this.inner.addChild(sh, s);
-      this.parts.push({ bone: layer.bone, sprite: s, shadow: sh, sx, sy, ox, oy, flat });
+      const cut = layer.slot === 'cut' ? true : layer.slot === 'body' && layer.piece === 'torso' ? false : undefined;
+      this.parts.push({ bone: layer.bone, sprite: s, shadow: sh, sx, sy, ox, oy, flat, cut });
     }
     this.invalidateStillFrame();
   }
@@ -303,7 +309,8 @@ export class PaperRig {
     if (frame && frame.facing === this.facing && frame.scale === this.scale
       && frame.shadow.enabled === shadow.enabled && frame.shadow.depth === shadow.depth
       && frame.shadow.strength === shadow.strength && frame.shadow.color.every((value, index) => value === shadow.color[index])
-      && this.kit.json.bones.every(({ name }) => (frame.pose[name] ?? 0) === (pose[name] ?? 0))) return;
+      && this.kit.json.bones.every(({ name }) => (frame.pose[name] ?? 0) === (pose[name] ?? 0))
+      && EXTRA_POSE_KEYS.every((name) => (frame.pose[name] ?? 0) === (pose[name] ?? 0))) return;
 
     this.render(renderer);
     this.stillFrame = { pose: { ...pose }, facing: this.facing, scale: this.scale, shadow: { ...shadow, color: [...shadow.color] } };
@@ -312,6 +319,17 @@ export class PaperRig {
   /** forward kinematics in rig units (y up, pelvis joint at its rest place), rotations in radians CCW */
   fk(pose: Pose): Map<string, { x: number; y: number; r: number }> {
     return forwardKinematics(this.kit.json.bones, pose);
+  }
+
+  /** a point given in a bone's own units (y up) in the coordinates of the view's parent, for effects */
+  screenPoint(bone: string, x = 0, y = 0): { x: number; y: number } {
+    const j = this.fk(this.heldPose()).get(bone)!;
+    const root = this.kit.json.bones[0];
+    const c = Math.cos(j.r), s = Math.sin(j.r);
+    return {
+      x: this.view.x + (j.x + x * c - y * s - root.x) * this.scale * this.facing,
+      y: this.view.y - (j.y + x * s + y * c - root.y) * this.scale,
+    };
   }
 
   /** lowest point of both soles (heel / toe), rig units */
@@ -343,6 +361,11 @@ export class PaperRig {
     for (const b of this.kit.json.bones) {
       const rot = ((pose[b.name] ?? 0) * Math.PI) / 180;
       if (!b.parent) { out.set(b.name, { x: this.origin.x, y: this.origin.y, r: -rot }); continue; }
+      if (b.name === 'head' && pose.neck_cut) {
+        const h = looseHead(pose), root = this.kit.json.bones[0];
+        out.set(b.name, { x: this.origin.x + (h.x - root.x) * k, y: this.origin.y - (h.y - root.y) * k, r: -h.r });
+        continue;
+      }
       const p = out.get(b.parent)!;
       const o = boneOffset(b, pose);
       const lx = o.x * k, ly = -o.y * k;
@@ -363,7 +386,9 @@ export class PaperRig {
     const ch = (i: number) => Math.round((1 - sh.strength * (1 - sh.color[i])) * 255);
     const tint = (ch(0) << 16) | (ch(1) << 8) | ch(2);
     const k = this.scale;
+    const torn = !!this.pose.neck_cut;
     for (const p of this.parts) {
+      const shown = p.cut === undefined || p.cut === torn;
       const t = W.get(p.bone)!;
       // local offset (bone units, y up) -> screen
       const lx = p.ox * k, ly = -p.oy * k;
@@ -374,7 +399,8 @@ export class PaperRig {
         spr.rotation = t.r;
         spr.scale.set(tex * p.sx, tex * p.sy);
       }
-      p.shadow.visible = sh.enabled && !p.flat;
+      p.sprite.visible = shown;
+      p.shadow.visible = shown && sh.enabled && !p.flat;
       p.shadow.tint = tint;
     }
     renderer.render({ container: this.inner, target: this.rt, clear: true });

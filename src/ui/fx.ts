@@ -5,6 +5,7 @@
  * ~1.6 s, so an old number never sits next to a new one.
  */
 import { Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
+import { PaperScraps } from './scraps';
 
 const FPS = 30;
 /** frames a pop stays before it fades on its own */
@@ -156,8 +157,14 @@ export class FxLayer extends Container {
     this.addChild(p);
     this.slots.set(slot, p);
   }
-  clear() { for (const p of this.slots.values()) p.fadeOut(); this.slots.clear(); }
+  /** finisher paper (#20): lies on the sand until clear(), under any pop-up shown later */
+  addScraps(s: PaperScraps) { this.addChild(s); }
+  clear() {
+    for (const p of this.slots.values()) p.fadeOut();
+    this.slots.clear();
+    for (const c of [...this.children]) if (c instanceof PaperScraps) c.destroy({ children: true });
+  }
   update(dt: number) {
-    for (const c of [...this.children]) if (c instanceof Pop && !c.destroyed) c.update(dt);
+    for (const c of [...this.children]) if ((c instanceof Pop || c instanceof PaperScraps) && !c.destroyed) c.update(dt);
   }
 }
