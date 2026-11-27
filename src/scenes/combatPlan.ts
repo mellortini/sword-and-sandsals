@@ -9,9 +9,13 @@ type AttackEvent = Extract<CombatEvent, { type: 'attack' }>;
 type MoveEvent = Extract<CombatEvent, { type: 'move' }>;
 
 export type Step =
-  /** a fighter travels; `strike` is set for a charge that ends in an attack */
-  | { kind: 'move'; side: FighterSide; move: MoveKind; from: number; to: number; strike?: AttackEvent; fatal?: boolean }
-  | { kind: 'attack'; attack: AttackEvent; fatal: boolean }
+  /**
+   * a fighter travels; `strike` is set for a charge that ends in an attack.
+   * `push` (here and on an attack) is the knockback the blow causes: the defender flies back on the hit frame,
+   * while the attacker's clip is still playing
+   */
+  | { kind: 'move'; side: FighterSide; move: MoveKind; from: number; to: number; strike?: AttackEvent; fatal?: boolean; push?: MoveEvent }
+  | { kind: 'attack'; attack: AttackEvent; fatal: boolean; push?: MoveEvent }
   | { kind: 'pose'; side: FighterSide; clip: 'block' | 'rest' | 'taunt' }
   /** a potion or spell from a combat slot (#191): `healthDelta` is applied to `target` */
   | { kind: 'item'; side: FighterSide; target: FighterSide; item: CombatItemId; healthDelta: number }
@@ -62,6 +66,13 @@ export function forwardDelta(side: FighterSide, from: number, to: number): numbe
 export function planSteps(events: readonly CombatEvent[]): Step[] {
   const steps: Step[] = [];
   const dies = new Set(events.filter((e) => e.type === 'death').map((e) => e.fighter));
+  /** the knockback of the attack at `at` (only the weapon's elemental damage can come in between) and its index */
+  const knockbackAfter = (at: number, target: FighterSide): { push: MoveEvent; index: number } | undefined => {
+    let j = at + 1;
+    while (events[j]?.type === 'elemental') j++;
+    const e = events[j];
+    return e?.type === 'move' && e.kind === 'knockback' && e.fighter === target ? { push: e, index: j } : undefined;
+  };
   for (let i = 0; i < events.length; i++) {
     const e = events[i];
     switch (e.type) {
@@ -69,16 +80,21 @@ export function planSteps(events: readonly CombatEvent[]): Step[] {
         const next = events[i + 1];
         const m: MoveEvent = e;
         if (m.kind === 'charge' && next?.type === 'attack' && next.kind === 'charge') {
-          steps.push({ kind: 'move', side: m.fighter, move: m.kind, from: m.from, to: m.to, strike: next, fatal: dies.has(next.target) });
           i++;
+          const knock = knockbackAfter(i, next.target);
+          steps.push({ kind: 'move', side: m.fighter, move: m.kind, from: m.from, to: m.to, strike: next, fatal: dies.has(next.target), ...(knock ? { push: knock.push } : {}) });
+          if (knock) i = knock.index;
         } else {
           steps.push({ kind: 'move', side: m.fighter, move: m.kind, from: m.from, to: m.to });
         }
         break;
       }
-      case 'attack':
-        steps.push({ kind: 'attack', attack: e, fatal: dies.has(e.target) });
+      case 'attack': {
+        const knock = knockbackAfter(i, e.target);
+        steps.push({ kind: 'attack', attack: e, fatal: dies.has(e.target), ...(knock ? { push: knock.push } : {}) });
+        if (knock) i = knock.index;
         break;
+      }
       case 'block':
         steps.push({ kind: 'pose', side: e.fighter, clip: 'block' });
         break;
