@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import meta from '../../assets/ui/ui.json';
 import { ACTION_GROUPS } from './actionBar';
-import { frameCss } from './uiSheet';
+import { frameCss, frameFill } from './uiSheet';
 
 describe('paper UI kit sheet (#16)', () => {
   it('has a badge for every combat action and for items', () => {
@@ -30,5 +30,14 @@ describe('paper UI kit sheet (#16)', () => {
       backgroundSize: '250px 125px', backgroundPosition: '-25px -12.5px', backgroundRepeat: 'no-repeat',
     });
     expect(frameCss({ url: '', width: 1, height: 1, frames: {} }, 'missing', 10)).toBeNull();
+  });
+
+  it('frameFill stretches one frame over any element with percentages (#34)', () => {
+    const css = frameFill({ url: 'ui.png', width: 1000, height: 500, frames: { a: { x: 100, y: 50, w: 200, h: 100 } } }, 'a');
+    expect(css).toEqual({
+      backgroundImage: 'url("ui.png")', backgroundSize: '500% 500%', backgroundPosition: '12.5% 12.5%', backgroundRepeat: 'no-repeat',
+    });
+    expect(frameFill({ url: '', width: 10, height: 10, frames: { all: { x: 0, y: 0, w: 10, h: 10 } } }, 'all')!.backgroundPosition).toBe('0% 0%');
+    expect(frameFill({ url: '', width: 1, height: 1, frames: {} }, 'missing')).toBeNull();
   });
 });

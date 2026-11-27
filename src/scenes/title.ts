@@ -3,6 +3,7 @@ import { saveGame } from '../core/save';
 import type { SavedCharacter } from '../core/save';
 import { PaperMenu } from '../ui/paperMenu';
 import { openTown, townNote } from '../ui/town';
+import { lookPreview } from '../ui/lookPreview';
 import { TEXT_SIZES, cycleTextSize, textSizeIndex } from '../ui/textSize';
 import type { PaperMenuEntry } from '../ui/paperMenu';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, drawableLook, groundShadowTexture, randomLook } from './common';
@@ -37,7 +38,7 @@ function entries(saved: SavedCharacter | null): TitleEntry[] {
  * `?view=title`: game title over the dimmed arena, two idle gladiators facing each other and the main menu.
  * Mouse or keyboard (↑/↓, Enter; ←/→ change a setting such as Text size, #77). Entries open their view by URL.
  */
-export async function showTitle({ world, bgTex, ui, add, kit }: SceneContext) {
+export async function showTitle({ app, world, bgTex, ui, add, kit }: SceneContext) {
   const root = new Container();
   world.addChild(root);
   const bg = new Sprite(bgTex);
@@ -84,6 +85,8 @@ export async function showTitle({ world, bgTex, ui, add, kit }: SceneContext) {
     if (items[i].setting === 'textSize') menu.setNote(i, TEXT_SIZES[cycleTextSize(step)].name);
   };
   let gladiator = saved;
+  // the shops put gear on the gladiator before buying it (#34): one still puppet, drawn only when asked
+  const tryOn = lookPreview(kit, app.renderer);
   const menu = new PaperMenu(items, (i) => {
     const view = items[i].view;
     if (view) location.search = `?view=${view}`;
@@ -92,7 +95,7 @@ export async function showTitle({ world, bgTex, ui, add, kit }: SceneContext) {
         gladiator = c;
         // the saved gladiator on the left shows new gear at once
         if (saved) void hero?.setLook(drawableLook(kit, c.look));
-      }).then((c) => {
+      }, tryOn).then((c) => {
         gladiator = c;
         menu.setNote(i, townNote(c));
       });

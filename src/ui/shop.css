@@ -38,3 +38,84 @@
   .shop-row__stat { grid-column: 1; grid-row: 2; }
   .shop-row button { grid-column: 2; grid-row: 1 / span 2; }
 }
+
+/* ---------------------------------------------------------------- the shop as a room (#34): vendor, try-on, scroll */
+.shop--room {
+  justify-content: flex-end; padding: 0 3vw 0 0; box-sizing: border-box;
+  background: linear-gradient(90deg, rgba(20, 12, 14, 0.05) 0%, rgba(20, 12, 14, 0.15) 55%, rgba(20, 12, 14, 0.45) 100%),
+    var(--room, none) center / cover no-repeat, #2a1a1e;
+}
+/* the scroll's rods stick out above and below the panel: keep them on the screen */
+.shop--room .shop__panel { width: min(54vw, 760px); max-height: 80vh; }
+.shop--room .shop__panel--scroll { max-height: calc(94vh - 0.2 * min(54vw, 760px)); }
+
+/* the vendor stands at the bottom left, facing the goods; the speech bubble floats over the bust */
+.shop__vendor {
+  position: absolute; left: 1.5vw; bottom: 0; width: min(30vw, 46vh, 440px);
+  display: flex; flex-direction: column; align-items: flex-start; pointer-events: none;
+}
+.shop__bubble {
+  position: relative; box-sizing: border-box; margin: 0 0 1.6vh 18%; max-width: 92%; padding: 10px 16px; border-radius: 14px;
+  font-size: 17px; line-height: 1.35; font-style: italic; color: #3a2418;
+  background: linear-gradient(160deg, #fffaf0 0%, #f3e6c8 70%); box-shadow: 0 3px 0 rgba(30, 16, 18, 0.35), inset 0 0 0 1px #c9ab7c;
+}
+.shop__bubble:empty { visibility: hidden; }
+.shop__bubble::after {
+  content: ''; position: absolute; left: 22%; bottom: -13px; border: 7px solid transparent;
+  border-top: 8px solid #f3e6c8; border-left: 8px solid #f3e6c8; filter: drop-shadow(0 2px 0 rgba(30, 16, 18, 0.25));
+}
+.shop__bust { position: relative; width: 100%; aspect-ratio: 448 / 488; }
+.shop__face { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.shop__face:not([src]) { display: none; }
+.shop__face--talk { visibility: hidden; }
+.shop__bust.talking .shop__face--talk { visibility: visible; }
+.shop__bust.talking .shop__face:not(.shop__face--talk) { visibility: hidden; }
+.shop__who {
+  position: absolute; left: 4%; bottom: 1.2vh; padding: 3px 12px; border-radius: 3px; font-size: 16px; color: #f2c14e;
+  background: rgba(40, 24, 28, 0.85); box-shadow: inset 0 0 0 1px #815a46; display: flex; flex-direction: column;
+}
+.shop__who:empty { display: none; }
+.shop__who small { font-size: 11px; font-style: italic; color: #cdb99a; }
+
+/* the gladiator between the vendor and the scroll, trying on what is pointed at */
+.shop__preview {
+  position: absolute; bottom: 2vh; left: calc(1.5vw + min(30vw, 46vh, 440px)); width: min(20vw, 34vh); height: 64vh;
+  display: flex; align-items: flex-end; justify-content: center; pointer-events: none;
+}
+.shop__puppet { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 6px 4px rgba(20, 10, 12, 0.35)); }
+
+/* the goods written on a paper scroll (UI kit frames scroll_top / body / bottom, #16) */
+.shop__panel--scroll {
+  position: relative; padding: 4.4% 6% 3.2%; border: 0; border-radius: 0; box-shadow: none; overflow: visible;
+  background-image: var(--scroll-body-image); background-size: var(--scroll-body-size); background-position: var(--scroll-body-pos);
+  background-repeat: no-repeat; background-color: transparent; color: #3a2418;
+}
+.shop__panel--scroll::before, .shop__panel--scroll::after {
+  content: ''; position: absolute; left: -2.5%; right: -2.5%; height: 0; padding-bottom: 14.6%; pointer-events: none;
+  background-repeat: no-repeat;
+}
+.shop__panel--scroll::before { bottom: 100%; margin-bottom: -6%; background-image: var(--scroll-top-image); background-size: var(--scroll-top-size); background-position: var(--scroll-top-pos); }
+.shop__panel--scroll::after { top: 100%; margin-top: -6%; background-image: var(--scroll-bottom-image); background-size: var(--scroll-bottom-size); background-position: var(--scroll-bottom-pos); }
+.shop__panel--scroll h3 { color: #6a2a1c; }
+.shop__panel--scroll .forge__name { color: #6b4a2e; }
+.shop__panel--scroll .shop__gold { color: #7a5a12; }
+.shop__panel--scroll .shop__gold b { color: #8a4a10; }
+.shop__panel--scroll .forge__problem { color: #6a2a1c; }
+.shop__panel--scroll .forge__problem.ok { color: #2f5a24; }
+.shop__panel--scroll .shop__tabs button { background: #d8bf92; color: #5a4030; box-shadow: inset 0 0 0 1px #a07a4f; }
+.shop__panel--scroll .shop__tabs [aria-selected='true'] { background: #fff4d8; color: #3a2418; }
+.shop__panel--scroll .forge__empty { color: #6b4a2e; }
+
+/* how an offer compares with what is worn: the sign and the word say it, the colour only helps */
+.shop-row__cmp { display: block; font-size: 11.5px; font-style: italic; }
+.shop-row__cmp--up { color: #2f6a24; }
+.shop-row__cmp--down { color: #a8322a; }
+.shop-row__cmp--same { color: #8b6a4a; }
+
+/* smaller screens: first the try-on goes, then the vendor shrinks to the bubble's side, then only the scroll is left */
+@media (max-width: 1100px) { .shop__preview { display: none; } }
+@media (max-width: 760px), (max-height: 520px) {
+  .shop--room { justify-content: center; padding: 0; }
+  .shop__vendor { display: none; }
+  .shop--room .shop__panel { width: min(96vw, 760px); }
+}

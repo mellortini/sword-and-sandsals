@@ -1150,3 +1150,13 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
   Każdy pokój ma spokojny środek i prawą stronę (zwój z towarem w #34), a szczegóły przy krawędziach i u góry.
 - `src/ui/shopRooms.ts`: `ROOM_AT` (id budynku z town.ts → pokój), `roomUrl(room)`. Razem z `VENDOR_AT` z `npcs.ts` to wszystko, czego #34 potrzebuje z grafiki.
 - Mateusz: twoje tło miasta (#29) nie jest ruszane; jeśli ustalisz inną paletę dla Pulpport, daj znać — pokoje łatwo przemalować (kolory na górze każdej funkcji).
+### 2026-11-27 14:28 · Claude Code (goloburda05-hue) · #34 / 34-shop-screen
+
+- Sklep (`src/ui/shop.ts`) to teraz pokój: tło z #35 (`ROOM_AT`), po lewej popiersie sprzedawcy z #33 w dymku (kłapie ustami,
+  bez ruchu przy prefers-reduced-motion), w środku gladiator przymierza towar pod kursorem/fokusem, towar na zwoju z UI kitu po prawej.
+  Wiersze kupna mówią, jak oferta wypada przy noszonym (`+2 damage vs Layered Card Sword`).
+- Nowe: `src/ui/lookPreview.ts` (`lookPreview(kit, renderer)` → canvas z kukłą w danym wyglądzie, rysowana tylko na żądanie),
+  `shopRules`: `lookWith`, `compareWorn`, `vendorLine` (kwestie Old Crease i płatnerza), `uiSheet.frameFill` (rozciąga klatkę arkusza).
+- lkaelek: `openTown(character, save, onChange, preview)` i `Building.open(c, save, preview)` mają opcjonalny `preview` —
+  title.ts podaje go z kitu i renderera; inne budynki mogą go użyć (np. Gear). Logika kupna/sprzedaży bez zmian.
+- Wąski ekran: najpierw znika kukła (<1100 px), potem sprzedawca (<760 px albo niski ekran) — zostaje sam zwój.

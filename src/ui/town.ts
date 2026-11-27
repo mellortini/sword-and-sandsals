@@ -11,6 +11,7 @@ import { equipmentSignal, recordForCareer, trophyCount } from './achievementRule
 import { showAchievements } from './achievementToast';
 import { openTrophies } from './trophies';
 import { openShop } from './shop';
+import type { LookPreview } from './lookPreview';
 import { openSkillTree } from './skillTree';
 import { openTemple } from './temple';
 import { openTrainer } from './trainer';
@@ -27,14 +28,15 @@ interface Building {
   readonly purpose: string;
   /** the gladiator's state there, e.g. "2 skill points to spend" */
   readonly note: (c: SavedCharacter) => string;
-  readonly open: (c: SavedCharacter, save: Save) => Promise<SavedCharacter>;
+  /** `preview` draws the gladiator in a look, for screens that try things on (the shops, #34) */
+  readonly open: (c: SavedCharacter, save: Save, preview?: LookPreview) => Promise<SavedCharacter>;
 }
 
 /** The town's places in the order the panel lists them (#201). Each opens its own screen. */
 export const BUILDINGS: readonly Building[] = [
   { id: 'leagues', name: 'Leagues', purpose: 'Climb the ladder to the champions', note: ladderNote, open: (c) => openLeagues(c) },
-  { id: 'armourer', name: 'Armourer', purpose: 'Buy and sell armour', note: (c) => `${c.gold} gold`, open: (c, save) => openShop('armourer', c, save) },
-  { id: 'weaponsmith', name: 'Weaponsmith', purpose: 'Buy and sell weapons', note: (c) => `${c.gold} gold`, open: (c, save) => openShop('weaponsmith', c, save) },
+  { id: 'armourer', name: 'Armourer', purpose: 'Buy and sell armour', note: (c) => `${c.gold} gold`, open: (c, save, preview) => openShop('armourer', c, save, preview) },
+  { id: 'weaponsmith', name: 'Weaponsmith', purpose: 'Buy and sell weapons', note: (c) => `${c.gold} gold`, open: (c, save, preview) => openShop('weaponsmith', c, save, preview) },
   {
     id: 'gear', name: 'Gear', purpose: 'Wear what is in your pack',
     note: (c) => plural(c.inventory.length, 'item') + ' in the pack', open: openGear,
@@ -67,7 +69,7 @@ export const BUILDINGS: readonly Building[] = [
  * screen over the town; when that closes, the town comes back with fresh notes. `onChange` hears every saved change
  * (the title updates its puppet and notes). Leave or Escape closes; arrows move between the cards.
  */
-export function openTown(character: SavedCharacter, save: Save, onChange?: (c: SavedCharacter) => void): Promise<SavedCharacter> {
+export function openTown(character: SavedCharacter, save: Save, onChange?: (c: SavedCharacter) => void, preview?: LookPreview): Promise<SavedCharacter> {
   const backdrop = document.createElement('div');
   backdrop.className = 'forge town';
   backdrop.innerHTML = `
@@ -125,7 +127,7 @@ export function openTown(character: SavedCharacter, save: Save, onChange?: (c: S
       keys.abort();
       backdrop.hidden = true;
       const before = current;
-      current = await place.open(current, save);
+      current = await place.open(current, save, preview);
       // new gear may complete an armour set (#203)
       if (place.id === 'gear' && current !== before) {
         const { character, unlocked } = recordForCareer(current, equipmentSignal(careerLoadout(current)));
