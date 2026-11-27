@@ -1,7 +1,7 @@
 """Paper UI kit (#16): HP / EN flasks, a wooden name plate, 11 action icons, a yellow note and a scroll panel,
 rendered in Cycles as cut paper and packed into one sheet for the HUD and menus.
 
-  "C:/Program Files/Blender Foundation/Blender 5.3/blender.exe" -b --python blender/ui_kit.py -- [samples]
+  python -I tools/blender.py blender/ui_kit.py -- [samples]
 
 Writes assets/ui/ui.png and assets/ui/ui.json:
   { "frames": { key: { x, y, w, h } }, "fill": { key: { top, bottom } } }   (px, top-left of the sheet)

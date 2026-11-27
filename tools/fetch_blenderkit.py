@@ -2,7 +2,7 @@
 BlenderKit's royalty-free licence allows using them in the game, not redistributing the raw files).
 
   python -I tools/fetch_blenderkit.py                 # downloads into art_src/blenderkit/<name>/
-  D:/blender/blender.exe -b --disable-autoexec --python blender/unpack_blenderkit.py   # extracts textures to <name>/tex/
+  python -I tools/blender.py blender/unpack_blenderkit.py   # extracts textures to <name>/tex/
 
 The list of assets (ids, licences, authors) is art_src/blenderkit/assets.json (tracked in git).
 Free assets download without an account; nothing personal is sent.

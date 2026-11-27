@@ -22,7 +22,7 @@ Plan i projekt: [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/GDD.md`](docs/GDD.m
 - **Node.js 22 od 22.13, 24 lub 26+** (projekt rozwijany na Node 26) i npm
 - **Git** + **Git LFS** (grafiki PNG/JPG/.blend idą przez LFS)
 - **GitHub CLI** (`gh`) — zadania i PR-y
-- tylko do generowania grafik: **Blender 5.3** (`D:/blender/blender.exe` u Mateusza; ścieżkę dopasuj) i Python 3.11+
+- tylko do generowania grafik: **Blender 5.3** i Python 3.11+ (`tools/blender.py` sam znajduje Blendera; inna ścieżka → zmienna `BLENDER`)
 
 ## Uruchomienie
 ```
@@ -45,14 +45,18 @@ Widoki (parametr w adresie):
 ## Grafika (Blender)
 Gotowe sprite'y są w repo (`assets/`), więc do uruchomienia gry Blender nie jest potrzebny. Żeby renderować:
 ```
-python -I tools/fetch_blenderkit.py                                          # pobiera darmowe tekstury papieru (nie są w git — licencja)
-D:/blender/blender.exe -b --disable-autoexec --python blender/unpack_blenderkit.py
-D:/blender/blender.exe -b --python blender/build_kit.py -- 32                # cały zestaw postaci (~75 s, GPU)
-D:/blender/blender.exe -b --python blender/build_kit.py -- 32 helmet9,face3  # tylko wybrane elementy
-D:/blender/blender.exe -b --python blender/arena.py -- assets/bg/arena.png 1920 1080 128
-D:/blender/blender.exe -b --python blender/fx_bits.py -- 64                 # płatki i kurz z piasku (#17) → assets/fx/bits.png + bits.json
-D:/blender/blender.exe -b --python blender/ui_kit.py -- 48                  # flakony, tabliczka, ikony akcji, karteczka, zwój (#16) → assets/ui/ui.png + ui.json
+python -I tools/fetch_blenderkit.py                                    # pobiera darmowe tekstury papieru (nie są w git — licencja)
+python -I tools/blender.py blender/unpack_blenderkit.py                # rozpakowuje je do art_src/blenderkit/*/tex
+python -I tools/blender.py blender/build_kit.py -- 32                  # cały zestaw postaci (~75 s, GPU)
+python -I tools/blender.py blender/build_kit.py -- 32 helmet9,face3    # tylko wybrane elementy
+python -I tools/blender.py blender/arena.py -- assets/bg/arena.png 1920 1080 128
+python -I tools/blender.py blender/fx_bits.py -- 64                    # płatki i kurz z piasku (#17) → assets/fx/bits.png + bits.json
+python -I tools/blender.py blender/ui_kit.py -- 48                     # flakony, tabliczka, ikony, karteczka, zwój (#16) → assets/ui/ui.png + ui.json
 ```
+`tools/blender.py` bierze Blendera ze zmiennej `BLENDER`, a bez niej z typowych miejsc instalacji (Windows: `Program Files/Blender Foundation`,
+`D:/blender`, macOS: `/Applications`) albo z `PATH`; `python -I tools/blender.py --where` pokazuje, którego użyje. Skrypty zawsze idą z
+`--disable-autoexec`. Render wybiera GPU (OptiX / CUDA / HIP / oneAPI / Metal), bez niego CPU — w logu jest linia `CYCLES_DEVICE`;
+`CYCLES_DEVICE=CPU` wymusza CPU.
 
 Po zmianie sprite'ów zestawu odśwież atlasy produkcyjne przez `npm run assets:atlas`. Serwer dev korzysta z PNG,
 a build produkcyjny pobiera odpowiednie strony WebP i może wrócić do PNG, jeśli atlas jest niedostępny.

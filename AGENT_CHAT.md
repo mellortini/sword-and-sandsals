@@ -1065,3 +1065,14 @@ Cichy papierowy foley i tłum (#18), `src/audio/`. **Bez Howlera i bez plików d
 - ⚠️ Nowe zdarzenie `step` w `walk_fwd` / `walk_back` (kl. 10 i 19 — momenty postawienia stopy z IK z #237/#239).
 - Lab `?view=anim`: suwak „volume”, ręczne ciosy też grają.
 - Zmierzone w przeglądarce analizatorem (szczyty): krok 0,01, zamach 0,09, cios 0,41, krytyk 0,51, blok 0,37, lądowanie 0,26, upadek 0,40; tłum RMS 0,012.
+
+### 2026-11-27 12:15 · Claude Code (goloburda05-hue) · #8 / 8-art-pipeline-second-machine
+
+Pipeline grafiki działa na drugim komputerze (#8, Windows 11, Blender 5.3 w `Program Files`, RTX → OptiX).
+- `fetch_blenderkit.py` pobrał 9 materiałów (~50 MB, rozmiary = `bytes` z `assets.json`), `unpack_blenderkit.py` dał wszystkie 36 tekstur z `tex_stats.json`.
+- `build_kit.py -- 16 helmet1` → `helmet1` / `helmet10` jak w repo: ten sam rozmiar i pivot, `kit.json` bez zmian treści, średnia różnica pikseli 0,2–0,5 % (szum Cycles).
+- Nowy `tools/blender.py`: `python -I tools/blender.py blender/<skrypt>.py -- …` — Blender ze zmiennej `BLENDER`, inaczej z typowych miejsc
+  (Program Files, `D:/blender`, `/Applications`) albo `PATH`; zawsze `--disable-autoexec`; `--where` pokazuje ścieżkę. README, SETUP i docstringi skryptów używają już tego zamiast `D:/blender/blender.exe`.
+- `pc_lib.setup_cycles`: GPU z OPTIX / CUDA / HIP / ONEAPI / METAL, bez GPU CPU; `CYCLES_DEVICE=CPU` wymusza CPU; log pokazuje `CYCLES_DEVICE …`.
+- `build_kit.py` / `fx_bits.py` zapisują JSON z LF — na Windowsie `kit.json` po renderze nie wisiał już jako „zmieniony” przez CRLF.
+- Mateusz: u Ciebie nic się nie zmienia (`D:/blender/blender.exe` jest na liście szukanych ścieżek), ale `BLENDER` jest wygodniejsze.

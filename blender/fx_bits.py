@@ -2,7 +2,7 @@
 on landing, after a charge and when a fighter falls. Rendered in Cycles like the kit, packed into one sheet so the
 runtime draws every piece from a single texture.
 
-  "C:/Program Files/Blender Foundation/Blender 5.3/blender.exe" -b --python blender/fx_bits.py -- [samples]
+  python -I tools/blender.py blender/fx_bits.py -- [samples]
 
 Writes assets/fx/bits.png (sheet) and assets/fx/bits.json ({ "frames": { name: { x, y, w, h } } }, px, top-left).
 Materials are procedural paper (pc_lib.paper_mat), so the BlenderKit scans are not needed: at 10-40 px on screen the
@@ -123,6 +123,6 @@ out.pixels[:] = sheet[::-1].ravel()
 out.filepath_raw = os.path.join(OUT, 'bits.png')
 out.file_format = 'PNG'
 out.save()
-with open(os.path.join(OUT, 'bits.json'), 'w') as fh:
+with open(os.path.join(OUT, 'bits.json'), 'w', newline='\n') as fh:
     json.dump({'frames': frames}, fh, indent=1)
 print('FX_BITS', SHEET_W, SHEET_H, ', '.join(frames))
