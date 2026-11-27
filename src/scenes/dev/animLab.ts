@@ -14,6 +14,8 @@ import type { SceneContext, SceneUpdate } from '../common';
 import { arenaBackdrop } from '../backdrop';
 import { FIGHT_LAYOUT, MIN_LUNGE, STRIKE_GAP } from '../combatPlan';
 import { WEAPONS } from '../../data/weapons';
+import { playFoley } from '../../audio/foley';
+import { setVolume, volumes } from '../../audio/volume';
 
 export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: SceneContext): Promise<SceneUpdate> {
   const arena = new Container();
@@ -66,9 +68,9 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   const miss = (who: PaperRig) => { const h = head(who); layer.show(who === P ? 'p' : 'e', new MissText(), h.x + 34 * who.facing, h.y); };
   const shield = (who: PaperRig) => { const h = head(who); layer.show(who === P ? 'pb' : 'eb', new BlockShield(), h.x - 30 * who.facing, h.y + 6); };
   const defend = (def: Animator, power: number, crit = false) => {
-    if (state.response === 'dodge') { def.play('dodge'); miss(def.rig); }
-    else if (state.response === 'block' && Math.random() < 0.9) { def.play('block'); shield(def.rig); }
-    else { def.play('hit'); dmg(def.rig, Math.round(power * (0.7 + Math.random() * 0.6)), crit); }
+    if (state.response === 'dodge') { def.play('dodge'); miss(def.rig); playFoley('miss'); }
+    else if (state.response === 'block' && Math.random() < 0.9) { def.play('block'); shield(def.rig); playFoley('block'); }
+    else { def.play('hit'); dmg(def.rig, Math.round(power * (0.7 + Math.random() * 0.6)), crit); playFoley(crit ? 'crit' : 'hit'); }
   };
   /**
    * Walk into this weapon's range (several strides if needed), then strike - one click is one attack.
@@ -135,13 +137,14 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
     <label>enemy <select id="sResponse"><option value="hit">gets hit</option><option value="block">blocks</option><option value="dodge">dodges (miss)</option></select></label>
     <label><input type="checkbox" id="cbCounter" checked> enemy answers</label>
     <label>gore <select id="sGore">${GORE_MODES.map((m) => `<option value="${m.id}"${m.id === goreMode() ? ' selected' : ''}>${m.name}</option>`).join('')}</select></label>
+    <label>volume <input type="range" id="rVolume" min="0" max="1" step="0.05" value="${volumes().master}"></label>
     <label>speed <select id="sSpeed"><option value="1">1x</option><option value="0.5">0.5x</option><option value="0.25">0.25x</option><option value="0.1">0.1x</option></select></label>
     <div class="small"><a href="?view=arena">arena</a> &middot; <a href="?view=wardrobe">wardrobe</a> &middot; <a href="?view=strip&clip=attack_normal">frame strips</a></div>`;
   // --- core fight (#11): src/core decides, CombatPresenter animates, HUD follows. Both sides pick at random.
   // same staging as the arena (#151): bodies never overlap, lunges stretch to the strike point
   const layout = FIGHT_LAYOUT;
   const presenter = new CombatPresenter({
-    fighters: { player: pa, enemy: ea }, fx: layer, unit: UNIT, layout, floorY: FEET_Y,
+    fighters: { player: pa, enemy: ea }, fx: layer, unit: UNIT, layout, floorY: FEET_Y, sound: true,
     onState: (s) => hud.setState(s),
   });
   const full = { name: '', health: 1, energy: 1, stats: { maxHealth: 1, maxEnergy: 1 } };
@@ -185,6 +188,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   (document.getElementById('sResponse') as HTMLSelectElement).onchange = (e) => (state.response = (e.target as HTMLSelectElement).value as typeof state.response);
   (document.getElementById('cbCounter') as HTMLInputElement).onchange = (e) => (state.counter = (e.target as HTMLInputElement).checked);
   (document.getElementById('sGore') as HTMLSelectElement).onchange = (e) => setGoreMode((e.target as HTMLSelectElement).value as GoreMode);
+  (document.getElementById('rVolume') as HTMLInputElement).oninput = (e) => setVolume('master', +(e.target as HTMLInputElement).value);
   (document.getElementById('sSpeed') as HTMLSelectElement).onchange = (e) => { const v = +(e.target as HTMLSelectElement).value; pa.speed = v; ea.speed = v; };
   (window as unknown as { __act: unknown }).__act = act;
   return (dt) => { layer.update(dt * pa.speed); hud.update(dt * pa.speed); };

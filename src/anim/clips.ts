@@ -26,6 +26,7 @@ export const CLIPS: Clip[] = [
     // #238: leg angles solved by 2-bone IK (as walk_back, #7): the front foot lifts and lands 1.6 ahead while the back
     // one holds, then the back foot follows while the front one holds (no sliding soles)
     name: 'walk_fwd', length: 20,
+    events: [{ f: 10, type: 'step' }, { f: 19, type: 'step' }],
     keys: [
       { f: 0 },
       { f: 3, x: 0.22, pose: { leg_f_up: 43, leg_f_lo: -52, leg_b_up: -6, leg_b_lo: -20, torso: 1, arm_b_up: -10 } },
@@ -40,6 +41,7 @@ export const CLIPS: Clip[] = [
     // #7: leg angles solved by 2-bone IK so the standing foot stays put: first the back foot lifts and reaches 1.6 back
     // while the front one holds, then the front foot follows while the back one holds (no sliding soles)
     name: 'walk_back', length: 20,
+    events: [{ f: 10, type: 'step' }, { f: 19, type: 'step' }],
     keys: [
       { f: 0 },
       { f: 3, x: -0.22, pose: { leg_f_up: 26, leg_f_lo: -20, leg_b_up: 10, leg_b_lo: -54, torso: 5 } },

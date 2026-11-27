@@ -1052,3 +1052,16 @@ Zestaw UI z #16 jest już w grze (#242).
 - Pasek akcji: odznaka 26 px nad nazwą na każdej karcie (`icon_<akcja>`, przedmioty `icon_item`). Karta ma ten sam rozmiar (68×78), mniejszy górny margines.
 - Poprawka #16: drążki zwoju wystawały poza wspólną ramkę (`scroll_top`/`bottom` szersze o 8 px od `scroll_body`) — ramka poszerzona, arkusz przerenderowany. Test `uiSheet.test.ts` pilnuje wspólnych ramek flakonu i zwoju.
 - Uwaga (stare, nie z tej zmiany): w pasku tłumu nad panelem napis „CROWD” jest przycięty przez pasek („CROWI”) — `crowdMeter.ts`.
+
+### 2026-11-27 11:50 · Claude Code (goloburda05-hue) · #18 / 18-paper-foley
+
+Cichy papierowy foley i tłum (#18), `src/audio/`. **Bez Howlera i bez plików dźwiękowych** — wszystko syntezowane w Web Audio
+(szum przez filtry = papier, opadający sinus = karton, kilka tonów trójkątnych = folia). Nic do pobierania, nic do licencji, `package.json` bez zmian.
+- `volume.ts`: kanały `master` / `foley` / `crowd` (domyślnie 0,6 / 0,8 / 0,5), zapis w przeglądarce, `setVolume(channel, v)` — ekran ustawień (#80) ma tylko to wołać.
+- `mixer.ts`: jeden graf (foley + tłum → master → łagodny kompresor), odblokowanie audio na pierwszy klik / klawisz.
+- `foley.ts`: `playFoley('swing'|'miss'|'hit'|'crit'|'block'|'step'|'land'|'impact')` z lekką losową wysokością i głośnością; `attachFoley(animator)` gra zdarzenia klipów (`swing`, `step`, `land`, `impact`).
+- `crowd.ts`: `startCrowd()` → szmer tłumu w dwóch pasmach z wolnym falowaniem + `cheer()`; arena i aifight startują go i wyciszają przy zniszczeniu sceny.
+- `CombatPresenter({ sound: true, crowd })`: wynik ciosu (miss / block / hit / crit) na klatce trafienia, tłum wiwatuje przy krytyku i dobiciu.
+- ⚠️ Nowe zdarzenie `step` w `walk_fwd` / `walk_back` (kl. 10 i 19 — momenty postawienia stopy z IK z #237/#239).
+- Lab `?view=anim`: suwak „volume”, ręczne ciosy też grają.
+- Zmierzone w przeglądarce analizatorem (szczyty): krok 0,01, zamach 0,09, cios 0,41, krytyk 0,51, blok 0,37, lądowanie 0,26, upadek 0,40; tłum RMS 0,012.
