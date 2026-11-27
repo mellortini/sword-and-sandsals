@@ -33,12 +33,16 @@ export const CLIPS: Clip[] = [
     ],
   },
   {
+    // #7: leg angles solved by 2-bone IK so the standing foot stays put: first the back foot lifts and reaches 1.6 back
+    // while the front one holds, then the front foot follows while the back one holds (no sliding soles)
     name: 'walk_back', length: 20,
     keys: [
       { f: 0 },
-      { f: 6, x: -0.5, pose: { leg_b_up: 12, leg_b_lo: -52, foot_b: 12, torso: 6 } },
-      { f: 12, x: -1.1, pose: { leg_b_up: -32, leg_b_lo: -2, leg_f_up: 26, leg_f_lo: -4 } },
-      { f: 16, x: -1.42, pose: { leg_f_up: 32, leg_f_lo: -42, foot_f: 6 } },
+      { f: 3, x: -0.22, pose: { leg_f_up: 26, leg_f_lo: -20, leg_b_up: 10, leg_b_lo: -54, torso: 5 } },
+      { f: 6, x: -0.5, pose: { leg_f_up: 30, leg_f_lo: -20, leg_b_up: 7, leg_b_lo: -60, torso: 6 } },
+      { f: 10, x: -0.8, pose: { leg_f_up: 35, leg_f_lo: -20, leg_b_up: -13, leg_b_lo: -24, torso: 5 } },
+      { f: 13, x: -1.05, pose: { leg_f_up: 48, leg_f_lo: -50, leg_b_up: -11, leg_b_lo: -20, torso: 4 } },
+      { f: 16, x: -1.32, pose: { leg_f_up: 46, leg_f_lo: -56, leg_b_up: -7, leg_b_lo: -20 } },
       { f: 20, x: -1.6, pose: { leg_f_up: 16, leg_f_lo: -6, leg_b_up: -14, leg_b_lo: 4, torso: 3 } },
     ],
   },
@@ -85,9 +89,10 @@ export const CLIPS: Clip[] = [
     name: 'attack_normal', length: 16,
     events: [{ f: 1, type: 'hit' }],
     keys: [
-      { f: 0, x: 0.6, ease: 'step', pose: { torso: -14, head: -4, arm_f_up: 112, arm_f_lo: -14, hand_f: 0, blade: 60, arm_b_up: -55, arm_b_lo: 20, leg_f_up: 42, leg_f_lo: -38, leg_b_up: -32, leg_b_lo: 8 } },
-      { f: 2, x: 0.9, ease: 'out', pose: { torso: -20, arm_f_up: 72, arm_f_lo: -24, blade: -40 } },
-      { f: 10, x: 0.95, pose: { torso: -18, head: -2, blade: -44 } },
+      // deep lunge as in the reference (#7): front knee well bent, back leg stretched out, so the pelvis drops low
+      { f: 0, x: 0.6, ease: 'step', pose: { torso: -16, head: -4, arm_f_up: 112, arm_f_lo: -14, hand_f: 0, blade: 60, arm_b_up: -55, arm_b_lo: 20, leg_f_up: 52, leg_f_lo: -58, leg_b_up: -40, leg_b_lo: 8 } },
+      { f: 2, x: 0.9, ease: 'out', pose: { torso: -24, head: 2, arm_f_up: 72, arm_f_lo: -24, blade: -33, leg_f_up: 62, leg_f_lo: -80, leg_b_up: -48, leg_b_lo: 6 } },
+      { f: 10, x: 0.95, pose: { torso: -22, head: 0, blade: -37, leg_f_up: 60, leg_f_lo: -76, leg_b_up: -47, leg_b_lo: 6 } },
       { f: 13, x: 0.3, pose: { torso: -4, arm_f_up: 40, arm_f_lo: 40, blade: 10, leg_f_up: 24, leg_f_lo: -12, leg_b_up: -18, leg_b_lo: 4, arm_b_up: -24 } },
       { f: 16, x: 0, pose: { torso: 3, head: -3, arm_f_up: 22, arm_f_lo: 62, hand_f: -10, weapon: -40, arm_b_up: -18, arm_b_lo: 35, leg_f_up: 16, leg_f_lo: -6, leg_b_up: -14, leg_b_lo: 4 } },
     ],
@@ -174,11 +179,15 @@ export const CLIPS: Clip[] = [
     keys: [
       { f: 0 },
       { f: 4, x: -0.4, ease: 'out', pose: { torso: 22, head: 28, arm_f_up: 40, arm_f_lo: 20, arm_b_up: 50 } },
-      { f: 12, air: true, x: -0.6, y: -1.6, pose: { pelvis: 14, torso: 28, leg_f_up: 52, leg_f_lo: -84, leg_b_up: 30, leg_b_lo: -92, foot_f: 30, foot_b: 60 } },
+      // #7: root heights below keep the lowest sole on the floor while the knees buckle (they used to sink up to 1.6 units)
+      { f: 8, air: true, x: -0.5, y: -0.13, pose: { pelvis: 7, torso: 25, head: 28, leg_f_up: 34, leg_f_lo: -45, leg_b_up: 8, leg_b_lo: -44, foot_f: 10, foot_b: 35 } },
+      { f: 12, air: true, x: -0.6, y: -0.98, pose: { pelvis: 14, torso: 28, leg_f_up: 52, leg_f_lo: -84, leg_b_up: 30, leg_b_lo: -92, foot_f: 30, foot_b: 60 } },
+      { f: 16, air: true, x: -0.71, y: -0.67, pose: { pelvis: 24, torso: 25, head: 25, leg_f_up: 50, leg_f_lo: -74, leg_b_up: 29, leg_b_lo: -79, foot_f: 22, foot_b: 49, arm_f_up: 53, arm_f_lo: 18, arm_b_up: 64, arm_b_lo: 31 } },
+      { f: 19, air: true, x: -0.94, y: -1.09, ease: 'in', pose: { pelvis: 44, torso: 18, head: 20, leg_f_up: 46, leg_f_lo: -55, leg_b_up: 27, leg_b_lo: -53, foot_f: 6, foot_b: 26, arm_f_up: 79, arm_f_lo: 15, arm_b_up: 94, arm_b_lo: 23 } },
       { f: 22, air: true, x: -1.3, y: -3.7, ease: 'in', pose: { pelvis: 76, torso: 8, head: 12, leg_f_up: 40, leg_f_lo: -24, leg_b_up: 24, leg_b_lo: -12, arm_f_up: 120, arm_f_lo: 10, arm_b_up: 140, arm_b_lo: 10, foot_f: -20, foot_b: -10 } },
       { f: 25, air: true, x: -1.45, y: -4.15, ease: 'out', pose: { pelvis: 86, head: 18 } },
       { f: 28, air: true, x: -1.5, y: -3.95, pose: { pelvis: 83 } },
-      { f: 33, air: true, x: -1.5, y: -4.2, ease: 'out', pose: { pelvis: 88, head: 22, leg_f_up: 10, leg_f_lo: -6, leg_b_up: -4, leg_b_lo: -2, foot_f: -60, foot_b: -70, arm_f_up: 130 } },
+      { f: 33, air: true, x: -1.5, y: -4.2, ease: 'out', pose: { pelvis: 88, head: 22, leg_f_up: 10, leg_f_lo: -6, leg_b_up: 4, leg_b_lo: -2, foot_f: -2, foot_b: 8, arm_f_up: 130 } }, // lying: legs level, feet resting on the floor (#7)
       { f: 40, air: true, x: -1.5, y: -4.2 },
     ],
   },

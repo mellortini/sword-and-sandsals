@@ -1003,3 +1003,11 @@ Dobicie z rozdarciem papieru (#20): klip `finish_decap` (głowa odfruwa łukiem 
 - Nowe zdarzenia klipów `cut` i `bounce`. Poza ma klucze `neck_cut`, `head_x`, `head_y`, `head_rot`.
 - Pliki wspólne: `kit.json` + atlas (6 sprite'ów `cut_*` i nowe warstwy `slot: 'cut'`, tylko dopisane; strony atlasu `base-*` przepakowane).
 - goloburda05-hue: #235 wszedł w trakcie, scaliłem w tym PR (`clips.ts`, `animLab.ts`) — zostają i `dodge`, i dobicie.
+### 2026-11-27 09:40 · Claude Code (goloburda05-hue) · #7 / 7-deeper-lunge
+
+Poprawki pozy (#7): głębszy wypad w `attack_normal`, stopy w `walk_back`, upadek w `death` — wszystko w `src/anim/clips.ts`.
+- `attack_normal`: niższy przysiad (przednie kolano ~−80°, tylna noga wyciągnięta, tułów −24°), ostrze podniesione o ~7°, żeby po obniżeniu ciała dalej celowało w tułów. Rytm bez zmian (trafienie kl. 1, przytrzymanie 2–10, powrót 11–16).
+- `walk_back`: kąty nóg policzone IK (udo 2,1 j., goleń 2,0 j.) — najpierw tylna stopa unosi się i ląduje 1,6 j. dalej, potem przednia. Stopa podporowa stoi (poślizg ≤ 0,03 j., wcześniej 1,5 j. — unosiła się nie ta noga). Warianty `@hammer`/`@spear` biorą to same.
+- `death`: przy uginaniu kolan stopy wchodziły pod podłogę do 1,6 j. (ręczne `y` w kluczach `air`) — nowe klucze 8/16/19 z policzonym `y`, poza bez zmian. Leżąc: tylna noga poziomo, stopy na ziemi (wcześniej palce 0,75 j. w podłodze).
+- Nowy test `src/anim/feet.test.ts` (FK z `kit.json`): poślizg stopy w `walk_back`, stopy nad podłogą w `death`.
+- ⚠️ Ten sam błąd ma druga połowa `walk_fwd` (kl. 13–20: tylna stopa sunie 1,4 j. po ziemi, podnosi się przednia) — osobne Issue.
