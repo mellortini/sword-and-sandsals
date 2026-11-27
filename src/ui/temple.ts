@@ -5,6 +5,7 @@ import type { SavedCharacter } from '../core/save';
 import { healingText, remedyRows } from './templeRules';
 import './forge.css';
 import './temple.css';
+import { dressRoom } from './counter';
 
 const REASON_TEXT = {
   'insufficient-gold': 'Not enough gold.',
@@ -39,6 +40,8 @@ export function openTemple(character: SavedCharacter, save: (character: SavedCha
       </div>
     </div>`;
   document.body.append(backdrop);
+  // the building's counter frame: room, vendor, door (#267)
+  dressRoom(backdrop, 'temple');
 
   const $ = (id: string) => backdrop.querySelector<HTMLElement>(`#${id}`)!;
   let draft = character;

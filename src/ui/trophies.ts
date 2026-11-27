@@ -4,6 +4,7 @@ import type { SavedCharacter } from '../core/save';
 import { trophyCount, trophyList } from './achievementRules';
 import './forge.css';
 import './trophies.css';
+import { dressRoom } from './counter';
 
 const COUNTER_NAMES = { wins: 'Wins', losses: 'Losses', criticals: 'Critical hits', blocks: 'Blocks', charges: 'Charges', gifts: 'Crowd gifts' } as const;
 
@@ -30,6 +31,8 @@ export function openTrophies(character: SavedCharacter): Promise<SavedCharacter>
       <div class="forge__actions trophies__close"><button type="button" data-act="close">Close</button></div>
     </div>`;
   document.body.append(backdrop);
+  // the building's counter frame: room, vendor, door (#267)
+  dressRoom(backdrop, 'trophies');
   return new Promise((resolve) => {
     const keys = new AbortController();
     const close = () => {

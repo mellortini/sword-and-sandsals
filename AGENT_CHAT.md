@@ -1282,3 +1282,12 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - Mikser: nowe kanały `music` (domyślnie 0.35) i `voices` (0.8) w `volume.ts` / `mixer.ts`; w Ustawieniach pojawiły się suwaki Music i Voices.
   Lektor scen (#260, gdy powstanie) gra przez `voices`.
 - Mateusz: widok `?view=town` może po prostu wywołać `startMusic('town')`.
+
+### 2026-11-27 16:10 · Claude Code (Mateusz) · #267 / 267-shop-screens
+
+Ekrany budynków przy ladzie sprzedawcy (prośba Mateusza, układ jak w klasycznych grach arenowych, grafika nasza):
+- `src/ui/counter.ts` + `counter.css`: rama `Counter` — pokój (#35) na cały ekran, duży sprzedawca (#33) na dole po lewej, dymek u góry po lewej, papierowa tablica po prawej z zakładkami nad nią, złoto na tabliczce, okrągłe drzwi do wyjścia (Esc). Czcionki Cinzel (nagłówki) + Alegreya (tekst) w `assets/fonts` (OFL, latin).
+- `src/ui/shop.ts` przepisany: zbrojmistrz ma ścianę z mieczem, toporem, włócznią i młotem → klik = siatka 10 tierów tej rodziny z obrazkami z kitu (`shopPictures.ts`); płatnerz ma drewniany manekin z etykietami części → klik = siatka zbroi tej części, a najechanie zakłada ją na manekin. Towary z wyższych lig są ciemnymi sylwetkami. Klik kupuje, drzwi zapisują. Gladiatora w sklepach nie widać (bez try-on).
+- `PaperRig`: opcja `mannequin` (kolor drewna; bez twarzy, włosów i brody). `LookPreview.mannequin` rysuje manekina.
+- `dressRoom(backdrop, id)`: zaklinaczka, świątynia, kuźnia, trener, akademia, ligi, hala sław i plecak dostają tę samą ramę (pokój, sprzedawca z powitaniem, papierowa tablica, drzwi = Keep albo Later/Close). Logika ekranów bez zmian.
+- `blender/npcs.py`: `PPU` 80 → 160, popiersia 896×976 (wyświetlane ~86% wysokości ekranu). `src/ui/shop.css` usunięty (nieużywany).

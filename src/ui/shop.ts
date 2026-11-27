@@ -1,225 +1,231 @@
 /// <reference types="vite/client" />
+import { LEAGUE_MAX_TIER } from '../core/leagues';
+import type { League } from '../core/leagues';
 import type { Shop } from '../core/shop';
 import type { SavedCharacter } from '../core/save';
-import type { Look } from '../rig/PaperRig';
+import { ITEMS } from '../data/equipment';
+import { WEAPONS, WEAPON_FAMILIES } from '../data/weapons';
+import { EQUIP_SLOTS } from '../rig/PaperRig';
+import type { EquipSlot } from '../rig/PaperRig';
+import { Counter } from './counter';
 import type { LookPreview } from './lookPreview';
-import { VENDOR_AT, loadNpcs, mouthOpen, npcUrl } from './npcs';
-import { ROOM_AT, roomUrl } from './shopRooms';
-import { SHOP_NAMES, buy, compareWorn, lookWith, saleOffers, sell, shopLeague, shopOffers, vendorLine } from './shopRules';
-import type { ShopMoment } from './shopRules';
-import { frameFill, loadUiSheet } from './uiSheet';
-import './forge.css';
-import './shop.css';
+import { MANNEQUIN_CROP, MANNEQUIN_PARTS, itemPicture } from './shopPictures';
+import { SHOP_NAMES, buy, compareWorn, saleOffers, sell, shopLeague, shopOffers, vendorLine } from './shopRules';
+import type { ShopMoment, ShopOffer } from './shopRules';
 
 const REASON_TEXT: Readonly<Record<string, string>> = {
-  'not-stocked': 'This shop does not stock that.',
+  'not-stocked': 'I don’t have that one on the rack yet.',
   'insufficient-gold': 'Not enough gold.',
   'not-owned': 'That item is no longer in your pack.',
-  'wrong-shop': 'The shop only buys plain goods of its own trade.',
+  'wrong-shop': 'I only buy plain goods of my own trade.',
   'gold-limit': 'You cannot carry more gold.',
 };
 
-/** seconds a line keeps the vendor's mouth moving: a little per letter, never too short or long */
-const talkTime = (text: string) => Math.min(3, Math.max(0.8, text.length * 0.035));
+/** what hangs on the weaponsmith's wall, and the armourer's mannequin parts, in plain words */
+const FAMILY_LABEL: Readonly<Record<string, string>> = { sword: 'Swords', axe: 'Axes', spear: 'Spears', hammer: 'Hammers' };
+const SLOT_LABEL: Readonly<Record<EquipSlot, string>> = { helmet: 'Helmet', shoulders: 'Shoulders', armor: 'Cuirass', greaves: 'Greaves', boots: 'Boots' };
+
+/** the catalogue of one wall section or mannequin part, every tier, cheapest first */
+function section(shop: Shop, key: string): { id: string; tier: number }[] {
+  return shop === 'weaponsmith' ? WEAPONS.filter((w) => w.family === key) : ITEMS.filter((i) => i.slot === key);
+}
+
+/** the first league that sells a tier, for goods not on the rack yet */
+function leagueFor(tier: number): string {
+  const league = (Object.keys(LEAGUE_MAX_TIER) as League[]).find((l) => LEAGUE_MAX_TIER[l] >= tier);
+  return league ? `${league[0].toUpperCase()}${league.slice(1)} league` : 'a later league';
+}
+
+const pic = (id: string, cls = '') => {
+  const p = itemPicture(id);
+  return p ? `<img class="${p.blade ? 'blade' : ''} ${cls}" src="${p.src}" alt="" loading="lazy">` : '';
+};
 
 /**
- * A shop (#205, logic in core #32, screen #34) in its own room (#35): the vendor's bust on the left talks in a speech
- * bubble (#33), the gladiator in the middle tries on the item under the pointer or focus, the goods are on a paper
- * scroll on the right. Buy lists the stock of the gladiator's league with prices after Charm and how each compares with
- * what is worn; Sell lists pack items of this trade with what the shop pays. Bought items go to the pack (wear them in
- * Gear). Changes stay in a draft; Keep saves, Later (or Escape) closes without paying.
+ * A shop (#205, logic in core #32) at the vendor's counter (#267). The weaponsmith's wall holds a sword, an axe, a spear
+ * and a hammer: pick one to see every blade of that family. The armourer's mannequin wears the gladiator's armour, with
+ * a label on each part: pick one to see every piece for it; pointing at a piece puts it on the mannequin. Goods not sold
+ * in the gladiator's league yet show as dark shapes. A click buys (into the pack; wear it in Gear); Sell lists what the
+ * shop buys back. The door (or Escape) leaves and saves what changed.
  */
 export function openShop(
   shop: Shop, character: SavedCharacter, save: (character: SavedCharacter) => Promise<void>, preview?: LookPreview,
 ): Promise<SavedCharacter> {
-  const backdrop = document.createElement('div');
-  backdrop.className = 'forge shop shop--room';
-  backdrop.style.setProperty('--room', `url("${roomUrl(ROOM_AT[shop] ?? 'forge')}")`);
-  backdrop.innerHTML = `
-    <div class="shop__vendor" aria-hidden="true">
-      <div class="shop__bubble" id="spSay"></div>
-      <div class="shop__bust" id="spBust"><img class="shop__face" alt=""><img class="shop__face shop__face--talk" alt=""></div>
-      <div class="shop__who" id="spWho"></div>
-    </div>
-    <div class="shop__preview" id="spTry" aria-hidden="true"></div>
-    <div class="forge__panel shop__panel" role="dialog" aria-modal="true" aria-labelledby="spTitle">
-      <div class="forge__head">
-        <h3 id="spTitle">${SHOP_NAMES[shop]}</h3>
-        <div class="forge__name">${shopLeague(character.level)} league goods · Charm ${character.attributes.charm}</div>
-        <div class="shop__gold">Gold <b id="spGold"></b></div>
-      </div>
-      <div class="shop__tabs" role="tablist">
-        <button type="button" role="tab" data-tab="buy" aria-selected="true">Buy</button>
-        <button type="button" role="tab" data-tab="sell" aria-selected="false">Sell</button>
-      </div>
-      <div class="shop__list" id="spList" role="tabpanel"></div>
-      <div class="forge__problem" id="spProblem" role="status"></div>
-      <div class="forge__actions">
-        <button type="button" data-act="later">Later</button>
-        <button type="button" data-act="keep" class="keep">Keep</button>
-      </div>
-    </div>`;
-  document.body.append(backdrop);
-
-  const $ = (id: string) => backdrop.querySelector<HTMLElement>(`#${id}`)!;
+  const counter = new Counter({
+    building: shop, title: SHOP_NAMES[shop], gold: character.gold,
+    tabs: [{ id: 'buy', label: 'Buy' }, { id: 'sell', label: 'Sell' }],
+  });
+  const board = counter.board;
+  const title = counter.root.querySelector<HTMLElement>('.counter__title')!;
   let draft = character;
   let tab: 'buy' | 'sell' = 'buy';
+  /** open wall section / mannequin part; null = the wall or the mannequin itself */
+  let open: string | null = null;
   let busy = false;
-  let closed = false;
-
-  // ---------------------------------------------------------------- the vendor: bust, name, lines with a moving mouth
-  const bust = $('spBust');
   const said: Partial<Record<ShopMoment, number>> = {};
-  let talking = 0;
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const say = (moment: ShopMoment) => {
     const n = said[moment] ?? 0;
     said[moment] = n + 1;
-    const text = vendorLine(shop, moment, n);
-    $('spSay').textContent = text;
-    const id = ++talking, start = performance.now(), length = talkTime(text);
-    const flap = (now: number) => {
-      if (id !== talking || closed) return;
-      const t = (now - start) / 1000;
-      bust.classList.toggle('talking', !still && mouthOpen(t, length));
-      if (t < length) requestAnimationFrame(flap);
-    };
-    requestAnimationFrame(flap);
+    counter.say(vendorLine(shop, moment, n));
   };
-  void loadNpcs().then((npcs) => {
-    const npc = npcs?.[VENDOR_AT[shop]];
-    if (!npc || closed) return;
-    const [shut, open] = bust.querySelectorAll('img');
-    shut.src = npcUrl(npc);
-    open.src = npcUrl(npc, true);
-    $('spWho').innerHTML = `${npc.name}<small>${npc.role}</small>`;
-  });
-  // the goods are written on a paper scroll from the UI kit (#16); without the sheet the dark panel stays
-  void loadUiSheet().then((sheet) => {
-    if (!sheet || closed) return;
-    const panel = backdrop.querySelector<HTMLElement>('.shop__panel')!;
-    for (const [part, key] of [['top', 'scroll_top'], ['body', 'scroll_body'], ['bottom', 'scroll_bottom']] as const) {
-      const css = frameFill(sheet, key);
-      if (!css) return;
-      panel.style.setProperty(`--scroll-${part}-image`, css.backgroundImage);
-      panel.style.setProperty(`--scroll-${part}-size`, css.backgroundSize);
-      panel.style.setProperty(`--scroll-${part}-pos`, css.backgroundPosition);
-    }
-    panel.classList.add('shop__panel--scroll');
-  });
+  const league = () => shopLeague(draft.level);
 
-  // ---------------------------------------------------------------- the gladiator trying things on
-  const tryOn = $('spTry');
-  let shown: string | null = null;
-  let previewId = 0;
-  const showLook = (key: string, look: Look) => {
-    if (!preview || key === shown || closed) return;
-    shown = key;
-    const id = ++previewId;
-    void preview(look).then((canvas) => {
-      if (id !== previewId || closed) return;
-      canvas.className = 'shop__puppet';
-      tryOn.replaceChildren(canvas);
+  // ---------------------------------------------------------------- the mannequin wears the armour, or a piece tried on
+  const dress = preview?.mannequin;
+  let dressed = '';
+  let dressId = 0;
+  const putOn = (look: Partial<SavedCharacter['look']>) => {
+    const frame = board.querySelector<HTMLElement>('.mannequin');
+    const key = JSON.stringify(look);
+    if (!dress || !frame || key === dressed) return;
+    dressed = key;
+    const id = ++dressId;
+    void dress(look).then((canvas) => {
+      if (id !== dressId || !frame.isConnected) return;
+      frame.querySelector('canvas')?.remove();
+      frame.prepend(canvas);
     }).catch(() => undefined);
   };
-  const showWorn = () => showLook(`worn:${JSON.stringify(draft.look)}`, draft.look);
-  if (!preview) tryOn.hidden = true;
+  const worn = () => Object.fromEntries(EQUIP_SLOTS.map((s) => [s, draft.look[s]])) as Partial<SavedCharacter['look']>;
 
-  const compare = (id: string) => {
-    const c = compareWorn(draft, id);
-    if (!c) return '';
-    const sign = c.delta > 0 ? `+${c.delta}` : c.delta < 0 ? `−${-c.delta}` : '±0';
-    const cls = c.delta > 0 ? 'up' : c.delta < 0 ? 'down' : 'same';
-    return `<span class="shop-row__cmp shop-row__cmp--${cls}">${sign} ${c.label.toLowerCase()} ${c.worn ? `vs ${c.worn}` : '· nothing worn'}</span>`;
-  };
-
-  const refresh = (focus?: string) => {
-    $('spGold').textContent = String(draft.gold);
-    for (const t of backdrop.querySelectorAll<HTMLButtonElement>('[role="tab"]')) t.setAttribute('aria-selected', String(t.dataset.tab === tab));
-    if (tab === 'buy') {
-      $('spList').innerHTML = shopOffers(draft, shop).map((o) => `<div class="shop-row" data-try="${o.id}">
-        <span class="shop-row__name">${o.name}<small>tier ${o.tier}${o.owned ? ` · ${o.owned} in pack` : ''}</small></span>
-        <span class="shop-row__stat">${o.stat}${o.wearNote ? ` · <b>${o.wearNote}</b>` : ''}${compare(o.id)}</span>
-        <button type="button" data-buy="${o.id}" aria-disabled="${!o.affordable}">Buy · ${o.price} gold</button></div>`).join('');
-    } else {
-      const sales = saleOffers(draft, shop);
-      $('spList').innerHTML = sales.length ? sales.map((s) => `<div class="shop-row">
-        <span class="shop-row__name">${s.name}</span><span class="shop-row__stat">${s.stat}</span>
-        ${s.price === undefined ? '<span class="shop-row__none">not bought here</span>'
-          : `<button type="button" data-sell="${s.index}">Sell · ${s.price} gold</button>`}</div>`).join('')
-        : `<p class="forge__empty">Nothing in your pack that the ${SHOP_NAMES[shop].toLowerCase()} buys.</p>`;
+  // ---------------------------------------------------------------- what the vendor says about a ware
+  const describe = (id: string) => {
+    const offer = shopOffers(draft, shop).find((o) => o.id === id);
+    if (!offer) {
+      const item = [...WEAPONS, ...ITEMS].find((i) => i.id === id)!;
+      return `${item.name}.\nNot on my rack yet: I sell it from the ${leagueFor(item.tier)}.`;
     }
-    backdrop.querySelector<HTMLButtonElement>('[data-act="keep"]')!.disabled = draft === character || busy;
-    if (focus) backdrop.querySelector<HTMLButtonElement>(focus)?.focus();
+    const c = compareWorn(draft, id);
+    const cmp = c ? (c.delta > 0 ? `+${c.delta}` : c.delta < 0 ? `−${-c.delta}` : '±0') + (c.worn ? ` against your ${c.worn}` : ', you wear nothing there') : '';
+    return `${offer.name}, tier ${offer.tier}.\n${offer.stat}${cmp ? ` (${cmp})` : ''}.${offer.wearNote ? `\nYou can ${offer.wearNote.replace('wear from', 'wear it from')}.` : ''}`
+      + `\n${offer.price} gold${offer.owned ? ` · ${offer.owned} in your pack` : ''}.${offer.affordable ? '' : ' More than your purse holds.'}`;
   };
 
-  // pointing at or focusing an offer puts it on the gladiator; leaving the list shows what is worn again
-  const tryRow = (e: Event) => {
-    const row = (e.target as HTMLElement).closest<HTMLElement>('[data-try]');
-    if (row) showLook(`try:${row.dataset.try}`, lookWith(draft, row.dataset.try!));
+  const ware = (id: string, offer: ShopOffer | undefined, tier: number) => {
+    const item = [...WEAPONS, ...ITEMS].find((i) => i.id === id)!;
+    const cls = !offer ? 'locked' : offer.affordable ? '' : 'poor';
+    return `<button type="button" class="ware ${cls}" data-ware="${id}" aria-label="${item.name}${offer ? `, ${offer.price} gold` : ', not sold yet'}">
+      ${offer?.owned ? `<span class="ware__badge">${offer.owned} owned</span>` : ''}
+      <span class="ware__pic">${pic(id)}</span><span class="ware__name">${offer ? item.name : `Tier ${tier}`}</span>
+      <span class="ware__price">${offer ? `${offer.price} gold` : leagueFor(tier)}</span></button>`;
   };
-  $('spList').addEventListener('mouseover', tryRow);
-  $('spList').addEventListener('focusin', tryRow);
-  $('spList').addEventListener('mouseleave', showWorn);
+
+  // ---------------------------------------------------------------- the board's views
+  const render = (focus?: string) => {
+    counter.setGold(draft.gold);
+    counter.selectTab(tab);
+    const offers = new Map(shopOffers(draft, shop).map((o) => [o.id, o]));
+    if (tab === 'sell') {
+      title.innerHTML = `Sell <small>what the ${SHOP_NAMES[shop].toLowerCase()} buys back</small>`;
+      const sales = saleOffers(draft, shop);
+      board.innerHTML = sales.length
+        ? `<div class="counter__grid">${sales.map((s) => `<button type="button" class="ware ${s.price === undefined ? 'locked' : ''}" data-sell="${s.index}">
+            <span class="ware__pic">${pic(s.id)}</span><span class="ware__name">${s.name}</span>
+            <span class="ware__price">${s.price === undefined ? 'not bought here' : `${s.price} gold`}</span></button>`).join('')}</div>`
+        : `<p class="counter__empty">Nothing in your pack that I buy.</p>`;
+    } else if (shop === 'weaponsmith' && !open) {
+      title.innerHTML = `The Rack <small>${league()} league goods</small>`;
+      board.innerHTML = `<div class="counter__wall">${WEAPON_FAMILIES.map((f) => {
+        // the best blade of the family the gladiator can buy now hangs on the wall
+        const best = [...section(shop, f)].reverse().find((w) => offers.has(w.id)) ?? section(shop, f)[0];
+        return `<button type="button" class="wall-item" data-open="${f}"><span class="wall-item__pic">${pic(best.id)}</span>
+          ${FAMILY_LABEL[f] ?? f}<small>${section(shop, f).filter((w) => offers.has(w.id)).length} on the rack</small></button>`;
+      }).join('')}</div>`;
+      // turned upright, a blade's length is the column's height
+      for (const img of board.querySelectorAll<HTMLImageElement>('.wall-item__pic img.blade')) {
+        const box = img.parentElement!;
+        const fit = () => { img.style.width = `${Math.min(box.clientHeight * 0.95, box.clientWidth * 3.6)}px`; };
+        if (img.complete) fit(); else img.onload = fit;
+      }
+    } else if (shop === 'weaponsmith') {
+      title.innerHTML = `${FAMILY_LABEL[open!]} <small>${league()} league goods</small>`;
+      board.innerHTML = `<div class="counter__head"><button type="button" class="counter__back" data-act="back">← The rack</button></div>
+        <div class="counter__grid">${section(shop, open!).map((w) => ware(w.id, offers.get(w.id), w.tier)).join('')}</div>`;
+      for (const img of board.querySelectorAll<HTMLImageElement>('.ware__pic img.blade')) {
+        const box = img.parentElement!;
+        const fit = () => { img.style.width = `${box.clientHeight * 0.98}px`; };
+        if (img.complete) fit(); else img.onload = fit;
+      }
+    } else {
+      title.innerHTML = open ? `${SLOT_LABEL[open as EquipSlot]} <small>${league()} league goods</small>` : `The Mannequin <small>pick a part</small>`;
+      const { x0, y0, x1, y1 } = MANNEQUIN_CROP;
+      board.innerHTML = `<div class="counter__split"><div class="mannequin">${EQUIP_SLOTS.map((s) => {
+        const [x, y] = MANNEQUIN_PARTS[s];
+        return `<button type="button" class="mannequin__part" data-open="${s}" aria-pressed="${open === s}"
+          style="left:${((x - x0) / (x1 - x0)) * 100}%;top:${((y1 - y) / (y1 - y0)) * 100}%">${SLOT_LABEL[s]}</button>`;
+      }).join('')}</div>${open
+        ? `<div class="counter__grid">${section(shop, open).map((i) => ware(i.id, offers.get(i.id), i.tier)).join('')}</div>`
+        : `<p class="counter__empty">Pick a part of the mannequin to see what I have for it.</p>`}</div>`;
+      dressed = '';
+      putOn(worn());
+    }
+    if (focus) board.querySelector<HTMLElement>(focus)?.focus();
+  };
+
+  // pointing at a ware: the vendor names it, the mannequin tries it on
+  const point = (e: Event) => {
+    const w = (e.target as HTMLElement).closest<HTMLElement>('[data-ware]');
+    if (!w) return;
+    counter.say(describe(w.dataset.ware!), true);
+    const piece = ITEMS.find((i) => i.id === w.dataset.ware);
+    if (piece) putOn({ ...worn(), [piece.slot]: piece.tier });
+  };
+  board.addEventListener('mouseover', point);
+  board.addEventListener('focusin', point);
+  board.addEventListener('mouseleave', () => { if (shop === 'armourer') putOn(worn()); });
 
   return new Promise((resolve) => {
     const keys = new AbortController();
-    const close = (result: SavedCharacter) => {
-      closed = true;
+    const close = async () => {
+      if (busy) return;
+      if (draft !== character) {
+        busy = true;
+        try {
+          await save(draft);
+        } catch {
+          busy = false;
+          counter.say('The game could not be saved. Try again.', true);
+          return;
+        }
+      }
       keys.abort();
-      backdrop.remove();
-      resolve(result);
+      counter.close();
+      resolve(draft === character ? character : draft);
     };
-    backdrop.addEventListener('click', async (e) => {
-      const button = (e.target as HTMLElement).closest('button');
-      if (!button || button.disabled || busy) return;
-      const problem = $('spProblem');
-      if (button.dataset.tab) {
-        tab = button.dataset.tab as 'buy' | 'sell';
-        problem.textContent = '';
-        refresh(`[data-tab="${tab}"]`);
-        showWorn();
-      } else if (button.dataset.buy || button.dataset.sell) {
-        const result = button.dataset.buy ? buy(draft, shop, button.dataset.buy) : sell(draft, shop, draft.inventory[+button.dataset.sell!]);
-        problem.classList.toggle('ok', result.ok);
+    counter.root.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
+      if (!b || busy) return;
+      if (b.dataset.act === 'exit') void close();
+      else if (b.dataset.tab) { tab = b.dataset.tab as 'buy' | 'sell'; open = null; render(); }
+      else if (b.dataset.act === 'back') { const was = open; open = null; render(`[data-open="${was}"]`); }
+      else if (b.dataset.open) { open = open === b.dataset.open && shop === 'armourer' ? null : b.dataset.open; render(open ? '[data-ware]' : undefined); }
+      else if (b.dataset.ware || b.dataset.sell) {
+        const id = b.dataset.ware;
+        if (id && !shopOffers(draft, shop).some((o) => o.id === id)) { counter.say(describe(id), true); return; }
+        const result = id ? buy(draft, shop, id) : sell(draft, shop, draft.inventory[+b.dataset.sell!]);
         if (!result.ok) {
-          problem.textContent = REASON_TEXT[result.reason] ?? 'Not possible.';
           say(result.reason === 'insufficient-gold' ? 'poor' : 'refused');
+          if (result.reason !== 'insufficient-gold') counter.say(REASON_TEXT[result.reason] ?? 'Not possible.');
           return;
         }
         draft = result.character;
-        problem.textContent = button.dataset.buy ? `Bought for ${result.price} gold. Wear it in Gear.` : `Sold for ${result.price} gold.`;
-        say(button.dataset.buy ? 'bought' : 'sold');
-        refresh(button.dataset.buy ? `[data-buy="${button.dataset.buy}"]` : '[data-sell]');
-      } else if (button.dataset.act === 'later') close(character);
-      else if (button.dataset.act === 'keep') {
-        busy = true;
-        refresh();
-        try {
-          await save(draft);
-          close(draft);
-        } catch {
-          busy = false;
-          problem.classList.remove('ok');
-          problem.textContent = 'The game could not be saved. Try again.';
-          refresh();
-        }
+        say(id ? 'bought' : 'sold');
+        render(id ? `[data-ware="${id}"]` : '[data-sell]');
       }
     });
     window.addEventListener('keydown', (e) => {
       e.stopImmediatePropagation();
-      if (e.key === 'Escape') close(character);
-      else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (e.key === 'Escape') {
+        if (open && tab === 'buy') { const was = open; open = null; render(`[data-open="${was}"]`); } else void close();
+      } else if (e.key.startsWith('Arrow')) {
         e.preventDefault();
-        const buttons = [...backdrop.querySelectorAll<HTMLButtonElement>('.shop-row button')];
-        const at = buttons.indexOf(document.activeElement as HTMLButtonElement);
-        buttons[at < 0 ? 0 : Math.max(0, Math.min(buttons.length - 1, at + (e.key === 'ArrowDown' ? 1 : -1)))]?.focus();
-      } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && (document.activeElement as HTMLElement | null)?.getAttribute('role') === 'tab') {
-        (backdrop.querySelector<HTMLButtonElement>(`[data-tab="${tab === 'buy' ? 'sell' : 'buy'}"]`))!.click();
+        const items = [...counter.root.querySelectorAll<HTMLButtonElement>('.counter__goods button, .counter__exit')];
+        const at = items.indexOf(document.activeElement as HTMLButtonElement);
+        const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1;
+        items[at < 0 ? 0 : Math.max(0, Math.min(items.length - 1, at + step))]?.focus();
       }
     }, { capture: true, signal: keys.signal });
-    refresh('[data-tab="buy"]');
-    showWorn();
+    render();
     say('hello');
   });
 }

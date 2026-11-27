@@ -5,6 +5,7 @@ import type { SavedCharacter } from '../core/save';
 import { MATERIAL_NAMES, applyForge, materialAmount, forgeRows, forgeState, materialsText } from './forgeRules';
 import type { ForgeRow } from './forgeRules';
 import './forge.css';
+import { dressRoom } from './counter';
 
 const REASON_TEXT = {
   'not-owned': 'That item is no longer in your pack.',
@@ -38,6 +39,8 @@ export function openForge(character: SavedCharacter, save: (character: SavedChar
       </div>
     </div>`;
   document.body.append(backdrop);
+  // the building's counter frame: room, vendor, door (#267)
+  dressRoom(backdrop, 'forge');
 
   const $ = (id: string) => backdrop.querySelector<HTMLElement>(`#${id}`)!;
   const start = forgeState(character);

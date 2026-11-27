@@ -4,6 +4,7 @@ import { leagueStandings, nextBout } from './leagueRules';
 import type { BoutState, LeagueState } from './leagueRules';
 import './forge.css';
 import './leagues.css';
+import { dressRoom } from './counter';
 
 const LEAGUE_STATE: Record<LeagueState, string> = {
   cleared: '✓ cleared', open: 'open', locked: 'locked · clear the league below', empty: 'fighters still to be written',
@@ -44,6 +45,8 @@ export function openLeagues(character: SavedCharacter): Promise<SavedCharacter> 
       </div>
     </div>`;
   document.body.append(backdrop);
+  // the building's counter frame: room, vendor, door (#267)
+  dressRoom(backdrop, 'leagues');
   return new Promise((resolve) => {
     const keys = new AbortController();
     const close = () => {

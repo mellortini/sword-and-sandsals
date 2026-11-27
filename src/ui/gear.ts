@@ -4,6 +4,7 @@ import type { EquipmentSlot } from '../core/types';
 import { GEAR_SLOTS, SLOT_NAMES, gearItem, gearTotals, savedInventory, takeOff, wear, wearProblem } from './gearRules';
 import './forge.css';
 import './gear.css';
+import { dressRoom } from './counter';
 
 /**
  * The gear screen (#197, logic in core #31): what the gladiator wears in each slot and the wearable items in the
@@ -32,6 +33,8 @@ export function openGear(character: SavedCharacter, save: (character: SavedChara
       </div>
     </div>`;
   document.body.append(backdrop);
+  // the building's counter frame: room, vendor, door (#267)
+  dressRoom(backdrop, 'gear');
 
   const $ = (id: string) => backdrop.querySelector<HTMLElement>(`#${id}`)!;
   let draft = character;

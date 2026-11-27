@@ -1,0 +1,178 @@
+/* The vendor's counter (src/ui/counter.ts, #267): room, big vendor, speech bubble, paper board, gold plaque, door. */
+.counter {
+  position: fixed; inset: 0; z-index: 30; overflow: hidden; color: #3a2320;
+  font-family: 'Alegreya', Georgia, serif;
+  background: linear-gradient(90deg, rgba(20, 12, 14, 0) 0%, rgba(20, 12, 14, 0.25) 100%), var(--room, none) center / cover no-repeat, #2a1a1e;
+}
+.counter .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+/* ---------------------------------------------------------------- the vendor, big, cut by the bottom of the screen */
+.counter__vendor { position: absolute; left: -2vw; bottom: -6vh; height: 86vh; aspect-ratio: 896 / 976; pointer-events: none; }
+.counter__face { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 1vh 1.2vh rgba(30, 14, 10, 0.45)); }
+.counter__face--talk { visibility: hidden; }
+.counter__vendor.talking .counter__face--talk { visibility: visible; }
+.counter__vendor.talking .counter__face:not(.counter__face--talk) { visibility: hidden; }
+.counter--empty .counter__vendor { display: none; }
+
+/* ---------------------------------------------------------------- speech bubble at the top left, tail towards the face */
+.counter__bubble {
+  position: absolute; left: 2vw; top: 3vh; width: min(32vw, 62vh); min-height: 15vh; box-sizing: border-box; padding: 2.2vh 2.4vh 2vh;
+  background: #fffbf1; border: 0.45vh solid #3a2320; border-radius: 2.4vh; box-shadow: 0.5vh 0.7vh 0 rgba(30, 16, 18, 0.35);
+  display: flex; flex-direction: column; justify-content: space-between; gap: 1vh; z-index: 2;
+}
+.counter__bubble::after {
+  content: ''; position: absolute; left: 34%; bottom: -4.6vh; width: 5vh; height: 5vh; background: #fffbf1;
+  border-right: 0.45vh solid #3a2320; border-bottom: 0.45vh solid #3a2320; transform: skewX(-28deg) rotate(28deg);
+  clip-path: polygon(0 60%, 100% 0, 100% 100%, 0 100%);
+}
+.counter__say { margin: 0; font-size: max(15px, 2.7vh); line-height: 1.32; white-space: pre-line; }
+.counter__say b { font-family: 'Cinzel', Georgia, serif; font-size: 0.92em; }
+.counter__who { font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: max(11px, 1.6vh); letter-spacing: 0.08em; color: #8b3324; }
+.counter__who small { font-family: 'Alegreya', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: 0; color: #7a5a3a; }
+.counter--empty .counter__bubble { display: none; }
+
+/* ---------------------------------------------------------------- the paper board with torn edges */
+.counter__board {
+  position: absolute; right: 2.5vw; top: 9vh; bottom: 13vh; width: min(54vw, 104vh); box-sizing: border-box; padding: 3.2vh 3.4vh 2.6vh;
+  display: flex; flex-direction: column; gap: 1.4vh;
+  background: radial-gradient(ellipse at 30% 20%, #f7e3b6 0%, transparent 60%), linear-gradient(160deg, #eed39c 0%, #ddb878 55%, #c99a5a 100%);
+  filter: drop-shadow(0.6vh 0.9vh 0 rgba(30, 14, 10, 0.4));
+  clip-path: polygon(0.8% 1.6%, 12% 0.4%, 27% 1.4%, 41% 0%, 58% 1.2%, 73% 0.2%, 88% 1.5%, 99.4% 0.5%, 100% 18%, 99.2% 37%, 100% 58%, 99.3% 79%, 99.8% 99.2%,
+    84% 98.6%, 66% 100%, 49% 98.8%, 31% 99.8%, 14% 98.7%, 0.6% 99.6%, 0% 80%, 0.9% 61%, 0.1% 40%, 0.8% 19%);
+}
+.counter__title {
+  margin: 0; font-family: 'Cinzel', Georgia, serif; font-weight: 800; font-size: max(18px, 3.6vh); letter-spacing: 0.06em; color: #5c2a1c;
+  display: flex; align-items: baseline; gap: 1.2vh;
+}
+.counter__title small { font-family: 'Alegreya', Georgia, serif; font-style: italic; font-weight: 400; font-size: 0.55em; letter-spacing: 0; color: #7a5a3a; }
+.counter__goods { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 1.2vh; }
+
+/* ---------------------------------------------------------------- tabs on gilded plaques above the board */
+.counter__tabs { position: absolute; right: 3vw; top: 1.6vh; display: flex; gap: 0.6vh; z-index: 2; }
+.counter__tabs button {
+  font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: max(13px, 2.4vh); padding: 0.5vh 2.2vh; cursor: pointer; color: #4a2a14;
+  border: 0.35vh solid #6b3d16; border-radius: 0.8vh; background: linear-gradient(180deg, #ffd978 0%, #f0b33e 55%, #d98f22 100%);
+  box-shadow: 0 0.5vh 0 rgba(30, 14, 10, 0.35);
+}
+.counter__tabs [aria-selected='true'] { background: linear-gradient(180deg, #fff3c8 0%, #ffd36a 100%); transform: translateY(0.4vh); box-shadow: 0 0.1vh 0 rgba(30, 14, 10, 0.35); }
+
+/* ---------------------------------------------------------------- gold plaque and the door */
+.counter__gold {
+  position: absolute; left: 2vw; bottom: 3vh; display: flex; align-items: center; gap: 1.4vh; padding: 0.6vh 3vh 0.6vh 1.4vh; z-index: 2;
+  font-family: 'Cinzel', Georgia, serif; font-weight: 800; font-size: max(16px, 3.6vh); color: #4a2a14;
+  border: 0.35vh solid #6b3d16; border-radius: 1vh; background: linear-gradient(180deg, #ffe08a 0%, #f2b640 60%, #db9426 100%);
+  box-shadow: 0 0.6vh 0 rgba(30, 14, 10, 0.4);
+}
+.counter__coins { position: relative; width: 5vh; height: 4vh; }
+.counter__coins i {
+  position: absolute; left: 0; width: 5vh; height: 1.8vh; border-radius: 50%; background: radial-gradient(ellipse at 40% 35%, #fff2b0, #e9a92c 70%);
+  border: 0.25vh solid #9b5f14;
+}
+.counter__coins i:nth-child(1) { bottom: 0; }
+.counter__coins i:nth-child(2) { bottom: 1vh; }
+.counter__coins i:nth-child(3) { bottom: 2vh; left: 0.4vh; }
+.counter__exit {
+  position: absolute; right: 2vw; bottom: 2vh; width: 11vh; height: 11vh; border-radius: 50%; cursor: pointer; padding: 1.4vh; z-index: 2;
+  border: 0.5vh solid #5c1f14; background: radial-gradient(circle at 40% 35%, #e0644a, #a8321f 70%); box-shadow: 0 0.7vh 0 rgba(30, 14, 10, 0.45);
+}
+.counter__exit svg { width: 100%; height: 100%; display: block; }
+.counter__exit:hover, .counter__exit:focus-visible { filter: brightness(1.12); outline: 0.4vh solid #fff0d0; outline-offset: 0.3vh; }
+.counter button:focus-visible { outline: 0.4vh solid #fff0d0; outline-offset: 0.3vh; }
+
+/* ---------------------------------------------------------------- goods: a wall of big choices and a grid of cards */
+.counter__wall { flex: 1; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 1vh; align-items: stretch; min-height: 0; }
+.wall-item {
+  position: relative; border: 0; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  gap: 1vh; padding: 1vh 0; border-radius: 1.4vh; font-family: 'Cinzel', Georgia, serif; font-weight: 800; font-size: max(13px, 2.6vh); color: #5c2a1c;
+}
+.wall-item:hover, .wall-item:focus-visible { background: rgba(255, 246, 214, 0.45); }
+.wall-item__pic { flex: 1; width: 100%; min-height: 0; position: relative; }
+.wall-item__pic img {
+  position: absolute; left: 50%; top: 50%; height: auto; transform: translate(-50%, -50%) rotate(-90deg);
+  filter: drop-shadow(0.5vh 0.6vh 0 rgba(40, 20, 10, 0.4));
+}
+.wall-item__pic img.upright { transform: translate(-50%, -50%); max-width: 92%; max-height: 92%; }
+.wall-item small { font-family: 'Alegreya', Georgia, serif; font-style: italic; font-weight: 400; font-size: 0.6em; color: #7a5a3a; }
+
+.counter__head { display: flex; align-items: center; gap: 1.4vh; }
+.counter__back {
+  font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: max(12px, 2vh); padding: 0.4vh 1.6vh; cursor: pointer; color: #f6ecd6;
+  background: #6b3d16; border: 0; border-radius: 0.8vh;
+}
+.counter__grid { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-rows: minmax(22vh, 1fr); gap: 1.2vh; padding: 0.4vh; }
+.ware {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0.4vh; padding: 0.8vh 0.6vh 1vh;
+  cursor: pointer; border: 0.3vh solid #a07a4f; border-radius: 1.2vh; background: rgba(255, 248, 227, 0.55); color: #3a2320;
+  font-family: 'Alegreya', Georgia, serif;
+}
+.ware:hover, .ware:focus-visible { background: rgba(255, 252, 236, 0.92); border-color: #6b3d16; }
+.ware__pic { flex: 1; width: 100%; min-height: 8vh; position: relative; }
+.ware__pic img { position: absolute; left: 50%; top: 50%; max-width: 86%; max-height: 92%; transform: translate(-50%, -50%); filter: drop-shadow(0.3vh 0.4vh 0 rgba(40, 20, 10, 0.35)); }
+.ware__pic img.blade { max-width: none; max-height: none; height: auto; transform: translate(-50%, -50%) rotate(-90deg); }
+.ware__name { font-weight: 700; font-size: max(11px, 1.75vh); line-height: 1.1; text-align: center; }
+.ware__price { font-family: 'Cinzel', Georgia, serif; font-weight: 800; font-size: max(11px, 1.8vh); color: #8b5a12; }
+.ware__badge {
+  position: absolute; top: 0.6vh; right: 0.6vh; font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: max(10px, 1.4vh);
+  padding: 0.1vh 0.8vh; border-radius: 0.8vh; background: #5f8b3d; color: #f6ecd6;
+}
+/* not affordable: plain and a little faded; not stocked yet (a higher league): a dark silhouette, like goods behind glass */
+.ware.poor { opacity: 0.62; }
+.ware.poor .ware__price { color: #a8322a; }
+.ware.locked { cursor: help; background: rgba(60, 40, 30, 0.12); }
+.ware.locked .ware__pic img { filter: brightness(0) opacity(0.45); }
+.ware.locked .ware__price { color: #7a5a3a; font-family: 'Alegreya', Georgia, serif; font-style: italic; font-weight: 400; }
+.counter__note { margin: 0; font-size: max(12px, 2vh); font-style: italic; color: #6b4a2a; }
+.counter__empty { margin: auto; font-size: max(14px, 2.6vh); font-style: italic; color: #6b4a2a; }
+
+/* ---------------------------------------------------------------- the armourer's mannequin with its labelled parts */
+.counter__split { flex: 1; min-height: 0; display: grid; grid-template-columns: auto 1fr; gap: 1.6vh; }
+/* the box has the crop's own proportions (8 x 13.6 rig units, MANNEQUIN_CROP), so the labels' percentages land on the parts */
+.mannequin { position: relative; height: 100%; max-width: 100%; aspect-ratio: 8 / 13.6; margin: 0 auto; min-height: 0; }
+.mannequin canvas { display: block; width: 100%; height: 100%; }
+.mannequin__part {
+  position: absolute; transform: translate(-50%, -50%); z-index: 1; cursor: pointer; white-space: nowrap;
+  font-family: 'Cinzel', Georgia, serif; font-weight: 800; font-size: max(11px, 1.8vh); letter-spacing: 0.04em; color: #fff6e0;
+  padding: 0.3vh 1.2vh; border: 0; border-radius: 0.8vh; background: rgba(58, 35, 32, 0.78); box-shadow: 0 0.3vh 0 rgba(20, 10, 8, 0.4);
+}
+.mannequin__part[aria-pressed='true'], .mannequin__part:hover, .mannequin__part:focus-visible { background: #a8321f; }
+.counter__split .counter__grid { grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(19vh, 1fr); }
+
+/* phones held sideways keep the same layout, only the vendor shrinks behind the bubble */
+@media (max-aspect-ratio: 4 / 3) {
+  .counter__vendor { height: 60vh; opacity: 0.5; }
+  .counter__board { left: 3vw; right: 3vw; width: auto; top: 22vh; }
+  .counter__bubble { width: 60vw; }
+  .counter__grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ---------------------------------------------------------------- a building's own screen in the counter frame (dressRoom) */
+.counter-room {
+  position: fixed; inset: 0; z-index: 30; display: block !important; padding: 0 !important; overflow: hidden;
+  font-family: 'Alegreya', Georgia, serif; color: #3a2320;
+  background: linear-gradient(90deg, rgba(20, 12, 14, 0) 0%, rgba(20, 12, 14, 0.25) 100%), var(--room, none) center / cover no-repeat, #2a1a1e !important;
+}
+.counter-room[hidden] { display: none !important; }
+.counter-room .forge__panel, .counter-room .skill-tree__panel, .counter-room .level-up__panel {
+  position: absolute; right: 2.5vw; top: 9vh; width: min(54vw, 104vh); max-height: 78vh; overflow-y: auto; box-sizing: border-box;
+  padding: 3.2vh 3.4vh 2.6vh; border: 0; border-radius: 0; color: #3a2320;
+  background: radial-gradient(ellipse at 30% 20%, #f7e3b6 0%, transparent 60%), linear-gradient(160deg, #eed39c 0%, #ddb878 55%, #c99a5a 100%);
+  box-shadow: none; filter: drop-shadow(0.6vh 0.9vh 0 rgba(30, 14, 10, 0.4));
+  clip-path: polygon(0.8% 0.8%, 12% 0.2%, 27% 0.7%, 41% 0%, 58% 0.6%, 73% 0.1%, 88% 0.7%, 99.4% 0.3%, 100% 18%, 99.2% 37%, 100% 58%, 99.3% 79%, 99.8% 99.6%,
+    84% 99.3%, 66% 100%, 49% 99.4%, 31% 99.9%, 14% 99.3%, 0.6% 99.8%, 0% 80%, 0.9% 61%, 0.1% 40%, 0.8% 19%);
+}
+/* buildings without a vendor (leagues, trophies, gear, skills) get the board in the middle */
+.counter-room:not(:has(.counter__vendor)) .forge__panel, .counter-room:not(:has(.counter__vendor)) .skill-tree__panel { right: 50%; transform: translateX(50%); width: min(80vw, 150vh); }
+.counter-room h3 { font-family: 'Cinzel', Georgia, serif; font-weight: 800; font-size: max(18px, 3.6vh); letter-spacing: 0.06em; color: #5c2a1c !important; }
+.counter-room h4 { font-family: 'Cinzel', Georgia, serif; font-weight: 700; color: #8b3324 !important; }
+.counter-room .forge__name, .counter-room .skill-tree__name { color: #7a5a3a; }
+.counter-room [class$='__gold'], .counter-room [class$='__count'], .counter-room [class$='__totals'], .counter-room [class$='__points'],
+.counter-room .trophies__counters { color: #6b3d16; font-family: 'Cinzel', Georgia, serif; font-weight: 700; }
+.counter-room [class$='__gold'] b, .counter-room [class$='__count'] b, .counter-room [class$='__totals'] b, .counter-room [class$='__points'] b,
+.counter-room .trophies__counters b, .counter-room .enchanter__offer i { color: #8b5a12; }
+.counter-room .gear__totals i, .counter-room .skill-tree__points b.done { color: #2f6b2a; }
+.counter-room .forge__hint, .counter-room .forge__empty { color: #6b4a2a; }
+.counter-room .forge__problem { color: #a8322a; }
+.counter-room .forge__problem.ok { color: #2f6b2a; }
+.counter-room .forge__actions button, .counter-room .skill-tree button { font-family: 'Cinzel', Georgia, serif; font-weight: 700; }
+.counter-room__parts .counter__exit { position: fixed; }
+.counter-room__parts .counter__bubble, .counter-room__parts .counter__vendor { position: fixed; }

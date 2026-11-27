@@ -4,6 +4,7 @@ import type { SavedCharacter } from '../core/save';
 import { ELEMENT_NAMES, ENCHANT_ELEMENTS, POWERS, applyEnchantment, effectText, enchantPrice, enchantTargets } from './enchanterRules';
 import './forge.css';
 import './enchanter.css';
+import { dressRoom } from './counter';
 
 const REASON_TEXT = {
   'not-owned': 'That weapon is no longer there.',
@@ -37,6 +38,8 @@ export function openEnchanter(character: SavedCharacter, save: (character: Saved
       </div>
     </div>`;
   document.body.append(backdrop);
+  // the building's counter frame: room, vendor, door (#267)
+  dressRoom(backdrop, 'enchanter');
 
   const $ = (id: string) => backdrop.querySelector<HTMLElement>(`#${id}`)!;
   let draft = character;
