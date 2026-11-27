@@ -1,7 +1,7 @@
 """Extract the packed textures of the downloaded BlenderKit materials into art_src/blenderkit/<name>/tex/*.png
 (the names sprite_lib.TEX expects). Run after tools/fetch_blenderkit.py:
 
-  D:/blender/blender.exe -b --disable-autoexec --python blender/unpack_blenderkit.py
+  python -I tools/blender.py blender/unpack_blenderkit.py      (always runs with --disable-autoexec)
 
 --disable-autoexec: the downloaded .blend files are third-party, never run their scripts.
 tex_stats.json (mean colours used by sprite_lib) is tracked in git, so it is not rebuilt here.

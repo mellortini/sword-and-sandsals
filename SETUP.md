@@ -62,11 +62,16 @@ Gra działa bez tego — wyrenderowane sprite'y są w repo.
 | Python | ≥ 3.11 | tylko do `tools/fetch_blenderkit.py` (biblioteka standardowa, bez pip) |
 
 ```
-python -I tools/fetch_blenderkit.py                                     # darmowe tekstury papieru (~210 MB, nie są w git — licencja)
-<blender> -b --disable-autoexec --python blender/unpack_blenderkit.py   # rozpakowanie tekstur do art_src/blenderkit/*/tex
-<blender> -b --python blender/build_kit.py -- 32 helmet1                # próbny render jednego elementu
+python -I tools/fetch_blenderkit.py                         # darmowe tekstury papieru (~50 MB pobrania, nie są w git — licencja)
+python -I tools/blender.py --where                          # który Blender zostanie użyty
+python -I tools/blender.py blender/unpack_blenderkit.py     # rozpakowanie tekstur do art_src/blenderkit/*/tex
+KIT_NO_ATLAS=1 python -I tools/blender.py blender/build_kit.py -- 16 helmet1   # próbny render jednego elementu
+git checkout -- assets/chars/kit                            # próbny render nie idzie do commita
 ```
-`<blender>` = ścieżka do programu, np. `D:/blender/blender.exe`, `/Applications/Blender.app/Contents/MacOS/Blender`, `blender`.
+Blender jest szukany w zmiennej **`BLENDER`** (pełna ścieżka do programu), potem w typowych miejscach instalacji i w `PATH`.
+Bez karty graficznej render idzie na CPU (wolniej); `CYCLES_DEVICE=CPU` wymusza CPU. W logu renderu linia `CYCLES_DEVICE` mówi, czego użył.
+Sprawdzone na drugim komputerze (#8, Windows 11, Blender 5.3): pobranie → rozpakowanie → `helmet1` / `helmet10` dają te same sprite'y co w repo
+(ten sam rozmiar i pivot, średnia różnica pikseli 0,2–0,5 % = szum Cycles przy 16 próbkach).
 
 ## 6. Problemy
 | objaw | przyczyna / rozwiązanie |
@@ -76,4 +81,5 @@ python -I tools/fetch_blenderkit.py                                     # darmow
 | port 5180 zajęty | zamknij inny `npm run dev` (port jest stały: `vite.config.ts`) |
 | animacje stoją w testach agenta | ukryte okno przeglądarki = stoi requestAnimationFrame; przesuwaj zegar ręcznie (`AGENTS.md`) |
 | `gh: command not found` | zainstaluj GitHub CLI (pkt 1), potem `gh auth login` |
-| render Blendera: brak tekstur | najpierw `tools/fetch_blenderkit.py` i `unpack_blenderkit.py` |
+| render Blendera: brak tekstur | najpierw `tools/fetch_blenderkit.py` i `tools/blender.py blender/unpack_blenderkit.py` |
+| `Blender not found` | zainstaluj Blender 5.3 albo ustaw `BLENDER=<ścieżka do blender / blender.exe>` |

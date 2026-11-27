@@ -3,7 +3,7 @@ writes rig.json, then assembles the whole puppet in a test pose with true Cycles
 reference for the in-game compositor.
 
 Run (headless):
-  D:/blender/blender.exe -b --python game/blender/gladiator.py -- <out_dir> [samples] [parts|assembly|all]
+  python -I tools/blender.py blender/gladiator.py -- <out_dir> [samples] [parts|assembly|all]
 """
 import bpy, sys, os, math, json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

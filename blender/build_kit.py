@@ -1,6 +1,6 @@
 """Render the whole modular gladiator kit -> game/assets/chars/kit/{sprites/*.png, kit.json}
 
-  D:/blender/blender.exe -b --python game/blender/build_kit.py -- [samples] [only_prefix,...]
+  python -I tools/blender.py blender/build_kit.py -- [samples] [only_prefix,...]
 
 only_prefix limits the render to keys starting with any of the prefixes (kit.json is merged, not replaced).
 At the end the production atlases are rebuilt (`npm run assets:atlas`), so the WebP pages never lag behind the PNGs.
@@ -161,7 +161,9 @@ kitjson = {
     'sets': armor.SET_NAMES,
     'sprites': sprites,
 }
-json.dump(kitjson, open(meta_path, 'w'), indent=1)
+# LF on every OS: kit.json is tracked in git and must not show up as changed after a render on Windows
+with open(meta_path, 'w', newline='\n') as fh:
+    json.dump(kitjson, fh, indent=1)
 print('KIT', n, 'sprites rendered,', len(sprites), 'in kit.json', f'{time.time() - t0:.0f}s')
 
 

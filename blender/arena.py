@@ -1,7 +1,7 @@
 """Arena background (1920x1080) as a layered paper diorama: sky + clouds, colonnade with arches, crowd tiers,
 barrier wall with banners, sand floor. Perspective camera with shallow DOF so the crowd softens like a busy backdrop.
 
-  D:/blender/blender.exe -b --python game/blender/arena.py -- <out.png> [W H samples]
+  python -I tools/blender.py blender/arena.py -- <out.png> [W H samples]
 
 Frame at the fighters plane: 50.5 x 28.4 units (x -25.25..25.25, y -9.5..18.9), feet line around y = -4.5.
 """

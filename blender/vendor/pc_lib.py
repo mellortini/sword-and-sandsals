@@ -253,17 +253,21 @@ def setup_cycles(scene, w, h, samples=128, exposure=0.0, view='AgX'):
     except Exception:
         pass
     prefs = bpy.context.preferences.addons['cycles'].preferences
-    for t in ('OPTIX', 'CUDA'):
-        try:
-            prefs.compute_device_type = t
-            prefs.get_devices()
-            for d in prefs.devices:
-                d.use = d.type != 'CPU'
-            if any(d.use for d in prefs.devices):
-                c.device = 'GPU'
-                break
-        except Exception:
-            pass
+    # any GPU backend that has a device (NVIDIA, AMD, Intel, Apple), else the CPU; CYCLES_DEVICE=CPU forces the CPU
+    c.device = 'CPU'
+    if os.environ.get('CYCLES_DEVICE', '').upper() != 'CPU':
+        for t in ('OPTIX', 'CUDA', 'HIP', 'ONEAPI', 'METAL'):
+            try:
+                prefs.compute_device_type = t
+                prefs.get_devices()
+                for d in prefs.devices:
+                    d.use = d.type != 'CPU'
+                if any(d.use for d in prefs.devices):
+                    c.device = 'GPU'
+                    break
+            except Exception:
+                pass
+    print('CYCLES_DEVICE', c.device, prefs.compute_device_type if c.device == 'GPU' else '', flush=True)
     c.max_bounces = 8
     c.diffuse_bounces = 4
     c.glossy_bounces = 3
