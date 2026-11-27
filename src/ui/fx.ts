@@ -6,6 +6,7 @@
  */
 import { Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import { PaperScraps } from './scraps';
+import { StatusFx } from './statusFx';
 import { GroundFx } from './groundFx';
 
 const FPS = 30;
@@ -169,6 +170,8 @@ export class FxLayer extends Container {
   private slots = new Map<string, Pop>();
   /** paper and dust kicked up from the sand (#17), under every pop-up */
   readonly ground = this.addChild(new GroundFx());
+  /** flames, stains, stars, tape on the fighters (#50), over the bodies and under every pop-up */
+  readonly status = this.addChild(new StatusFx());
   show(slot: string, p: Pop, x: number, y: number) {
     this.slots.get(slot)?.fadeOut();
     p.position.set(x, y);
@@ -182,9 +185,11 @@ export class FxLayer extends Container {
     this.slots.clear();
     for (const c of [...this.children]) if (c instanceof PaperScraps) c.destroy({ children: true });
     this.ground.clear();
+    this.status.clear();
   }
   update(dt: number) {
     this.ground.update(dt);
+    this.status.update(dt);
     for (const c of [...this.children]) if ((c instanceof Pop || c instanceof PaperScraps) && !c.destroyed) c.update(dt);
   }
 }

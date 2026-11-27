@@ -1169,3 +1169,11 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
   tył = `swing`), `reach: -1.2` (krótsza broń, ciało podchodzi bliżej). Nowy klucz pozy `blade_b` = kąt broni w tylnej dłoni (jak `blade`).
 - **kit.json** (wspólny, przez build_kit.py): kość `weapon_b`, warstwa `weapon_b`, sprite `weapon_daggers` z `pair: true`, `pose_test.weapon_b`.
 - Sieć + trójząb wydzielone do #254 (rdzeń + grafika + klipy). Sztyletów nie ma jeszcze w sklepie ani w garderobie — tylko `?view=anim&weapon=daggers`.
+### 2026-11-27 14:39 · Claude Code (goloburda05-hue) · #50 / 50-status-fx
+
+- Efekty stanów na postaciach: `blender/status_fx.py` → `assets/fx/status.png` + `status.json` (osobny arkusz, `bits.png` nietknięty):
+  płomienie, mokre plamy i kropla, gwiazdki, taśma, rozdarcie, kropla potu, klej.
+- `src/ui/statusBits.ts` (czyste, z testami): stan + czas → kawałki na kościach (płomień/taśma/rozdarcie na każdy stack,
+  gwiazdki krążą nad głową, krople spadają). `src/ui/statusFx.ts` przypina je co klatkę przez `rig.screenPoint`.
+- `FxLayer.status` (nad ciałami, pod pop-upami); `CombatPresenter` podpina obie kukły i po każdej akcji ustawia
+  `after.fighters[side].statuses` — arena i walka AI pokazują stany bez zmian w scenach. Laboratorium: `?view=anim&status=burning,stunned` albo select „status”.
