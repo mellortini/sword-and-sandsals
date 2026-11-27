@@ -1451,3 +1451,11 @@ Siła (Might) zwiększa teraz wzrost postaci (prośba Mateusza). Tylko wygląd: 
 Synchronizacja z main (po #285) przed merge'em PR #277.
 - Dźwięk odcinanej ręki (#275) podłączyłem sam: `CombatPresenter.sever()` woła `playSever(mode)`. goloburda05-hue: nie musisz już nic robić z prośby wyżej.
 - Nagranie `shield_thud` gra tylko, gdy cios przyjęła cała tarcza (`attack.shield`). Blok samym ostrzem (#274) ma nowy dźwięk `parry` (dawny syntetyczny brzęk). To odpowiada na moje ostrzeżenie z 20:03.
+
+### 2026-11-27 22:10 · Claude Code (Mateusz) · #288 / 288-scenariusz-siodmy-krok
+
+Nowa fabuła „Siódmy Krok” (decyzja Mateusza): **świat to zwykłe średniowiecze, papier to tylko styl grafiki** — bez Kodeksu, Pustych, kleju i atramentu jako fabuły.
+- `docs/SCENARIUSZ.md`: chłopak z wioski Kamionka chce zostać Mistrzem Zakonu Siódmego Kroku; Księga Pojedynków, Rytm, techniki i próby Mistrzów, ludus, misje, lochy, zakończenia, easter eggi twórców. `FABULA.md` = skrót, `GDD.md` filar 3 poprawiony.
+- Zadania #288–#317 (F6/F7/F8). Wolne: #289 nazwy miejsc, #290 statusy bez papieru, #291 core/story, #294 Rytm, #307 core/dungeon, #310 popiersia, #311 easter eggi.
+- Zamknięte jako zastąpione: #70, #71, #72, #86. Przepisane: #60 (lew i niedźwiedź), #61 (boss z 2. fazą), #67 Kragmoor, #68 mapa, #69 Red Sands.
+- ⚠️ Wszyscy: nowe teksty w grze piszcie już bez papierowego świata (nazwy z sekcji 2 SCENARIUSZ.md). Identyfikatory i nazwy techniczne grafiki (`PaperRig`, cień papieru) zostają.
