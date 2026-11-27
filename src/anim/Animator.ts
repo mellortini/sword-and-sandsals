@@ -5,6 +5,7 @@
  */
 import type { PaperRig, Pose } from '../rig/PaperRig';
 import { Baked, ClipEvent, lerpPose, sample } from './clip';
+import { poseWithLooseHead } from './decap';
 
 export const FPS = 30;
 /** how far an attack may step back when the enemy stands inside the weapon's reach (units) */
@@ -103,7 +104,7 @@ export class Animator {
     this.last = { pose, x, y };
     // grounded frames: lift / lower the pelvis so the lowest sole rests on the floor
     const yPos = s.air ? y : y + this.baseLow - this.rig.soleLow(pose);
-    this.rig.pose = pose;
+    this.rig.pose = s.head ? poseWithLooseHead(pose, s.head, x, yPos, this.baseLow) : pose;
     const k = this.unit;
     this.rig.view.position.set(this.home.x + x * k * this.rig.facing, this.home.y - yPos * k);
     if (!c.loop && this.frame >= c.length && !this.done) { this.done = true; this.finish(); }

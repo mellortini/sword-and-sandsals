@@ -240,8 +240,23 @@
   },
   {
    "bone": "torso",
+   "slot": "cut",
+   "piece": "torso_edge"
+  },
+  {
+   "bone": "torso",
+   "slot": "cut",
+   "piece": "torso"
+  },
+  {
+   "bone": "torso",
    "slot": "armor",
    "piece": "torso"
+  },
+  {
+   "bone": "torso",
+   "slot": "cut",
+   "piece": "torso_tissue"
   },
   {
    "bone": "pelvis",
@@ -252,6 +267,21 @@
    "bone": "pelvis",
    "slot": "armor",
    "piece": "skirt"
+  },
+  {
+   "bone": "head",
+   "slot": "cut",
+   "piece": "head_tissue"
+  },
+  {
+   "bone": "head",
+   "slot": "cut",
+   "piece": "head_edge"
+  },
+  {
+   "bone": "head",
+   "slot": "cut",
+   "piece": "head_neck"
   },
   {
    "bone": "head",
@@ -2441,6 +2471,60 @@
     -1.5,
     0.0
    ]
+  },
+  "cut_torso_edge": {
+   "w": 111,
+   "h": 79,
+   "pivot": [
+    44.56,
+    352.56
+   ],
+   "tint": null
+  },
+  "cut_torso": {
+   "w": 336,
+   "h": 357,
+   "pivot": [
+    164.7,
+    345.3
+   ],
+   "tint": "skin"
+  },
+  "cut_torso_tissue": {
+   "w": 144,
+   "h": 90,
+   "pivot": [
+    57.68,
+    377.36
+   ],
+   "tint": null
+  },
+  "cut_head_tissue": {
+   "w": 144,
+   "h": 97,
+   "pivot": [
+    73.07,
+    6.3
+   ],
+   "tint": null
+  },
+  "cut_head_edge": {
+   "w": 107,
+   "h": 77,
+   "pivot": [
+    52.79,
+    33.27
+   ],
+   "tint": null
+  },
+  "cut_head_neck": {
+   "w": 96,
+   "h": 98,
+   "pivot": [
+    47.7,
+    61.55
+   ],
+   "tint": "skin"
   }
  }
 }

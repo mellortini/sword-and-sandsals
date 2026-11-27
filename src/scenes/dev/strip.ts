@@ -1,6 +1,7 @@
 import { Container, Graphics } from 'pixi.js';
 import { FPS } from '../../anim/Animator';
 import { sample } from '../../anim/clip';
+import { poseWithLooseHead } from '../../anim/decap';
 import { PaperRig } from '../../rig/PaperRig';
 import type { Look } from '../../rig/PaperRig';
 import { H, PELVIS_ABOVE_FEET, W, label, randomLook } from '../common';
@@ -33,8 +34,8 @@ export async function showStrip({ world, kit, clips, params, add, rigs }: SceneC
     bgs.addChild(new Graphics().rect(x0 + 3, y0 + 3, cw - 6, ch - 6).fill(0x3b4558));
     const s = sample(c, f);
     const rig = await add(look, 0, 0, S, 1, world, 0, true);
-    rigs[rigs.length - 1].fixed = s.pose;
     const lift = s.air ? s.y : s.y + baseLow - probe.soleLow(s.pose);
+    rigs[rigs.length - 1].fixed = s.head ? poseWithLooseHead(s.pose, s.head, s.x, lift, baseLow) : s.pose;
     rig.view.position.set(x0 + cw * 0.36 + s.x * S * 0.4, y0 + ch - 10 - PELVIS_ABOVE_FEET * S - lift * S);
     const ev = (c.events ?? []).filter((e) => e.f === f).map((e) => ' ' + e.type).join('');
     world.addChild(label(`${f}${ev}`, x0 + 30, y0 + 6, 16, ev ? '#e8be4c' : '#cdb99a'));

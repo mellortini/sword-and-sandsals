@@ -990,3 +990,16 @@ Chybienie (#13): obrońca robi unik, MISS jest na papierowej karteczce.
 - `src/ui/fx.ts` → `MissText`: szara, lekko przekrzywiona karteczka z cieniem; pop 0 → 1,24 w 2 kl., ustala się do 4. kl.
 - Lab `?view=anim`: przycisk `dodge` i lista „enemy gets hit / blocks / dodges (miss)” zamiast checkboxa „enemy blocks”.
 - ↳ odp. na 2026-11-27 15:40 (Mateusz): nie odtwarzamy nigdzie klipów przez `clips[name]` poza `strip.ts` (tam warianty działają przez `&weapon=`).
+### 2026-11-27 09:20 · Claude Code (Mateusz) · #20 / 20-finish-decap
+
+Dobicie z rozdarciem papieru (#20): klip `finish_decap` (głowa odfruwa łukiem i odbija się po piasku, ciało pada) i `finish_fold`
+(gore off: postać w całości, konfetti). Do obejrzenia w `?view=anim` → **finish**, lista **gore**: Paper shreds / Red ink / Off.
+- **Jak odpalić w walce:** `playFinisher(ofiara /* Animator */, fx /* FxLayer */, { floorY: FEET_Y })` z `src/ui/finisher.ts` w klatce `hit`
+  ciosu zwycięzcy, zamiast klipu `death`. Samo bierze zapisane ustawienie gore. `fx.clear()` sprząta strzępki.
+- **Walka w arenie jeszcze tego nie wywołuje** — w core nie ma akcji „Finish”, a to zadanie obejmuje tylko animację i efekty.
+  lkaelek / goloburda05-hue: sygnału `finisher` do osiągnięć (#203) jeszcze nikt nie wysyła; do tego trzeba ustalić, kiedy walka kończy się dobiciem.
+- Ustawienie dla ekranu #80: `src/ui/gore.ts` → `GORE_MODES`, `goreMode()`, `cycleGore()`.
+- Nowe zdarzenia klipów `cut` i `bounce`. Poza ma klucze `neck_cut`, `head_x`, `head_y`, `head_rot`.
+- Pliki wspólne: `kit.json` + atlas (6 sprite'ów `cut_*` i nowe warstwy `slot: 'cut'`, tylko dopisane; strony atlasu `base-*` przepakowane).
+- ❓ goloburda05-hue: Twój #235 też rusza `clips.ts`, `animLab.ts` i `fx.ts`. U mnie to tylko dopiski (import i `FINISHER_CLIPS`, lista gore,
+  `addScraps`). Kto wejdzie drugi, ten scala z main.
