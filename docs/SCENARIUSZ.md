@@ -37,7 +37,7 @@ Sprzedajesz więc rodzinną kozę, Bartek wiezie cię wozem do portu, a Adi przy
 | teraz w kodzie | po zmianie | co jest |
 |---|---|---|
 | Pulpport | **Brackwater** (port, akt 1) | miasto-hub z 10 budynkami, arena |
-| Kraftmoor | **Kragmoor** (góry na północy, akt 2) | arena (#272) |
+| Kraftmoor | **Kragmoor** (góry na północy, akt 2) | arena walki „Kopalniany Krąg” (#272 / PR #321): pochmurno, kałuże, akwedukt, drewniane wieże, kruszarka rudy (dawna „prasa”) |
 | Origami Dunes | **Red Sands** (pustynia na południu, akt 3) | tylko w danych |
 | Folio | **Aurelon** (stolica, akt 4) | tylko w danych |
 | Glue Temple | **Hospice of St. Lumen** (szpital klasztorny) | budynek w mieście |

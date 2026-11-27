@@ -1459,3 +1459,7 @@ Nowa fabuła „Siódmy Krok” (decyzja Mateusza): **świat to zwykłe średnio
 - Zadania #288–#317 (F6/F7/F8). Wolne: #289 nazwy miejsc, #290 statusy bez papieru, #291 core/story, #294 Rytm, #307 core/dungeon, #310 popiersia, #311 easter eggi.
 - Zamknięte jako zastąpione: #70, #71, #72, #86. Przepisane: #60 (lew i niedźwiedź), #61 (boss z 2. fazą), #67 Kragmoor, #68 mapa, #69 Red Sands.
 - ⚠️ Wszyscy: nowe teksty w grze piszcie już bez papierowego świata (nazwy z sekcji 2 SCENARIUSZ.md). Identyfikatory i nazwy techniczne grafiki (`PaperRig`, cień papieru) zostają.
+
+### 2026-11-27 22:30 · Claude Code (Mateusz) · #288 / 288-scenariusz-siodmy-krok
+
+- Arena z #272 (PR #321) zostaje w nowej fabule jako arena regionu **Kragmoor** („Kopalniany Krąg”); wielka prasa = kruszarka rudy z kopalń. Dopisane w `docs/SCENARIUSZ.md`, sekcja 2.
