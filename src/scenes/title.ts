@@ -3,8 +3,10 @@ import { saveGame } from '../core/save';
 import type { SavedCharacter } from '../core/save';
 import { PaperMenu } from '../ui/paperMenu';
 import { openTown, townNote } from '../ui/town';
+import { openSettings } from '../ui/settings';
+import { startMusic } from '../audio/music';
 import { lookPreview } from '../ui/lookPreview';
-import { TEXT_SIZES, cycleTextSize, textSizeIndex } from '../ui/textSize';
+import { TEXT_SIZES, cycleTextSize } from '../ui/textSize';
 import type { PaperMenuEntry } from '../ui/paperMenu';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, drawableLook, groundShadowTexture, randomLook } from './common';
 import type { SceneContext } from './common';
@@ -16,7 +18,7 @@ interface TitleEntry extends PaperMenuEntry {
   /** a setting changed in place (Enter, ←/→) instead of a screen */
   readonly setting?: 'textSize';
   /** a panel opened over the title: the town with its buildings (#201) */
-  readonly panel?: 'town';
+  readonly panel?: 'town' | 'settings';
 }
 
 function entries(saved: SavedCharacter | null): TitleEntry[] {
@@ -30,7 +32,7 @@ function entries(saved: SavedCharacter | null): TitleEntry[] {
       : { label: 'Town', enabled: false, note: 'no saved game yet' },
     { label: 'Quick bout', enabled: true, view: 'prefight&gladiator=random' },
     { label: 'Wardrobe', enabled: true, view: 'wardrobe' },
-    { label: 'Text size', enabled: true, setting: 'textSize', note: TEXT_SIZES[textSizeIndex()].name },
+    { label: 'Settings', enabled: true, panel: 'settings', note: 'text size, gore, motion, sound' },
   ];
 }
 
@@ -84,6 +86,8 @@ export async function showTitle({ app, world, bgTex, ui, add, kit }: SceneContex
   const changeSetting = (i: number, step: 1 | -1) => {
     if (items[i].setting === 'textSize') menu.setNote(i, TEXT_SIZES[cycleTextSize(step)].name);
   };
+  // the town's theme plays over the title and the town panels (#73); the page changes view by reloading
+  startMusic('town');
   let gladiator = saved;
   // the shops put gear on the gladiator before buying it (#34): one still puppet, drawn only when asked
   const tryOn = lookPreview(kit, app.renderer);
@@ -99,7 +103,8 @@ export async function showTitle({ app, world, bgTex, ui, add, kit }: SceneContex
         gladiator = c;
         menu.setNote(i, townNote(c));
       });
-    } else changeSetting(i, 1);
+    } else if (items[i].panel === 'settings') void openSettings();
+    else changeSetting(i, 1);
   }, undefined, saved ? 1 : 0);
   const menuY = 330;
   // the menu shrinks to keep itself and the hint on the screen once it has many entries (town screens, #189/#191)
@@ -110,7 +115,7 @@ export async function showTitle({ app, world, bgTex, ui, add, kit }: SceneContex
   band.roundRect(W / 2 - 520, 60, 1040, Math.max(880, menuBottom + 80 - 60), 40).fill({ color: 0x1c1013, alpha: 0.55 });
   root.addChild(menu);
 
-  const hint = new Text({ text: '↑ ↓  choose    Enter  confirm    ← →  change text size', style: { fontFamily: 'Georgia', fontSize: 22, fill: '#cdb99a' } });
+  const hint = new Text({ text: '↑ ↓  choose    Enter  confirm', style: { fontFamily: 'Georgia', fontSize: 22, fill: '#cdb99a' } });
   hint.anchor.set(0.5);
   hint.position.set(W / 2, menuBottom + 40);
   root.addChild(hint);

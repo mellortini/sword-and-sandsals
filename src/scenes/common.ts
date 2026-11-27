@@ -3,7 +3,8 @@ import { Text, Texture } from 'pixi.js';
 import type { Application, Container } from 'pixi.js';
 import { Animator } from '../anim/Animator';
 import { bakeAll } from '../anim/clips';
-import { DEFAULT_LOOK, EQUIP_SLOTS, PaperRig } from '../rig/PaperRig';
+import { DEFAULT_LOOK, DEFAULT_SHADOW, EQUIP_SLOTS, PaperRig } from '../rig/PaperRig';
+import { paperShadows } from '../ui/graphics';
 import type { Kit, Look, Pose } from '../rig/PaperRig';
 // every scene applies the player's text size (#77)
 import '../ui/textSize';
@@ -28,7 +29,8 @@ export function createRigCollection(kit: Kit) {
   const rigs: SceneRig[] = [];
 
   const add = async (look: Look, x: number, y: number, scale: number, facing: 1 | -1, parent: Container, phase = Math.random() * 2, still = false) => {
-    const rig = new PaperRig(kit, { scale, facing });
+    // paper shadows can be switched off in Settings (#80): the costliest part of a puppet on a slow phone
+    const rig = new PaperRig(kit, { scale, facing, shadow: { ...DEFAULT_SHADOW, enabled: paperShadows() } });
     await rig.setLook(drawableLook(kit, look));
     rig.view.position.set(x, y);
     parent.addChild(rig.view);
