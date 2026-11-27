@@ -14,6 +14,8 @@ import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook 
 import type { SceneContext, SceneUpdate } from '../common';
 import { arenaBackdrop } from '../backdrop';
 import { CrowdFx } from '../../ui/crowdFx';
+import { CameraJuice, applyCamera } from '../../ui/cameraJuice';
+import { reduceMotion, setMotionMode } from '../../ui/motion';
 import { FIGHT_LAYOUT, MIN_LUNGE, STRIKE_GAP } from '../combatPlan';
 import { WEAPONS } from '../../data/weapons';
 import { playFoley } from '../../audio/foley';
@@ -26,6 +28,8 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   world.addChild(arena);
   arena.addChild(new Sprite(arenaBackdrop(bgTex)));
   const crowdFx = arena.addChild(new CrowdFx());
+  // the camera's juice (#75): crit zoom, charge shake, drift; the checkbox below is the "reduce motion" setting
+  const camera = new CameraJuice(W, H, reduceMotion);
   const gsh = groundShadowTexture();
   const tp = params.get('tier');
   // &weapon=hammer8 / &enemy=spear6: try a weapon (and its clip variants, #36) in the lab
@@ -129,7 +133,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
         strike(pa, 'attack_power', { then: 'victory', onHit: () => playFinisher(ea, layer, { floorY: FEET_Y }) });
         break;
       case 'net_throw': if (pa.clipFor('net_throw')) pa.play('net_throw'); break;
-      case 'cheer': crowdFx.cheer(1, P.view.x); break;
+      case 'cheer': crowdFx.cheer(1, P.view.x); camera.punch(E.view.x, E.view.y - 5 * UNIT, 1); break;
       case 'gifts': crowdFx.throw('bouquet', 5, P.view.x, FEET_Y); crowdFx.throw('coin', 4, P.view.x, FEET_Y); break;
       case 'reset':
         hud.visible = false;
@@ -148,20 +152,21 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
     <label>gore <select id="sGore">${GORE_MODES.map((m) => `<option value="${m.id}"${m.id === goreMode() ? ' selected' : ''}>${m.name}</option>`).join('')}</select></label>
     <label>volume <input type="range" id="rVolume" min="0" max="1" step="0.05" value="${volumes().master}"></label>
     <label>status <select id="sStatus"><option value="">none</option>${STATUS_KINDS.map((k) => `<option value="${k}">${k}</option>`).join('')}<option value="all">all</option></select></label>
+    <label><input type="checkbox" id="cbMotion"${reduceMotion() ? ' checked' : ''}> reduce motion</label>
     <label>speed <select id="sSpeed"><option value="1">1x</option><option value="0.5">0.5x</option><option value="0.25">0.25x</option><option value="0.1">0.1x</option></select></label>
     <div class="small"><a href="?view=arena">arena</a> &middot; <a href="?view=wardrobe">wardrobe</a> &middot; <a href="?view=strip&clip=attack_normal">frame strips</a></div>`;
   // --- core fight (#11): src/core decides, CombatPresenter animates, HUD follows. Both sides pick at random.
   // same staging as the arena (#151): bodies never overlap, lunges stretch to the strike point
   const layout = FIGHT_LAYOUT;
   const presenter = new CombatPresenter({
-    crowdFx,
+    crowdFx, camera,
     fighters: { player: pa, enemy: ea }, fx: layer, unit: UNIT, layout, floorY: FEET_Y, sound: true,
     onState: (s) => hud.setState(s),
   });
   const full = { name: '', health: 1, energy: 1, stats: { maxHealth: 1, maxEnergy: 1 } };
   const hud = new CombatHud({ fighters: { player: full, enemy: full } }, W, H);
   hud.visible = false;
-  arena.addChild(hud);
+  world.addChild(hud);
   let fighting = false;
   const pause = (sec: number) => new Promise<void>((res) => later(sec, res));
   const choose = (opts: ActionOption[], rnd: () => number): CombatAction => {
@@ -207,7 +212,11 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   };
   showStatus(params.get('status') ?? '');
   (document.getElementById('sStatus') as HTMLSelectElement).onchange = (e) => showStatus((e.target as HTMLSelectElement).value);
+  (document.getElementById('cbMotion') as HTMLInputElement).onchange = (e) => { setMotionMode((e.target as HTMLInputElement).checked ? 'reduced' : 'full'); camera.clear(); };
   (document.getElementById('sSpeed') as HTMLSelectElement).onchange = (e) => { const v = +(e.target as HTMLSelectElement).value; pa.speed = v; ea.speed = v; };
   (window as unknown as { __act: unknown }).__act = act;
-  return (dt) => { layer.update(dt * pa.speed); crowdFx.update(dt * pa.speed); hud.update(dt * pa.speed); };
+  return (dt) => {
+    layer.update(dt * pa.speed); crowdFx.update(dt * pa.speed); hud.update(dt * pa.speed);
+    applyCamera(arena, camera.update(dt * pa.speed), W, H);
+  };
 }

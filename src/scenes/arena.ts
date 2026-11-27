@@ -37,6 +37,8 @@ import { aiPicker, nemesisPicker, runFight } from './turnLoop';
 import type { ActionPicker } from './turnLoop';
 import { arenaBackdrop } from './backdrop';
 import { CrowdFx } from '../ui/crowdFx';
+import { CameraJuice, applyCamera } from '../ui/cameraJuice';
+import { reduceMotion } from '../ui/motion';
 import { FIGHT_LAYOUT } from './combatPlan';
 import { nextOpponent } from './opponents';
 
@@ -113,9 +115,11 @@ export async function showArena(
 
   const empty = { name: '', health: 1, energy: 1, stats: { maxHealth: 1, maxEnergy: 1 } };
   const hud = new CombatHud({ fighters: { player: empty, enemy: empty } }, W, H);
-  arena.addChild(hud);
+  // the HUD stays still while the camera moves the arena under it (#75)
+  world.addChild(hud);
+  const camera = new CameraJuice(W, H, reduceMotion);
   const presenter = new CombatPresenter({
-    crowdFx,
+    crowdFx, camera,
     fighters: { player: rigs.find((r) => r.rig === P)!.anim!, enemy: rigs.find((r) => r.rig === E)!.anim! },
     fx, unit: UNIT, layout: LAYOUT, floorY: FEET_Y, sound: true, crowd,
     onState: (s) => hud.setState(s),
@@ -230,6 +234,7 @@ export async function showArena(
     hud.update(dt);
     fx.update(dt); // damage numbers, MISS and BLOCK animate and fade only while ticked
     crowdFx.update(dt);
+    applyCamera(arena, camera.update(dt), W, H);
     const gap = hud.panelGap;
     const s = world.scale.x;
     const links = ui.getBoundingClientRect();

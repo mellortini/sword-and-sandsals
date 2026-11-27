@@ -8,6 +8,7 @@ import type { ClipEvent } from '../anim/clip';
 import type { CombatEvent, CombatState, Fighter, FighterSide, MoveKind } from '../core/types';
 import { BlockShield, DamageSplat, FxLayer, MissText } from '../ui/fx';
 import type { CrowdFx } from '../ui/crowdFx';
+import type { CameraJuice } from '../ui/cameraJuice';
 import { attachGroundFx } from '../ui/groundFx';
 import { attachFoley, playFoley } from '../audio/foley';
 import type { CrowdAmbience } from '../audio/crowd';
@@ -40,6 +41,8 @@ export interface PresenterOptions {
   crowd?: CrowdAmbience;
   /** the painted stands come alive (#52): arms go up on a crit and a finishing blow, gifts fly onto the sand */
   crowdFx?: CrowdFx;
+  /** the camera's juice (#75): a micro-zoom on a crit, a shake when a charge or a body hits the sand */
+  camera?: CameraJuice;
   /**
    * called whenever the shown health/energy/crowd change (feed it to CombatHud.setState);
    * `gifts` lists what the crowd threw during the action that just ended
@@ -64,6 +67,14 @@ export class CombatPresenter {
     if (options.sound) for (const side of ['player', 'enemy'] as const) attachFoley(options.fighters[side]);
     // statuses show on the bodies (#50): flames, wet stains, stars, tape
     for (const side of ['player', 'enemy'] as const) options.fx.status.attach(side, options.fighters[side].rig);
+    if (options.camera) {
+      const cam = options.camera;
+      for (const side of ['player', 'enemy'] as const) {
+        options.fighters[side].listeners.add((e, clip) => {
+          if (e.type === 'impact') cam.shake(clip.startsWith('charge') ? 1 : 0.55);
+        });
+      }
+    }
   }
 
   get busy() { return this.running; }
@@ -173,6 +184,7 @@ export class CombatPresenter {
       this.o.crowd?.cheer(fatal ? 1.4 : 0.8);
       // a crit brings half the stands up, a finishing blow all of it, and they throw flowers and coins at the winner
       this.o.crowdFx?.cheer(fatal ? 1 : 0.5, h.x);
+      this.o.camera?.punch(h.x, h.y, fatal ? 1.6 : 1);
       if (fatal && this.o.floorY !== undefined) {
         const winner = this.o.fighters[other(a.target)].rig.view.x;
         this.o.crowdFx?.throw('bouquet', 6, winner, this.o.floorY);
