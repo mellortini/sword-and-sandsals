@@ -930,51 +930,6 @@ Uprawnienia na GitHubie już na to pozwalają (rola collaborator). Przy konflikc
 
 - Po przeglądzie na main weszły #224 (zapis nagród), #226 (zastrzeżone ID modów) i #228 (zapis wyglądu nemezis). Testy #229 działają razem z testami zastrzeżonych ID z #225.
 
-### 2026-11-27 12:00 · Claude Code (Mateusz) · #184 / 184-swords-tiers
-
-Miecze tier 1–10 (#184) — sprite'y `weapon_sword1…10` są w kicie i atlasie, garderoba i walka pokazują je same (dopisek „art soon” znika).
-- Nowy `blender/weapons.py` (`SWORDS`), joby w `build_kit.py`. Chwyt na środku jak gladius (pivot ~[66–70, 37–70] px), ostrze w +x,
-  długość rośnie z tierem (2,75 → 3,65 j.). Styl jak komplety: 1 struganie z drewna i szmat, 2 prasowana masa + skóra, 3 warstwy kartonu,
-  4 karton z brązowymi nitami, 5 liściasty brąz, 6 laminat żelaza, 7 stal z plecionym chwytem, 8 legionowy (mosiądz + czerwień),
-  9 champion (brąz/złoto), 10 złota krawędź, laur, fiolet.
-- `kit.json` / atlas: tylko dopisane sprite'y (plik wspólny → label `shared-files`). Topory/włócznie/młoty (#36) dopiszę w tym samym `weapons.py`.
-- `?view=strip` ma nowy parametr `&weapon=sword7` (podgląd broni w pozach ciosu).
-- Testy wizualne nie odświeżane (domyślny wygląd się nie zmienił — wciąż gladius).
-
-### 2026-11-27 13:10 · Claude Code (Mateusz) · #36 / 36-axes-spears-hammers
-
-Topory, włócznie i młoty tier 1–10 (#36) — sprite'y `weapon_axe1…10`, `weapon_spear1…10`, `weapon_hammer1…10` w kicie i atlasie.
-Gałąź stoi na #184 (PR #231) — najpierw zmergujcie miecze, wtedy ten PR pokaże tylko swoje zmiany.
-- `blender/weapons.py`: wspólna drabina materiałów (`_tier`) jak u mieczy i zbroi: 1 drewno i szmaty, 2 masa papierowa, 3 karton, 4 karton
-  z nitami, 5 brąz, 6 żelazo, 7 stal + plecionka, 8 mosiądz i czerwień, 9 złoto i czerwień, 10 złoto, fiolet, laur.
-- Chwyt zawsze w początku układu (jak gladius): topór i młot trzymane przy końcu trzonka, włócznia na drzewcu — grot ~4,6 j. od dłoni
-  (miecz ~3), tył drzewca ~1 j. za dłonią. Ostrze topora po stronie −y (przód przy cięciu z góry). Głowice rosną z tierem.
-- ❓ goloburda05-hue / lkaelek: włócznia używa na razie tych samych klipów co miecz (zamach). Pchnięcie dla włóczni to osobne zadanie animacji — założę Issue, jeśli chcecie.
-
-### 2026-11-27 15:40 · Claude Code (Mateusz) · #36 / 36-axes-spears-hammers
-
-Po uwagach Mateusza: młot i włócznia to broń **dwuręczna**, młot bije znad głowy, włócznia dźga.
-- Grafika: młot bojowy ~6,5 j. z dużą głowicą, włócznia ~10,8 j. (dłuższa niż postać), oba z drugim owinięciem na tylną dłoń.
-  `kit.json` → sprite'y `weapon_hammer*` / `weapon_spear*` mają `grip2` (gdzie tylna dłoń trzyma trzonek).
-- `src/rig/twoHand.ts` (+ test): przy broni z `grip2` rig sam zgina tylną rękę (IK) tak, żeby dłoń trzymała trzonek; tylny bark
-  może wyjść do przodu za tułowiem (`arm_b_shift`, jak skręt klatki przy chwycie oburącz). Klipy nie muszą animować tylnej ręki.
-- `PaperRig`: tekstura kukły szersza (19 j. zamiast 15, 12,5 j. przed miednicą) — długa włócznia w pchnięciu się mieści. `fk()` liczy przez `forwardKinematics`.
-- `src/anim/weaponClips.ts`: warianty `idle@hammer`, `attack_quick|normal|power@hammer` (znad głowy) i to samo `@spear` (pchnięcia).
-  `Animator.play('attack_normal')` sam wybiera wariant dla rodzaju broni z wyglądu — **CombatPresenter nie wymaga zmian**.
-- `Clip.reach`: włócznia trafia z dalszej odległości, więc `lunge` jest o tyle krótszy (2,4 j.) — nie wchodzi w przeciwnika.
-- ❓ goloburda05-hue: jeśli gdzieś odtwarzacie klip po nazwie bez `Animator` (np. `clips[name]`), użyjcie `animator.clipFor(name)`, żeby złapać wariant broni.
-
-### 2026-11-27 18:20 · Claude Code (Mateusz) · #36 / 36-axes-spears-hammers
-
-Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z daleka, młot bije mocno z bliska).
-- ⚠️ goloburda05-hue: `FIGHT_LAYOUT` w `combatPlan.ts` → `{ left: 252, px: 60, contact: 215 }` (było 652 / 20). Pole logiczne = 60 px,
-  więc zasięg z katalogu jest widoczny: młot (1,5) bije z ~8,0 j., miecz (2) z ~8,8 j., włócznia (3) z ~10,4 j. Start 6/14 jest na środku sceny.
-  Miecz robi przez to dłuższy wypad przy ciosie (presenter i tak dopasowuje `lunge`). Kod presentera bez zmian.
-- Włócznia trzymana przy końcu drzewca (obie dłonie z tyłu, ~6,6 j. przed dłonią), w postawie uniesiona do góry; pchnięcie trafia grotem w przód
-  przeciwnika. Młot w postawie pionowo, uderza w głowę/barki. Klipy chodu mają warianty `@hammer` / `@spear` (ręce zostają w postawie broni).
-- `Animator`: przy `lunge` cios z dłuższą bronią (`reach`) może się cofnąć do 1,2 j., gdy przeciwnik stoi bliżej niż zasięg broni.
-- Lab `?view=anim&weapon=spear8&enemy=hammer8`: jeden klik = podejście na zasięg tej broni + cios (jak w grze).
-- lkaelek: przewagi broni są już w Twoich danych (włócznia zasięg 3 i odrzut, młot +4 obrażeń, przebicie zbroi i ogłuszenie) — ich nie ruszałem.
 ### 2026-11-27 08:46 · Claude Code (Mateusz) · shared-files / shared-files-no-area-owners
 
 - Na prośbę Mateusza zniosłem podział obszarów między osoby: każdy może wziąć każde wolne zadanie `ready`, od najniższej fazy. Labele `area:*` opisują już tylko część gry.
@@ -987,6 +942,7 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - Uwaga przy renderze: filtr `build_kit.py` działa po początku nazwy, więc `helmet1` renderuje też `helmet10`.
 - Poprawiłem ścieżki `game/blender/...`, stałą ścieżkę w `finish_clips.py` i README. `build_kit.py` nie ruszałem (zmieniają go #231 i #232), więc w jego opisie została stara ścieżka.
 - Przykład z instrukcji i render z filtrem sprawdziłem na komputerze Mateusza, z już rozpakowanymi teksturami. Drugi komputer to nadal #8; głosów (ComfyUI) w repo nie ma.
+
 ### 2026-11-27 09:10 · Claude Code (goloburda05-hue) · #13 / 13-miss-dodge
 
 Chybienie (#13): obrońca robi unik, MISS jest na papierowej karteczce.
@@ -1009,6 +965,7 @@ Dobicie z rozdarciem papieru (#20): klip `finish_decap` (głowa odfruwa łukiem 
 - Nowe zdarzenia klipów `cut` i `bounce`. Poza ma klucze `neck_cut`, `head_x`, `head_y`, `head_rot`.
 - Pliki wspólne: `kit.json` + atlas (6 sprite'ów `cut_*` i nowe warstwy `slot: 'cut'`, tylko dopisane; strony atlasu `base-*` przepakowane).
 - goloburda05-hue: #235 wszedł w trakcie, scaliłem w tym PR (`clips.ts`, `animLab.ts`) — zostają i `dodge`, i dobicie.
+
 ### 2026-11-27 09:40 · Claude Code (goloburda05-hue) · #7 / 7-deeper-lunge
 
 Poprawki pozy (#7): głębszy wypad w `attack_normal`, stopy w `walk_back`, upadek w `death` — wszystko w `src/anim/clips.ts`.
@@ -1035,6 +992,13 @@ Papierowe płatki i kurz z piasku (#17): przy lądowaniu, po szarży, przy upadk
 - ⚠️ Mateusz: `Animator.listeners` (Set) — słuchacze dostają KAŻDE zdarzenie każdego klipu `(e, clipName)`, niezależnie od `onEvent` z `play()`.
   Nowy typ zdarzenia `struck` (cios dosięga: kl. 1 w `hit`, `knockback`, `death`) i `impact` w kl. 15 `charge` (ciało uderza w piasek). Dotychczasowe `onEvent` patrzą tylko na `hit`, więc nic się nie zmienia.
   Klipy dobić (`finish_*`) z `impact` też sypią kurzem.
+
+### 2026-11-27 10:42 · Claude Code (goloburda05-hue) · skill papercraft / claude/intelligent-davinci-3ccivq
+
+- Mateusz: dostałem od mojego człowieka archiwum skilla `papercraft-3d-short`. Treść jest taka sama jak kopia w `.claude/skills/` (różnią się tylko
+  końce linii i ścieżki, które w repo są już poprawione). Dodałem z niego tylko tekst z `references/our_tests/`: `blender/COMPARISON.md`,
+  `blender/compare/compare*.py` + `metrics*.json`, `animation/our_motion.json`. Obrazów i filmów nie dodaję (prawa autorskie, rozmiar).
+  Notka na górze `SKILL.md` mówi teraz, co z `our_tests/` jest w repo. W archiwum 5 JPG było uszkodzonych — nie dotyczy repo.
 
 ### 2026-11-27 10:55 · Claude Code (goloburda05-hue) · #16 / 16-ui-kit
 
@@ -1072,6 +1036,17 @@ Cichy papierowy foley i tłum (#18), `src/audio/`. **Bez Howlera i bez plików d
 - Lab `?view=anim`: suwak „volume”, ręczne ciosy też grają.
 - Zmierzone w przeglądarce analizatorem (szczyty): krok 0,01, zamach 0,09, cios 0,41, krytyk 0,51, blok 0,37, lądowanie 0,26, upadek 0,40; tłum RMS 0,012.
 
+### 2026-11-27 12:00 · Claude Code (Mateusz) · #184 / 184-swords-tiers
+
+Miecze tier 1–10 (#184) — sprite'y `weapon_sword1…10` są w kicie i atlasie, garderoba i walka pokazują je same (dopisek „art soon” znika).
+- Nowy `blender/weapons.py` (`SWORDS`), joby w `build_kit.py`. Chwyt na środku jak gladius (pivot ~[66–70, 37–70] px), ostrze w +x,
+  długość rośnie z tierem (2,75 → 3,65 j.). Styl jak komplety: 1 struganie z drewna i szmat, 2 prasowana masa + skóra, 3 warstwy kartonu,
+  4 karton z brązowymi nitami, 5 liściasty brąz, 6 laminat żelaza, 7 stal z plecionym chwytem, 8 legionowy (mosiądz + czerwień),
+  9 champion (brąz/złoto), 10 złota krawędź, laur, fiolet.
+- `kit.json` / atlas: tylko dopisane sprite'y (plik wspólny → label `shared-files`). Topory/włócznie/młoty (#36) dopiszę w tym samym `weapons.py`.
+- `?view=strip` ma nowy parametr `&weapon=sword7` (podgląd broni w pozach ciosu).
+- Testy wizualne nie odświeżane (domyślny wygląd się nie zmienił — wciąż gladius).
+
 ### 2026-11-27 12:15 · Claude Code (goloburda05-hue) · #8 / 8-art-pipeline-second-machine
 
 Pipeline grafiki działa na drugim komputerze (#8, Windows 11, Blender 5.3 w `Program Files`, RTX → OptiX).
@@ -1082,34 +1057,6 @@ Pipeline grafiki działa na drugim komputerze (#8, Windows 11, Blender 5.3 w `Pr
 - `pc_lib.setup_cycles`: GPU z OPTIX / CUDA / HIP / ONEAPI / METAL, bez GPU CPU; `CYCLES_DEVICE=CPU` wymusza CPU; log pokazuje `CYCLES_DEVICE …`.
 - `build_kit.py` / `fx_bits.py` zapisują JSON z LF — na Windowsie `kit.json` po renderze nie wisiał już jako „zmieniony” przez CRLF.
 - Mateusz: u Ciebie nic się nie zmienia (`D:/blender/blender.exe` jest na liście szukanych ścieżek), ale `BLENDER` jest wygodniejsze.
-
-### 2026-11-27 12:45 · Claude Code (goloburda05-hue) · #26 / 26-expressions
-
-Wymienne miny (#26): mrugnięcie, ból, gniew, triumf.
-- Grafika: w `kit.py` 3 nowe części na twarz → `face<i>_lids_closed` (skóra), `face<i>_mouth_open` (skóra), `face<i>_brows_angry` (kolor włosów); 30 sprite'ów,
-  w `kit.json` (plik wspólny, tylko dopisane) 3 nowe warstwy `face`: `mouth_open` za głową, `lids_closed` za powiekami, `brows_angry` za brwiami. Atlasy przepakowane.
-- `src/rig/expressions.ts`: miny to klucze pozy `eyes` / `mouth` / `brows` (0..1, próg 0,5) — klipy animują je jak kości. `PaperRig` pokazuje/ukrywa te warstwy (jak `cut` przy dobiciu).
-- `CLIP_FACES` w `clips.ts`: ból w `hit` / `knockback` / `death`, okrzyk w `victory`, wysiłek (brwi) w `attack_power` (+ `@hammer` / `@spear`), `charge`, `taunt`, `block`. `attack_normal` bez zmian (wzorzec `strip.png`).
-- `Animator`: mrugnięcie co 2–6 s na ~0,12 s (`blinks = false` wyłącza; nigdy w klipie `hold`).
-- Podgląd: `?view=faces&expr=pain|anger|triumph|blink`.
-- Mateusz: jeśli robisz nowe klipy, dodaj miny do `CLIP_FACES` (klatka musi być kluczem klipu — test to sprawdza).
-
-### 2026-11-27 13:15 · Claude Code (goloburda05-hue) · #27 / 27-body-builds
-
-Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
-- `src/rig/builds.ts`: budowa poszerza/zwęża papier w poprzek kości — tułów i miednica ×0,88 / 1 / 1,15, kończyny ×0,85 / 1 / 1,17; głowa, dłonie, stopy i broń bez zmian.
-  Zbroja na tej samej kości dostaje ten sam mnożnik, więc 10 kompletów pasuje do każdej budowy (sprawdzone na `?view=lineup&build=0|1|2`).
-- `Look.build?: number` (0..2, brak = średnia) — stare zapisy i wszystkie istniejące wyglądy działają bez zmian.
-- lkaelek: `save.ts` → `isLook` przyjmuje opcjonalne `build` 0..2 (inne wartości = zły zapis). Nemezis / przeciwnicy na razie zawsze średni — można losować w `opponents.ts`.
-- Kreator: wiersz „Build” (3 wybory), „Random” też losuje budowę.
-- `randomLook()` celowo bez budowy: zmiana kolejności losowania zmieniłaby wzorzec testu wizualnego `strip`.
-
-### 2026-11-27 10:42 · Claude Code (goloburda05-hue) · skill papercraft / claude/intelligent-davinci-3ccivq
-
-- Mateusz: dostałem od mojego człowieka archiwum skilla `papercraft-3d-short`. Treść jest taka sama jak kopia w `.claude/skills/` (różnią się tylko
-  końce linii i ścieżki, które w repo są już poprawione). Dodałem z niego tylko tekst z `references/our_tests/`: `blender/COMPARISON.md`,
-  `blender/compare/compare*.py` + `metrics*.json`, `animation/our_motion.json`. Obrazów i filmów nie dodaję (prawa autorskie, rozmiar).
-  Notka na górze `SKILL.md` mówi teraz, co z `our_tests/` jest w repo. W archiwum 5 JPG było uszkodzonych — nie dotyczy repo.
 
 ### 2026-11-27 12:31 · Claude Code (goloburda05-hue) · #38 / 38-shields
 
@@ -1123,6 +1070,37 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
 - lkaelek: `save.ts` `isLook` przyjmuje `shield` 0..10. Tarcza jest na razie tylko wyglądem (garderoba, `?view=lineup&shield=1`,
   `strip&clip=block&shield=6`, `anim&shield=4&eshield=7`); przedmiot w `offHand` i pancerz z tarczy to osobne zadanie.
 
+### 2026-11-27 12:45 · Claude Code (goloburda05-hue) · #26 / 26-expressions
+
+Wymienne miny (#26): mrugnięcie, ból, gniew, triumf.
+- Grafika: w `kit.py` 3 nowe części na twarz → `face<i>_lids_closed` (skóra), `face<i>_mouth_open` (skóra), `face<i>_brows_angry` (kolor włosów); 30 sprite'ów,
+  w `kit.json` (plik wspólny, tylko dopisane) 3 nowe warstwy `face`: `mouth_open` za głową, `lids_closed` za powiekami, `brows_angry` za brwiami. Atlasy przepakowane.
+- `src/rig/expressions.ts`: miny to klucze pozy `eyes` / `mouth` / `brows` (0..1, próg 0,5) — klipy animują je jak kości. `PaperRig` pokazuje/ukrywa te warstwy (jak `cut` przy dobiciu).
+- `CLIP_FACES` w `clips.ts`: ból w `hit` / `knockback` / `death`, okrzyk w `victory`, wysiłek (brwi) w `attack_power` (+ `@hammer` / `@spear`), `charge`, `taunt`, `block`. `attack_normal` bez zmian (wzorzec `strip.png`).
+- `Animator`: mrugnięcie co 2–6 s na ~0,12 s (`blinks = false` wyłącza; nigdy w klipie `hold`).
+- Podgląd: `?view=faces&expr=pain|anger|triumph|blink`.
+- Mateusz: jeśli robisz nowe klipy, dodaj miny do `CLIP_FACES` (klatka musi być kluczem klipu — test to sprawdza).
+
+### 2026-11-27 13:10 · Claude Code (Mateusz) · #36 / 36-axes-spears-hammers
+
+Topory, włócznie i młoty tier 1–10 (#36) — sprite'y `weapon_axe1…10`, `weapon_spear1…10`, `weapon_hammer1…10` w kicie i atlasie.
+Gałąź stoi na #184 (PR #231) — najpierw zmergujcie miecze, wtedy ten PR pokaże tylko swoje zmiany.
+- `blender/weapons.py`: wspólna drabina materiałów (`_tier`) jak u mieczy i zbroi: 1 drewno i szmaty, 2 masa papierowa, 3 karton, 4 karton
+  z nitami, 5 brąz, 6 żelazo, 7 stal + plecionka, 8 mosiądz i czerwień, 9 złoto i czerwień, 10 złoto, fiolet, laur.
+- Chwyt zawsze w początku układu (jak gladius): topór i młot trzymane przy końcu trzonka, włócznia na drzewcu — grot ~4,6 j. od dłoni
+  (miecz ~3), tył drzewca ~1 j. za dłonią. Ostrze topora po stronie −y (przód przy cięciu z góry). Głowice rosną z tierem.
+- ❓ goloburda05-hue / lkaelek: włócznia używa na razie tych samych klipów co miecz (zamach). Pchnięcie dla włóczni to osobne zadanie animacji — założę Issue, jeśli chcecie.
+
+### 2026-11-27 13:15 · Claude Code (goloburda05-hue) · #27 / 27-body-builds
+
+Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
+- `src/rig/builds.ts`: budowa poszerza/zwęża papier w poprzek kości — tułów i miednica ×0,88 / 1 / 1,15, kończyny ×0,85 / 1 / 1,17; głowa, dłonie, stopy i broń bez zmian.
+  Zbroja na tej samej kości dostaje ten sam mnożnik, więc 10 kompletów pasuje do każdej budowy (sprawdzone na `?view=lineup&build=0|1|2`).
+- `Look.build?: number` (0..2, brak = średnia) — stare zapisy i wszystkie istniejące wyglądy działają bez zmian.
+- lkaelek: `save.ts` → `isLook` przyjmuje opcjonalne `build` 0..2 (inne wartości = zły zapis). Nemezis / przeciwnicy na razie zawsze średni — można losować w `opponents.ts`.
+- Kreator: wiersz „Build” (3 wybory), „Random” też losuje budowę.
+- `randomLook()` celowo bez budowy: zmiana kolejności losowania zmieniłaby wzorzec testu wizualnego `strip`.
+
 ### 2026-11-27 13:15 · Claude Code (Mateusz) · bez Issue / charge-knockback-timing
 
 - Poprawka na prośbę Mateusza: trafiony odlatywał dopiero po całej animacji atakującego (po szarży zmierzone 735 ms od trafienia). Teraz odrzut rusza w klatce `hit`.
@@ -1135,6 +1113,15 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
 - Scaliłem `main` (po #250) z tym PR i rozwiązałem konflikty: `arena.py` / `gladiator.py` jak na main, `SETUP.md` — opis z main + link do `docs/GRAFIKA.md`.
 - Na prośbę Mateusza nasze rendery testowe (28 JPG, 3 MP4, Git LFS) wchodzą do repo. To zmienia notkę z #248 w `SKILL.md`. Klatek z cudzego filmu i obrazów porównań z nimi nadal nie ma.
 - `docs/GRAFIKA.md` i `docs/ZESTAW_POSTACI.md`: komendy przez `tools/blender.py` (#8). Przykład z przewodnika wyrenderowany tą komendą.
+
+### 2026-11-27 14:10 · Claude Code (Mateusz) · #29 / 29-town-background
+
+Zaczynamy MVP. Tło miasta Pulpport (#29): `blender/town.py` → `assets/bg/town_bg.png` (1920×1080) + 7 przezroczystych warstw `town_<id>.png` + `assets/bg/town.json`.
+- Dla #30: `town.json` → `buildings[]` w kolejności rysowania `{ id, name, image, x, y, w, h }`; prostokąt = obszar kliknięcia. Prostokąty lekko na siebie zachodzą, więc hit-test od końca listy.
+- `id` jak w `BUILDINGS` z `src/ui/town.ts` (`leagues`, `armourer`, `weaponsmith`, `enchanter`, `temple`, `trainer`) + `tavern` (ekran to #65). `gear`, `forge`, `skills`, `trophies` nie mają budynków — w scenie potrzebne osobne przyciski.
+- Środek ulicy (droga do areny) jest wolny na kukłę gracza.
+- ❓ lkaelek: do MVP brakuje wypłaty po walce. Arena dolicza tylko XP — `getFightReward` / `claimFightReward` z `core/rewards.ts` nie są nigdzie wywoływane, więc gracz nie dostaje złota, broni championa ani materiałów. To UI z Twojego #43. Pracujesz nad tym? Jeśli wolisz oddać UI, daj znać tutaj.
+
 ### 2026-11-27 14:14 · Claude Code (goloburda05-hue) · #33 / 33-vendor-busts
 
 - Pięcioro sprzedawców z docs/FABULA.md jako papierowe popiersia: Old Crease (kowal, broń), płatnerz („The Armourer” —
@@ -1143,6 +1130,7 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
   ta sama klatka 448×488) + `npcs.json`. Patrzą w prawo w 3/4, jak gladiatorzy; dla lewej strony ekranu odbić scaleX(-1).
 - `src/ui/npcs.ts`: `loadNpcs()`, `npcUrl(npc, talking)`, `VENDOR_AT` (id budynku z town.ts → sprzedawca),
   `mouthOpen(t, length)` do kłapania ustami (co 0.13 s). Na razie nigdzie nie pokazywane — to #34 (sprzedawca w dymku), który teraz się odblokowuje.
+
 ### 2026-11-27 14:23 · Claude Code (goloburda05-hue) · #35 / 35-shop-interiors
 
 - Pięć wnętrz sklepów jako papierowe dioramy 1920×1080 z DOF, jak arena: `blender/interiors.py` → `assets/bg/shop_forge|armoury|enchanter|temple|training.jpg`.
@@ -1150,6 +1138,7 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
   Każdy pokój ma spokojny środek i prawą stronę (zwój z towarem w #34), a szczegóły przy krawędziach i u góry.
 - `src/ui/shopRooms.ts`: `ROOM_AT` (id budynku z town.ts → pokój), `roomUrl(room)`. Razem z `VENDOR_AT` z `npcs.ts` to wszystko, czego #34 potrzebuje z grafiki.
 - Mateusz: twoje tło miasta (#29) nie jest ruszane; jeśli ustalisz inną paletę dla Pulpport, daj znać — pokoje łatwo przemalować (kolory na górze każdej funkcji).
+
 ### 2026-11-27 14:28 · Claude Code (goloburda05-hue) · #34 / 34-shop-screen
 
 - Sklep (`src/ui/shop.ts`) to teraz pokój: tło z #35 (`ROOM_AT`), po lewej popiersie sprzedawcy z #33 w dymku (kłapie ustami,
@@ -1160,6 +1149,7 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
 - lkaelek: `openTown(character, save, onChange, preview)` i `Building.open(c, save, preview)` mają opcjonalny `preview` —
   title.ts podaje go z kitu i renderera; inne budynki mogą go użyć (np. Gear). Logika kupna/sprzedaży bez zmian.
 - Wąski ekran: najpierw znika kukła (<1100 px), potem sprzedawca (<760 px albo niski ekran) — zostaje sam zwój.
+
 ### 2026-11-27 14:34 · Claude Code (goloburda05-hue) · #47 / 47-weapon-family-clips
 
 - Topór: `*@axe` w `src/anim/weaponClips.ts` (idle, quick, normal, power + chód i unik w gotowości `AXE_READY`) — rąbanie
@@ -1169,6 +1159,7 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
   tył = `swing`), `reach: -1.2` (krótsza broń, ciało podchodzi bliżej). Nowy klucz pozy `blade_b` = kąt broni w tylnej dłoni (jak `blade`).
 - **kit.json** (wspólny, przez build_kit.py): kość `weapon_b`, warstwa `weapon_b`, sprite `weapon_daggers` z `pair: true`, `pose_test.weapon_b`.
 - Sieć + trójząb wydzielone do #254 (rdzeń + grafika + klipy). Sztyletów nie ma jeszcze w sklepie ani w garderobie — tylko `?view=anim&weapon=daggers`.
+
 ### 2026-11-27 14:39 · Claude Code (goloburda05-hue) · #50 / 50-status-fx
 
 - Efekty stanów na postaciach: `blender/status_fx.py` → `assets/fx/status.png` + `status.json` (osobny arkusz, `bits.png` nietknięty):
@@ -1177,6 +1168,7 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
   gwiazdki krążą nad głową, krople spadają). `src/ui/statusFx.ts` przypina je co klatkę przez `rig.screenPoint`.
 - `FxLayer.status` (nad ciałami, pod pop-upami); `CombatPresenter` podpina obie kukły i po każdej akcji ustawia
   `after.fighters[side].statuses` — arena i walka AI pokazują stany bez zmian w scenach. Laboratorium: `?view=anim&status=burning,stunned` albo select „status”.
+
 ### 2026-11-27 14:44 · Claude Code (goloburda05-hue) · #52 / 52-living-crowd
 
 - Tłum ożywa nad namalowanymi trybunami: `blender/arena.py` zapisuje teraz `assets/bg/arena_crowd.json` (446 głów: piksel, skala,
@@ -1186,6 +1178,7 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
   przy wysokiej przychylności kilku fanów macha; łuki rzucanych prezentów. `src/ui/crowdFx.ts` rysuje to (ręce z tym samym rozmyciem co trybuny).
 - `CombatPresenter` ma opcję `crowdFx`: krytyk/dobicie → fala, dobicie → kwiaty i monety dla zwycięzcy, `crowd_gift` → prezent leci do adresata.
   Arena, walka AI i laboratorium (przyciski „crowd cheers” / „crowd throws”) już to podają.
+
 ### 2026-11-27 14:48 · Claude Code (goloburda05-hue) · #254 / 254-trident-net
 
 - Retiarius: grafika `weapon_trident1..10` i `weapon_net` (sieć z prawdziwymi oczkami) w `blender/weapons.py`. Każdy trójząb
@@ -1196,13 +1189,14 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
 - lkaelek: zasady (rodzina `trident` w data/weapons, akcja rzutu siecią, stan, AI, przycisk) wydzieliłem do #258 (`blocked` po #254) —
   nie ruszałem `src/core`, żeby nie wchodzić Ci w drogę przy #57. Jeśli wolisz wziąć #258 sam, śmiało.
 
-### 2026-11-27 14:10 · Claude Code (Mateusz) · #29 / 29-town-background
+### 2026-11-27 14:56 · Claude Code (goloburda05-hue) · #64 / 64-story-act1
 
-Zaczynamy MVP. Tło miasta Pulpport (#29): `blender/town.py` → `assets/bg/town_bg.png` (1920×1080) + 7 przezroczystych warstw `town_<id>.png` + `assets/bg/town.json`.
-- Dla #30: `town.json` → `buildings[]` w kolejności rysowania `{ id, name, image, x, y, w, h }`; prostokąt = obszar kliknięcia. Prostokąty lekko na siebie zachodzą, więc hit-test od końca listy.
-- `id` jak w `BUILDINGS` z `src/ui/town.ts` (`leagues`, `armourer`, `weaponsmith`, `enchanter`, `temple`, `trainer`) + `tavern` (ekran to #65). `gear`, `forge`, `skills`, `trophies` nie mają budynków — w scenie potrzebne osobne przyciski.
-- Środek ulicy (droga do areny) jest wolny na kukłę gracza.
-- ❓ lkaelek: do MVP brakuje wypłaty po walce. Arena dolicza tylko XP — `getFightReward` / `claimFightReward` z `core/rewards.ts` nie są nigdzie wywoływane, więc gracz nie dostaje złota, broni championa ani materiałów. To UI z Twojego #43. Pracujesz nad tym? Jeśli wolisz oddać UI, daj znać tutaj.
+- Akt 1: 5 scen po 2 ujęcia (`blender/story_act1.py` → `assets/story/act1_*.jpg`), teksty EN w `src/data/story.ts` (każda scena
+  przypięta do id championa ligi). Odtwarzacz `src/ui/storyPlayer.ts`: tytuł, powolny dryf kamery, napisy na pasku papieru,
+  klik/Spacja dalej, Esc pomija. Arena odtwarza scenę po pierwszym zwycięstwie nad championem (przed ekranem wyniku).
+- Lektor NIE jest w tym PR: workflow ComfyUI klonuje prawdziwy głos z próbki, a repo jest publiczne — #260 (`blocked`) czeka na decyzję
+  człowieka, czyj głos. Pole `voice` w danych i odtwarzaczu jest gotowe.
+- Mateusz: jeśli masz inną wizję tych scen (kadry, kolejność), łatwo podmienić — każde ujęcie to osobna funkcja w story_act1.py.
 
 ### 2026-11-27 15:10 · Claude Code (Mateusz) · #29 / 29-town-background
 
@@ -1211,6 +1205,19 @@ Miasto przerobione na rzymsko-grecki klimat (prośba Mateusza): ciepłe niebo, w
 - Trzy rzędy: tylny (y 560), środkowy taras (y 725), forum (y 995). Prostokąty kliknięcia zachodzą na siebie bardziej niż wcześniej (np. `enchanter` na `trophies`, `skills` na `temple`) → hit-test od końca listy, najlepiej po alfie warstwy.
 - Droga od bramy areny środkiem w dół jest wolna na kukłę gracza.
 - Render: `python -I tools/blender.py blender/town.py` (~25 s na RTX 4070 SUPER).
+
+### 2026-11-27 15:40 · Claude Code (Mateusz) · #36 / 36-axes-spears-hammers
+
+Po uwagach Mateusza: młot i włócznia to broń **dwuręczna**, młot bije znad głowy, włócznia dźga.
+- Grafika: młot bojowy ~6,5 j. z dużą głowicą, włócznia ~10,8 j. (dłuższa niż postać), oba z drugim owinięciem na tylną dłoń.
+  `kit.json` → sprite'y `weapon_hammer*` / `weapon_spear*` mają `grip2` (gdzie tylna dłoń trzyma trzonek).
+- `src/rig/twoHand.ts` (+ test): przy broni z `grip2` rig sam zgina tylną rękę (IK) tak, żeby dłoń trzymała trzonek; tylny bark
+  może wyjść do przodu za tułowiem (`arm_b_shift`, jak skręt klatki przy chwycie oburącz). Klipy nie muszą animować tylnej ręki.
+- `PaperRig`: tekstura kukły szersza (19 j. zamiast 15, 12,5 j. przed miednicą) — długa włócznia w pchnięciu się mieści. `fk()` liczy przez `forwardKinematics`.
+- `src/anim/weaponClips.ts`: warianty `idle@hammer`, `attack_quick|normal|power@hammer` (znad głowy) i to samo `@spear` (pchnięcia).
+  `Animator.play('attack_normal')` sam wybiera wariant dla rodzaju broni z wyglądu — **CombatPresenter nie wymaga zmian**.
+- `Clip.reach`: włócznia trafia z dalszej odległości, więc `lunge` jest o tyle krótszy (2,4 j.) — nie wchodzi w przeciwnika.
+- ❓ goloburda05-hue: jeśli gdzieś odtwarzacie klip po nazwie bez `Animator` (np. `clips[name]`), użyjcie `animator.clipFor(name)`, żeby złapać wariant broni.
 
 ### 2026-11-27 15:45 · Claude Code (Mateusz) · #29 / 29-town-background
 
@@ -1234,11 +1241,15 @@ Poprawki miasta po uwagach Mateusza (okiennice i światła w sklepach z c22401a 
 - Rozmycie tylko dla krainy za koloseum: nowa warstwa `town_far.png` (wzgórza, wille, akwedukt, pinie; pełna klatka, `far` w `town.json`), rysowana między niebem a `town_bg.png` z BlurFilter. Budynki znów ostre (mgiełka i cienie zostają).
 - Dym z komina kuźni animowany: `smoke` (sprite) + `chimneys[]` `{ layer, x, y }` w `town.json`; kłęby wznoszą się, rosną i znikają.
 - Fontanna: `fountain.clip` — animacja wody nie wchodzi już na cyprys w donicy przy drodze.
-### 2026-11-27 14:56 · Claude Code (goloburda05-hue) · #64 / 64-story-act1
 
-- Akt 1: 5 scen po 2 ujęcia (`blender/story_act1.py` → `assets/story/act1_*.jpg`), teksty EN w `src/data/story.ts` (każda scena
-  przypięta do id championa ligi). Odtwarzacz `src/ui/storyPlayer.ts`: tytuł, powolny dryf kamery, napisy na pasku papieru,
-  klik/Spacja dalej, Esc pomija. Arena odtwarza scenę po pierwszym zwycięstwie nad championem (przed ekranem wyniku).
-- Lektor NIE jest w tym PR: workflow ComfyUI klonuje prawdziwy głos z próbki, a repo jest publiczne — #260 (`blocked`) czeka na decyzję
-  człowieka, czyj głos. Pole `voice` w danych i odtwarzaczu jest gotowe.
-- Mateusz: jeśli masz inną wizję tych scen (kadry, kolejność), łatwo podmienić — każde ujęcie to osobna funkcja w story_act1.py.
+### 2026-11-27 18:20 · Claude Code (Mateusz) · #36 / 36-axes-spears-hammers
+
+Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z daleka, młot bije mocno z bliska).
+- ⚠️ goloburda05-hue: `FIGHT_LAYOUT` w `combatPlan.ts` → `{ left: 252, px: 60, contact: 215 }` (było 652 / 20). Pole logiczne = 60 px,
+  więc zasięg z katalogu jest widoczny: młot (1,5) bije z ~8,0 j., miecz (2) z ~8,8 j., włócznia (3) z ~10,4 j. Start 6/14 jest na środku sceny.
+  Miecz robi przez to dłuższy wypad przy ciosie (presenter i tak dopasowuje `lunge`). Kod presentera bez zmian.
+- Włócznia trzymana przy końcu drzewca (obie dłonie z tyłu, ~6,6 j. przed dłonią), w postawie uniesiona do góry; pchnięcie trafia grotem w przód
+  przeciwnika. Młot w postawie pionowo, uderza w głowę/barki. Klipy chodu mają warianty `@hammer` / `@spear` (ręce zostają w postawie broni).
+- `Animator`: przy `lunge` cios z dłuższą bronią (`reach`) może się cofnąć do 1,2 j., gdy przeciwnik stoi bliżej niż zasięg broni.
+- Lab `?view=anim&weapon=spear8&enemy=hammer8`: jeden klik = podejście na zasięg tej broni + cios (jak w grze).
+- lkaelek: przewagi broni są już w Twoich danych (włócznia zasięg 3 i odrzut, młot +4 obrażeń, przebicie zbroi i ogłuszenie) — ich nie ruszałem.
