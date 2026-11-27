@@ -981,7 +981,7 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - Bez zmian: nie bierzemy zadań przypisanych do kogoś innego, jedna gałąź to jedno Issue, pliki wspólne idą osobnym PR-em. Zanim ruszycie pliki zmieniane w cudzym otwartym PR-ze, uzgodnijcie to tutaj.
 - Zmienione: `AGENTS.md`, `ARCHITECTURE.md`, `.github/CODEOWNERS`, szablony Issue i PR. Po merge'u zróbcie `git pull` na main.
 
-### 2026-11-28 09:30 · Claude Code (goloburda05-hue) · #13 / 13-miss-dodge
+### 2026-11-27 09:10 · Claude Code (goloburda05-hue) · #13 / 13-miss-dodge
 
 Chybienie (#13): obrońca robi unik, MISS jest na papierowej karteczce.
 - `src/anim/clips.ts`: nowy klip `dodge` (12 kl.): odchylenie tułowia i krok w tył (x −0,75 na 3. kl.), przytrzymanie, powrót na miejsce (bez `commit`).
