@@ -25,12 +25,18 @@ export function boneOffset(b: Bone, pose: Pose): { x: number; y: number } {
   return b.name === 'arm_b_up' ? { x: b.x + (pose.arm_b_shift ?? 0), y: b.y } : { x: b.x, y: b.y };
 }
 
+/** a head torn off its neck (finishers, #20) sits where the pose puts it, whatever the torso does */
+export function looseHead(pose: Pose): Joint {
+  return { x: pose.head_x ?? 0, y: pose.head_y ?? 0, r: ((pose.head_rot ?? 0) * Math.PI) / 180 };
+}
+
 /** forward kinematics in rig units: joint position and world rotation (radians CCW) of every bone */
 export function forwardKinematics(bones: readonly Bone[], pose: Pose): Map<string, Joint> {
   const out = new Map<string, Joint>();
   for (const b of bones) {
     const rot = ((pose[b.name] ?? 0) * Math.PI) / 180;
     if (!b.parent) { out.set(b.name, { x: b.x, y: b.y, r: rot }); continue; }
+    if (b.name === 'head' && pose.neck_cut) { out.set(b.name, looseHead(pose)); continue; }
     const p = out.get(b.parent)!;
     const o = boneOffset(b, pose);
     const c = Math.cos(p.r), s = Math.sin(p.r);

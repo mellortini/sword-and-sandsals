@@ -5,6 +5,9 @@ import { createCombat, getActionOptions, performAction } from '../../core/combat
 import type { ActionOption, CombatAction, CombatState } from '../../core/types';
 import { CombatHud } from '../../ui/hud';
 import { BlockShield, DamageSplat, FxLayer, MissText } from '../../ui/fx';
+import { playFinisher } from '../../ui/finisher';
+import { GORE_MODES, goreMode, setGoreMode } from '../../ui/gore';
+import type { GoreMode } from '../../ui/gore';
 import { CombatPresenter } from '../combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from '../common';
 import type { SceneContext, SceneUpdate } from '../common';
@@ -114,7 +117,8 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
         break;
       }
       case 'finish':
-        strike(pa, 'attack_power', { then: 'victory', onHit: () => { ea.play('death', { then: null }); dmg(E, 24, true); } });
+        // no damage splat here: it would sit right where the head takes off
+        strike(pa, 'attack_power', { then: 'victory', onHit: () => playFinisher(ea, layer, { floorY: FEET_Y }) });
         break;
       case 'reset':
         hud.visible = false;
@@ -130,6 +134,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
     ${btn('taunt', 'taunt')}${btn('rest', 'rest')}${btn('hit', 'hit')}${btn('finish', 'finish')}${btn('victory', 'victory')}${btn('death', 'die')}${btn('reset', 'reset')}${btn('fight', 'core fight')}</div>
     <label>enemy <select id="sResponse"><option value="hit">gets hit</option><option value="block">blocks</option><option value="dodge">dodges (miss)</option></select></label>
     <label><input type="checkbox" id="cbCounter" checked> enemy answers</label>
+    <label>gore <select id="sGore">${GORE_MODES.map((m) => `<option value="${m.id}"${m.id === goreMode() ? ' selected' : ''}>${m.name}</option>`).join('')}</select></label>
     <label>speed <select id="sSpeed"><option value="1">1x</option><option value="0.5">0.5x</option><option value="0.25">0.25x</option><option value="0.1">0.1x</option></select></label>
     <div class="small"><a href="?view=arena">arena</a> &middot; <a href="?view=wardrobe">wardrobe</a> &middot; <a href="?view=strip&clip=attack_normal">frame strips</a></div>`;
   // --- core fight (#11): src/core decides, CombatPresenter animates, HUD follows. Both sides pick at random.
@@ -179,6 +184,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   ui.addEventListener('click', (e) => { const a = (e.target as HTMLElement).dataset.a; if (a === 'fight') void coreFight(); else if (a) act(a); });
   (document.getElementById('sResponse') as HTMLSelectElement).onchange = (e) => (state.response = (e.target as HTMLSelectElement).value as typeof state.response);
   (document.getElementById('cbCounter') as HTMLInputElement).onchange = (e) => (state.counter = (e.target as HTMLInputElement).checked);
+  (document.getElementById('sGore') as HTMLSelectElement).onchange = (e) => setGoreMode((e.target as HTMLSelectElement).value as GoreMode);
   (document.getElementById('sSpeed') as HTMLSelectElement).onchange = (e) => { const v = +(e.target as HTMLSelectElement).value; pa.speed = v; ea.speed = v; };
   (window as unknown as { __act: unknown }).__act = act;
   return (dt) => { layer.update(dt * pa.speed); hud.update(dt * pa.speed); };
