@@ -1,5 +1,6 @@
 import { ColorMatrixFilter, Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { Texture } from 'pixi.js';
+import { startMusic } from '../audio/music';
 import { saveGame } from '../core/save';
 import type { SavedCharacter } from '../core/save';
 import { lookPreview } from '../ui/lookPreview';
@@ -87,6 +88,8 @@ export async function showTown({ app, world, params, add, kit, ui }: SceneContex
   });
   world.addChild(town);
   (window as unknown as { __town: TownBackdrop }).__town = town;
+  // the quiet town theme (#73)
+  startMusic('town');
 
   // the gladiator on the road, with a soft shadow under the feet
   const people = new Container();
