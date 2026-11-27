@@ -3,6 +3,7 @@ import { BUILDS, DEFAULT_BUILD } from '../rig/builds';
 import { saveGame } from '../core/save';
 import { deriveStats } from '../core/stats';
 import { DEFAULT_LOOK } from '../rig/PaperRig';
+import { statureFor } from '../rig/stature';
 import type { Look } from '../rig/PaperRig';
 import '../ui/creator.css';
 import {
@@ -90,6 +91,7 @@ export async function showCreator({ world, bgTex, kit, ui, add }: SceneContext) 
     const free = $('cFree');
     free.textContent = String(spread.free);
     free.classList.toggle('done', spread.free === 0);
+    rig.setStature(statureFor(spread.attributes.might));
     const stats = deriveStats(spread.attributes);
     $('cDerived').innerHTML = `Health <b>${stats.maxHealth}</b> · Energy <b>${stats.maxEnergy}</b>`;
     const problem = nameProblem(name);

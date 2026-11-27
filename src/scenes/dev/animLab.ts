@@ -12,22 +12,20 @@ import type { GoreMode } from '../../ui/gore';
 import { CombatPresenter } from '../combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from '../common';
 import type { SceneContext, SceneUpdate } from '../common';
-import { arenaBackdrop } from '../backdrop';
-import { CrowdFx } from '../../ui/crowdFx';
+import { buildArenaStage } from '../arenaStage';
 import { CameraJuice, applyCamera } from '../../ui/cameraJuice';
 import { reduceMotion, setMotionMode } from '../../ui/motion';
 import { FIGHT_LAYOUT, MIN_LUNGE, STRIKE_GAP } from '../combatPlan';
 import { WEAPONS } from '../../data/weapons';
-import { playFoley } from '../../audio/foley';
+import { blowSound, playFoley } from '../../audio/foley';
 import { setVolume, volumes } from '../../audio/volume';
 
 const STATUS_KINDS: readonly StatusKind[] = ['burning', 'soaked', 'stunned', 'taped', 'torn', 'feared', 'slowed'];
 
-export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: SceneContext): Promise<SceneUpdate> {
+export async function showAnimLab({ app, world, params, ui, add, rigs }: SceneContext): Promise<SceneUpdate> {
   const arena = new Container();
   world.addChild(arena);
-  arena.addChild(new Sprite(arenaBackdrop(bgTex)));
-  const crowdFx = arena.addChild(new CrowdFx());
+  const crowdFx = await buildArenaStage(arena);
   // the camera's juice (#75): crit zoom, charge shake, drift; the checkbox below is the "reduce motion" setting
   const camera = new CameraJuice(W, H, reduceMotion);
   const gsh = groundShadowTexture();
@@ -79,8 +77,12 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   const shield = (who: PaperRig) => { const h = head(who); layer.show(who === P ? 'pb' : 'eb', new BlockShield(), h.x - 30 * who.facing, h.y + 6); };
   const defend = (def: Animator, power: number, crit = false) => {
     if (state.response === 'dodge') { def.play('dodge'); miss(def.rig); playFoley('miss'); }
-    else if (state.response === 'block' && Math.random() < 0.9) { def.play('block'); shield(def.rig); playFoley('block'); }
-    else { def.play('hit'); dmg(def.rig, Math.round(power * (0.7 + Math.random() * 0.6)), crit); playFoley(crit ? 'crit' : 'hit'); }
+    else if (state.response === 'block' && Math.random() < 0.9) { def.play('block'); shield(def.rig); playFoley(def.rig.look.shield ? 'block' : 'parry'); }
+    else {
+      def.play('hit'); dmg(def.rig, Math.round(power * (0.7 + Math.random() * 0.6)), crit);
+      const attacker = def === ea ? pa : ea;
+      playFoley(blowSound({ hit: true, blocked: false, crit }, WEAPONS.find((w) => w.id === attacker.rig.look.weapon)?.family));
+    }
   };
   /**
    * Walk into this weapon's range (several strides if needed), then strike - one click is one attack.

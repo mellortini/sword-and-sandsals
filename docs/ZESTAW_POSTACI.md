@@ -45,3 +45,9 @@ Gra: http://localhost:5180 — `?view=wardrobe` (garderoba/kreator), `?view=line
 - Zrzuty z ukrytego panelu przeglądarki: requestAnimationFrame stoi → przed `extract` wyrenderować kukły ręcznie.
 - Maski Pixi psuły `extract` → portrety robione wycinkiem tekstury kukły (`PaperRig.crop`).
 - Zarost jako pełna warstwa wyglądał jak broda → alpha 0.42 bez cienia.
+
+## Obrażenia ciała (#284)
+Rany pojawiają się co 10 % utraconego HP (etap 1 = powyżej 90 %, etap 10 = 10 % i mniej): zadrapania, siniaki, cięcia, płynąca krew, zapuchnięte oko.
+- Grafika: `blender/wounds.py` (każda rana w układzie jednej kości) → nakładki `wound_<część>_<etap>`; `kit.json` → `wounds` mówi, którą nakładkę ma część na każdym etapie. Render: `python -I tools/blender.py blender/build_kit.py -- 32 wound_`.
+- Gra: warstwy `slot: 'wound'` leżą na gołej skórze (zbroja je zakrywa), etap liczy `src/rig/wounds.ts`, ustawia `CombatPresenter` z pokazywanego HP; przy „gore off” ran nie ma.
+- Zasady wyglądu: tylko podłużne cięcia, miękkie siniaki i płynąca krew; nic okrągłego ani w kropki, rany matowe.

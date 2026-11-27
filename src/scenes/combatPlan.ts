@@ -16,7 +16,7 @@ export type Step =
    */
   | { kind: 'move'; side: FighterSide; move: MoveKind; from: number; to: number; strike?: AttackEvent; fatal?: boolean; push?: MoveEvent }
   | { kind: 'attack'; attack: AttackEvent; fatal: boolean; push?: MoveEvent }
-  | { kind: 'pose'; side: FighterSide; clip: 'block' | 'rest' | 'taunt' }
+  | { kind: 'pose'; side: FighterSide; clip: 'guard_up' | 'rest' | 'taunt' }
   /** a potion or spell from a combat slot (#191): `healthDelta` is applied to `target` */
   | { kind: 'item'; side: FighterSide; target: FighterSide; item: CombatItemId; healthDelta: number }
   | { kind: 'death'; side: FighterSide; winner: FighterSide };
@@ -96,7 +96,8 @@ export function planSteps(events: readonly CombatEvent[]): Step[] {
         break;
       }
       case 'block':
-        steps.push({ kind: 'pose', side: e.fighter, clip: 'block' });
+        // the guard goes up and stays up (#273): the presenter holds it until the blow or the end of the guard
+        steps.push({ kind: 'pose', side: e.fighter, clip: 'guard_up' });
         break;
       case 'rest':
         steps.push({ kind: 'pose', side: e.fighter, clip: 'rest' });

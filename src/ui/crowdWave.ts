@@ -1,12 +1,14 @@
 /**
  * The living crowd (#52), the parts that are only numbers (tested without Pixi):
+ *  - crowdPose(): how a spectator stands this moment (#272): a few cheer with both arms up, most of the others sway
+ *    very gently from side to side
  *  - armRaise(): how far a spectator's arm is up — a cheer runs across the stands as a wave from where the blow fell,
  *    a share of the crowd joins in (all of it for a finishing blow), and a crowd that loves the fighters waves anyway
  *  - throwPath(): a flower or coin thrown from a seat in an arc onto the sand, where it then lies
  */
 
 export interface Seat {
-  /** the spectator's head, px of the 1920x1080 arena picture (assets/bg/arena_crowd.json) */
+  /** the spectator's head, px of the 1920x1080 arena picture (assets/bg/arena_people.json) */
   readonly x: number;
   readonly y: number;
   /** px per rig unit at that seat's depth */
@@ -66,6 +68,38 @@ export function armRaise(seat: Seat, i: number, cheers: readonly Cheer[], t: num
 /** a share of the arms that are up at all (for tests and tuning) */
 export function raisedShare(seats: readonly Seat[], cheers: readonly Cheer[], t: number, mood = 0): number {
   return seats.reduce((n, s, i) => n + (armRaise(s, i, cheers, t, mood) > 0.5 ? 1 : 0), 0) / Math.max(1, seats.length);
+}
+
+/** the share of the crowd that cheers on its own, with both arms up, and the share of the rest that sways */
+export const CHEERERS = 0.08, SWAYERS = 0.75;
+/** radians: how far a spectator leans to either side; about 3 px at the head */
+export const SWAY = 0.035;
+
+export interface Pose {
+  /** 0 arms down (not drawn) .. 1 both arms straight up */
+  readonly up: number;
+  /** radians around the lowest visible point of the spectator */
+  readonly sway: number;
+  /** how much taller a cheering spectator stretches this moment, 0..BOUNCE */
+  readonly bounce: number;
+}
+
+export const BOUNCE = 0.045;
+
+/** the arms of one of the keen fans, who put both up for a few seconds, rest, and start again */
+function keen(i: number, t: number): number {
+  if (seatHash(i, 5) >= CHEERERS) return 0;
+  const wave = Math.sin(t * (0.7 + 0.5 * seatHash(i, 6)) + seatHash(i, 7) * Math.PI * 2);
+  return Math.max(0, Math.min(1, (wave + 0.35) / 0.3));
+}
+
+/** `still` = the Reduce motion setting: nobody sways or cheers on their own, the fight's cheers still show */
+export function crowdPose(seat: Seat, i: number, cheers: readonly Cheer[], t: number, mood = 0, still = false): Pose {
+  const up = Math.max(armRaise(seat, i, cheers, t, mood), still ? 0 : keen(i, t));
+  const bounce = BOUNCE * up * Math.abs(Math.sin(t * (4.5 + 2 * seatHash(i, 8)) + i));
+  const sways = !still && up < 0.5 && seatHash(i, 9) < SWAYERS;
+  const sway = sways ? SWAY * (1 - 2 * up) * Math.sin(t * (1.1 + 0.8 * seatHash(i, 10)) + seatHash(i, 11) * Math.PI * 2) : 0;
+  return { up, sway, bounce };
 }
 
 export interface Throw {

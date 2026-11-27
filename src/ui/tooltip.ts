@@ -7,6 +7,8 @@ export interface TooltipContent {
   description: string;
   energyCost?: number;
   hitChance?: number;
+  /** the Block card (#274) */
+  blockChance?: number;
 }
 
 const HOVER_DELAY = 300;
@@ -163,6 +165,7 @@ export class Tooltip {
     const details = [];
     if (content.energyCost !== undefined) details.push(`Energy: ${content.energyCost}`);
     if (content.hitChance !== undefined) details.push(`Hit chance: ${content.hitChance}%`);
+    if (content.blockChance !== undefined) details.push(`Block chance: ${content.blockChance}%`);
     this.details.textContent = details.join(' · ');
     this.details.hidden = details.length === 0;
     this.element.hidden = false;

@@ -4,6 +4,7 @@
  */
 import type { Animator } from '../anim/Animator';
 import { HEAD_CENTRE } from '../anim/decap';
+import { playSever } from '../audio/sever';
 import type { FxLayer } from './fx';
 import { finisherClip, goreMode } from './gore';
 import type { GoreMode } from './gore';
@@ -36,6 +37,7 @@ export function playFinisher(victim: Animator, fx: FxLayer, options: FinisherOpt
         return;
       }
       if (e.type === 'cut') {
+        playSever(mode);
         scraps.burst({ ...neck(), count: 38, angle: up - 0.35 * rig.facing, spread: 1.2, speed: 28 });
         scraps.spray(neck, 30);
       } else if (e.type === 'bounce') {

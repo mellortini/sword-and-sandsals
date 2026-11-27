@@ -18,7 +18,7 @@ export type AttributeKey = keyof Attributes;
 
 /** Order, label and one-line meaning (from docs/GDD.md) of the eight attributes. */
 export const ATTRIBUTE_INFO: readonly { key: AttributeKey; label: string; hint: string }[] = [
-  { key: 'might', label: 'Might', hint: 'Damage and heavy weapons' },
+  { key: 'might', label: 'Might', hint: 'Damage, heavy weapons and height' },
   { key: 'agility', label: 'Agility', hint: 'Jump length and dodging' },
   { key: 'precision', label: 'Precision', hint: 'Hit chance and critical hits' },
   { key: 'guard', label: 'Guard', hint: 'Blocking and damage reduction' },

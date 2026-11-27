@@ -1,5 +1,6 @@
 /**
- * Quiet paper foley for the fight (#18), synthesised with Web Audio - no sound files:
+ * Quiet paper foley for the fight (#18), synthesised with Web Audio. Recorded sounds are the exception: a weapon on a
+ * shield (SAMPLES below) and the wet tear of a cut (sever.ts). The synthesised kinds:
  *  - rustle: white noise through a band-pass that sweeps (paper moving, a blade cutting the air)
  *  - thump: a sine falling in pitch (cardboard slapping cardboard, a body on the sand)
  *  - ring: a few inharmonic partials with a fast decay (the foil of a shield or blade)
@@ -8,28 +9,42 @@
 import type { Animator } from '../anim/Animator';
 import { getMixer } from './mixer';
 import type { Mixer } from './mixer';
+import { loadSample, playSample, readySample } from './sample';
+import { preloadSever } from './sever';
 
-export type Sound = 'swing' | 'miss' | 'hit' | 'crit' | 'block' | 'step' | 'land' | 'impact';
+export type Sound = 'swing' | 'miss' | 'hit' | 'crit' | 'sword_hit' | 'sword_crit' | 'block' | 'parry' | 'step' | 'land' | 'impact';
 
 export type Layer =
   | { type: 'rustle'; from: number; to: number; q: number; dur: number; gain: number; delay?: number }
   | { type: 'thump'; from: number; to: number; dur: number; gain: number; delay?: number }
   | { type: 'ring'; freqs: readonly number[]; dur: number; gain: number; delay?: number };
 
+const HIT: readonly Layer[] = [
+  { type: 'thump', from: 150, to: 70, dur: 0.12, gain: 0.42 },
+  { type: 'rustle', from: 1100, to: 500, q: 0.9, dur: 0.11, gain: 0.3 },
+];
+const CRIT: readonly Layer[] = [
+  { type: 'thump', from: 120, to: 50, dur: 0.22, gain: 0.55 },
+  { type: 'rustle', from: 1400, to: 380, q: 0.8, dur: 0.2, gain: 0.36 },
+  { type: 'rustle', from: 4200, to: 2500, q: 2.5, dur: 0.12, gain: 0.12, delay: 0.02 },
+];
+
 /** frequencies in Hz, times in seconds, gains before the foley / master volumes (kept low: nothing dominates) */
 export const RECIPES: Readonly<Record<Sound, readonly Layer[]>> = {
   swing: [{ type: 'rustle', from: 2200, to: 700, q: 1.4, dur: 0.17, gain: 0.22 }],
   miss: [{ type: 'rustle', from: 2600, to: 600, q: 1.2, dur: 0.24, gain: 0.24 }],
-  hit: [
-    { type: 'thump', from: 150, to: 70, dur: 0.12, gain: 0.42 },
-    { type: 'rustle', from: 1100, to: 500, q: 0.9, dur: 0.11, gain: 0.3 },
-  ],
-  crit: [
-    { type: 'thump', from: 120, to: 50, dur: 0.22, gain: 0.55 },
-    { type: 'rustle', from: 1400, to: 380, q: 0.8, dur: 0.2, gain: 0.36 },
-    { type: 'rustle', from: 4200, to: 2500, q: 2.5, dur: 0.12, gain: 0.12, delay: 0.02 },
-  ],
+  hit: HIT,
+  crit: CRIT,
+  // a sword's blow is recorded (SAMPLES); these stand in until the file is decoded
+  sword_hit: HIT,
+  sword_crit: CRIT,
+  // the same clink for both: `block` is a shield (recorded, SAMPLES), `parry` the blade alone
   block: [
+    { type: 'ring', freqs: [930, 1390, 2210], dur: 0.32, gain: 0.12 },
+    { type: 'thump', from: 220, to: 140, dur: 0.07, gain: 0.25 },
+    { type: 'rustle', from: 5200, to: 3200, q: 3, dur: 0.08, gain: 0.1 },
+  ],
+  parry: [
     { type: 'ring', freqs: [930, 1390, 2210], dur: 0.32, gain: 0.12 },
     { type: 'thump', from: 220, to: 140, dur: 0.07, gain: 0.25 },
     { type: 'rustle', from: 5200, to: 3200, q: 3, dur: 0.08, gain: 0.1 },
@@ -45,6 +60,20 @@ export const RECIPES: Readonly<Record<Sound, readonly Layer[]>> = {
     { type: 'rustle', from: 1800, to: 900, q: 1.5, dur: 0.18, gain: 0.08, delay: 0.05 },
   ],
 };
+
+/** recordings that replace a synthesised sound; the recipe above plays until the file is decoded */
+export const SAMPLES: Readonly<Partial<Record<Sound, { file: string; gain: number }>>> = {
+  // a sword landing on the fighter (a recording with a low peak, hence the higher gain); a crit is a little louder
+  sword_hit: { file: 'sfx/combat/sword_hit.wav', gain: 0.65 },
+  sword_crit: { file: 'sfx/combat/sword_hit.wav', gain: 0.85 },
+  // a weapon on a shield: the recording peaks at full scale, so it is turned well down
+  block: { file: 'sfx/combat/shield_thud.wav', gain: 0.3 },
+};
+
+function preloadSamples() {
+  const m = getMixer();
+  if (m) for (const s of Object.values(SAMPLES)) void loadSample(m, s.file);
+}
 
 /** the same sound twice within this many seconds plays once (both fighters' events on one frame) */
 const MIN_GAP = 0.035;
@@ -91,6 +120,17 @@ function layer(m: Mixer, l: Layer, at: number, pitch: number, loud: number) {
   }
 }
 
+/**
+ * the sound of a blow's result; `family` = the attacker's weapon family, `shield` = set when a whole shield
+ * took the blocked blow (the attack event's field, #273); without it the blade alone parried (#274)
+ */
+export function blowSound(blow: { hit: boolean; blocked: boolean; crit: boolean; shield?: unknown }, family?: string): Sound {
+  if (!blow.hit) return 'miss';
+  if (blow.blocked) return blow.shield ? 'block' : 'parry';
+  if (family === 'sword') return blow.crit ? 'sword_crit' : 'sword_hit';
+  return blow.crit ? 'crit' : 'hit';
+}
+
 /** play one foley sound now (silent until the player has clicked or pressed a key once) */
 export function playFoley(sound: Sound, random: () => number = Math.random) {
   const m = getMixer();
@@ -100,6 +140,12 @@ export function playFoley(sound: Sound, random: () => number = Math.random) {
   last.set(sound, now);
   const pitch = 0.94 + random() * 0.12;
   const loud = 0.85 + random() * 0.3;
+  const sample = SAMPLES[sound];
+  if (sample) {
+    const buffer = readySample(sample.file);
+    if (buffer) return playSample(m, buffer, sample.gain * loud, pitch);
+    void loadSample(m, sample.file);
+  }
   for (const l of RECIPES[sound]) layer(m, l, now, pitch, loud);
 }
 
@@ -108,6 +154,8 @@ export const EVENT_SOUNDS: Readonly<Partial<Record<string, Sound>>> = { swing: '
 
 /** sound a fighter's own clip events: wind-ups, footsteps, landings, falls */
 export function attachFoley(anim: Animator): () => void {
+  preloadSever();
+  preloadSamples();
   const listener = (e: { type: string }) => {
     const s = EVENT_SOUNDS[e.type];
     if (s) playFoley(s);

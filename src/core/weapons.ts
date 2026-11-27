@@ -39,6 +39,11 @@ export function combatWeapon(id?: string): CombatWeapon | undefined {
   return { ...weapon, id, damage: weapon.damage + level, ...(enchantment && { enchantment }) };
 }
 
+/** Spears and hammers take both hands (sprite `grip2`, #36): no hand is left for a shield. A dagger is one-handed. */
+export function leavesHandForShield(weapon?: CombatWeapon): boolean {
+  return weapon?.family !== 'spear' && weapon?.family !== 'hammer';
+}
+
 export function weaponReach(weapon?: CombatWeapon): number {
   return weapon?.range ?? DEFAULT_WEAPON_REACH;
 }

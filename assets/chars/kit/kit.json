@@ -151,6 +151,12 @@
   },
   {
    "bone": "arm_b_lo",
+   "slot": "wound",
+   "piece": "arm_b_lo",
+   "back": true
+  },
+  {
+   "bone": "arm_b_lo",
    "slot": "armor",
    "piece": "bracer",
    "back": true
@@ -159,6 +165,12 @@
    "bone": "arm_b_up",
    "slot": "body",
    "piece": "arm_up",
+   "back": true
+  },
+  {
+   "bone": "arm_b_up",
+   "slot": "wound",
+   "piece": "arm_b_up",
    "back": true
   },
   {
@@ -187,6 +199,12 @@
   },
   {
    "bone": "leg_b_lo",
+   "slot": "wound",
+   "piece": "leg_b_lo",
+   "back": true
+  },
+  {
+   "bone": "leg_b_lo",
    "slot": "boots",
    "piece": "cuff",
    "back": true
@@ -201,6 +219,12 @@
    "bone": "leg_b_up",
    "slot": "body",
    "piece": "leg_up",
+   "back": true
+  },
+  {
+   "bone": "leg_b_up",
+   "slot": "wound",
+   "piece": "leg_b_up",
    "back": true
   },
   {
@@ -229,6 +253,12 @@
   },
   {
    "bone": "leg_f_lo",
+   "slot": "wound",
+   "piece": "leg_f_lo",
+   "back": false
+  },
+  {
+   "bone": "leg_f_lo",
    "slot": "boots",
    "piece": "cuff",
    "back": false
@@ -243,6 +273,12 @@
    "bone": "leg_f_up",
    "slot": "body",
    "piece": "leg_up",
+   "back": false
+  },
+  {
+   "bone": "leg_f_up",
+   "slot": "wound",
+   "piece": "leg_f_up",
    "back": false
   },
   {
@@ -264,6 +300,11 @@
   {
    "bone": "torso",
    "slot": "cut",
+   "piece": "torso"
+  },
+  {
+   "bone": "torso",
+   "slot": "wound",
    "piece": "torso"
   },
   {
@@ -313,6 +354,11 @@
   },
   {
    "bone": "head",
+   "slot": "wound",
+   "piece": "face_under"
+  },
+  {
+   "bone": "head",
    "slot": "face",
    "piece": "eyes"
   },
@@ -348,6 +394,11 @@
   },
   {
    "bone": "head",
+   "slot": "wound",
+   "piece": "face"
+  },
+  {
+   "bone": "head",
    "slot": "hair",
    "piece": "front"
   },
@@ -368,6 +419,11 @@
   },
   {
    "bone": "arm_f_lo",
+   "slot": "wound",
+   "piece": "arm_f_lo"
+  },
+  {
+   "bone": "arm_f_lo",
    "slot": "armor",
    "piece": "bracer"
   },
@@ -375,6 +431,11 @@
    "bone": "arm_f_up",
    "slot": "body",
    "piece": "arm_up"
+  },
+  {
+   "bone": "arm_f_up",
+   "slot": "wound",
+   "piece": "arm_f_up"
   },
   {
    "bone": "arm_f_up",
@@ -612,6 +673,140 @@
   "Champion's Bronze",
   "Gilded Legend"
  ],
+ "wounds": {
+  "torso": [
+   null,
+   "wound_torso_2",
+   "wound_torso_3",
+   "wound_torso_4",
+   "wound_torso_5",
+   "wound_torso_6",
+   "wound_torso_7",
+   "wound_torso_8",
+   "wound_torso_9",
+   "wound_torso_10"
+  ],
+  "arm_f_up": [
+   null,
+   null,
+   "wound_arm_f_up_3",
+   "wound_arm_f_up_3",
+   "wound_arm_f_up_3",
+   "wound_arm_f_up_3",
+   "wound_arm_f_up_3",
+   "wound_arm_f_up_3",
+   "wound_arm_f_up_9",
+   "wound_arm_f_up_9"
+  ],
+  "arm_f_lo": [
+   null,
+   null,
+   "wound_arm_f_lo_3",
+   "wound_arm_f_lo_3",
+   "wound_arm_f_lo_3",
+   "wound_arm_f_lo_3",
+   "wound_arm_f_lo_3",
+   "wound_arm_f_lo_3",
+   "wound_arm_f_lo_3",
+   "wound_arm_f_lo_10"
+  ],
+  "arm_b_up": [
+   null,
+   "wound_arm_b_up_2",
+   "wound_arm_b_up_2",
+   "wound_arm_b_up_2",
+   "wound_arm_b_up_5",
+   "wound_arm_b_up_5",
+   "wound_arm_b_up_5",
+   "wound_arm_b_up_8",
+   "wound_arm_b_up_9",
+   "wound_arm_b_up_9"
+  ],
+  "arm_b_lo": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   "wound_arm_b_lo_7",
+   "wound_arm_b_lo_7",
+   "wound_arm_b_lo_7",
+   "wound_arm_b_lo_7"
+  ],
+  "leg_f_up": [
+   null,
+   null,
+   "wound_leg_f_up_3",
+   "wound_leg_f_up_3",
+   "wound_leg_f_up_3",
+   "wound_leg_f_up_6",
+   "wound_leg_f_up_6",
+   "wound_leg_f_up_6",
+   "wound_leg_f_up_9",
+   "wound_leg_f_up_9"
+  ],
+  "leg_f_lo": [
+   null,
+   "wound_leg_f_lo_2",
+   "wound_leg_f_lo_2",
+   "wound_leg_f_lo_4",
+   "wound_leg_f_lo_4",
+   "wound_leg_f_lo_4",
+   "wound_leg_f_lo_4",
+   "wound_leg_f_lo_8",
+   "wound_leg_f_lo_8",
+   "wound_leg_f_lo_10"
+  ],
+  "leg_b_up": [
+   null,
+   null,
+   null,
+   "wound_leg_b_up_4",
+   "wound_leg_b_up_4",
+   "wound_leg_b_up_4",
+   "wound_leg_b_up_4",
+   "wound_leg_b_up_4",
+   "wound_leg_b_up_4",
+   "wound_leg_b_up_10"
+  ],
+  "leg_b_lo": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "face_under": [
+   null,
+   null,
+   null,
+   null,
+   "wound_face_under_5",
+   "wound_face_under_5",
+   "wound_face_under_7",
+   "wound_face_under_7",
+   "wound_face_under_7",
+   "wound_face_under_7"
+  ],
+  "face": [
+   null,
+   "wound_face_2",
+   "wound_face_3",
+   "wound_face_4",
+   "wound_face_5",
+   "wound_face_6",
+   "wound_face_7",
+   "wound_face_8",
+   "wound_face_9",
+   "wound_face_10"
+  ]
+ },
  "sprites": {
   "body_torso": {
    "w": 336,
@@ -3044,6 +3239,348 @@
    ],
    "tint": null,
    "offhand": "weapon_net"
+  },
+  "wound_torso_2": {
+   "w": 75,
+   "h": 72,
+   "pivot": [
+    87.22,
+    211.25
+   ],
+   "tint": null
+  },
+  "wound_torso_3": {
+   "w": 187,
+   "h": 157,
+   "pivot": [
+    114.1,
+    211.09
+   ],
+   "tint": null
+  },
+  "wound_torso_4": {
+   "w": 230,
+   "h": 181,
+   "pivot": [
+    114.1,
+    235.09
+   ],
+   "tint": null
+  },
+  "wound_torso_5": {
+   "w": 230,
+   "h": 223,
+   "pivot": [
+    114.1,
+    235.27
+   ],
+   "tint": null
+  },
+  "wound_torso_6": {
+   "w": 246,
+   "h": 223,
+   "pivot": [
+    129.68,
+    235.27
+   ],
+   "tint": null
+  },
+  "wound_torso_7": {
+   "w": 246,
+   "h": 201,
+   "pivot": [
+    129.68,
+    234.47
+   ],
+   "tint": null
+  },
+  "wound_torso_8": {
+   "w": 246,
+   "h": 236,
+   "pivot": [
+    129.68,
+    247.74
+   ],
+   "tint": null
+  },
+  "wound_torso_9": {
+   "w": 246,
+   "h": 236,
+   "pivot": [
+    129.68,
+    247.74
+   ],
+   "tint": null
+  },
+  "wound_torso_10": {
+   "w": 246,
+   "h": 244,
+   "pivot": [
+    129.68,
+    247.66
+   ],
+   "tint": null
+  },
+  "wound_arm_f_up_3": {
+   "w": 85,
+   "h": 88,
+   "pivot": [
+    39.0,
+    -22.98
+   ],
+   "tint": null
+  },
+  "wound_arm_f_up_9": {
+   "w": 85,
+   "h": 110,
+   "pivot": [
+    39.0,
+    -23.23
+   ],
+   "tint": null
+  },
+  "wound_arm_f_lo_3": {
+   "w": 51,
+   "h": 46,
+   "pivot": [
+    27.67,
+    -43.57
+   ],
+   "tint": null
+  },
+  "wound_arm_f_lo_10": {
+   "w": 126,
+   "h": 78,
+   "pivot": [
+    102.58,
+    -11.57
+   ],
+   "tint": null
+  },
+  "wound_arm_b_up_2": {
+   "w": 67,
+   "h": 51,
+   "pivot": [
+    32.03,
+    -51.71
+   ],
+   "tint": null
+  },
+  "wound_arm_b_up_5": {
+   "w": 72,
+   "h": 114,
+   "pivot": [
+    36.3,
+    -51.63
+   ],
+   "tint": null
+  },
+  "wound_arm_b_up_8": {
+   "w": 77,
+   "h": 144,
+   "pivot": [
+    37.46,
+    -21.63
+   ],
+   "tint": null
+  },
+  "wound_arm_b_up_9": {
+   "w": 80,
+   "h": 144,
+   "pivot": [
+    37.46,
+    -21.63
+   ],
+   "tint": null
+  },
+  "wound_arm_b_lo_7": {
+   "w": 54,
+   "h": 52,
+   "pivot": [
+    25.19,
+    -48.24
+   ],
+   "tint": null
+  },
+  "wound_leg_f_up_3": {
+   "w": 58,
+   "h": 59,
+   "pivot": [
+    22.2,
+    -102.24
+   ],
+   "tint": null
+  },
+  "wound_leg_f_up_6": {
+   "w": 82,
+   "h": 95,
+   "pivot": [
+    36.94,
+    -66.24
+   ],
+   "tint": null
+  },
+  "wound_leg_f_up_9": {
+   "w": 87,
+   "h": 136,
+   "pivot": [
+    41.57,
+    -65.44
+   ],
+   "tint": null
+  },
+  "wound_leg_f_lo_2": {
+   "w": 61,
+   "h": 47,
+   "pivot": [
+    24.97,
+    -1.36
+   ],
+   "tint": null
+  },
+  "wound_leg_f_lo_4": {
+   "w": 61,
+   "h": 137,
+   "pivot": [
+    24.97,
+    -1.35
+   ],
+   "tint": null
+  },
+  "wound_leg_f_lo_8": {
+   "w": 71,
+   "h": 137,
+   "pivot": [
+    34.14,
+    -1.35
+   ],
+   "tint": null
+  },
+  "wound_leg_f_lo_10": {
+   "w": 71,
+   "h": 165,
+   "pivot": [
+    34.14,
+    -1.0
+   ],
+   "tint": null
+  },
+  "wound_leg_b_up_4": {
+   "w": 73,
+   "h": 99,
+   "pivot": [
+    42.05,
+    -86.79
+   ],
+   "tint": null
+  },
+  "wound_leg_b_up_10": {
+   "w": 75,
+   "h": 112,
+   "pivot": [
+    42.05,
+    -73.79
+   ],
+   "tint": null
+  },
+  "wound_face_under_5": {
+   "w": 93,
+   "h": 101,
+   "pivot": [
+    -25.83,
+    188.16
+   ],
+   "tint": null
+  },
+  "wound_face_under_7": {
+   "w": 116,
+   "h": 121,
+   "pivot": [
+    -9.9,
+    196.28
+   ],
+   "tint": null
+  },
+  "wound_face_2": {
+   "w": 51,
+   "h": 62,
+   "pivot": [
+    64.93,
+    126.95
+   ],
+   "tint": null
+  },
+  "wound_face_3": {
+   "w": 161,
+   "h": 153,
+   "pivot": [
+    64.93,
+    217.95
+   ],
+   "tint": null
+  },
+  "wound_face_4": {
+   "w": 167,
+   "h": 167,
+   "pivot": [
+    70.74,
+    218.12
+   ],
+   "tint": null
+  },
+  "wound_face_5": {
+   "w": 182,
+   "h": 205,
+   "pivot": [
+    70.74,
+    218.1
+   ],
+   "tint": null
+  },
+  "wound_face_6": {
+   "w": 182,
+   "h": 205,
+   "pivot": [
+    70.74,
+    218.1
+   ],
+   "tint": null
+  },
+  "wound_face_7": {
+   "w": 182,
+   "h": 205,
+   "pivot": [
+    70.74,
+    218.1
+   ],
+   "tint": null
+  },
+  "wound_face_8": {
+   "w": 182,
+   "h": 205,
+   "pivot": [
+    70.74,
+    218.1
+   ],
+   "tint": null
+  },
+  "wound_face_9": {
+   "w": 185,
+   "h": 241,
+   "pivot": [
+    70.74,
+    218.55
+   ],
+   "tint": null
+  },
+  "wound_face_10": {
+   "w": 201,
+   "h": 241,
+   "pivot": [
+    86.97,
+    218.55
+   ],
+   "tint": null
   }
  }
 }

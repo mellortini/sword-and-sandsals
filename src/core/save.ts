@@ -9,6 +9,8 @@ import { LEAGUE_MAX_TIER } from './leagues';
 import type { NemesisAppearance, NemesisMemory } from './nemesis';
 import { MAX_LEVEL } from './progression';
 import { resolveAttributes } from './stats';
+import { isStoryState } from './story';
+import type { StoryState } from './story';
 import type { ArmourImprovements, Attributes, EquipmentLoadout } from './types';
 
 const SAVE_VERSION = 1;
@@ -42,6 +44,8 @@ export interface SavedCharacter {
   nemesis?: NemesisMemory;
   /** IDs of the league bouts the gladiator has won (#58), in the order they were won. */
   leagueWins?: string[];
+  /** the story (#291): act, decision flags, reputation and the day; missing in saves from before it (`storyOf`) */
+  story?: StoryState;
 }
 
 type DecodeFailure = 'invalid' | 'unsupported';
@@ -120,7 +124,8 @@ function isCharacter(value: unknown): value is SavedCharacter {
     && (value.forgeMaterials === undefined || isForgeMaterials(value.forgeMaterials))
     && (value.armourImprovements === undefined || isArmourImprovements(value.armourImprovements))
     && (value.nemesis === undefined || isNemesisMemory(value.nemesis))
-    && (value.leagueWins === undefined || (Array.isArray(value.leagueWins) && value.leagueWins.length <= 200 && value.leagueWins.every(isItemId)));
+    && (value.leagueWins === undefined || (Array.isArray(value.leagueWins) && value.leagueWins.length <= 200 && value.leagueWins.every(isItemId)))
+    && (value.story === undefined || isStoryState(value.story));
 }
 
 export function serializeSave(character: SavedCharacter): string {

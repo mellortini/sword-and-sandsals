@@ -7,14 +7,30 @@ import { Texture } from 'pixi.js';
 
 /** y (px of the 1920x1080 backdrop) where the stands' wall meets the sand */
 const SAND_TOP = 665;
+/** how the stands are softened; `shade` scales the darkening at the top and the vignette */
+export interface StandsLook {
+  readonly blur: number;
+  readonly saturation: number;
+  readonly brightness: number;
+  readonly shade: number;
+}
 /** blur, colour and light of the stands; tuned by eye against the paper puppets */
-const STANDS_BLUR_PX = 5;
-const STANDS_SATURATION = 0.6;
-const STANDS_BRIGHTNESS = 0.78;
+export const SUNNY: StandsLook = { blur: 5, saturation: 0.6, brightness: 0.78, shade: 1 };
+
+/**
+ * How much of its light a point of the stands keeps under the top shade and the vignette below, 0..1: the spectator
+ * sprites (src/ui/crowdFx.ts) are drawn over the finished backdrop, so they take the same light as a tint.
+ */
+export function standsLight(x: number, y: number, look: StandsLook, w = 1920, h = 1080): number {
+  const top = look.shade * (0.35 - 0.3 * Math.min(1, Math.max(0, y / SAND_TOP)));
+  const r = Math.hypot(x - w / 2, y - h * 0.62);
+  const edge = Math.min(1, Math.max(0, (r - h * 0.35) / (w * 0.72 - h * 0.35)));
+  return (1 - top) * (1 - edge * 0.55 * (0.5 + look.shade / 2));
+}
 
 const cache = new WeakMap<Texture, Texture>();
 
-export function arenaBackdrop(bg: Texture): Texture {
+export function arenaBackdrop(bg: Texture, look: StandsLook = SUNNY): Texture {
   const hit = cache.get(bg);
   if (hit) return hit;
   const w = bg.width, h = bg.height;
@@ -32,13 +48,13 @@ export function arenaBackdrop(bg: Texture): Texture {
   const s = soft.getContext('2d')!;
   // Canvas filters are missing in some older browsers; then the stands are only dimmed, never broken.
   const canFilter = typeof (s as { filter?: unknown }).filter === 'string';
-  s.filter = `blur(${STANDS_BLUR_PX}px) saturate(${STANDS_SATURATION}) brightness(${STANDS_BRIGHTNESS})`;
+  s.filter = `blur(${look.blur}px) saturate(${look.saturation}) brightness(${look.brightness})`;
   // draw slightly oversized so the blur does not pull transparent edges in
-  s.drawImage(source, -STANDS_BLUR_PX * 2, -STANDS_BLUR_PX * 2, w + STANDS_BLUR_PX * 4, h + STANDS_BLUR_PX * 4);
+  s.drawImage(source, -look.blur * 2, -look.blur * 2, w + look.blur * 4, h + look.blur * 4);
   s.filter = 'none';
   if (!canFilter) {
     s.globalCompositeOperation = 'multiply';
-    s.fillStyle = `rgba(0,0,0,${1 - STANDS_BRIGHTNESS})`;
+    s.fillStyle = `rgba(0,0,0,${1 - look.brightness})`;
     s.fillRect(0, 0, w, h);
   }
   s.globalCompositeOperation = 'destination-in';
@@ -53,13 +69,13 @@ export function arenaBackdrop(bg: Texture): Texture {
 
   // 3) light: a little darker at the top (the stands recede), vignette on the sides and corners
   const top = g.createLinearGradient(0, 0, 0, SAND_TOP);
-  top.addColorStop(0, 'rgba(30,14,16,0.35)');
-  top.addColorStop(1, 'rgba(30,14,16,0.05)');
+  top.addColorStop(0, `rgba(30,14,16,${0.35 * look.shade})`);
+  top.addColorStop(1, `rgba(30,14,16,${0.05 * look.shade})`);
   g.fillStyle = top;
   g.fillRect(0, 0, w, SAND_TOP);
   const vignette = g.createRadialGradient(w / 2, h * 0.62, h * 0.35, w / 2, h * 0.62, w * 0.72);
   vignette.addColorStop(0, 'rgba(30,14,16,0)');
-  vignette.addColorStop(1, 'rgba(30,14,16,0.55)');
+  vignette.addColorStop(1, `rgba(30,14,16,${0.55 * (0.5 + look.shade / 2)})`);
   g.fillStyle = vignette;
   g.fillRect(0, 0, w, h);
 

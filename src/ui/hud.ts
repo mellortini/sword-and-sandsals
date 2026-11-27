@@ -14,6 +14,8 @@ interface HudFighter {
   };
   /** crowd favour 0-100 (#51); without it the crowd strip stays hidden */
   readonly crowd?: { readonly favour: number };
+  /** the off-hand shield (#273): a badge with its health at the end of the name board; none = no badge */
+  readonly shield?: { readonly health: number; readonly maxHealth: number };
 }
 
 /** a gift the crowd threw during the last action (the core's `crowd_gift` event) */
@@ -107,6 +109,7 @@ class FighterPanel extends Container {
   private readonly health = new Flask('HEALTH', 0xcf493d, 0xff987a);
   private readonly energy = new Flask('ENERGY', 0x377bb1, 0x9adcff);
   private readonly crowd = new CrowdMeter(PANEL_WIDTH - 36);
+  private readonly shield = new ShieldBadge();
   /** drawn name board; replaced by the wooden plate sprite once the UI kit has loaded (#242) */
   private readonly header = new Graphics()
     .roundRect(18, 0, PANEL_WIDTH - 36, 46, 6)
@@ -129,7 +132,9 @@ class FighterPanel extends Container {
     this.energy.position.set(230, 104);
     this.crowd.position.set(18, CROWD_STRIP_TOP);
     this.crowd.visible = false;
-    this.addChild(this.crowd, plate, this.header, this.nameText, this.health, this.energy);
+    this.shield.position.set(PANEL_WIDTH - 2, 26);
+    this.shield.visible = false;
+    this.addChild(this.crowd, plate, this.header, this.nameText, this.health, this.energy, this.shield);
   }
 
   /** swap the drawn name board and flasks for the paper UI kit sprites (#16) */
@@ -164,6 +169,8 @@ class FighterPanel extends Container {
       this.fitName();
     }
     this.health.setValue(fighter.health, fighter.stats.maxHealth, immediate);
+    this.shield.visible = fighter.shield !== undefined;
+    if (fighter.shield) this.shield.setValue(fighter.shield.health, fighter.shield.maxHealth);
     this.energy.setValue(fighter.energy, fighter.stats.maxEnergy, immediate);
     if (fighter.crowd) {
       this.crowd.setFavour(fighter.crowd.favour, immediate || !this.crowd.visible);
@@ -278,5 +285,39 @@ class Flask extends Container {
     } else {
       this.liquid.visible = fraction > 0;
     }
+  }
+}
+
+/** A small paper shield with the shield's health on it (#273); grey and cracked once it is broken. */
+class ShieldBadge extends Container {
+  private readonly face = new Graphics();
+  private readonly crack = new Graphics().poly([-1, -24, 4, -10, -3, 0, 4, 12, 0, 26, -5, 12, -8, 0, -2, -10]).fill(0x2e1a14);
+  private readonly valueText = new Text({
+    style: { fontFamily: 'Georgia', fontSize: 19, fontWeight: 'bold', fill: '#fff0d6', stroke: { color: '#2a1a16', width: 4 } },
+  });
+  private last = '';
+
+  constructor() {
+    super();
+    this.valueText.anchor.set(0.5);
+    this.valueText.position.set(0, 0);
+    this.addChild(this.face, this.crack, this.valueText);
+  }
+
+  setValue(health: number, max: number) {
+    const key = `${health}/${max}`;
+    if (key === this.last) return;
+    this.last = key;
+    const broken = health <= 0;
+    const shape = [-24, -24, 24, -24, 26, 4, 0, 30, -26, 4];
+    this.face.clear()
+      .poly(shape.map((v, i) => v + (i % 2 ? 4 : 3))).fill({ color: 0x1c1214, alpha: 0.5 })
+      .poly(shape).fill(broken ? 0x6b5e58 : 0xb98a52).stroke({ color: broken ? 0x9a8e86 : 0xf0cf96, width: 2.5 })
+      .poly([-16, -17, 16, -17, 17, 2, 0, 21, -17, 2]).fill(broken ? 0x544a46 : 0x8c5e33);
+    this.crack.visible = broken;
+    this.valueText.text = broken ? '0' : String(health);
+    this.valueText.scale.set(1);
+    if (this.valueText.width > 40) this.valueText.scale.x = 40 / this.valueText.width;
+    this.alpha = broken ? 0.75 : 1;
   }
 }

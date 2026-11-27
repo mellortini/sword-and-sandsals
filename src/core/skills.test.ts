@@ -45,6 +45,8 @@ it('applies learned rules to real movement, spells, resistance, counters and the
   const initial = createCombat(12, {
     position: 4, skills: ['economy-of-motion', 'focused-casting', 'opening-act', 'unshaken', 'riposte'],
     slots: [{ id: 'ember' }, null, null, null],
+    // behind a shield the block chance is the full one (#274)
+    equipment: { offHand: 'shield9' },
   }, { position: 6 });
   expect(initial.fighters.player.crowd.favour).toBe(58);
   expect(getActionOptions(initial)).toContainEqual({ action: 'step_forward', energyCost: 0 });

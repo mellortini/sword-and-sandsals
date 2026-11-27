@@ -1,6 +1,7 @@
 import { Container, Sprite } from 'pixi.js';
 import type { AiProfile } from '../core/ai';
 import { createCombat, getAttackZoneOptions } from '../core/combat';
+import { passTime } from '../core/story';
 import type { TargetedAttack } from '../core/hitZones';
 import { saveGame } from '../core/save';
 import type { CombatSlotAction } from '../core/spells';
@@ -38,8 +39,9 @@ import type { NemesisMemory } from '../core/nemesis';
 import { loadoutFromLook } from './preFight';
 import { aiPicker, nemesisPicker, runFight } from './turnLoop';
 import type { ActionPicker } from './turnLoop';
-import { arenaBackdrop } from './backdrop';
-import { CrowdFx } from '../ui/crowdFx';
+import { buildArenaStage } from './arenaStage';
+import { isArenaId } from './arenas';
+import type { ArenaId } from './arenas';
 import { startMusic } from '../audio/music';
 import { CameraJuice, applyCamera } from '../ui/cameraJuice';
 import { reduceMotion } from '../ui/motion';
@@ -55,6 +57,10 @@ export interface ArenaFighter {
   readonly nemesis?: NemesisMemory;
   /** set for a league fighter (#58): its AI profile, and its wins are saved on the ladder */
   readonly bout?: { readonly id: string; readonly profile: AiProfile };
+  /** this opponent's own AI; without it (and without a bout) the arena picks one */
+  readonly profile?: AiProfile;
+  /** who "Next opponent" brings instead of one grown from this opponent (the first bout's rookie) */
+  readonly successor?: ArenaFighter;
   /** the gear the fighter really fights with when it is more than its look shows (weapon, league fighters) */
   readonly equipment?: EquipmentLoadout;
 }
@@ -62,6 +68,8 @@ export interface ArenaFighter {
 export interface ArenaOptions {
   /** the saved gladiator fighting as the player: fights pay gold and XP into the save (#43), the result screen shows the XP bar (#24) */
   readonly career?: SavedCharacter;
+  /** where the bout is fought (#272); `?arena=` when not given, else Pulpport */
+  readonly arena?: ArenaId;
 }
 
 const LAYOUT = FIGHT_LAYOUT;
@@ -80,22 +88,29 @@ const pause = (sec: number) => new Promise<void>((r) => setTimeout(r, sec * 1000
  * The arena fight (#12): the player picks from the action bar (#147), the opponent's AI (#6) answers after a short pause,
  * CombatPresenter animates every action and the HUD follows. The menu opens only when the player's action can be chosen,
  * never during an animation. At 0 HP the result screen offers a rematch or the way back to the title.
- * Pre-fight passes the two gladiators it showed; a direct visit (`?view=arena[&tier=N][&ai=aggressor|defender]`) uses random ones.
+ * Pre-fight passes the two gladiators it showed; a direct visit (`?view=arena[&tier=N][&ai=aggressor|defender][&shield=N][&eshield=N]`) uses random ones.
  */
 export async function showArena(
   context: SceneContext, fighters?: readonly [ArenaFighter, ArenaFighter], options: ArenaOptions = {},
 ): Promise<SceneUpdate> {
-  const { world, bgTex, params, ui, add, rigs } = context;
+  const { world, params, ui, add, rigs } = context;
+  const askedArena = params.get('arena');
+  const themeId: ArenaId = options.arena ?? (isArenaId(askedArena) ? askedArena : 'pulpport');
   const arena = new Container();
   world.addChild(arena);
-  arena.addChild(new Sprite(arenaBackdrop(bgTex)));
   // the painted stands come alive (#52): over the backdrop, under the fighters
-  const crowdFx = arena.addChild(new CrowdFx());
+  const crowdFx = await buildArenaStage(arena, themeId);
 
   const tp = params.get('tier');
   const tier = tp ? +tp : undefined;
-  const [player, firstEnemy]: readonly [ArenaFighter, ArenaFighter] = fighters
-    ?? [{ name: 'Player', look: randomLook(tier) }, { name: 'Opponent', look: randomLook(tier) }];
+  // a direct visit may hand out shields (#273): `&shield=3&eshield=6` (the look's shield becomes a real one in the bout)
+  const shieldOf = (key: string) => (params.has(key) ? { shield: +params.get(key)! } : {});
+  // &might=17&emight=5: try fighters of different Might (and so of different height)
+  const mightOf = (key: string) => (params.has(key) ? { attributes: { might: Math.max(0, Math.floor(+params.get(key)!) || 0) } } : {});
+  const [player, firstEnemy]: readonly [ArenaFighter, ArenaFighter] = fighters ?? [
+    { name: 'Player', look: { ...randomLook(tier), ...shieldOf('shield') }, ...mightOf('might') },
+    { name: 'Opponent', look: { ...randomLook(tier), ...shieldOf('eshield') }, ...mightOf('emight') },
+  ];
   let enemy: ArenaFighter = firstEnemy;
   const asked = params.get('ai');
   const profile: AiProfile = asked === 'aggressor' || asked === 'defender' ? asked : PROFILES[Math.floor(Math.random() * PROFILES.length)];
@@ -177,7 +192,7 @@ export async function showArena(
       menu.setVisible(true);
       fighting = true;
       const outcome = await runFight(start, {
-        pickers: { player: playerPicker, enemy: enemy.nemesis ? nemesisPicker(enemy.nemesis, seed ^ 0x85ebca6b) : aiPicker(enemy.bout?.profile ?? profile, seed ^ 0x85ebca6b) },
+        pickers: { player: playerPicker, enemy: enemy.nemesis ? nemesisPicker(enemy.nemesis, seed ^ 0x85ebca6b) : aiPicker(enemy.bout?.profile ?? enemy.profile ?? profile, seed ^ 0x85ebca6b) },
         present: (events, after) => presenter.present(events, after),
         pause: (next: FighterSide) => (next === 'enemy' ? pause(ENEMY_PAUSE) : Promise.resolve()),
       });
@@ -191,7 +206,8 @@ export async function showArena(
       let payout: FightPayout | undefined;
       if (career) {
         // health after the bout and the potions left (#191) go to the save with the XP
-        const settled = settleTempleCombat(career, outcome.state.fighters.player);
+        // and a bout takes a day of the story calendar (#291)
+        const settled = passTime(settleTempleCombat(career, outcome.state.fighters.player), 'fight');
         // achievements (#203): the bout first, then the level it ended on; the result screen keeps working on `after`
         const fightId = `${Date.now().toString(36)}-${seed}`;
         // the nemesis (#209): a victor becomes one, beating it ends the feud; a rematch fights the updated one
@@ -242,7 +258,8 @@ export async function showArena(
       }
       if (choice === 'next') {
         // #187: same gear, at most 5% stronger, at most one level above the player
-        enemy = { ...nextOpponent(enemy, career?.level ?? player.level ?? 1), nemesis: undefined, bout: undefined, equipment: undefined };
+        enemy = enemy.successor
+          ?? { ...nextOpponent(enemy, career?.level ?? player.level ?? 1), nemesis: undefined, bout: undefined, equipment: undefined, profile: undefined };
         await E.setLook(drawableLook(context.kit, enemy.look));
       }
       seed++;
@@ -261,13 +278,14 @@ export async function showArena(
     menu.place({
       left: world.position.x + gap.left * s, right: world.position.x + gap.right * s, bottom: world.position.y + gap.bottom * s,
       ceiling: (links.top < 60 ? links.bottom : 0) + 6,
-      floor: world.position.y + (FEET_Y - FIGHTER_HEIGHT) * s,
+      floor: world.position.y + (FEET_Y - FIGHTER_HEIGHT * Math.max(P.stature, E.stature)) * s,
     });
     for (const [rig, g] of [[P, shadows[0]], [E, shadows[1]]] as const) {
-      const lift = Math.max(0, (pelvisY - rig.view.y) / UNIT);
+      // a taller fighter's pelvis rests higher (stature): that is not a jump
+      const lift = Math.max(0, (FEET_Y - PELVIS_ABOVE_FEET * rig.scale - rig.view.y) / UNIT);
       g.position.set(rig.view.x + 0.35 * UNIT * rig.facing, FEET_Y);
       g.alpha = Math.max(0.25, 1 - lift * 0.18);
-      g.width = 5.2 * UNIT * Math.max(0.6, 1 - lift * 0.08);
+      g.width = 5.2 * rig.scale * Math.max(0.6, 1 - lift * 0.08);
     }
   };
 }

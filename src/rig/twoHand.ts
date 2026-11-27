@@ -22,7 +22,10 @@ const SLACK = 0.18;
 
 /** a bone's joint offset in its parent, with the two-handed shoulder shift applied */
 export function boneOffset(b: Bone, pose: Pose): { x: number; y: number } {
-  return b.name === 'arm_b_up' ? { x: b.x + (pose.arm_b_shift ?? 0), y: b.y } : { x: b.x, y: b.y };
+  if (b.name === 'arm_b_up') return { x: b.x + (pose.arm_b_shift ?? 0), y: b.y };
+  // the weapon shoulder slides back along the torso in the quarter turn (#273, #280, `quarterTurn`)
+  if (b.name === 'arm_f_up') return { x: b.x + (pose.arm_f_shift ?? 0), y: b.y };
+  return { x: b.x, y: b.y };
 }
 
 /** a head torn off its neck (finishers, #20) sits where the pose puts it, whatever the torso does */
@@ -55,7 +58,9 @@ const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
  */
 export function holdWithBothHands(bones: readonly Bone[], pose: Pose, grip2: readonly [number, number]): Pose {
   const bone = (n: string) => bones.find((b) => b.name === n)!;
-  const J = forwardKinematics(bones, { ...pose, arm_b_shift: 0 });
+  // the shoulder starts where the quarter turn puts it (#280) and comes further forward only if the haft needs it
+  const turnShift = pose.arm_b_shift ?? 0;
+  const J = forwardKinematics(bones, { ...pose, arm_b_shift: turnShift });
   const wpn = J.get('weapon')!, torso = J.get('torso')!, shoulder0 = J.get('arm_b_up')!;
   const cw = Math.cos(wpn.r), sw = Math.sin(wpn.r);
   // the hand closes on the haft the same way as the front hand: wrist = grip point - hand -> weapon offset
@@ -111,7 +116,7 @@ export function holdWithBothHands(bones: readonly Bone[], pose: Pose, grip2: rea
     const bend = wrap(loR - upR);
     const solved: Pose = {
       ...pose,
-      arm_b_shift: shift,
+      arm_b_shift: turnShift + shift,
       arm_b_up: wrap(upR - torso.r) * DEG,
       arm_b_lo: bend * DEG,
       hand_b: wrap(hand - loR) * DEG,

@@ -11,8 +11,8 @@ const customer: ShopCustomer = {
 describe('shop transactions', () => {
   it('keeps a separate catalogue for each shop and opens higher tiers by league', () => {
     const bronze = getShopStock('armourer', 'bronze');
-    expect(bronze).toHaveLength(10);
-    expect(bronze.every((item) => 'slot' in item && item.tier <= 2)).toBe(true);
+    expect(bronze).toHaveLength(12);   // two tiers of five armour pieces and a shield (#273)
+    expect(bronze.every((item) => ('slot' in item || item.id.startsWith('shield')) && item.tier <= 2)).toBe(true);
     const legend = getShopStock('weaponsmith', 'legend');
     expect(legend).toHaveLength(40);
     expect(legend.every((item) => 'family' in item)).toBe(true);

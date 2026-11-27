@@ -7,11 +7,16 @@ import type { Animator } from '../anim/Animator';
 import type { ClipEvent } from '../anim/clip';
 import type { CombatEvent, CombatState, Fighter, FighterSide, MoveKind } from '../core/types';
 import { BlockShield, DamageSplat, FxLayer, MissText } from '../ui/fx';
+import { goreMode } from '../ui/gore';
+import { woundStage } from '../rig/wounds';
+import { PaperScraps } from '../ui/scraps';
 import type { CrowdFx } from '../ui/crowdFx';
 import type { CameraJuice } from '../ui/cameraJuice';
 import { attachGroundFx } from '../ui/groundFx';
-import { attachFoley, playFoley } from '../audio/foley';
+import { attachFoley, blowSound, playFoley } from '../audio/foley';
+import { statureFor } from '../rig/stature';
 import type { CrowdAmbience } from '../audio/crowd';
+import { playSever } from '../audio/sever';
 import { MIN_LUNGE, STRIKE_GAP, forwardDelta, planSteps, screenX } from './combatPlan';
 import type { Layout, Step } from './combatPlan';
 
@@ -91,6 +96,12 @@ export class CombatPresenter {
     this.shown = { player: { ...state.fighters.player }, enemy: { ...state.fighters.enemy } };
     for (const side of ['player', 'enemy'] as const) {
       const a = this.o.fighters[side];
+      // Might shows as height, the bout's own Might (skills included)
+      a.rig.setStature(statureFor(state.fighters[side].attributes.might));
+      // a shield broken in the last bout is whole again (#273), and a cut-off arm is back (#275)
+      const shield = state.fighters[side].shield;
+      if (a.rig.look.armCut) void a.rig.setLook({ armCut: false });
+      if (shield && a.rig.look.shield !== shield.tier) void a.rig.setLook({ shield: shield.tier });
       a.home.x = screenX(this.o.layout, side, state.fighters[side].position);
       a.play('idle', { blend: 0 });
     }
@@ -116,6 +127,9 @@ export class CombatPresenter {
       this.shown = { player: { ...after.fighters.player }, enemy: { ...after.fighters.enemy } };
       for (const side of ['player', 'enemy'] as const) {
         this.o.fighters[side].home.x = screenX(this.o.layout, side, after.fighters[side].position);
+        // the guard ended with no blow (the opponent rested, moved, …): lower it now
+        const anim = this.o.fighters[side];
+        if (!after.fighters[side].guarding && anim.clip.startsWith('guard')) anim.play('idle');
       }
       // the crowd reacts once the action has played out; a bouquet's health is already in `after`
       const gifts = events.filter((e): e is CrowdGiftEvent => e.type === 'crowd_gift');
@@ -140,7 +154,19 @@ export class CombatPresenter {
     for (const side of ['player', 'enemy'] as const) this.o.fx.status.set(side, state.fighters[side].statuses);
   }
 
+  /** the bodies show the health the bars show (#284); with gore off they stay unmarked */
+  private showWounds() {
+    if (!this.shown) return;
+    for (const side of ['player', 'enemy'] as const) {
+      const { health, stats } = this.shown[side];
+      const stage = goreMode() === 'off' ? 1 : woundStage(health, stats.maxHealth);
+      const rig = this.o.fighters[side].rig;
+      if ((rig.look.wounds ?? 1) !== stage) void rig.setLook({ wounds: stage });
+    }
+  }
+
   private emit(gifts?: readonly CrowdGiftEvent[]) {
+    this.showWounds();
     if (this.shown) this.o.onState?.(gifts ? { fighters: this.shown, gifts } : { fighters: this.shown });
   }
 
@@ -161,7 +187,7 @@ export class CombatPresenter {
 
   private head(side: FighterSide) {
     const r = this.o.fighters[side].rig;
-    return { x: r.view.x + 0.3 * this.o.unit * r.facing, y: r.view.y - 8.9 * this.o.unit };
+    return { x: r.view.x + 0.3 * r.scale * r.facing, y: r.view.y - 8.9 * r.scale };
   }
 
   /** play a move clip so that its root motion carries the fighter from `from` to `to` */
@@ -179,7 +205,7 @@ export class CombatPresenter {
     const slot = a.target === 'player' ? 'p' : 'e';
     const h = this.head(a.target);
     const facingDef = def.rig.facing;
-    if (this.o.sound) playFoley(!a.hit ? 'miss' : a.blocked ? 'block' : a.crit ? 'crit' : 'hit');
+    if (this.o.sound) playFoley(blowSound(a, this.shown?.[a.actor].weapon?.family));
     if (a.hit && !a.blocked && (a.crit || fatal)) {
       this.o.crowd?.cheer(fatal ? 1.4 : 0.8);
       // a crit brings half the stands up, a finishing blow all of it, and they throw flowers and coins at the winner
@@ -198,13 +224,46 @@ export class CombatPresenter {
     }
     const knockback = () => this.move(push!.fighter, push!.kind, push!.from, push!.to);
     if (a.blocked) {
-      this.o.fx.show(slot + 'b', new BlockShield(), h.x - 30 * facingDef, h.y + 6);
+      // a real shield (#273): what it lost, and at 0 it breaks and leaves the puppet's arm
+      const s = a.shield;
+      this.o.fx.show(slot + 'b', new BlockShield(s && { lost: s.from - s.to, broken: s.to === 0 }), h.x - 30 * facingDef, h.y + 6);
+      if (s && this.shown?.[a.target].shield) {
+        this.setShown(a.target, { shield: { ...this.shown[a.target].shield!, health: s.to } });
+        if (s.to === 0) void def.rig.setLook({ shield: 0 });
+      }
       return push ? knockback() : this.clip(def, 'block');
     }
     this.o.fx.show(slot, new DamageSplat(a.damage, a.crit), h.x + 34 * facingDef, h.y);
+    if (a.severed) this.sever(a.target);
     if (this.shown) this.setShown(a.target, { health: Math.max(0, this.shown[a.target].health - a.damage) });
     if (fatal) return this.clip(def, 'death', { then: null });
     return push ? knockback() : this.clip(def, 'hit');
+  }
+
+  /**
+   * The shield arm comes off (#275). With gore on, the forearm, hand and shield are gone at the elbow in a burst of
+   * paper shreds (or red ink); with gore off the arm stays and the shield is knocked out of the hand.
+   */
+  private sever(side: FighterSide) {
+    const rig = this.o.fighters[side].rig;
+    const mode = goreMode();
+    const elbow = rig.screenPoint('arm_b_lo');
+    // the wet tear of the arm coming off; with gore off playSever stays silent
+    if (this.o.sound) playSever(mode);
+    if (this.o.floorY !== undefined) {
+      const scraps = new PaperScraps(mode, this.o.floorY);
+      this.o.fx.addScraps(scraps);
+      scraps.burst({ ...elbow, count: mode === 'off' ? 18 : 30, angle: -Math.PI / 2 - 0.5 * rig.facing, spread: 1.3, speed: 22 });
+      if (mode !== 'off') scraps.spray(() => rig.screenPoint('arm_b_up', 0, -1.7), 18);
+    }
+    if (mode === 'off') {
+      const h = this.head(side);
+      this.o.fx.show((side === 'player' ? 'p' : 'e') + 'b', new BlockShield({ lost: 0, broken: true }), h.x - 30 * rig.facing, h.y + 6);
+      void rig.setLook({ shield: 0 });
+    } else {
+      void rig.setLook({ armCut: true, shield: 0 });
+    }
+    if (this.shown?.[side].shield) this.setShown(side, { shield: { ...this.shown[side].shield!, health: 0 } });
   }
 
   private async play(step: Step): Promise<void> {
@@ -225,14 +284,16 @@ export class CombatPresenter {
         const gap = Math.abs(fighters.enemy.home.x - fighters.player.home.x) / unit;
         await this.clip(anim, `attack_${step.attack.kind}`, {
           blend: 1,
-          lunge: Math.max(MIN_LUNGE, gap - STRIKE_GAP[step.attack.kind]),
+          // a taller fighter's blade reaches further, so the body steps in that much less
+          lunge: Math.max(MIN_LUNGE, gap - STRIKE_GAP[step.attack.kind] * anim.rig.stature),
           onEvent: (e) => { if (e.type === 'hit') reaction = this.react(step.attack, step.fatal, step.push); },
         });
         await reaction;
         return;
       }
       case 'pose':
-        await this.clip(fighters[step.side], step.clip);
+        // a raised guard is held (`guard`, looping) until a blow's reaction or the end of the guard lowers it (#273)
+        await this.clip(fighters[step.side], step.clip, step.clip === 'guard_up' ? { then: 'guard' } : {});
         return;
       case 'item':
         // no own clip or pop-up yet: the user pauses as when resting and the target's bar moves when it ends
