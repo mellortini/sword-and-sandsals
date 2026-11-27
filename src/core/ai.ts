@@ -18,9 +18,10 @@ const PROFILE_WEIGHTS: Record<AiProfile, Record<CombatAction, number>> = {
     quick: 1, normal: 1.2, power: 1.6, charge: 2.2,
     step_forward: 1, jump: 1.4, step_back: 0.1, block: 0.3, rest: 0.6, taunt: 0.3,
   },
+  // #282: a defender that still answers blow for blow; the old, more passive one lost ~60% to the aggressor
   defender: {
-    quick: 1.3, normal: 1.1, power: 0.7, charge: 0.5,
-    step_forward: 0.7, jump: 0.4, step_back: 0.5, block: 1.2, rest: 1, taunt: 0.15,
+    quick: 1.4, normal: 1.3, power: 1.0, charge: 0.9,
+    step_forward: 1, jump: 0.8, step_back: 0.3, block: 1.0, rest: 0.9, taunt: 0.1,
   },
   lion: {
     quick: 1.8, normal: 1, power: 0.7, charge: 3.4,

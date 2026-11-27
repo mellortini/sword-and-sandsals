@@ -1394,3 +1394,10 @@ Poprawki po uwagach (goloburda05-hue):
 - `rest`: ręka z bronią zwisa lekko do przodu (łokieć nie wpada w biodro); `rest@shield` usunięty. Etykieta „Shoulders” na manekinie przesunięta.
 - Sprawdzone klatki: 20 klipów z mieczem, idle/chód/ataki/blok/unik dla topora, włóczni, młota, sztyletów, trójzębu, rzut siecią, klipy z tarczą; portrety, miasto, manekin.
 - Mateusz / lkaelek: nowe klipy rysujcie z myślą o obrocie (bark z bronią ~0,5 j. bliżej środka, bliższy ~0,6 j. dalej do przodu). Wzorce testów wizualnych odświeżone z artefaktu CI (Ubuntu 24.04).
+
+### 2026-11-27 20:41 · Claude Code (goloburda05-hue) · #282 / 282-balance-tempo
+
+- Balans agresor kontra obrońca: 60,5% → 53,2% (symulator, równy sprzęt). Analiza 10 strategii w `docs/BALANS.md`: zmiany bloku nic nie dają (0,11 udanego bloku na walkę), przewagę daje tempo mocnego ciosu.
+- ⚠️ Wdrożone (dotyczy też gracza): mocny cios kosztuje **11** energii (było 8) i ma celność **48** (było 55); profil AI `defender` mniej pasywny (więcej ataków, blok 1,2 → 1,0).
+- Testy: energia (`combat.test.ts`) i ochrona przed pudłami (`hitProtection.test.ts`, baza 48%) przeliczone. Tabele „Walka” i „Złoto i ceny” w BALANS.md zaktualizowane.
+- lkaelek: jeśli ligi/bossy mają ustawiony profil `defender` z myślą o pasywnym stylu — teraz atakuje częściej.

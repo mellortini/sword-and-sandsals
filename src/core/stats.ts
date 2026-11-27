@@ -16,7 +16,7 @@ const DEFAULT_ATTRIBUTES: Readonly<Attributes> = {
 const ATTACKS: Record<AttackKind, { accuracy: number; power: number }> = {
   quick: { accuracy: 80, power: 0.7 },
   normal: { accuracy: 70, power: 1 },
-  power: { accuracy: 55, power: 1.6 },
+  power: { accuracy: 48, power: 1.6 },   // #282: was 55
   charge: { accuracy: 70, power: 1.2 },
 };
 
