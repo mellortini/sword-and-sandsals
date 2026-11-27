@@ -76,7 +76,7 @@ export function nameProblem(name: string): string | null {
 }
 
 /** Appearance parts the creator changes; armour and weapon start empty / default. */
-export type Appearance = Pick<Look, 'skin' | 'face' | 'hair' | 'hairColor' | 'beard'>;
+export type Appearance = Pick<Look, 'skin' | 'face' | 'hair' | 'hairColor' | 'beard'> & Pick<Look, 'build'>;
 
 /** A level 1 gladiator in a loincloth, ready for saveGame. Throws when the draft is not finished. */
 export function newCharacter(name: string, appearance: Appearance, spread: PointSpread): SavedCharacter {

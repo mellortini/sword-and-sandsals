@@ -10,6 +10,7 @@
  *   is already in the puppet texture (like canvas source-atop)
  */
 import { EXPRESSION_KEYS, EXPRESSION_PIECES, pieceShown } from './expressions';
+import { widthScale } from './builds';
 import { boneOffset, forwardKinematics, holdWithBothHands, looseHead } from './twoHand';
 import { Assets, Container, Rectangle, Renderer, RenderTexture, Sprite, Texture } from 'pixi.js';
 
@@ -42,6 +43,8 @@ export interface Look {
   skin: number; face: number; hair: number; hairColor: number; beard: number;
   helmet: number; armor: number; shoulders: number; greaves: number; boots: number;
   weapon: string;
+  /** body build (#27): 0 slim, 1 average (default), 2 heavy - src/rig/builds.ts */
+  build?: number;
 }
 
 export const DEFAULT_LOOK: Look = { skin: 3, face: 0, hair: 1, hairColor: 1, beard: 2, helmet: 0, armor: 0, shoulders: 0, greaves: 0, boots: 0, weapon: 'gladius' };
@@ -288,7 +291,8 @@ export class PaperRig {
       sh.anchor.set((m.pivot[0] + SHADOW_PAD) / (m.w + SHADOW_PAD * 2), (m.pivot[1] + SHADOW_PAD) / (m.h + SHADOW_PAD * 2));
       sh.blendMode = 'multiply';
       // beards are drawn on the reference jaw: stretch them to this face's jaw around the jaw centre
-      let sx = 1, sy = 1, ox = 0, oy = 0;
+      // a build widens the paper across its bone (#27); armour on the bone follows, so every set fits
+      let sx = widthScale(L.build, layer.bone), sy = 1, ox = 0, oy = 0;
       if (layer.slot === 'beard') {
         sx = face.jaw[0] / J.ref_jaw[0];
         sy = face.jaw[1] / J.ref_jaw[1];
