@@ -8,7 +8,7 @@
  */
 import type { Pose } from '../rig/PaperRig';
 import { bake, Baked, Clip } from './clip';
-import { WEAPON_CLIPS, heldWalks } from './weaponClips';
+import { WEAPON_CLIPS, heldDodges, heldWalks } from './weaponClips';
 
 const CROUCH: Pose = { leg_f_up: 48, leg_f_lo: -82, leg_b_up: 24, leg_b_lo: -76, torso: -12 };
 
@@ -123,6 +123,17 @@ export const CLIPS: Clip[] = [
     ],
   },
   {
+    // the defender when the attack misses (#13): leans the torso away and slides the back foot out on frame 3
+    // (the blow passes on the attacker's hit frame), holds, then steps back in; root x returns to 0 (no travel)
+    name: 'dodge', length: 12,
+    keys: [
+      { f: 0 },
+      { f: 3, x: -0.75, ease: 'out', pose: { torso: 22, head: 16, arm_f_up: 44, arm_f_lo: 70, hand_f: -6, blade: 72, arm_b_up: -44, arm_b_lo: 26, leg_f_up: 26, leg_f_lo: -24, leg_b_up: -30, leg_b_lo: -6 } },
+      { f: 7, x: -0.82, pose: { torso: 19, head: 12 } },
+      { f: 12, x: 0, pose: { torso: 3, head: -3, arm_f_up: 22, arm_f_lo: 62, hand_f: -10, weapon: -40, arm_b_up: -18, arm_b_lo: 35, leg_f_up: 16, leg_f_lo: -6, leg_b_up: -14, leg_b_lo: 4 } },
+    ],
+  },
+  {
     // the defender after a successful charge: thrown back, stumbles, recovers
     name: 'knockback', length: 30,
     keys: [
@@ -181,7 +192,7 @@ export const CLIPS: Clip[] = [
 ];
 
 /** every clip including the weapon-family variants (`attack_power@hammer`, src/anim/weaponClips.ts) */
-export const ALL_CLIPS: Clip[] = [...CLIPS, ...WEAPON_CLIPS, ...heldWalks(CLIPS)];
+export const ALL_CLIPS: Clip[] = [...CLIPS, ...WEAPON_CLIPS, ...heldWalks(CLIPS), ...heldDodges(CLIPS)];
 
 export function bakeAll(stance: Pose): Record<string, Baked> {
   const o: Record<string, Baked> = {};

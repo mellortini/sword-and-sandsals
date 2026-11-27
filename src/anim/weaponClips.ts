@@ -128,3 +128,18 @@ export function heldWalks(clips: readonly Clip[]): Clip[] {
   }
   return out;
 }
+
+const GRIP = ['arm_f_up', 'arm_f_lo', 'hand_f', 'blade'] as const;
+
+/**
+ * Dodging with a two-handed weapon (#13): the shared `dodge` with the front arm and weapon of the ready stance on
+ * every key, while the torso and head still lean away. The weapon stays upright instead of dropping to sword height.
+ */
+export function heldDodges(clips: readonly Clip[]): Clip[] {
+  const dodge = clips.find((c) => c.name === 'dodge');
+  if (!dodge) return [];
+  return ([['hammer', HAMMER_READY], ['spear', SPEAR_READY]] as const).map(([family, ready]) => {
+    const grip: Pose = Object.fromEntries(GRIP.map((k) => [k, ready[k] ?? 0]));
+    return { ...dodge, name: `dodge@${family}`, keys: dodge.keys.map((k) => ({ ...k, pose: { ...(k.pose ?? {}), ...grip } })) }; // 'blade' wins over 'weapon' in bake()
+  });
+}

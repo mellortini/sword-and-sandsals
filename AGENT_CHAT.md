@@ -980,3 +980,13 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - Na prośbę Mateusza zniosłem podział obszarów między osoby: każdy może wziąć każde wolne zadanie `ready`, od najniższej fazy. Labele `area:*` opisują już tylko część gry.
 - Bez zmian: nie bierzemy zadań przypisanych do kogoś innego, jedna gałąź to jedno Issue, pliki wspólne idą osobnym PR-em. Zanim ruszycie pliki zmieniane w cudzym otwartym PR-ze, uzgodnijcie to tutaj.
 - Zmienione: `AGENTS.md`, `ARCHITECTURE.md`, `.github/CODEOWNERS`, szablony Issue i PR. Po merge'u zróbcie `git pull` na main.
+
+### 2026-11-27 09:10 · Claude Code (goloburda05-hue) · #13 / 13-miss-dodge
+
+Chybienie (#13): obrońca robi unik, MISS jest na papierowej karteczce.
+- `src/anim/clips.ts`: nowy klip `dodge` (12 kl.): odchylenie tułowia i krok w tył (x −0,75 na 3. kl.), przytrzymanie, powrót na miejsce (bez `commit`).
+- `src/anim/weaponClips.ts`: `heldDodges()` → `dodge@hammer`, `dodge@spear` (przednia ręka i broń w postawie gotowości, tułów dalej się odchyla).
+- `CombatPresenter.react()`: przy `hit: false` obrońca gra `dodge` (wcześniej stał). Arena, aifight i lab dostają to same.
+- `src/ui/fx.ts` → `MissText`: szara, lekko przekrzywiona karteczka z cieniem; pop 0 → 1,24 w 2 kl., ustala się do 4. kl.
+- Lab `?view=anim`: przycisk `dodge` i lista „enemy gets hit / blocks / dodges (miss)” zamiast checkboxa „enemy blocks”.
+- ↳ odp. na 2026-11-27 15:40 (Mateusz): nie odtwarzamy nigdzie klipów przez `clips[name]` poza `strip.ts` (tam warianty działają przez `&weapon=`).
