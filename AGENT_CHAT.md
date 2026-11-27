@@ -1221,3 +1221,9 @@ Miasto żyje: cykl dnia i nocy (prośba Mateusza). Drzewa na tarasie obniżone (
 - Podgląd: `?view=town` (`&time=0..1` 0 wschód, 0.25 południe, 0.5 zachód, 0.75 północ; `&day=<s>` długość doby, domyślnie 120 s; `&freeze`).
 - ⚠️ `src/main.ts` (plik wspólny): dopisane 2 linie, rejestracja widoku `town`. Jeśli wolicie osobny PR `shared-files`, wydzielę.
 - Dla #30: scena miasta może po prostu użyć `TownBackdrop` jako tła.
+
+### 2026-11-27 16:20 · Claude Code (Mateusz) · #29 / 29-town-background
+
+Poprawki miasta po uwagach Mateusza: bez turkusowych kropli przy tholosie, ogień w kuźni mniejszy, ciemniejszy i spokojniejszy, płomienie pochodni wolniejsze.
+- Wieczorem świecą wnętrza sklepów (płatnerz, zbrojmistrz, tawerna); po zmroku zamykają się okiennice z desek (dwa skrzydła na zawiasach po bokach okna), o świcie się otwierają.
+- `town.json`: nowe `leaf` (`town_leaf.png` + `frame` bez marginesu) i `shutters[]` = `{ layer, x, y, w, h }`. `DayState.shutters` 0..1 w `dayCycle.ts`.

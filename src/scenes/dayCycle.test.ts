@@ -32,6 +32,15 @@ describe('dayState', () => {
   });
 });
 
+describe('shop shutters', () => {
+  it('are open in the evening with the lamps lit and closed at midnight', () => {
+    expect(dayState(0.52).lights).toBeGreaterThan(0.5);
+    expect(dayState(0.52).shutters).toBe(0);
+    expect(dayState(0.75).shutters).toBe(1);
+    expect(dayState(0.25).shutters).toBe(0);
+  });
+});
+
 describe('mixColor', () => {
   it('mixes per channel', () => {
     expect(mixColor(0x000000, 0xffffff, 0.5)).toBe(0x808080);

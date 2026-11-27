@@ -89,7 +89,10 @@ BRONZE = sl.foil('bronze', '#b9783e', metal=0.65, rough=0.38, emit=0.2)
 FIRE, FIRE_HOT = glow('fire', '#ff7a1a', 1.5), glow('fire_hot', '#ffd25a', 1.7)
 LAMP, MAGIC = glow('lamp', '#ffbe55', 1.15), glow('magic', '#69e6d2', 1.15)
 # by day the lamps and the magic are off: building layers use these, the night `lights` layer the glowing ones
-LIGHT_OFF = {LAMP.name: paper('lamp_off', '#7a5034'), MAGIC.name: paper('magic_off', '#4d8a84')}
+# shop interiors: shaded by day, a warm lamplit glow in the evening (until the shutters close)
+SHOP = glow('shop', '#e09a52', 0.75)
+LIGHT_OFF = {LAMP.name: paper('lamp_off', '#7a5034'), MAGIC.name: paper('magic_off', '#4d8a84'), SHOP.name: SHADE}
+SHUTTERS = []                                    # shop windows the game closes at night: [layer, x, y, w, h]
 SMOKE = paper('smoke', '#cfc5bd', 'water')
 
 
@@ -223,6 +226,11 @@ def torch(x, top, bottom, z, s=0.75):
     poly([(x - 13, top - 2), (x + 13, top - 2), (x + 7, top + 14), (x - 7, top + 14)], BRONZE, z + 0.12, 0.1)
     B(x - 9, top - 4, x + 9, top + 2, DARK, z + 0.24, 0.03, 2)
     flame(x, top + 1, s)
+
+
+def shutter(x0, y0, x1, y1):
+    """a shop window the game closes at night with two plank leaves hinged at its sides"""
+    SHUTTERS.append(dict(layer=layer_key, x=x0, y=y0, w=x1 - x0, h=y1 - y0))
 
 
 def oil_lamp(x, y, z, chain=18):
@@ -657,13 +665,10 @@ def enchanter():
         E(cx - 120 + i * 24, 497, 5, 5, TERRA_D, 1.4, 0.05, 12)
     B(cx - 5, 380, cx + 5, 404, BRONZE, 1.42, 0.06)
     drop(cx, 380, 13, INK, 1.46, 0.08)
-    drop(cx, 382, 5, MAGIC, 1.54, 0.03)
     for i in range(3):
         B(cx - 112 - i * 10, base - 36 + i * 12, cx + 112 + i * 10, base - 23 + i * 12, (MARBLE, MARBLE_D, MARBLE)[i], 1.6 + i * 0.1, 0.1, 2)
     for x, y, r in ((cx - 102, 430, 12), (cx + 108, 450, 10), (cx - 128, 556, 9), (cx + 126, 560, 11)):
         star(x, y, r, GOLD, 1.7)
-    for x, y, s in ((cx + 140, 400, 7), (cx - 150, 480, 6)):
-        drop(x, y, s, MAGIC, 1.7, 0.04)
     for x, m in ((cx - 132, TEAL), (cx + 132, PURPLE)):                     # potion amphorae
         amphora(x, base - 2, 0.7, 2.0, m)
 
@@ -704,7 +709,8 @@ def weaponsmith():
     B(28, 820, 262, base, OCHRE, 0.4, 0.2)
     B(28, 940, 262, base, OCHRE_D, 0.5, 0.05)                               # dado
     tiles(24, 266, 768, 822, 0.8)
-    B(46, 852, 210, 950, SHADE, 0.7, 0.04)                                   # open shop front
+    B(46, 852, 210, 950, SHOP, 0.7, 0.04)                                    # open shop front
+    shutter(46, 852, 210, 942)
     for i, x in enumerate((70, 104, 138, 172)):
         gladius(x, 868, 0.8, 0.62, (STEEL, STEEL, BRONZE, STEEL)[i])
     B(52, 848, 204, 856, WOOD_D, 0.9, 0.06)
@@ -742,7 +748,7 @@ def forge():
     A(372, 852, base - 6, 116, TRAV_D, 0.9, 0.12)
     A(372, 866, base - 6, 90, SHADE, 1.0, 0.05)
     E(372, 976, 30, 7, FIRE, 1.05, 0.03, 24)                              # embers; the flames come from the game
-    for x, s in ((352, 1.0), (392, 1.05), (372, 1.45)):
+    for x, s in ((356, 0.62), (390, 0.66), (373, 0.85)):
         flame(x, 982, s, always=True)
     B(326, 978, 418, 990, DARK, 1.2, 0.06, 3)
     for x in (434, 454, 474):                                                # tongs and hammers on the wall
@@ -775,7 +781,8 @@ def armourer():
     B(540, 930, 752, base, POMP, 0.5, 0.05)
     B(540, 926, 752, 932, POMP_D, 0.55, 0.03)
     tiles(536, 756, 790, 832, 0.8)
-    B(556, 862, 676, 952, SHADE, 0.7, 0.04)                                  # shop window
+    B(556, 862, 676, 952, SHOP, 0.7, 0.04)                                   # shop window
+    shutter(556, 878, 676, 950)
     scutum(586, 904, 34, 64, 0.8)
     helmet(636, 906, 0.8, POMP, 0.62)
     B(552, 950, 680, 964, MARBLE, 1.1, 0.1, 2)
@@ -842,7 +849,8 @@ def tavern():
     tiles(1522, 1874, 738, 776, 0.8)
     for x in (1566, 1636, 1760, 1830):                                       # upper windows
         window(x - 16, 798, x + 16, 834, 0.6)
-    B(1546, 896, 1700, 962, SHADE, 0.6, 0.04)                                # inside the popina
+    B(1546, 896, 1700, 962, SHOP, 0.6, 0.04)                                 # inside the popina
+    shutter(1546, 900, 1700, 950)
     for x in (1568, 1600, 1632):
         amphora(x, 958, 0.55, 0.7)
     B(1590, 904, 1660, 912, WOOD_D, 0.7, 0.04)
@@ -892,6 +900,20 @@ def cloud(seed):
           r.uniform(44, 70), r.uniform(20, 30), CLOUD, 0.05 * j, 0.06)
 
 
+def leaf_sprite():
+    """one shutter leaf, 80x100 px around (960, 540): vertical planks, a Z brace and iron hinges on the left"""
+    x0, y0, x1, y1 = 920, 490, 1000, 590
+    B(x0, y0, x1, y1, WOOD_D, 0.0, 0.1, 2)
+    for i in range(4):
+        B(x0 + 2 + i * 19.5, y0 + 2, x0 + 19 + i * 19.5, y1 - 2, (WOOD, WOOD_L, WOOD, WOOD_L)[i], 0.12, 0.05, 2)
+    for y in (y0 + 12, y1 - 20):
+        B(x0 + 4, y, x1 - 4, y + 9, WOOD_D, 0.2, 0.06, 2)
+    poly([(x0 + 8, y1 - 22), (x1 - 14, y0 + 22), (x1 - 6, y0 + 24), (x0 + 16, y1 - 20)], WOOD_D, 0.2, 0.05)
+    for y in (y0 + 16, y1 - 16):
+        B(x0, y - 3, x0 + 26, y + 3, DARK, 0.3, 0.04, 2)
+        E(x0 + 22, y, 3, 3, DARK, 0.34, 0.03, 10)
+
+
 def flame_sprite():
     """one paper flame, base at (960, 540); the game sways, stretches and flickers copies of it"""
     drop(960, 522, 18, FIRE, 0.0, 0.05)
@@ -908,7 +930,7 @@ BUILDINGS = [
     ('trainer', 'Trainer', trainer), ('tavern', 'Tavern', tavern),
 ]
 CLOUDS = 4
-EXTRA = [('sky', sky), ('sun', sun), ('flame', flame_sprite)] + [(f'cloud{i}', (lambda i=i: cloud(i))) for i in range(CLOUDS)]
+EXTRA = [('sky', sky), ('sun', sun), ('flame', flame_sprite), ('leaf', leaf_sprite)] + [(f'cloud{i}', (lambda i=i: cloud(i))) for i in range(CLOUDS)]
 colls = {}
 for key, build in [('bg', background)] + [(k, f) for k, _, f in BUILDINGS] + EXTRA:
     coll = sl.new_coll(key)
@@ -929,7 +951,7 @@ bpy.context.view_layer.update()
 boxes = {k: pixel_box(colls[k]) for k in colls if k != 'bg'}
 WORLD = ['bg'] + [k for k, _, _ in BUILDINGS]
 lit = {o.name: o.data.materials[0] for k in WORLD for o in colls[k].all_objects
-       if o.data.materials and o.data.materials[0] in (LAMP, MAGIC)}   # object -> its glowing material
+       if o.data.materials and o.data.materials[0] in (LAMP, MAGIC, SHOP)}   # object -> its glowing material
 
 
 def sprite(k):
@@ -952,6 +974,11 @@ manifest = {
     'flame': dict(image='town_flame.png', w=fw, h=fh, ax=round((960 - fx) / fw, 3), ay=round((540 - fy) / fh, 3)),
     # flames to animate; `layer` = the building they belong to (draw them just above it), `always` = burns by day too
     'flames': FLAMES,
+    # shop windows that close at night: two `leaf` sprites hinged at the window's left and right edges
+    # `frame` = the leaf itself inside the sprite's padding: [x, y, w, h]
+    'leaf': dict(image='town_leaf.png', w=boxes['leaf'][2], h=boxes['leaf'][3],
+                 frame=[920 - boxes['leaf'][0], 490 - boxes['leaf'][1], 80, 100]),
+    'shutters': SHUTTERS,
     # draw in this order at (x, y). The rectangle is the click area; where two overlap, the later one is on top, so
     # hit-test from the end of the list
     'buildings': [dict(id=k, name=n, **sprite(k)) for k, n, _ in BUILDINGS],

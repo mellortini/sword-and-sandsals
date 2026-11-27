@@ -91,23 +91,23 @@
     },
     {
       "layer": "forge",
-      "x": 352,
+      "x": 356,
       "y": 982,
-      "s": 1.0,
+      "s": 0.62,
       "always": true
     },
     {
       "layer": "forge",
-      "x": 392,
+      "x": 390,
       "y": 982,
-      "s": 1.05,
+      "s": 0.66,
       "always": true
     },
     {
       "layer": "forge",
-      "x": 372,
+      "x": 373,
       "y": 982,
-      "s": 1.45,
+      "s": 0.85,
       "always": true
     },
     {
@@ -116,6 +116,40 @@
       "y": 899,
       "s": 0.6,
       "always": false
+    }
+  ],
+  "leaf": {
+    "image": "town_leaf.png",
+    "w": 90,
+    "h": 110,
+    "frame": [
+      5,
+      5,
+      80,
+      100
+    ]
+  },
+  "shutters": [
+    {
+      "layer": "weaponsmith",
+      "x": 46,
+      "y": 852,
+      "w": 164,
+      "h": 90
+    },
+    {
+      "layer": "armourer",
+      "x": 556,
+      "y": 878,
+      "w": 120,
+      "h": 72
+    },
+    {
+      "layer": "tavern",
+      "x": 1546,
+      "y": 900,
+      "w": 154,
+      "h": 50
     }
   ],
   "buildings": [
@@ -150,9 +184,9 @@
       "id": "enchanter",
       "name": "Enchantress",
       "image": "town_enchanter.png",
-      "x": 284,
+      "x": 297,
       "y": 355,
-      "w": 313,
+      "w": 296,
       "h": 376
     },
     {

@@ -4,10 +4,10 @@
  * change colour with it, windows, torches and braziers light up at dusk and the forge fire always burns.
  *
  * Draw order: sky gradient → paper sky (multiply) → stars → sun/moon → clouds → background → each building with its
- * flames just above it → lit windows. `buildings` maps a building id to its sprite (for hover highlight / hit-tests).
+ * flames just above it → lit windows → shop shutters (closed at night). `buildings` maps a building id to its sprite (for hover highlight / hit-tests).
  */
-import { Assets, Container, Graphics, Sprite, Texture } from 'pixi.js';
-import { dayState } from './dayCycle';
+import { Assets, Container, Graphics, Rectangle, Sprite, Texture } from 'pixi.js';
+import { dayState, mixColor } from './dayCycle';
 import type { DayState } from './dayCycle';
 
 interface Rect { image: string; x: number; y: number; w: number; h: number }
@@ -20,11 +20,14 @@ interface TownManifest {
   lights: string;
   flame: { image: string; w: number; h: number; ax: number; ay: number };
   flames: { layer: string; x: number; y: number; s: number; always: boolean }[];
+  leaf: { image: string; w: number; h: number; frame: [number, number, number, number] };
+  shutters: { layer: string; x: number; y: number; w: number; h: number }[];
   buildings: (Rect & { id: string; name: string })[];
 }
 
 interface Flame { root: Container; fire: Sprite; glow: Sprite; s: number; always: boolean; ph: number }
 interface Cloud { sprite: Sprite; speed: number }
+interface Shutter { left: Sprite; right: Sprite; half: number }
 
 export interface TownOptions {
   /** seconds for a whole day and night (default 120) */
@@ -63,6 +66,7 @@ export class TownBackdrop extends Container {
   private readonly clouds: Cloud[] = [];
   private readonly tinted: Sprite[] = [];
   private readonly flames: Flame[] = [];
+  private readonly shutters: Shutter[] = [];
   private readonly lights: Sprite;
   private time = 0;
   private lastSky = -1;
@@ -70,7 +74,7 @@ export class TownBackdrop extends Container {
   static async load(base: string, options: TownOptions = {}): Promise<TownBackdrop> {
     const dir = `${base}bg/`;
     const manifest: TownManifest = await (await fetch(`${dir}town.json`)).json();
-    const files = [manifest.background, manifest.sky.image, manifest.sun.image, manifest.lights, manifest.flame.image,
+    const files = [manifest.background, manifest.sky.image, manifest.sun.image, manifest.lights, manifest.flame.image, manifest.leaf.image,
       ...manifest.clouds.map((c) => c.image), ...manifest.buildings.map((b) => b.image)];
     const tex = new Map<string, Texture>();
     await Promise.all(files.map(async (f) => tex.set(f, await Assets.load(dir + f))));
@@ -152,6 +156,20 @@ export class TownBackdrop extends Container {
     }
     this.lights = new Sprite(tex.get(m.lights)!);
     this.addChild(this.lights);
+
+    // two plank leaves per shop window, hinged at its sides; they swing shut at night
+    const leafSrc = tex.get(m.leaf.image)!;
+    const [fx, fy, fw, fh] = m.leaf.frame;
+    const leaf = new Texture({ source: leafSrc.source, frame: new Rectangle(leafSrc.frame.x + fx, leafSrc.frame.y + fy, fw, fh) });
+    for (const sh of m.shutters) {
+      const left = new Sprite(leaf), right = new Sprite(leaf);
+      left.position.set(sh.x, sh.y);
+      right.position.set(sh.x + sh.w, sh.y);
+      left.height = right.height = sh.h;
+      this.shutters.push({ left, right, half: sh.w / 2 / fw });
+      this.tinted.push(left, right);
+      this.addChild(left, right);
+    }
     this.apply(dayState(this.phase));
   }
 
@@ -186,6 +204,15 @@ export class TownBackdrop extends Container {
     for (const c of this.clouds) c.sprite.tint = s.cloud;
     for (const t of this.tinted) t.tint = s.tint;
     this.lights.alpha = s.lights;
+    // a leaf swinging towards the wall is seen edge-on: narrow it, and shade it as it turns away from the light
+    const c = s.shutters;
+    for (const sh of this.shutters) {
+      sh.left.visible = sh.right.visible = c > 0.02;
+      sh.left.scale.x = sh.half * c;
+      sh.right.scale.x = -sh.half * c;
+      const shade = mixColor(0x7a6a60, s.tint, 0.4 + 0.6 * c);
+      sh.left.tint = sh.right.tint = shade;
+    }
 
     const t = this.time;
     for (const f of this.flames) {
@@ -195,15 +222,17 @@ export class TownBackdrop extends Container {
       const k = f.s * (0.35 + 0.65 * on);
       const p = f.ph;
       f.fire.scale.set(
-        k * (1 - 0.09 * Math.sin(t * 13 + p) + 0.04 * Math.sin(t * 29 + p * 3)),
-        k * (1 + 0.13 * Math.sin(t * 11 + p) + 0.07 * Math.sin(t * 23 + p * 2)),
+        k * (1 - 0.07 * Math.sin(t * 4.5 + p) + 0.03 * Math.sin(t * 9.5 + p * 3)),
+        k * (1 + 0.1 * Math.sin(t * 4 + p) + 0.05 * Math.sin(t * 8.5 + p * 2)),
       );
-      f.fire.skew.x = 0.14 * Math.sin(t * 7 + p) + 0.05 * Math.sin(t * 17 + p);
-      const flicker = 0.85 + 0.15 * Math.sin(t * 19 + p) * Math.sin(t * 5 + p);
+      f.fire.skew.x = 0.1 * Math.sin(t * 2.6 + p) + 0.04 * Math.sin(t * 6 + p);
+      const flicker = 0.88 + 0.12 * Math.sin(t * 6.5 + p) * Math.sin(t * 2 + p);
       // the glow shows most at night; by day the forge only warms its mouth
       const dark = 1 - ((s.tint >> 8) & 255) / 255;
-      f.glow.alpha = flicker * on * (0.35 + 0.65 * Math.min(1, dark * 3 + s.lights));
-      f.glow.scale.set(k * (1.1 + 0.08 * flicker));
+      // the forge glows softer than the torches: its fire is bigger, so its halo would blow out the shop
+      const soft = f.always ? 0.45 : 1;
+      f.glow.alpha = soft * flicker * on * (0.3 + 0.7 * Math.min(1, dark * 3 + s.lights));
+      f.glow.scale.set(k * (f.always ? 0.8 : 1.1) * (1 + 0.06 * flicker));
     }
   }
 }
