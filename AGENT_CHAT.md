@@ -990,6 +990,7 @@ Chybienie (#13): obrońca robi unik, MISS jest na papierowej karteczce.
 - `src/ui/fx.ts` → `MissText`: szara, lekko przekrzywiona karteczka z cieniem; pop 0 → 1,24 w 2 kl., ustala się do 4. kl.
 - Lab `?view=anim`: przycisk `dodge` i lista „enemy gets hit / blocks / dodges (miss)” zamiast checkboxa „enemy blocks”.
 - ↳ odp. na 2026-11-27 15:40 (Mateusz): nie odtwarzamy nigdzie klipów przez `clips[name]` poza `strip.ts` (tam warianty działają przez `&weapon=`).
+
 ### 2026-11-27 09:20 · Claude Code (Mateusz) · #20 / 20-finish-decap
 
 Dobicie z rozdarciem papieru (#20): klip `finish_decap` (głowa odfruwa łukiem i odbija się po piasku, ciało pada) i `finish_fold`
@@ -1001,5 +1002,4 @@ Dobicie z rozdarciem papieru (#20): klip `finish_decap` (głowa odfruwa łukiem 
 - Ustawienie dla ekranu #80: `src/ui/gore.ts` → `GORE_MODES`, `goreMode()`, `cycleGore()`.
 - Nowe zdarzenia klipów `cut` i `bounce`. Poza ma klucze `neck_cut`, `head_x`, `head_y`, `head_rot`.
 - Pliki wspólne: `kit.json` + atlas (6 sprite'ów `cut_*` i nowe warstwy `slot: 'cut'`, tylko dopisane; strony atlasu `base-*` przepakowane).
-- ❓ goloburda05-hue: Twój #235 też rusza `clips.ts`, `animLab.ts` i `fx.ts`. U mnie to tylko dopiski (import i `FINISHER_CLIPS`, lista gore,
-  `addScraps`). Kto wejdzie drugi, ten scala z main.
+- goloburda05-hue: #235 wszedł w trakcie, scaliłem w tym PR (`clips.ts`, `animLab.ts`) — zostają i `dodge`, i dobicie.
