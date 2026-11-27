@@ -4,9 +4,9 @@
  * change colour with it, windows, torches and braziers light up at dusk and the forge fire always burns.
  *
  * Draw order: sky gradient → paper sky (multiply) → stars → sun/moon → clouds → background → each building with its
- * flames just above it → lit windows → shop shutters (closed at night). `buildings` maps a building id to its sprite (for hover highlight / hit-tests).
+ * flames just above it → lit windows. `buildings` maps a building id to its sprite (for hover highlight / hit-tests).
  */
-import { Assets, Container, Graphics, Rectangle, Sprite, Texture } from 'pixi.js';
+import { Assets, BlurFilter, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { dayState, mixColor } from './dayCycle';
 import type { DayState } from './dayCycle';
 
@@ -20,14 +20,12 @@ interface TownManifest {
   lights: string;
   flame: { image: string; w: number; h: number; ax: number; ay: number };
   flames: { layer: string; x: number; y: number; s: number; always: boolean }[];
-  leaf: { image: string; w: number; h: number; frame: [number, number, number, number] };
-  shutters: { layer: string; x: number; y: number; w: number; h: number }[];
   buildings: (Rect & { id: string; name: string })[];
+  fountain?: { x: number; y: number };
 }
 
 interface Flame { root: Container; fire: Sprite; glow: Sprite; s: number; always: boolean; ph: number }
 interface Cloud { sprite: Sprite; speed: number }
-interface Shutter { left: Sprite; right: Sprite; half: number }
 
 export interface TownOptions {
   /** seconds for a whole day and night (default 120) */
@@ -39,6 +37,46 @@ export interface TownOptions {
 }
 
 /** soft round glow, white in the middle, for additive blending */
+/** a canvas texture from a 2D painter */
+function canvasTexture(w: number, h: number, paint: (g: CanvasRenderingContext2D) => void): Texture {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  paint(c.getContext('2d')!);
+  return Texture.from(c);
+}
+
+/** white, opaque at the haze's horizon, fading out above and below; stretched over the depth band it covers */
+const hazeTexture = () => canvasTexture(2, 128, (g) => {
+  const l = g.createLinearGradient(0, 0, 0, 128);
+  l.addColorStop(0, 'rgba(255,255,255,0.55)');
+  l.addColorStop(0.75, 'rgba(255,255,255,1)');
+  l.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = l;
+  g.fillRect(0, 0, 2, 128);
+});
+
+/** soft dark oval for the shadow a building throws on the ground */
+const shadowTexture = () => canvasTexture(128, 32, (g) => {
+  g.scale(1, 0.25);
+  const r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  r.addColorStop(0, 'rgba(40,24,16,0.55)');
+  r.addColorStop(0.6, 'rgba(40,24,16,0.3)');
+  r.addColorStop(1, 'rgba(40,24,16,0)');
+  g.fillStyle = r;
+  g.fillRect(0, 0, 128, 128);
+});
+
+/**
+ * Depth: the farther a row stands, the more air between it and the eye. Rows by the building's baseline
+ * (y + h of its sprite): back (the arena's terrace), middle terrace, front (the forum).
+ */
+const ROWS = [
+  // [baseline up to, haze over everything drawn so far: top, bottom, strength, blur of the row's sprites]
+  { until: 600, haze: [40, 640, 0.3], blur: 0.9 },
+  { until: 800, haze: [330, 790, 0.16], blur: 0.35 },
+  { until: Infinity, haze: null, blur: 0 },
+] as const;
+
 function glowTexture(): Texture {
   const c = document.createElement('canvas');
   c.width = c.height = 128;
@@ -66,15 +104,17 @@ export class TownBackdrop extends Container {
   private readonly clouds: Cloud[] = [];
   private readonly tinted: Sprite[] = [];
   private readonly flames: Flame[] = [];
-  private readonly shutters: Shutter[] = [];
   private readonly lights: Sprite;
+  private readonly hazes: { sprite: Sprite; strength: number }[] = [];
+  private readonly water = new Graphics();
+  private readonly fountain?: { x: number; y: number };
   private time = 0;
   private lastSky = -1;
 
   static async load(base: string, options: TownOptions = {}): Promise<TownBackdrop> {
     const dir = `${base}bg/`;
     const manifest: TownManifest = await (await fetch(`${dir}town.json`)).json();
-    const files = [manifest.background, manifest.sky.image, manifest.sun.image, manifest.lights, manifest.flame.image, manifest.leaf.image,
+    const files = [manifest.background, manifest.sky.image, manifest.sun.image, manifest.lights, manifest.flame.image,
       ...manifest.clouds.map((c) => c.image), ...manifest.buildings.map((b) => b.image)];
     const tex = new Map<string, Texture>();
     await Promise.all(files.map(async (f) => tex.set(f, await Assets.load(dir + f))));
@@ -144,9 +184,35 @@ export class TownBackdrop extends Container {
     const bg = new Sprite(tex.get(m.background)!);
     this.tinted.push(bg);
     this.addChild(bg);
+    this.fountain = m.fountain;
+    this.tinted.push(this.water as unknown as Sprite);
+    this.addChild(this.water);
     flamesOf('bg');
+    const haze = hazeTexture(), shadow = shadowTexture();
+    let row = 0;
+    const addHaze = ([top, bottom, strength]: readonly [number, number, number]) => {
+      const h = new Sprite(haze);
+      h.position.set(0, top);
+      h.width = W;
+      h.height = bottom - top;
+      this.hazes.push({ sprite: h, strength });
+      this.addChild(h);
+    };
     for (const b of m.buildings) {
+      // a nearer row starts: veil everything behind it in the air of the farther row
+      while (b.y + b.h > ROWS[row].until) {
+        const hz = ROWS[row].haze;
+        if (hz) addHaze(hz);
+        row++;
+      }
+      const sh = new Sprite(shadow);
+      sh.anchor.set(0.5, 0.5);
+      sh.position.set(b.x + b.w / 2 + 10, b.y + b.h - 10);
+      sh.width = b.w * 1.05;
+      sh.height = 26 + row * 10;
+      this.addChild(sh);
       const s = new Sprite(tex.get(b.image)!);
+      if (ROWS[row].blur) s.filters = [new BlurFilter({ strength: ROWS[row].blur, quality: 2 })];
       s.position.set(b.x, b.y);
       s.label = b.id;
       this.buildings.set(b.id, s);
@@ -154,22 +220,9 @@ export class TownBackdrop extends Container {
       this.addChild(s);
       flamesOf(b.id);
     }
+    for (; row < ROWS.length; row++) if (ROWS[row].haze) addHaze(ROWS[row].haze!);
     this.lights = new Sprite(tex.get(m.lights)!);
     this.addChild(this.lights);
-
-    // two plank leaves per shop window, hinged at its sides; they swing shut at night
-    const leafSrc = tex.get(m.leaf.image)!;
-    const [fx, fy, fw, fh] = m.leaf.frame;
-    const leaf = new Texture({ source: leafSrc.source, frame: new Rectangle(leafSrc.frame.x + fx, leafSrc.frame.y + fy, fw, fh) });
-    for (const sh of m.shutters) {
-      const left = new Sprite(leaf), right = new Sprite(leaf);
-      left.position.set(sh.x, sh.y);
-      right.position.set(sh.x + sh.w, sh.y);
-      left.height = right.height = sh.h;
-      this.shutters.push({ left, right, half: sh.w / 2 / fw });
-      this.tinted.push(left, right);
-      this.addChild(left, right);
-    }
     this.apply(dayState(this.phase));
   }
 
@@ -204,15 +257,10 @@ export class TownBackdrop extends Container {
     for (const c of this.clouds) c.sprite.tint = s.cloud;
     for (const t of this.tinted) t.tint = s.tint;
     this.lights.alpha = s.lights;
-    // a leaf swinging towards the wall is seen edge-on: narrow it, and shade it as it turns away from the light
-    const c = s.shutters;
-    for (const sh of this.shutters) {
-      sh.left.visible = sh.right.visible = c > 0.02;
-      sh.left.scale.x = sh.half * c;
-      sh.right.scale.x = -sh.half * c;
-      const shade = mixColor(0x7a6a60, s.tint, 0.4 + 0.6 * c);
-      sh.left.tint = sh.right.tint = shade;
-    }
+    // the air takes the colour of the sky at the horizon, a little paler by day
+    const air = mixColor(s.skyBottom, 0xffffff, 0.35 * (1 - s.lights));
+    for (const h of this.hazes) { h.sprite.tint = air; h.sprite.alpha = h.strength; }
+    this.drawFountain();
 
     const t = this.time;
     for (const f of this.flames) {
@@ -234,5 +282,36 @@ export class TownBackdrop extends Container {
       f.glow.alpha = soft * flicker * on * (0.3 + 0.7 * Math.min(1, dark * 3 + s.lights));
       f.glow.scale.set(k * (f.always ? 0.8 : 1.1) * (1 + 0.06 * flicker));
     }
+  }
+
+  /** drops running down the painted jets and rings spreading on the water, slow and quiet */
+  private drawFountain() {
+    const f = this.fountain;
+    if (!f) return;
+    const g = this.water.clear();
+    const t = this.time;
+    const drop = (x: number, y: number, r: number, a: number) => g.circle(x, y, r).fill({ color: 0xe8f7f7, alpha: a });
+    for (const side of [-1, 1]) {
+      for (let k = 0; k < 4; k++) {
+        // upper jet: from the top spout down into the bowl
+        const u = (t * 0.45 + k / 4 + (side > 0 ? 0.12 : 0)) % 1;
+        drop(f.x + side * (6 + 40 * u), f.y - 118 - 30 * Math.sin(Math.PI * u * 0.7) + 50 * u * u, 2.2, 0.8 * Math.sin(Math.PI * u));
+        // lower arcs: from the bowl's rim into the basin
+        const v = (t * 0.38 + k / 4 + (side > 0 ? 0.37 : 0.6)) % 1;
+        drop(f.x + side * (40 + 34 * v), f.y - 66 + 60 * v * v, 2, 0.75 * Math.sin(Math.PI * v));
+      }
+    }
+    // rings where the water lands, growing and fading
+    for (const [cx, cy, rx, ry, speed, off] of [
+      [f.x - 74, f.y - 4, 22, 4, 0.5, 0], [f.x + 74, f.y - 4, 22, 4, 0.5, 0.5],
+      [f.x - 44, f.y - 75, 10, 2, 0.7, 0.25], [f.x + 44, f.y - 75, 10, 2, 0.7, 0.75],
+    ] as const) {
+      for (let k = 0; k < 2; k++) {
+        const p = (t * speed + off + k / 2) % 1;
+        g.ellipse(cx, cy, rx * (0.3 + p), ry * (0.3 + p)).stroke({ color: 0xe8f7f7, width: 1.5, alpha: 0.7 * (1 - p) });
+      }
+    }
+    // the jet on top bobs a little
+    g.ellipse(f.x, f.y - 120 - 2 * Math.sin(t * 2.2), 5, 3 + Math.sin(t * 3.1)).fill({ color: 0xe8f7f7, alpha: 0.85 });
   }
 }

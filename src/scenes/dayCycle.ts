@@ -18,8 +18,6 @@ export interface DayState {
   lights: number;
   /** 0..1 */
   stars: number;
-  /** 0 open .. 1 closed: shop shutters close late in the evening and open again at dawn */
-  shutters: number;
 }
 
 // [phase, sky top, sky bottom, world tint, cloud tint]
@@ -68,10 +66,9 @@ export function dayState(phase: number): DayState {
   const d = p < 0.25 ? p + 1 : p;
   const lights = smooth((d - 0.45) / 0.07) * smooth((1.06 - d) / 0.06);
   const stars = smooth((d - 0.55) / 0.08) * smooth((0.98 - d) / 0.08);
-  const shutters = smooth((d - 0.6) / 0.04) * smooth((0.99 - d) / 0.04);
   return {
     skyTop: mixColor(a[1], b[1], t), skyBottom: mixColor(a[2], b[2], t),
     tint: mixColor(a[3], b[3], t), cloud: mixColor(a[4], b[4], t),
-    body, lights, stars, shutters,
+    body, lights, stars,
   };
 }

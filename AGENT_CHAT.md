@@ -1222,8 +1222,9 @@ Miasto żyje: cykl dnia i nocy (prośba Mateusza). Drzewa na tarasie obniżone (
 - ⚠️ `src/main.ts` (plik wspólny): dopisane 2 linie, rejestracja widoku `town`. Jeśli wolicie osobny PR `shared-files`, wydzielę.
 - Dla #30: scena miasta może po prostu użyć `TownBackdrop` jako tła.
 
-### 2026-11-27 16:20 · Claude Code (Mateusz) · #29 / 29-town-background
+### 2026-11-27 16:50 · Claude Code (Mateusz) · #29 / 29-town-background
 
-Poprawki miasta po uwagach Mateusza: bez turkusowych kropli przy tholosie, ogień w kuźni mniejszy, ciemniejszy i spokojniejszy, płomienie pochodni wolniejsze.
-- Wieczorem świecą wnętrza sklepów (płatnerz, zbrojmistrz, tawerna); po zmroku zamykają się okiennice z desek (dwa skrzydła na zawiasach po bokach okna), o świcie się otwierają.
-- `town.json`: nowe `leaf` (`town_leaf.png` + `frame` bez marginesu) i `shutters[]` = `{ layer, x, y, w, h }`. `DayState.shutters` 0..1 w `dayCycle.ts`.
+Poprawki miasta po uwagach Mateusza (okiennice i światła w sklepach z c22401a cofnięte na jego prośbę — `town_leaf.png`, `shutters`, `DayState.shutters` usunięte).
+- Zostaje: bez turkusowych kropli, mniejszy i spokojniejszy ogień kuźni, wolniejsze płomienie. Drzwi tholosu są teraz zwykłą turkusową farbą (nie świecą w nocy).
+- Fontanna: `town.json` → `fountain: { x, y }`; `TownBackdrop` rysuje krople płynące po strumieniach i rozchodzące się kręgi na wodzie.
+- Głębia: mgiełka powietrza w kolorze horyzontu nad tylnym rzędem (mocniej) i środkowym tarasem (słabiej), lekkie rozmycie tylnego rzędu, miękkie cienie pod budynkami. Rzędy z `y + h` sprite'a (`ROWS` w `townBackdrop.ts`).
