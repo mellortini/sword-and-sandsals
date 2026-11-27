@@ -1,0 +1,44 @@
+{
+ "npcs": {
+  "old_crease": {
+   "name": "Old Crease",
+   "role": "Weaponsmith",
+   "still": "old_crease.png",
+   "w": 448,
+   "h": 488,
+   "talk": "old_crease_talk.png"
+  },
+  "armourer": {
+   "name": "The Armourer",
+   "role": "Armourer",
+   "still": "armourer.png",
+   "w": 448,
+   "h": 488,
+   "talk": "armourer_talk.png"
+  },
+  "mirra": {
+   "name": "Mirra Inkwell",
+   "role": "Enchantress",
+   "still": "mirra.png",
+   "w": 448,
+   "h": 488,
+   "talk": "mirra_talk.png"
+  },
+  "brother_tape": {
+   "name": "Brother Tape",
+   "role": "Priest of the Glue",
+   "still": "brother_tape.png",
+   "w": 448,
+   "h": 488,
+   "talk": "brother_tape_talk.png"
+  },
+  "magpie": {
+   "name": "Magpie",
+   "role": "Lanista and trainer",
+   "still": "magpie.png",
+   "w": 448,
+   "h": 488,
+   "talk": "magpie_talk.png"
+  }
+ }
+}
