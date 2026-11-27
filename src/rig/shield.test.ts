@@ -65,4 +65,10 @@ describe('shields (#38)', () => {
     const at = (slot: string, bone: string) => kit.layers.findIndex((l) => l.slot === slot && l.bone === bone);
     expect(at('weapon_b', 'weapon_b')).toBeLessThan(at('body', 'hand_b'));
   });
+
+  it('gives every trident its net for the back hand (#254)', () => {
+    for (let t = 1; t <= 10; t++) expect(kit.sprites[`weapon_trident${t}`]?.offhand, `trident${t}`).toBe('weapon_net');
+    expect(kit.sprites.weapon_net).toBeDefined();
+    expect(kit.sprites.weapon_sword5.offhand).toBeUndefined();
+  });
 });

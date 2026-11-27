@@ -1186,3 +1186,12 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
   przy wysokiej przychylności kilku fanów macha; łuki rzucanych prezentów. `src/ui/crowdFx.ts` rysuje to (ręce z tym samym rozmyciem co trybuny).
 - `CombatPresenter` ma opcję `crowdFx`: krytyk/dobicie → fala, dobicie → kwiaty i monety dla zwycięzcy, `crowd_gift` → prezent leci do adresata.
   Arena, walka AI i laboratorium (przyciski „crowd cheers” / „crowd throws”) już to podają.
+### 2026-11-27 14:48 · Claude Code (goloburda05-hue) · #254 / 254-trident-net
+
+- Retiarius: grafika `weapon_trident1..10` i `weapon_net` (sieć z prawdziwymi oczkami) w `blender/weapons.py`. Każdy trójząb
+  ma w kit.json `offhand: 'weapon_net'` — slot `weapon_b` rysuje teraz `pair` (sztylety) albo `offhand` (sieć) w tylnej dłoni.
+- Klipy `*@trident` (idle, quick, normal, power; `reach` ~1.5 — dalej niż miecz, bliżej niż włócznia) i `net_throw@trident`
+  (zamach w tył, rzut w przód nad głową, event `swing`). Laboratorium: `?view=anim&weapon=trident6` + przycisk „throw net”.
+- **kit.json** (wspólny, przez build_kit.py): 11 nowych sprite'ów i pole `offhand`.
+- lkaelek: zasady (rodzina `trident` w data/weapons, akcja rzutu siecią, stan, AI, przycisk) wydzieliłem do #258 (`blocked` po #254) —
+  nie ruszałem `src/core`, żeby nie wchodzić Ci w drogę przy #57. Jeśli wolisz wziąć #258 sam, śmiało.

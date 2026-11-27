@@ -1423,77 +1423,84 @@
       "h": 78
     },
     "shield2": {
-      "page": "base-f158483ba30b.webp",
+      "page": "base-99456bcee49e.webp",
       "x": 2,
       "y": 2,
       "w": 251,
       "h": 251
     },
     "shield3": {
-      "page": "base-f158483ba30b.webp",
+      "page": "base-99456bcee49e.webp",
       "x": 257,
       "y": 2,
       "w": 265,
       "h": 265
     },
     "shield4": {
-      "page": "base-f158483ba30b.webp",
+      "page": "base-99456bcee49e.webp",
       "x": 2,
       "y": 271,
       "w": 280,
       "h": 280
     },
     "shield5": {
-      "page": "base-f158483ba30b.webp",
+      "page": "base-99456bcee49e.webp",
       "x": 526,
       "y": 2,
       "w": 208,
       "h": 352
     },
     "shield6": {
-      "page": "base-f158483ba30b.webp",
+      "page": "base-99456bcee49e.webp",
       "x": 2,
       "y": 555,
       "w": 216,
       "h": 365
     },
     "shield7": {
-      "page": "base-f158483ba30b.webp",
+      "page": "base-99456bcee49e.webp",
       "x": 286,
       "y": 271,
       "w": 223,
       "h": 378
     },
     "shield8": {
-      "page": "base-f158483ba30b.webp",
+      "page": "base-99456bcee49e.webp",
       "x": 738,
       "y": 2,
       "w": 230,
       "h": 390
     },
     "shield9": {
-      "page": "base-f158483ba30b.webp",
+      "page": "base-99456bcee49e.webp",
       "x": 513,
       "y": 396,
       "w": 237,
       "h": 403
     },
     "weapon_gladius": {
-      "page": "base-f158483ba30b.webp",
+      "page": "base-99456bcee49e.webp",
       "x": 222,
       "y": 803,
       "w": 359,
       "h": 81
     },
+    "weapon_net": {
+      "page": "base-99456bcee49e.webp",
+      "x": 754,
+      "y": 396,
+      "w": 168,
+      "h": 253
+    },
     "weapon_spear1": {
-      "page": "base-f158483ba30b.webp",
+      "page": "base-99456bcee49e.webp",
       "x": 2,
       "y": 924,
       "w": 774,
       "h": 61
     },
     "weapon_sword1": {
-      "page": "base-f158483ba30b.webp",
+      "page": "base-99456bcee49e.webp",
       "x": 585,
       "y": 803,
       "w": 329,
@@ -1717,32 +1724,102 @@
       "h": 89
     },
     "weapon_sword6": {
-      "page": "base-52dcb023da3a.webp",
+      "page": "base-a44dd417b476.webp",
       "x": 2,
       "y": 2,
       "w": 364,
       "h": 89
     },
     "weapon_sword7": {
-      "page": "base-52dcb023da3a.webp",
+      "page": "base-a44dd417b476.webp",
       "x": 2,
       "y": 95,
       "w": 382,
       "h": 125
     },
     "weapon_sword8": {
-      "page": "base-52dcb023da3a.webp",
+      "page": "base-a44dd417b476.webp",
       "x": 2,
       "y": 224,
       "w": 389,
       "h": 87
     },
     "weapon_sword9": {
-      "page": "base-52dcb023da3a.webp",
+      "page": "base-a44dd417b476.webp",
       "x": 2,
       "y": 315,
       "w": 404,
       "h": 125
+    },
+    "weapon_trident1": {
+      "page": "base-a44dd417b476.webp",
+      "x": 410,
+      "y": 2,
+      "w": 595,
+      "h": 96
+    },
+    "weapon_trident10": {
+      "page": "base-a44dd417b476.webp",
+      "x": 2,
+      "y": 444,
+      "w": 626,
+      "h": 127
+    },
+    "weapon_trident2": {
+      "page": "base-a44dd417b476.webp",
+      "x": 388,
+      "y": 102,
+      "w": 572,
+      "h": 115
+    },
+    "weapon_trident3": {
+      "page": "base-a44dd417b476.webp",
+      "x": 410,
+      "y": 221,
+      "w": 577,
+      "h": 117
+    },
+    "weapon_trident4": {
+      "page": "base-a44dd417b476.webp",
+      "x": 2,
+      "y": 575,
+      "w": 588,
+      "h": 118
+    },
+    "weapon_trident5": {
+      "page": "base-a44dd417b476.webp",
+      "x": 2,
+      "y": 697,
+      "w": 593,
+      "h": 120
+    },
+    "weapon_trident6": {
+      "page": "base-a44dd417b476.webp",
+      "x": 2,
+      "y": 821,
+      "w": 597,
+      "h": 121
+    },
+    "weapon_trident7": {
+      "page": "base-b00b32e3918f.webp",
+      "x": 2,
+      "y": 2,
+      "w": 602,
+      "h": 123
+    },
+    "weapon_trident8": {
+      "page": "base-b00b32e3918f.webp",
+      "x": 2,
+      "y": 129,
+      "w": 606,
+      "h": 124
+    },
+    "weapon_trident9": {
+      "page": "base-b00b32e3918f.webp",
+      "x": 2,
+      "y": 257,
+      "w": 621,
+      "h": 126
     }
   }
 }
