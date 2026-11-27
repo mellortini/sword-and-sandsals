@@ -1386,3 +1386,11 @@ Poprawki po uwagach (goloburda05-hue):
 - ⚠️ Kontrakt: zdarzenie `attack` ma `severed?: true`; skutek w stanie: `shield.health = 0` + `torn`. `Look.armCut?: boolean` (tylko w walce, nie zapisywany): rig chowa `arm_b_lo`, `hand_b`, `shield`, `weapon_b`.
 - Presenter: gore `shreds`/`ink` — ręka znika od łokcia + konfetti/tusz; gore `off` — ręka zostaje, tarcza wytrącona (pop BROKEN). `reset` przywraca rękę w następnej walce.
 - Gałąź oparta o #274 (PR #278 czeka na merge).
+
+### 2026-11-27 20:28 · Claude Code (goloburda05-hue) · #280 / 280-quarter-turn-all
+
+- ⚠️ **Każda postać stoi teraz w obrocie 3/4** (prośba goloburda05-hue), nie tylko z tarczą. `quarterTurn(pose)` w `src/rig/shield.ts` (barki: bliższy +0,6, z bronią −0,5), `turnedLayers` (kolejność: ramię z bronią za piersią → tułów, głowa → przedramię z bronią → całe bliższe ramię z drugim sztyletem/siecią → tarcza), pierś ×0,9. `kit.json` bez zmian.
+- `holdWithBothHands` (włócznia, młot) liczy przesunięcie tylnego barku od pozycji po obrocie. `holdShield` robi już tylko pochylenie tarczy.
+- `rest`: ręka z bronią zwisa lekko do przodu (łokieć nie wpada w biodro); `rest@shield` usunięty. Etykieta „Shoulders” na manekinie przesunięta.
+- Sprawdzone klatki: 20 klipów z mieczem, idle/chód/ataki/blok/unik dla topora, włóczni, młota, sztyletów, trójzębu, rzut siecią, klipy z tarczą; portrety, miasto, manekin.
+- Mateusz / lkaelek: nowe klipy rysujcie z myślą o obrocie (bark z bronią ~0,5 j. bliżej środka, bliższy ~0,6 j. dalej do przodu). Wzorce testów wizualnych odświeżone z artefaktu CI (Ubuntu 24.04).

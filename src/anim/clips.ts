@@ -198,7 +198,9 @@ export const CLIPS: Clip[] = [
     name: 'rest', length: 48,
     keys: [
       { f: 0 },
-      { f: 10, pose: { torso: -18, head: -12, arm_f_up: 2, arm_f_lo: 14, hand_f: 0, blade: -82, arm_b_up: -4, arm_b_lo: 14, leg_f_up: 12, leg_b_up: -10 } },
+      // the quarter turn (#280) puts the sword shoulder behind the chest: the arm hangs a little forward so the elbow
+      // clears the chest and the forearm hangs loose before the thigh, the blade's point down
+      { f: 10, pose: { torso: -18, head: -12, arm_f_up: 50, arm_f_lo: -24, hand_f: 0, blade: -84, arm_b_up: -4, arm_b_lo: 14, leg_f_up: 12, leg_b_up: -10 } },
       { f: 20, pose: { torso: -11, head: -8 } },
       { f: 30, pose: { torso: -18, head: -12 } },
       { f: 38, pose: { torso: -11, head: -8 } },
@@ -260,19 +262,7 @@ export const CLIP_FACES: Readonly<Record<string, Readonly<Record<number, Pose>>>
  * The back arm swings the shield up in front of the chest and face (its centre ~1.6 ahead of the pelvis, at head
  * height); the sword arm stays cocked low behind it instead of parrying. The rig keeps the shield upright (src/rig/shield.ts).
  */
-/**
- * Resting behind a shield (#273): in the quarter turn the sword shoulder sits behind the chest, so an arm hanging
- * straight down would put the elbow in the belly. Here the arm hangs a little forward instead: the elbow clears the
- * chest and the forearm hangs loose before the thigh, the blade's point down. The rest of `rest` is kept.
- */
-function restBehindShield(): Clip {
-  const rest = CLIPS.find((c) => c.name === 'rest')!;
-  const arm = { arm_f_up: 50, arm_f_lo: -24, hand_f: 0, blade: -84 };
-  return { ...rest, name: 'rest@shield', keys: rest.keys.map((k) => (k.f === 10 ? { ...k, pose: { ...k.pose, ...arm } } : k)) };
-}
-
 export const SHIELD_CLIPS: Clip[] = [
-  restBehindShield(),
   {
     name: 'block@shield', length: 18,
     events: [{ f: 2, type: 'block' }],

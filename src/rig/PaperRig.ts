@@ -11,7 +11,7 @@
  */
 import { EXPRESSION_KEYS, EXPRESSION_PIECES, pieceShown } from './expressions';
 import { widthScale } from './builds';
-import { SHIELD_TURN, holdShield, isShieldTier, shieldArmInFront } from './shield';
+import { QUARTER_TURN, holdShield, isShieldTier, quarterTurn, turnedLayers } from './shield';
 import { boneOffset, forwardKinematics, holdWithBothHands, looseHead } from './twoHand';
 import { Assets, Container, Rectangle, Renderer, RenderTexture, Sprite, Texture } from 'pixi.js';
 
@@ -203,14 +203,6 @@ export class Kit {
     }
   }
 
-  /**
-   * the quarter turn of a shield fighter (#273): while the shield is carried, and still after the shield arm was cut
-   * off (#275), so the stump stays in front where the shield arm was and the body keeps its turn
-   */
-  turned(look: Look): boolean {
-    return this.shieldShown(look) || !!look.armCut;
-  }
-
   /** a shield is drawn when the look has one and the back hand is free (not on the haft of a two-handed weapon) */
   shieldShown(look: Look): boolean {
     return isShieldTier(look.shield) && !look.armCut && !this.json.sprites[`weapon_${look.weapon}`]?.grip2;
@@ -309,9 +301,8 @@ export class PaperRig {
     const skin = J.skins[L.skin]?.color ?? J.skins[3].color;
     const hair = J.hair_colors[L.hairColor]?.color ?? J.hair_colors[1].color;
     const face = J.faces[L.face] ?? J.faces[0];
-    // behind a shield the body stands in a quarter turn (#273): shield arm in front, sword shoulder behind, narrower chest
-    const turned = this.kit.turned(L);
-    const layers = turned ? shieldArmInFront(J.layers) : J.layers;
+    // every fighter stands in a quarter turn (#273, #280): near arm in front, weapon shoulder behind, narrower chest
+    const layers = turnedLayers(J.layers);
     for (const layer of layers) {
       const key = this.kit.resolve(layer, L);
       if (!key || !this.kit.has(key)) continue;
@@ -327,7 +318,7 @@ export class PaperRig {
       sh.blendMode = 'multiply';
       // beards are drawn on the reference jaw: stretch them to this face's jaw around the jaw centre
       // a build widens the paper across its bone (#27); armour on the bone follows, so every set fits
-      let sx = widthScale(L.build, layer.bone) * (turned && layer.bone === 'torso' ? SHIELD_TURN.chestWidth : 1), sy = 1, ox = 0, oy = 0;
+      let sx = widthScale(L.build, layer.bone) * (layer.bone === 'torso' ? QUARTER_TURN.chestWidth : 1), sy = 1, ox = 0, oy = 0;
       if (layer.slot === 'beard') {
         sx = face.jaw[0] / J.ref_jaw[0];
         sy = face.jaw[1] / J.ref_jaw[1];
@@ -396,8 +387,10 @@ export class PaperRig {
   heldPose(pose: Pose = this.pose): Pose {
     const key = this.look.weapon ? `weapon_${this.look.weapon}` : null;
     const grip2 = key ? this.kit.json.sprites[key]?.grip2 : undefined;
-    if (grip2) return holdWithBothHands(this.kit.json.bones, pose, grip2);
-    return this.kit.turned(this.look) ? holdShield(pose) : pose;
+    // the quarter turn first (#280): the two-handed grip and the shield work from the turned shoulders
+    const turned = quarterTurn(pose);
+    if (grip2) return holdWithBothHands(this.kit.json.bones, turned, grip2);
+    return this.hasShield() ? holdShield(turned) : turned;
   }
 
   private solve(): Map<string, { x: number; y: number; r: number }> {

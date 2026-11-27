@@ -41,7 +41,7 @@ export function itemPicture(id: string): { src: string; blade: boolean } | undef
 export const MANNEQUIN_CROP = { x0: -3.6, y0: -5.4, x1: 4.4, y1: 8.2 } as const;
 /** where each part's label sits on the mannequin, in the same units */
 export const MANNEQUIN_PARTS: Readonly<Record<EquipSlot | 'shield', readonly [number, number]>> = {
-  helmet: [0.4, 7.75], shoulders: [-2.2, 4.2], armor: [0.6, 2.4], greaves: [-0.6, -2.4], boots: [1.0, -4.9], shield: [-1.3, 0.7],
+  helmet: [0.4, 7.75], shoulders: [-1.5, 4.2], armor: [0.6, 2.4], greaves: [-0.6, -2.4], boots: [1.0, -4.9], shield: [-1.3, 0.7],
 };
 
 /**
