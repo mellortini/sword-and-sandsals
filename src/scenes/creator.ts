@@ -12,6 +12,8 @@ import {
 import type { Appearance, AttributeKey, PointSpread } from '../ui/creatorRules';
 import { goToTitle, onEscape } from '../ui/backKey';
 import { inkName } from '../ui/inkName';
+import { playStory } from '../ui/storyPlayer';
+import { PROLOGUE } from '../data/story';
 import { PELVIS_ABOVE_FEET } from './common';
 import type { SceneContext } from './common';
 import { loadSavedGladiator } from './savedGladiator';
@@ -139,6 +141,8 @@ export async function showCreator({ world, bgTex, kit, ui, add }: SceneContext) 
   };
 
   refresh();
+  // the new-game intro (#322) ends on Magpie asking for a name, so the name field is next; `&intro=0` skips it
+  if (new URLSearchParams(location.search).get('intro') !== '0') await playStory(PROLOGUE);
   nameInput.focus();
   onEscape(goToTitle);
 }

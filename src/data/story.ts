@@ -4,6 +4,8 @@
  * A line may get a narrator's recording later (`voice`, a path under assets/); without one the line is read as a subtitle.
  */
 
+import prologueVoice from './voice/prologue.json';
+
 export interface StoryShot {
   /** path under assets/ */
   readonly image: string;
@@ -90,6 +92,34 @@ export const ACT1: readonly StoryScene[] = [
     ],
   },
 ];
+
+/** a scene that is not tied to a league win (the new-game intro) */
+export type StoryIntro = Omit<StoryScene, 'after'>;
+
+/**
+ * The new-game intro (#322): the prologue of "The Seventh Step" (docs/SCENARIUSZ.md). Plays when the player opens the
+ * creator from "New game"; its last line hands over to writing the gladiator's name. Pictures by blender/story_prologue.py,
+ * narration by tools/voice_story.py from the same lines (src/data/voice/prologue.json).
+ */
+export const PROLOGUE: StoryIntro = (() => {
+  const line = (n: number) => prologueVoice.lines[n - 1];
+  const shot = (picture: number, a: number, b: number, drift: readonly [number, number]): StoryShot => ({
+    image: `story/prologue_${picture}.jpg`,
+    drift,
+    lines: [line(a).text, line(b).text],
+    voice: [`story/voice/${line(a).id}.mp3`, `story/voice/${line(b).id}.mp3`],
+  });
+  return {
+    id: 'prologue', title: 'The Seventh Step',
+    shots: [
+      shot(1, 1, 2, [0.0, -0.02]),
+      shot(2, 3, 4, [0.03, 0.0]),
+      shot(3, 5, 6, [0.0, 0.02]),
+      shot(4, 7, 8, [-0.03, 0.0]),
+      shot(5, 9, 10, [0.02, -0.01]),
+    ],
+  };
+})();
 
 /** the scene a league win unlocks, if any */
 export function sceneAfter(boutId: string): StoryScene | undefined {

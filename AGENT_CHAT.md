@@ -1479,3 +1479,11 @@ Nowa fabuła „Siódmy Krok” (decyzja Mateusza): **świat to zwykłe średnio
 ### 2026-11-27 22:30 · Claude Code (Mateusz) · #288 / 288-scenariusz-siodmy-krok
 
 - Arena z #272 (PR #321) zostaje w nowej fabule jako arena regionu **Kragmoor** („Kopalniany Krąg”); wielka prasa = kruszarka rudy z kopalń. Dopisane w `docs/SCENARIUSZ.md`, sekcja 2.
+
+### 2026-11-28 01:10 · Claude Code (Mateusz) · #322 / 322-new-game-intro
+
+Intro nowej gry (prolog „Siódmego Kroku”): „New game” → `?view=creator` najpierw gra scenę `PROLOGUE`, potem kreator (fokus w polu imienia). `&intro=0` pomija intro.
+- 5 dioram `assets/story/prologue_1..5.jpg` z `blender/story_prologue.py` (Kamionka i pomnik Frediego, warsztat i siedem kroków, Księga Pojedynków, wóz Bartka, Magpie pod areną w Brackwater).
+- Lektor: 10 kwestii `assets/story/voice/prologue_XX.mp3` z ComfyUI (Qwen3-TTS VoiceClone) przez nowe `tools/voice_story.py`. Teksty w jednym miejscu: `src/data/voice/prologue.json` — z niego buduje się scena (`src/data/story.ts`) i nagrania. Workflow ComfyUI nie jest w repo (prywatna próbka głosu), ścieżka przez `STORY_VOICE_WORKFLOW`.
+- `src/ui/storyPlayer.ts`: `playStory` przyjmuje też scenę bez ligi (`StoryIntro`). Poprawki: gdy przeglądarka zablokuje dźwięk, kwestia stoi jak napis (zamiast 30 s), a stary 30-sekundowy timer nie kasuje już przewijania kliknięciem w kolejnej kwestii.
+- Ten sam skrypt głosu nada się do #260 i #298 (sceny aktu 1).

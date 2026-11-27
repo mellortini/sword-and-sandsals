@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PULPPORT_LEAGUES } from './leagues';
-import { ACT1, readingTime, sceneAfter } from './story';
+import { ACT1, PROLOGUE, readingTime, sceneAfter } from './story';
 
 // the pictures in the repo (vite resolves the pattern at build time; only the file names matter here)
 const pictures = Object.keys(import.meta.glob('../../assets/story/*.jpg')).map((p) => p.replace('../../assets/', ''));
@@ -24,6 +24,18 @@ describe('act 1 story scenes (#64)', () => {
         for (const l of shot.lines) expect(l.length).toBeLessThan(140);   // one subtitle strip
       }
     }
+  });
+
+  it('has a new-game intro with pictures and a recording for every line (#322)', () => {
+    const voices = Object.keys(import.meta.glob('../../assets/story/voice/*.mp3')).map((p) => p.replace('../../assets/', ''));
+    expect(PROLOGUE.shots).toHaveLength(5);
+    for (const shot of PROLOGUE.shots) {
+      expect(pictures, shot.image).toContain(shot.image);
+      expect(shot.voice).toHaveLength(shot.lines.length);
+      for (const v of shot.voice ?? []) expect(voices, v).toContain(v);
+      for (const l of shot.lines) expect(l.length).toBeLessThan(140);
+    }
+    expect(PROLOGUE.shots.at(-1)?.lines.at(-1)).toMatch(/Name/);   // hands over to the creator
   });
 
   it('keeps a subtitle long enough to read, never forever', () => {

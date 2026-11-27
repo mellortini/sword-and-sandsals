@@ -5,14 +5,14 @@
  * (src/data/story.ts `voice`), otherwise for the time it takes to read it. Click, Space or Enter moves on to the next
  * line; Escape (or Skip) ends the scene. Nothing moves with prefers-reduced-motion.
  */
-import type { StoryScene } from '../data/story';
+import type { StoryIntro } from '../data/story';
 import { readingTime } from '../data/story';
 import { volumes } from '../audio/volume';
 import './story.css';
 
 const TITLE_FOR = 1.6;
 
-export function playStory(scene: StoryScene): Promise<void> {
+export function playStory(scene: StoryIntro): Promise<void> {
   const base = import.meta.env.BASE_URL;
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const root = document.createElement('div');
@@ -55,14 +55,30 @@ export function playStory(scene: StoryScene): Promise<void> {
       void line.offsetWidth;
       line.classList.add('story__line--in');
       if (src) {
-        voice = new Audio(base + src);
+        const v = new Audio(base + src);
+        voice = v;
         // the narrator on the voices channel (#73), under the master volume
-        voice.volume = Math.min(1, volumes().master * volumes().voices);
-        const ended = new Promise<void>((next) => { voice!.onended = () => next(); voice!.onerror = () => next(); });
-        void voice.play().catch(() => undefined);
-        await Promise.race([ended, hold(30)]);
-        voice.pause();
+        v.volume = Math.min(1, volumes().master * volumes().voices);
+        // one wait per line: the recording ends (or fails, or runs past 30 s), or the player moves on; a click while it
+        // plays moves on at once. If the browser refuses to play it (autoplay), the line stays as long as a subtitle.
+        const blocked = await new Promise<boolean>((next) => {
+          let settled = false;   // play() rejects late (AbortError) when the line was skipped: ignore it then
+          const timer = setTimeout(() => done(false), 30_000);
+          const done = (refused: boolean) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            advance = null;
+            next(refused);
+          };
+          v.onended = () => done(false);
+          v.onerror = () => done(false);
+          advance = () => done(false);
+          v.play().catch(() => done(true));
+        });
+        v.pause();
         voice = null;
+        if (blocked) await hold(readingTime(text));
       } else await hold(readingTime(text));
     };
 

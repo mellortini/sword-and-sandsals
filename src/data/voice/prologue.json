@@ -1,0 +1,15 @@
+{
+  "scene": "prologue",
+  "lines": [
+    { "id": "prologue_01", "text": "A hundred years ago, a cobbler's boy walked out of Kamionka and became Fredi, Master of the Seventh Step." },
+    { "id": "prologue_02", "text": "The village still keeps his statue. It leans a little. So did he, after supper." },
+    { "id": "prologue_03", "text": "You mend boots in his village. At night, you practise his steps on the workshop floor." },
+    { "id": "prologue_04", "text": "Six steps you can count. The seventh, the songs say, nobody ever sees." },
+    { "id": "prologue_05", "text": "The Order takes no one without a Book of Duels: one hundred honest fights, each one witnessed and signed." },
+    { "id": "prologue_06", "text": "And there is only one place to find a hundred fights in a hurry." },
+    { "id": "prologue_07", "text": "So you sold the family goat and climbed onto Bartek's cart before you could change your mind." },
+    { "id": "prologue_08", "text": "Adi took bets on how soon you'd be back. Nothing personal." },
+    { "id": "prologue_09", "text": "In Brackwater, a one-eyed lanista called Magpie counted your goat money twice, then opened his ledger." },
+    { "id": "prologue_10", "text": "“Name,” he said. “Small letters. You haven't earned big ones yet.”" }
+  ]
+}
