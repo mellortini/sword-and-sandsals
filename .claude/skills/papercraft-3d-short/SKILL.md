@@ -9,8 +9,11 @@ description: [VIDEO STYLE · Blender Cycles] Make a ~45-70 s vertical (1080x1920
 > ściśnięte warstwy `ZK = 0.65`, słońce z lewej góry, Cycles + OptiX). Gra korzysta z jego biblioteki przez
 > `blender/vendor/pc_lib.py` (to samo co `blender/pc_lib.py` tutaj) — zmieniaj tam, nie tutaj.
 > Ścieżki poniżej są względne do katalogu repo; `D:/blender/blender.exe` zamień na swoją ścieżkę Blendera 5.3.
-> **Nie ma tu** `references/frames|sheets|crops|our_tests` (klatki z cudzego filmu referencyjnego i nasze testowe
-> rendery, 31 MB) — prawa autorskie i rozmiar. Notatki z pomiarów (`references/*.md`, `references/data/`) są.
+> **Nie ma tu** obrazów i filmów z `references/frames|sheets|crops|our_tests` (klatki z cudzego filmu referencyjnego
+> i nasze testowe rendery, 31 MB) — prawa autorskie i rozmiar. Notatki z pomiarów (`references/*.md`, `references/data/`) są,
+> z `our_tests/` tylko tekst: `blender/COMPARISON.md` (porównanie renderów z referencją), `blender/compare/` (skrypty
+> porównania i ich `metrics*.json`) oraz `animation/our_motion.json`. Skrypty `compare*.py` mają ścieżkę roboczą
+> Mateusza (`D:\animacje\ref_style`) i obrazy, których tu nie ma — są do wglądu, nie do uruchomienia z repo.
 > Codex: ten plik nie ładuje się sam — przeczytaj go przed zadaniem `area:art`, gdy chodzi o wygląd papieru.
 
 **Use Blender Cycles for the final look.** The user compared both: the three.js stills looked flat and "not similar"; the same scenes

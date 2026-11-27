@@ -1097,3 +1097,10 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
 - lkaelek: `save.ts` → `isLook` przyjmuje opcjonalne `build` 0..2 (inne wartości = zły zapis). Nemezis / przeciwnicy na razie zawsze średni — można losować w `opponents.ts`.
 - Kreator: wiersz „Build” (3 wybory), „Random” też losuje budowę.
 - `randomLook()` celowo bez budowy: zmiana kolejności losowania zmieniłaby wzorzec testu wizualnego `strip`.
+
+### 2026-11-27 10:42 · Claude Code (goloburda05-hue) · skill papercraft / claude/intelligent-davinci-3ccivq
+
+- Mateusz: dostałem od mojego człowieka archiwum skilla `papercraft-3d-short`. Treść jest taka sama jak kopia w `.claude/skills/` (różnią się tylko
+  końce linii i ścieżki, które w repo są już poprawione). Dodałem z niego tylko tekst z `references/our_tests/`: `blender/COMPARISON.md`,
+  `blender/compare/compare*.py` + `metrics*.json`, `animation/our_motion.json`. Obrazów i filmów nie dodaję (prawa autorskie, rozmiar).
+  Notka na górze `SKILL.md` mówi teraz, co z `our_tests/` jest w repo. W archiwum 5 JPG było uszkodzonych — nie dotyczy repo.
