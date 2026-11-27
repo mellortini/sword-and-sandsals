@@ -49,14 +49,18 @@ function canvasTexture(w: number, h: number, paint: (g: CanvasRenderingContext2D
   return Texture.from(c);
 }
 
-/** white, opaque at the haze's horizon, fading out above and below; stretched over the depth band it covers */
-const hazeTexture = () => canvasTexture(2, 128, (g) => {
-  const l = g.createLinearGradient(0, 0, 0, 128);
-  l.addColorStop(0, 'rgba(255,255,255,0.55)');
-  l.addColorStop(0.75, 'rgba(255,255,255,1)');
+/**
+ * white, opaque at the haze's horizon, fading out softly above and below (no hard edge anywhere, or the band shows
+ * as a stripe across the screen); stretched over the depth band it covers
+ */
+const hazeTexture = () => canvasTexture(2, 256, (g) => {
+  const l = g.createLinearGradient(0, 0, 0, 256);
+  l.addColorStop(0, 'rgba(255,255,255,0)');
+  l.addColorStop(0.35, 'rgba(255,255,255,0.6)');
+  l.addColorStop(0.78, 'rgba(255,255,255,1)');
   l.addColorStop(1, 'rgba(255,255,255,0)');
   g.fillStyle = l;
-  g.fillRect(0, 0, 2, 128);
+  g.fillRect(0, 0, 2, 256);
 });
 
 /** soft dark oval for the shadow a building throws on the ground */
@@ -76,8 +80,8 @@ const shadowTexture = () => canvasTexture(128, 32, (g) => {
  */
 const ROWS = [
   // [baseline up to, haze over everything drawn so far: top, bottom, strength]
-  { until: 600, haze: [40, 640, 0.3] },
-  { until: 800, haze: [330, 790, 0.16] },
+  { until: 600, haze: [-250, 640, 0.3] },
+  { until: 800, haze: [160, 790, 0.16] },
   { until: Infinity, haze: null },
 ] as const;
 
