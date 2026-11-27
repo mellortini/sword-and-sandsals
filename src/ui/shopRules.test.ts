@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { SavedCharacter } from '../core/save';
 import { resolveAttributes } from '../core/stats';
 import { item } from '../data/equipment';
-import { buy, compareWorn, lookWith, saleOffers, sell, shopLeague, shopOffers, vendorLine } from './shopRules';
+import { buy, buyAndWear, compareWorn, lookWith, ownedOfFamily, saleOffers, sell, shopLeague, shopOffers, vendorLine } from './shopRules';
 
 const c: SavedCharacter = {
   name: 'Aelia', level: 3, experience: 0, gold: 100, attributes: resolveAttributes({ charm: 10 }),
@@ -17,7 +17,7 @@ describe('shop rules', () => {
     expect(offers).toHaveLength(10);
     expect(offers.every((o) => o.tier <= 2)).toBe(true);
     const cap = offers.find((o) => o.id === 'helmet2')!;
-    expect(cap).toMatchObject({ name: 'Leather Cap', stat: 'Armour 1', affordable: true, owned: 0 });
+    expect(cap).toMatchObject({ name: 'Leather Cap', stat: 'Armour 1', affordable: true, owned: false });
     expect(cap.price).toBe(23); // list price 25, Charm 10 takes 10% off
   });
 
@@ -32,6 +32,30 @@ describe('shop rules', () => {
     const sold = sell(c, 'weaponsmith', 'sword1');
     expect(sold.ok && sold.character.inventory).toEqual(['sword1^+2', 'boots2', 'glue-tonic']);
     expect(sell(c, 'weaponsmith', 'sword1^+2')).toEqual({ ok: false, reason: 'wrong-shop' });
+  });
+
+  it('never sells a second copy of what is worn, packed or upgraded', () => {
+    for (const [shop, id] of [['weaponsmith', 'sword1'], ['armourer', 'boots2'], ['armourer', 'helmet1']] as const) {
+      expect(buy(c, shop, id)).toEqual({ ok: false, reason: 'already-owned' });
+      expect(shopOffers(c, shop).find((o) => o.id === id)!.owned).toBe(true);
+    }
+    expect(buy({ ...c, inventory: ['sword2^+1'] }, 'weaponsmith', 'sword2')).toEqual({ ok: false, reason: 'already-owned' });
+    const first = buy(c, 'armourer', 'helmet2');
+    expect(first.ok && buy(first.character, 'armourer', 'helmet2')).toEqual({ ok: false, reason: 'already-owned' });
+  });
+
+  it('puts bought armour straight on and keeps the old piece; weapons wait in the pack', () => {
+    const helmet = buyAndWear(c, 'armourer', 'helmet2');
+    expect(helmet.ok && [helmet.worn, helmet.character.look.helmet]).toEqual([true, 2]);
+    expect(helmet.ok && helmet.character.inventory).toContain('helmet1');
+    const blade = buyAndWear(c, 'weaponsmith', 'axe1');
+    expect(blade.ok && [blade.worn, blade.character.look.weapon]).toEqual([false, 'gladius']);
+  });
+
+  it('hangs the best blade the gladiator has of a family on the wall', () => {
+    expect(ownedOfFamily(c, 'sword')).toBe('sword1');
+    expect(ownedOfFamily(c, 'axe')).toBeUndefined();
+    expect(ownedOfFamily({ ...c, inventory: ['axe1', 'axe2~fire~1'] }, 'axe')).toBe('axe2');
   });
 
   it('refuses when the gold is short', () => {

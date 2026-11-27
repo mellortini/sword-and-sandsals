@@ -4,8 +4,10 @@ import { SKILL_TREES } from '../data/skills';
 import type { SkillId } from '../data/skills';
 import { commitSkills, skillState, skillsLeft, startSkillDraft, toggleSkill } from './skillTreeRules';
 import type { SkillDraft } from './skillTreeRules';
-import './skillTree.css';
 import { dressRoom } from './counter';
+import { SKILL_MEDALS, medalHtml } from './medalIcons';
+import './medals.css';
+import './skillTree.css';
 
 const STATE_TEXT = { learned: 'learned', picked: 'chosen', open: 'can learn', locked: 'locked' } as const;
 
@@ -19,23 +21,25 @@ export function openSkillTree(character: SavedCharacter, save: (character: Saved
   const backdrop = document.createElement('div');
   backdrop.className = 'skill-tree';
   backdrop.innerHTML = `
-    <div class="skill-tree__panel" role="dialog" aria-modal="true" aria-labelledby="skTitle">
-      <div class="skill-tree__head">
-        <h3 id="skTitle">Skills</h3>
-        <div class="skill-tree__name">${escapeHtml(character.name)} · level ${character.level}</div>
-        <div class="skill-tree__points">Skill points <b id="skFree"></b></div>
+    <div class="skill-tree__panel medal-panel" role="dialog" aria-modal="true" aria-labelledby="skTitle">
+      <div class="medal-board">
+        <div class="medal-head">
+          <h3 id="skTitle">Skills</h3>
+          <div class="medal-head__name">${escapeHtml(character.name)} · level ${character.level}</div>
+          <div class="medal-head__score">Skill points <b id="skFree"></b></div>
+        </div>
+        <div class="medal-grid">
+          ${SKILL_TREES.map((tree, t) => `<section class="medal-tree" aria-label="${tree.name}">
+            <h4>${tree.name}</h4>
+            ${tree.skills.map((s, i) => `<button type="button" class="medal-node skill" data-skill="${s.id}" data-tree="${t}" data-row="${i}">
+              ${medalHtml(SKILL_MEDALS[s.id])}<span class="medal-card"><span class="medal-card__name">${s.name}</span><span class="medal-card__state"></span>
+              <span class="medal-card__text">${s.description}</span></span></button>`).join('')}
+          </section>`).join('')}
+        </div>
+        <div class="skill-tree__hint">One point per skill · a skill opens once the one above it is learned · a new point every third level</div>
       </div>
-      <div class="skill-tree__trees">
-        ${SKILL_TREES.map((tree, t) => `<section class="skill-tree__tree" aria-label="${tree.name}">
-          <h4>${tree.name}</h4>
-          ${tree.skills.map((s, i) => `<button type="button" class="skill" data-skill="${s.id}" data-tree="${t}" data-row="${i}">
-            <span class="skill__name">${s.name}</span><span class="skill__state"></span><span class="skill__text">${s.description}</span>
-            </button>`).join('')}
-        </section>`).join('')}
-      </div>
-      <div class="skill-tree__hint">One point per skill · a skill opens once the one above it is learned · a new point every third level</div>
       <div class="skill-tree__problem" id="skProblem" role="status"></div>
-      <div class="skill-tree__actions">
+      <div class="medal-actions">
         <button type="button" data-act="later">Later</button>
         <button type="button" data-act="keep" class="keep">Keep</button>
       </div>
@@ -56,7 +60,9 @@ export function openSkillTree(character: SavedCharacter, save: (character: Saved
     for (const b of skillButtons) {
       const state = skillState(draft, b.dataset.skill as SkillId);
       b.dataset.state = state;
-      b.querySelector('.skill__state')!.textContent = STATE_TEXT[state];
+      b.querySelector('.medal-card__state')!.textContent = STATE_TEXT[state];
+      b.classList.toggle('is-done', state === 'learned');
+      b.classList.toggle('is-locked', state === 'locked');
       const usable = state === 'picked' || (state === 'open' && left > 0);
       b.setAttribute('aria-disabled', String(!usable));
       b.setAttribute('aria-pressed', String(state === 'picked' || state === 'learned'));

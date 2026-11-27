@@ -1,11 +1,11 @@
-import { buyItem, getShopStock, sellItem, shopPrices } from '../core/shop';
+import { buyItem, getShopStock, ownsItem, sellItem, shopPrices } from '../core/shop';
 import type { Shop, ShopCustomer } from '../core/shop';
 import type { League } from '../core/leagues';
 import type { SavedCharacter } from '../core/save';
 import type { Look } from '../rig/PaperRig';
 import { ITEMS } from '../data/equipment';
 import { WEAPONS } from '../data/weapons';
-import { applyInventory, gearItem, savedInventory, weaponBase } from './gearRules';
+import { applyInventory, gearItem, savedInventory, wear, weaponBase } from './gearRules';
 
 export const SHOP_NAMES: Readonly<Record<Shop, string>> = { armourer: 'Armourer', weaponsmith: 'Weaponsmith' };
 
@@ -26,13 +26,16 @@ export interface ShopOffer {
   readonly tier: number;
   readonly stat: string;
   readonly price: number;
-  readonly owned: number;
+  /** the gladiator has it already (worn or packed): it cannot be bought again */
+  readonly owned: boolean;
+  readonly equipped: boolean;
   readonly affordable: boolean;
   /** "wear from level 9" / "needs Might 7" when the gladiator cannot wear it yet; buying is still allowed */
   readonly wearNote?: string;
 }
 
 export function shopOffers(c: SavedCharacter, shop: Shop): ShopOffer[] {
+  const inventory = savedInventory(c);
   return getShopStock(shop, shopLeague(c.level)).map((item) => {
     const info = gearItem(item.id)!;
     const price = shopPrices(item, c.attributes.charm).buy;
@@ -40,7 +43,8 @@ export function shopOffers(c: SavedCharacter, shop: Shop): ShopOffer[] {
       : c.attributes.might < info.minMight ? `needs Might ${info.minMight}` : undefined;
     return {
       id: item.id, name: info.name, tier: item.tier, stat: info.stat, price,
-      owned: c.inventory.filter((id) => id === item.id).length, affordable: c.gold >= price, wearNote,
+      owned: ownsItem(inventory, item.id), equipped: Object.values(inventory.equipped).some((id) => weaponBase(id) === item.id),
+      affordable: c.gold >= price, wearNote,
     };
   });
 }
@@ -61,6 +65,25 @@ export function saleOffers(c: SavedCharacter, shop: Shop): SaleOffer[] {
 export function buy(c: SavedCharacter, shop: Shop, id: string) {
   const r = buyItem(customer(c), shop, shopLeague(c.level), id);
   return r.ok ? { ok: true as const, character: fromCustomer(c, r.customer), price: r.price } : { ok: false as const, reason: r.reason };
+}
+
+/**
+ * A purchase over the counter: bought armour goes straight on (the old piece moves to the pack) when the gladiator can
+ * wear it already; weapons, and armour above the gladiator's level, wait in the pack.
+ */
+export function buyAndWear(c: SavedCharacter, shop: Shop, id: string) {
+  const r = buy(c, shop, id);
+  if (!r.ok) return r;
+  if (shop !== 'armourer') return { ...r, worn: false };
+  const dressed = wear(r.character, id);
+  return { ...r, character: dressed.character, worn: dressed.ok };
+}
+
+/** the blade of a family shown on the weaponsmith's wall: the best one the gladiator has, worn or packed */
+export function ownedOfFamily(c: SavedCharacter, family: string): string | undefined {
+  const inventory = savedInventory(c);
+  const held = [...inventory.backpack, ...Object.values(inventory.equipped)].map(weaponBase);
+  return WEAPONS.filter((w) => w.family === family && held.includes(w.id)).sort((a, b) => b.tier - a.tier)[0]?.id;
 }
 
 export function sell(c: SavedCharacter, shop: Shop, id: string) {

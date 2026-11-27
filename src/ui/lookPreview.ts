@@ -1,14 +1,14 @@
 import type { Renderer } from 'pixi.js';
 import { PaperRig } from '../rig/PaperRig';
 import type { Kit, Look } from '../rig/PaperRig';
-import { mannequin } from './shopPictures';
+import { standingGladiator } from './shopPictures';
 import { drawableLook } from './weaponLooks';
 
 /**
- * draws the gladiator in a look, standing, into a canvas for an HTML screen; `mannequin` draws the armourer's wooden
- * stand wearing a look's armour (#267)
+ * draws the gladiator in a look, standing, into a canvas for an HTML screen; `armoured` draws them at the armourer's,
+ * empty-handed, in a window fitted to the armour (#267)
  */
-export type LookPreview = ((look: Look) => Promise<HTMLCanvasElement>) & { mannequin?: (look: Partial<Look>) => Promise<HTMLCanvasElement> };
+export type LookPreview = ((look: Look) => Promise<HTMLCanvasElement>) & { armoured?: (look: Look) => Promise<HTMLCanvasElement> };
 
 /** window around the pelvis (rig units, y up): feet to crest, sword arm and blade in front */
 const CROP = { x0: -4.6, y0: -5.5, x1: 7.4, y1: 7.6 } as const;
@@ -30,6 +30,6 @@ export function lookPreview(kit: Kit, renderer: Renderer, scale = 40): LookPrevi
     queue = job.catch(() => undefined);
     return job;
   };
-  draw.mannequin = mannequin(kit, renderer);
+  draw.armoured = standingGladiator(kit, renderer);
   return draw;
 }

@@ -43,6 +43,36 @@ export function setVolume(channel: Channel, value: number) {
   for (const l of listeners) l(current);
 }
 
+const MUSIC_OFF_KEY = 'folded-glory.music-off';
+let off: boolean | null = null;
+
+/** music switched off as a whole (the settings' On / Off row); the music slider keeps its level for later */
+export function musicOff(): boolean {
+  if (off === null) {
+    try { off = localStorage.getItem(MUSIC_OFF_KEY) === '1'; } catch { off = false; }
+  }
+  return off;
+}
+
+export function setMusicOff(value: boolean) {
+  off = value;
+  try { localStorage.setItem(MUSIC_OFF_KEY, value ? '1' : '0'); } catch { /* private mode: holds until reload */ }
+  for (const l of listeners) l(volumes());
+}
+
+/** the level the music really plays at: 0 when switched off, or turned all the way down (itself or the master) */
+export const musicLevel = (v: Volumes = volumes()) => (musicOff() || v.master === 0 ? 0 : v.music);
+
+// a change made in another tab of the game applies here at once
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (e.key !== KEY && e.key !== MUSIC_OFF_KEY) return;
+    current = null;
+    off = null;
+    for (const l of listeners) l(volumes());
+  });
+}
+
 export function onVolumeChange(listener: (v: Volumes) => void): () => void {
   listeners.add(listener);
   return () => { listeners.delete(listener); };

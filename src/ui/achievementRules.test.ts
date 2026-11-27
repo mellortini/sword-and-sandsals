@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
+import { ACHIEVEMENTS } from '../core/achievements';
 import { createCombat, performAction } from '../core/combat';
 import type { SavedCharacter } from '../core/save';
 import { deserializeSave, serializeSave } from '../core/save';
 import { resolveAttributes } from '../core/stats';
-import { equipmentSignal, recordForCareer, trophyCount, trophyList } from './achievementRules';
+import { SKILL_TREES } from '../data/skills';
+import type { SkillId } from '../data/skills';
+import { equipmentSignal, recordForCareer, trophyCount, trophyGroups, trophyList } from './achievementRules';
+import { SKILL_MEDALS, hasAchievementMedal } from './medalIcons';
 
 const c: SavedCharacter = {
   name: 'Aelia', level: 3, experience: 0, gold: 0, attributes: resolveAttributes(), inventory: [],
@@ -33,5 +37,18 @@ describe('achievement rules', () => {
 
   it('leaves the character untouched when nothing changes', () => {
     expect(recordForCareer(c).character).toBe(c);
+  });
+});
+
+describe('Hall of Fame medallions', () => {
+  it('puts every achievement in exactly one column, each with its own picture', () => {
+    const groups = trophyGroups({} as Parameters<typeof trophyGroups>[0]);
+    expect(groups.map((g) => g.name)).not.toContain('More');
+    expect(groups.flatMap((g) => g.ids).sort()).toEqual(ACHIEVEMENTS.map((a) => a.id).sort());
+    for (const a of ACHIEVEMENTS) expect(hasAchievementMedal(a.id), a.id).toBe(true);
+  });
+
+  it('has a medallion for every skill', () => {
+    for (const id of SKILL_TREES.flatMap((t) => t.skills.map((s): SkillId => s.id))) expect(SKILL_MEDALS[id].art, id).toContain('<');
   });
 });
