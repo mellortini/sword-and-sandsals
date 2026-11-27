@@ -22,7 +22,10 @@ const SLACK = 0.18;
 
 /** a bone's joint offset in its parent, with the two-handed shoulder shift applied */
 export function boneOffset(b: Bone, pose: Pose): { x: number; y: number } {
-  return b.name === 'arm_b_up' ? { x: b.x + (pose.arm_b_shift ?? 0), y: b.y } : { x: b.x, y: b.y };
+  if (b.name === 'arm_b_up') return { x: b.x + (pose.arm_b_shift ?? 0), y: b.y };
+  // the sword shoulder slides back along the torso when the body turns behind a shield (#273, `holdShield`)
+  if (b.name === 'arm_f_up') return { x: b.x + (pose.arm_f_shift ?? 0), y: b.y };
+  return { x: b.x, y: b.y };
 }
 
 /** a head torn off its neck (finishers, #20) sits where the pose puts it, whatever the torso does */

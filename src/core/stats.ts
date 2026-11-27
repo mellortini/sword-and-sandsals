@@ -66,6 +66,11 @@ export function attackHitChance(kind: AttackKind, attacker: Readonly<FighterStat
   return Math.max(5, Math.min(95, chance));
 }
 
+/** What a blocked blow takes off the shield (#273): its raw force, no armour, no crit, at least 1. */
+export function shieldDamage(kind: AttackKind, attacker: Readonly<FighterStats>): number {
+  return Math.max(1, Math.round(attacker.attackPower * ATTACKS[kind].power));
+}
+
 /** A landed, unblocked attack always deals at least 1 HP. Armour has diminishing returns. */
 export function attackDamage(kind: AttackKind, attacker: Readonly<FighterStats>, defender: Readonly<FighterStats>, critical = false): number {
   const raw = attacker.attackPower * ATTACKS[kind].power * (critical ? 1.5 : 1);

@@ -91,6 +91,9 @@ export class CombatPresenter {
     this.shown = { player: { ...state.fighters.player }, enemy: { ...state.fighters.enemy } };
     for (const side of ['player', 'enemy'] as const) {
       const a = this.o.fighters[side];
+      // a shield broken in the last bout is whole again (#273)
+      const shield = state.fighters[side].shield;
+      if (shield && a.rig.look.shield !== shield.tier) void a.rig.setLook({ shield: shield.tier });
       a.home.x = screenX(this.o.layout, side, state.fighters[side].position);
       a.play('idle', { blend: 0 });
     }
@@ -116,6 +119,9 @@ export class CombatPresenter {
       this.shown = { player: { ...after.fighters.player }, enemy: { ...after.fighters.enemy } };
       for (const side of ['player', 'enemy'] as const) {
         this.o.fighters[side].home.x = screenX(this.o.layout, side, after.fighters[side].position);
+        // the guard ended with no blow (the opponent rested, moved, …): lower it now
+        const anim = this.o.fighters[side];
+        if (!after.fighters[side].guarding && anim.clip.startsWith('guard')) anim.play('idle');
       }
       // the crowd reacts once the action has played out; a bouquet's health is already in `after`
       const gifts = events.filter((e): e is CrowdGiftEvent => e.type === 'crowd_gift');
@@ -198,7 +204,13 @@ export class CombatPresenter {
     }
     const knockback = () => this.move(push!.fighter, push!.kind, push!.from, push!.to);
     if (a.blocked) {
-      this.o.fx.show(slot + 'b', new BlockShield(), h.x - 30 * facingDef, h.y + 6);
+      // a real shield (#273): what it lost, and at 0 it breaks and leaves the puppet's arm
+      const s = a.shield;
+      this.o.fx.show(slot + 'b', new BlockShield(s && { lost: s.from - s.to, broken: s.to === 0 }), h.x - 30 * facingDef, h.y + 6);
+      if (s && this.shown?.[a.target].shield) {
+        this.setShown(a.target, { shield: { ...this.shown[a.target].shield!, health: s.to } });
+        if (s.to === 0) void def.rig.setLook({ shield: 0 });
+      }
       return push ? knockback() : this.clip(def, 'block');
     }
     this.o.fx.show(slot, new DamageSplat(a.damage, a.crit), h.x + 34 * facingDef, h.y);
@@ -232,7 +244,8 @@ export class CombatPresenter {
         return;
       }
       case 'pose':
-        await this.clip(fighters[step.side], step.clip);
+        // a raised guard is held (`guard`, looping) until a blow's reaction or the end of the guard lowers it (#273)
+        await this.clip(fighters[step.side], step.clip, step.clip === 'guard_up' ? { then: 'guard' } : {});
         return;
       case 'item':
         // no own clip or pop-up yet: the user pauses as when resting and the target's bar moves when it ends

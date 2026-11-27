@@ -1338,3 +1338,38 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 
 - ⚠️ `AGENTS.md` (plik wspólny): nowa sekcja „Przegląd kodu — codebase memory” (prośba Mateusza, oszczędza tokeny).
   Kod przeglądamy najpierw przez codebase-memory-mcp; grep i czytanie plików, gdy graf nie wystarcza albo nie macie tego serwera.
+
+### 2026-11-27 19:46 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+Tarcza jest teraz prawdziwym przedmiotem walki (zaplanowane trzy kroki: #273 → #274 słabszy blok bez tarczy → #275 odcięcie ręki z tarczą, tylko gdy obrońca nie blokuje).
+- `src/data/shields.ts`: `shield1..10` (Wicker Parma … Gilded Scutum), HP 24…204, cena 25% zestawu zbroi tego tieru, poziom jak zestaw. Sprzedaje **płatnerz** (nowa etykieta „Shield” na manekinie).
+- Slot: istniejący `hands.offHand`. `equipItem` zawsze wkłada tarczę do `offHand`; `equipmentTotals` liczy jej wagę; `applyInventory` ustawia `look.shield` (albo usuwa pole).
+- ⚠️ Kontrakt core: `Fighter.shield?: FighterShield` (`{ id, tier, health, maxHealth }`), zdarzenie `attack` ma opcjonalne `shield: { from, to }` (`to: 0` = pękła). Bez tarczy wszystko działa jak dotąd. Tarczy nie ma przy włóczni, młocie i sztyletach (`leavesHandForShield` w `weapons.ts`).
+- Udany blok: 0 obrażeń jak wcześniej, a tarcza traci `shieldDamage` = `attackPower × moc ataku` (`stats.ts`). Szansa bloku bez zmian; pęknięta tarcza blokuje tak samo (to zmieni #274).
+- Scena: `loadoutFromLook` daje tarczę przeciwnikom z `look.shield` (dziś żaden jej nie ma). Presenter pokazuje BLOCK z „−N”, przy pęknięciu rdzawy BROKEN i zdejmuje tarczę z kukły (`reset` ją przywraca). HUD: odznaka z HP tarczy na końcu tabliczki z imieniem.
+- `tools/balance.ts`: cena zestawu liczy tylko 5 części zbroi (wyniki w BALANS.md bez zmian); nowe wiersze `shieldDefender` / `shieldAggressor` = 50,0% (tarcza nie zmienia jeszcze wyniku). AI blokuje rzadko, tarcza pęka w 0–2% walk.
+- Dev: `?view=arena&shield=3&eshield=6` daje losowym postaciom tarcze.
+
+### 2026-11-27 19:51 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+Poprawki po uwagach (goloburda05-hue):
+- Sztylet jest jednoręczny: tarcza działa też przy `daggers` (`leavesHandForShield` wyklucza tylko włócznię i młot). Rig: z tarczą w ręce znika drugi sztylet (`weapon_b`). Mechanika sztyletów (2 uderzenia) bez zmian.
+- Blok trzymany do ciosu: akcja Blok gra nowy `guard_up` (podniesienie bez opuszczania), potem zapętlony `guard` (oba też `@shield`). Gardę opuszcza reakcja na cios (`block` / `hit` / `dodge`), a gdy rdzeń zdejmie ją bez ciosu, presenter wraca do `idle`. ⚠️ `combatPlan`: krok `pose` dla bloku ma teraz `clip: 'guard_up'` (było `'block'`). Klip `block` zostaje jako reakcja na zablokowany cios.
+- `expressions.test.ts`: klipy zapętlone i `guard_up` mogą kończyć się ze zmarszczonymi brwiami (garda trwa).
+
+### 2026-11-27 19:59 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+- Ramię z tarczą na pierwszym planie (prośba goloburda05-hue: bark ręki z tarczą wyglądał, jakby był po drugiej stronie ciała). `shieldArmInFront` w `src/rig/shield.ts`: gdy tarcza jest widoczna, `PaperRig.build` przenosi warstwy tylnego ramienia (przedramię, karwasz, ramię, naramiennik, dłoń) przed tułów, tuż pod tarczę, bez `BACK_TINT`. Ramię z mieczem zostaje nad tarczą. Przeciwnik (lustro) trzyma więc tarczę w lewej, bliższej ręce, a gracz w bliższej (prawej). **`kit.json` bez zmian** — kolejność zmienia się tylko w rigu, bez tarczy wszystko jak dotąd.
+- Testy wizualne (`tests/visual`) nie były uruchamiane; widoki z tarczą to tylko `?view=lineup&shield=1`, `anim`, `strip`.
+
+### 2026-11-27 20:05 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+- Za tarczą postać stoi w lekkim obrocie 3/4 (prośba goloburda05-hue: więcej 3D, łokieć z mieczem widoczny, tarcza nie może wchodzić pod bark z mieczem).
+  `holdShield` dokłada `arm_b_shift: +0,6` (bark z tarczą do przodu) i nowy klucz `arm_f_shift: −0,5` (bark z mieczem do tyłu, obsłużony w `boneOffset`), a `PaperRig.build` zwęża pierś do 0,9 (`SHIELD_TURN` w `src/rig/shield.ts`).
+- Kolejność warstw przy tarczy (`shieldArmInFront`): ramię i naramiennik z mieczem za piersią (w cieniu) → tułów, głowa → przedramię z mieczem, broń, dłoń → całe ramię z tarczą → tarcza na wierzchu. Bez tarczy wszystko jak w `kit.json`.
+- ⚠️ Mateusz / lkaelek: kto pisze klipy z tarczą (`@shield`) — bark z mieczem jest teraz ~0,5 j. bliżej środka, a z tarczą ~0,6 j. dalej do przodu.
+
+### 2026-11-27 20:15 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+- `rest@shield` (`clips.ts`, z klipu `rest`): przy obrocie 3/4 ręka z mieczem zwisająca pionowo miała łokieć w brzuchu. Teraz zwisa lekko do przodu: łokieć na krawędzi piersi, przedramię przy udzie, ostrze w dół.
+- `PaperRig`: tekstura postaci ma 9,5 j. za miednicą (było 6,5; szerokość 19 → 22). Leżący na plecach gladiator z tarczą miał ją uciętą. Pozycja na ekranie bez zmian (kotwica liczona z `origin`).

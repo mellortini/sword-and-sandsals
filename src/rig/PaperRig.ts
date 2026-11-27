@@ -11,7 +11,7 @@
  */
 import { EXPRESSION_KEYS, EXPRESSION_PIECES, pieceShown } from './expressions';
 import { widthScale } from './builds';
-import { holdShield, isShieldTier } from './shield';
+import { SHIELD_TURN, holdShield, isShieldTier, shieldArmInFront } from './shield';
 import { boneOffset, forwardKinematics, holdWithBothHands, looseHead } from './twoHand';
 import { Assets, Container, Rectangle, Renderer, RenderTexture, Sprite, Texture } from 'pixi.js';
 
@@ -182,10 +182,12 @@ export class Kit {
       case 'beard': return look.beard > 0 ? `beard${look.beard}` : null;
       case 'weapon': return look.weapon ? `weapon_${look.weapon}` : null;
       case 'shield': return this.shieldShown(look) ? `shield${look.shield}` : null;
-      // the back hand holds a paired weapon's second copy (daggers, #47) or the weapon's companion (the trident's net, #254)
+      // the back hand holds a paired weapon's second copy (daggers, #47) or the weapon's companion (the trident's net, #254);
+      // a shield (#273) takes that hand instead of the second dagger
       case 'weapon_b': {
         const main = look.weapon ? this.json.sprites[`weapon_${look.weapon}`] : undefined;
-        return main?.pair ? `weapon_${look.weapon}` : main?.offhand ?? null;
+        if (main?.pair) return this.shieldShown(look) ? null : `weapon_${look.weapon}`;
+        return main?.offhand ?? null;
       }
       default: {
         const tier = look[layer.slot as EquipSlot] ?? 0;
@@ -242,8 +244,10 @@ export class PaperRig {
     this.facing = opts.facing;
     this.shadow = { ...(opts.shadow ?? DEFAULT_SHADOW) };
     this.pose = { ...kit.json.pose_test };
-    const wU = 19, hU = 18;   // 12.5 units ahead of the pelvis: room for a spear thrust (#36)
-    this.origin = { x: 6.5 * this.scale, y: 11.8 * this.scale };
+    // 12.5 units ahead of the pelvis: room for a spear thrust (#36); 9.5 behind it: a fighter fallen on the back with
+    // a shield on the arm (#273) used to be cut off at 6.5
+    const wU = 22, hU = 18;
+    this.origin = { x: 9.5 * this.scale, y: 11.8 * this.scale };
     const resolution = window.matchMedia('(pointer: coarse)').matches ? 1 : 2;
     this.rt = RenderTexture.create({ width: Math.ceil(wU * this.scale), height: Math.ceil(hU * this.scale), resolution, antialias: true });
     this.view = new Sprite(this.rt);
@@ -291,7 +295,10 @@ export class PaperRig {
     const skin = J.skins[L.skin]?.color ?? J.skins[3].color;
     const hair = J.hair_colors[L.hairColor]?.color ?? J.hair_colors[1].color;
     const face = J.faces[L.face] ?? J.faces[0];
-    for (const layer of J.layers) {
+    // behind a shield the body stands in a quarter turn (#273): shield arm in front, sword shoulder behind, narrower chest
+    const turned = this.kit.shieldShown(L);
+    const layers = turned ? shieldArmInFront(J.layers) : J.layers;
+    for (const layer of layers) {
       const key = this.kit.resolve(layer, L);
       if (!key || !this.kit.has(key)) continue;
       const m = J.sprites[key];
@@ -306,7 +313,7 @@ export class PaperRig {
       sh.blendMode = 'multiply';
       // beards are drawn on the reference jaw: stretch them to this face's jaw around the jaw centre
       // a build widens the paper across its bone (#27); armour on the bone follows, so every set fits
-      let sx = widthScale(L.build, layer.bone), sy = 1, ox = 0, oy = 0;
+      let sx = widthScale(L.build, layer.bone) * (turned && layer.bone === 'torso' ? SHIELD_TURN.chestWidth : 1), sy = 1, ox = 0, oy = 0;
       if (layer.slot === 'beard') {
         sx = face.jaw[0] / J.ref_jaw[0];
         sy = face.jaw[1] / J.ref_jaw[1];

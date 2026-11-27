@@ -7,6 +7,7 @@ import type { EquipmentLoadout, EquipmentSlot } from '../core/types';
 import { combatWeapon } from '../core/weapons';
 import { ITEMS } from '../data/equipment';
 import { WEAPONS } from '../data/weapons';
+import { findShield } from '../data/shields';
 import type { ArmourImprovements } from '../core/types';
 import { EQUIP_SLOTS } from '../rig/PaperRig';
 
@@ -53,6 +54,10 @@ export function applyInventory(character: SavedCharacter, inventory: Inventory):
   const { weapon, offHand } = inventory.equipped;
   // the puppet shows the weapon's family and tier; with empty hands it keeps the starting gladius
   look.weapon = weapon !== undefined ? weaponBase(weapon) : 'gladius';
+  // and the shield of the off hand (#273); the rig hides it behind a two-handed weapon
+  const shield = findShield(offHand)?.tier;
+  if (shield) look.shield = shield;
+  else delete look.shield;
   const next: SavedCharacter = {
     ...character, look, inventory: [...inventory.backpack],
     hands: { ...(weapon !== undefined && { weapon }), ...(offHand !== undefined && { offHand }) },
@@ -74,6 +79,8 @@ export function gearItem(id: string): { name: string; slot: EquipmentSlot | 'han
   if (armour) {
     return { name: forgePresentation(id)?.label ?? armour.name, slot: armour.slot, stat: `Armour ${armour.armor + forged.level}`, minLevel: armour.minLevel, minMight: 0 };
   }
+  const shield = findShield(id);
+  if (shield) return { name: shield.name, slot: 'offHand', stat: `Shield ${shield.health}`, minLevel: shield.minLevel, minMight: 0 };
   const weapon = WEAPONS.find((w) => w.id === weaponBase(id));
   if (!weapon) return undefined;
   const { enchantment } = readWeaponEnchantment(id);

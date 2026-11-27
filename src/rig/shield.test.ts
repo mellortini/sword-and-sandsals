@@ -3,7 +3,7 @@ import kitJson from '../../assets/chars/kit/kit.json';
 import { ALL_CLIPS } from '../anim/clips';
 import { bake, sample } from '../anim/clip';
 import type { KitJson, Pose } from './PaperRig';
-import { ROUND_TIERS, SHIELD_TIERS, holdShield, isShieldTier, shieldName, shieldShape } from './shield';
+import { ROUND_TIERS, SHIELD_TIERS, holdShield, isShieldTier, shieldArmInFront, shieldName, shieldShape } from './shield';
 import { forwardKinematics } from './twoHand';
 
 const kit = kitJson as unknown as KitJson;
@@ -70,5 +70,45 @@ describe('shields (#38)', () => {
     for (let t = 1; t <= 10; t++) expect(kit.sprites[`weapon_trident${t}`]?.offhand, `trident${t}`).toBe('weapon_net');
     expect(kit.sprites.weapon_net).toBeDefined();
     expect(kit.sprites.weapon_sword5.offhand).toBeUndefined();
+  });
+});
+
+describe('the quarter turn behind a shield (#273)', () => {
+  const at = (layers: KitJson['layers'], bone: string, slot: string) => layers.findIndex((l) => l.bone === bone && l.slot === slot);
+
+  it('draws the sword shoulder behind the chest, the elbow in front, and the shield arm and shield on top', () => {
+    const layers = shieldArmInFront(kit.layers);
+    expect(layers).toHaveLength(kit.layers.length);
+    const torso = at(layers, 'torso', 'body');
+    const helmet = at(layers, 'head', 'helmet');
+    const shield = at(layers, 'shield', 'shield');
+    expect(shield).toBe(layers.length - 1);
+    // sword shoulder and upper arm behind the chest, shaded like a far arm
+    for (const [bone, slot] of [['arm_f_up', 'body'], ['arm_f_up', 'shoulders']]) {
+      const i = at(layers, bone, slot);
+      expect(i, `${bone} ${slot}`).toBeLessThan(torso);
+      expect(layers[i].back).toBe(true);
+    }
+    // the sword forearm (the elbow), the blade and the hand in front of the chest and head, under the shield arm
+    const shieldArm = at(layers, 'arm_b_lo', 'body');
+    for (const [bone, slot] of [['arm_f_lo', 'body'], ['weapon', 'weapon'], ['hand_f', 'body']]) {
+      const i = at(layers, bone, slot);
+      expect(i, `${bone} ${slot}`).toBeGreaterThan(helmet);
+      expect(i, `${bone} ${slot}`).toBeLessThan(shieldArm);
+    }
+    // the whole shield arm in full light, forearm to hand, right under the shield
+    const arm = [['arm_b_lo', 'body'], ['arm_b_lo', 'armor'], ['arm_b_up', 'body'], ['arm_b_up', 'shoulders'], ['hand_b', 'body']]
+      .map(([bone, slot]) => at(layers, bone, slot));
+    expect(arm).toEqual([shield - 5, shield - 4, shield - 3, shield - 2, shield - 1]);
+    for (const i of arm) expect(layers[i].back).toBe(false);
+    // the second dagger's layer stays behind the body; the kit's own order is untouched
+    expect(at(layers, 'weapon_b', 'weapon_b')).toBeLessThan(torso);
+    expect(at(kit.layers, 'arm_b_up', 'body')).toBeLessThan(at(kit.layers, 'torso', 'body'));
+  });
+
+  it('turns both shoulders towards the middle of the chest', () => {
+    const pose = holdShield({});
+    expect(pose.arm_b_shift).toBeGreaterThan(0);
+    expect(pose.arm_f_shift).toBeLessThan(0);
   });
 });
