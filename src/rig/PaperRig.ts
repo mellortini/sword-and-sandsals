@@ -9,6 +9,7 @@
  * - every part gets a soft paper shadow drawn right before it; 'multiply' is patched so shadows only darken paper that
  *   is already in the puppet texture (like canvas source-atop)
  */
+import { EXPRESSION_KEYS, EXPRESSION_PIECES, pieceShown } from './expressions';
 import { boneOffset, forwardKinematics, holdWithBothHands, looseHead } from './twoHand';
 import { Assets, Container, Rectangle, Renderer, RenderTexture, Sprite, Texture } from 'pixi.js';
 
@@ -188,10 +189,11 @@ export class Kit {
 }
 
 /** `cut` = drawn only with a torn neck (true) or only with a whole one (false); undefined = always */
-interface Part { bone: string; sprite: Sprite; shadow: Sprite; sx: number; sy: number; ox: number; oy: number; flat: boolean; cut?: boolean }
+/** `face` = a face piece an expression may show or hide (#26) */
+interface Part { bone: string; sprite: Sprite; shadow: Sprite; sx: number; sy: number; ox: number; oy: number; flat: boolean; cut?: boolean; face?: string }
 
 /** pose keys beyond the bones that change the picture */
-const EXTRA_POSE_KEYS = ['neck_cut', 'head_x', 'head_y', 'head_rot'];
+const EXTRA_POSE_KEYS = ['neck_cut', 'head_x', 'head_y', 'head_rot', ...EXPRESSION_KEYS];
 
 interface StillFrame {
   pose: Pose;
@@ -295,7 +297,8 @@ export class PaperRig {
       }
       this.inner.addChild(sh, s);
       const cut = layer.slot === 'cut' ? true : layer.slot === 'body' && layer.piece === 'torso' ? false : undefined;
-      this.parts.push({ bone: layer.bone, sprite: s, shadow: sh, sx, sy, ox, oy, flat, cut });
+      const expression = layer.slot === 'face' && layer.piece in EXPRESSION_PIECES ? layer.piece : undefined;
+      this.parts.push({ bone: layer.bone, sprite: s, shadow: sh, sx, sy, ox, oy, flat, cut, face: expression });
     }
     this.invalidateStillFrame();
   }
@@ -388,7 +391,7 @@ export class PaperRig {
     const k = this.scale;
     const torn = !!this.pose.neck_cut;
     for (const p of this.parts) {
-      const shown = p.cut === undefined || p.cut === torn;
+      const shown = (p.cut === undefined || p.cut === torn) && (!p.face || pieceShown(p.face, this.pose));
       const t = W.get(p.bone)!;
       // local offset (bone units, y up) -> screen
       const lx = p.ox * k, ly = -p.oy * k;

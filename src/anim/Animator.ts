@@ -4,6 +4,7 @@
  * Clips that end with `commit` root x move `home` (walks / jumps / charges really travel).
  */
 import type { PaperRig, Pose } from '../rig/PaperRig';
+import { BLINK } from '../rig/expressions';
 import { Baked, ClipEvent, lerpPose, sample } from './clip';
 import { poseWithLooseHead } from './decap';
 
@@ -30,6 +31,10 @@ export class Animator {
   speed = 1;
   /** called for every event of every clip this Animator plays (effects that follow the fighter, e.g. ground fx #17) */
   readonly listeners = new Set<(e: ClipEvent, clip: string) => void>();
+  /** blink now and then (#26); never during a held pose such as death */
+  blinks = true;
+  private blinkIn = BLINK.min + Math.random() * (BLINK.max - BLINK.min);
+  private blinkLeft = 0;
   private cur: Baked;
   private frame = 0;
   private opts: PlayOpts = {};
@@ -105,6 +110,16 @@ export class Animator {
       y = this.from.y + (y - this.from.y) * k;
     }
     this.last = { pose, x, y };
+    // a blink shuts the lids for a few frames every 2-6 s, over whatever the clip does with the face
+    this.blinkIn -= dt * this.speed;
+    if (this.blinkIn <= 0) {
+      this.blinkLeft = BLINK.shut;
+      this.blinkIn = BLINK.min + Math.random() * (BLINK.max - BLINK.min);
+    }
+    if (this.blinkLeft > 0) {
+      this.blinkLeft -= dt * this.speed;
+      if (this.blinks && !c.hold) pose = { ...pose, eyes: 1 };
+    }
     // grounded frames: lift / lower the pelvis so the lowest sole rests on the floor
     const yPos = s.air ? y : y + this.baseLow - this.rig.soleLow(pose);
     this.rig.pose = s.head ? poseWithLooseHead(pose, s.head, x, yPos, this.baseLow) : pose;

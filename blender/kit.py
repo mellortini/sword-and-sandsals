@@ -334,6 +334,38 @@ def face_nose(c, f):
         L(c, pc.xf([(x * s, y * s) for x, y in pts], bx + 0.02, by), m, 0.0, 0.1, 'nose')
 
 
+# ================================================================== expressions (#26): drawn over the neutral face when a pose asks
+# eyes > 0.5 -> lids_closed over the eyes (blink, pain); mouth > 0.5 -> mouth_open over the mouth (pain, shout);
+# brows > 0.5 -> brows_angry instead of the brows (anger, effort)
+def face_lids_closed(c, f):
+    """both eyes shut: a skin lid over the whole eye and a dark lash line low on it (tinted skin)"""
+    rx0, rx1, ry = f['eye']
+    lid = M_skin(NS['lid'])
+    lash = M_skin(NS['mouth'])
+    for x, rx in ((-0.02, rx0), (0.72, rx1)):
+        L(c, E(rx * 1.14, ry * 1.22, x, 1.36), lid, 0.0, 0.04, 'lid_closed')
+        # the lash line sags a little: a thin crescent across the lower half of the lid
+        L(c, sl.arc_pts(x, 1.36 + ry * 0.55, ry * 0.85, ry * 0.85 + 0.045, 200, 340, 16), lash, 0.05, 0.02, 'lash')
+
+
+def face_mouth_open(c, f):
+    """an open mouth (pain, a triumphant shout) covering any of the neutral mouths (tinted skin)"""
+    chin, _ = face_geo(f)
+    my = chin + 0.34
+    L(c, E(0.24, 0.17, 0.45, my - 0.01), M_skin(NS['lo']), 0.0, 0.03, 'lips')
+    L(c, E(0.18, 0.12, 0.45, my - 0.02), M_skin(NS['mouth']), 0.04, 0.03, 'mouth_in')
+    L(c, E(0.1, 0.045, 0.47, my - 0.1), M_skin(NS['blush']), 0.08, 0.02, 'tongue')
+
+
+def face_brows_angry(c, f):
+    """the face's brows pulled down towards the nose (tinted hair colour)"""
+    ln, th, _, _, dy = f['brow']
+    hair = M_hair()
+    th = th * 1.15
+    L(c, R(ln, th, th * 0.45, -0.04, 1.62 + dy, -0.32), hair, 0.0, 0.05, 'brow_l')
+    L(c, R(ln * 0.82, th * 0.95, th * 0.45, 0.74, 1.64 + dy, 0.34), hair, 0.0, 0.05, 'brow_r')
+
+
 # ================================================================== hair (tinted). front = over the head, back = behind the whole body
 CAP_C = (0.1, 1.72)
 
