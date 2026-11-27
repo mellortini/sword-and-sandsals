@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { SavedCharacter } from '../core/save';
 import { resolveAttributes } from '../core/stats';
-import { buy, saleOffers, sell, shopLeague, shopOffers } from './shopRules';
+import { item } from '../data/equipment';
+import { buy, compareWorn, lookWith, saleOffers, sell, shopLeague, shopOffers, vendorLine } from './shopRules';
 
 const c: SavedCharacter = {
   name: 'Aelia', level: 3, experience: 0, gold: 100, attributes: resolveAttributes({ charm: 10 }),
@@ -35,5 +36,32 @@ describe('shop rules', () => {
 
   it('refuses when the gold is short', () => {
     expect(buy({ ...c, gold: 0 }, 'armourer', 'helmet2')).toEqual({ ok: false, reason: 'insufficient-gold' });
+  });
+
+  it('tries an offer on the puppet without changing the save (#34)', () => {
+    expect(lookWith(c, 'helmet2')).toEqual({ ...c.look, helmet: 2 });
+    expect(lookWith(c, 'boots3').boots).toBe(3);
+    expect(lookWith(c, 'axe4').weapon).toBe('axe4');
+    expect(lookWith(c, 'glue-tonic')).toBe(c.look);
+    expect(c.look.helmet).toBe(1);
+  });
+
+  it('compares an offer with what is worn in its slot (#34)', () => {
+    const worn = compareWorn(c, 'helmet2')!;
+    expect(worn.label).toBe('Armour');
+    expect(worn.worn).toBeDefined();
+    expect(worn.delta).toBe(item('helmet', 2)!.armor - item('helmet', 1)!.armor);
+    expect(compareWorn(c, 'boots2')).toMatchObject({ label: 'Armour', worn: undefined });
+    expect(compareWorn(c, 'boots2')!.delta).toBeGreaterThan(0);
+    expect(compareWorn(c, 'sword1')).toMatchObject({ label: 'Damage' });
+    expect(compareWorn(c, 'glue-tonic')).toBeUndefined();
+  });
+
+  it('gives each vendor lines that take turns (#34)', () => {
+    for (const shop of ['armourer', 'weaponsmith'] as const) {
+      for (const m of ['hello', 'bought', 'sold', 'poor', 'refused'] as const) expect(vendorLine(shop, m).length).toBeGreaterThan(5);
+      expect(vendorLine(shop, 'hello', 0)).not.toBe(vendorLine(shop, 'hello', 1));
+      expect(vendorLine(shop, 'hello', 2)).toBe(vendorLine(shop, 'hello', 0));
+    }
   });
 });

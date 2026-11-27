@@ -54,3 +54,20 @@ export function frameCss(s: Pick<UiSheet, 'url' | 'width' | 'height' | 'frames'>
     backgroundRepeat: 'no-repeat',
   };
 }
+
+/**
+ * CSS that stretches one frame of the sheet over an element of any size (the scroll's body, #34): percentages keep the
+ * frame filling the element whatever its width and height, so nothing else of the sheet shows.
+ */
+export function frameFill(s: Pick<UiSheet, 'url' | 'width' | 'height' | 'frames'>, key: string) {
+  const f = s.frames[key];
+  if (!f) return null;
+  const pct = (v: number) => `${+v.toFixed(4)}%`;
+  const at = (offset: number, sheet: number, size: number) => (sheet === size ? 0 : (offset / (sheet - size)) * 100);
+  return {
+    backgroundImage: `url("${s.url}")`,
+    backgroundSize: `${pct((s.width / f.w) * 100)} ${pct((s.height / f.h) * 100)}`,
+    backgroundPosition: `${pct(at(f.x, s.width, f.w))} ${pct(at(f.y, s.height, f.h))}`,
+    backgroundRepeat: 'no-repeat',
+  };
+}

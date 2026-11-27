@@ -2,7 +2,10 @@ import { buyItem, getShopStock, sellItem, shopPrices } from '../core/shop';
 import type { Shop, ShopCustomer } from '../core/shop';
 import type { League } from '../core/leagues';
 import type { SavedCharacter } from '../core/save';
-import { applyInventory, gearItem, savedInventory } from './gearRules';
+import type { Look } from '../rig/PaperRig';
+import { ITEMS } from '../data/equipment';
+import { WEAPONS } from '../data/weapons';
+import { applyInventory, gearItem, savedInventory, weaponBase } from './gearRules';
 
 export const SHOP_NAMES: Readonly<Record<Shop, string>> = { armourer: 'Armourer', weaponsmith: 'Weaponsmith' };
 
@@ -63,4 +66,58 @@ export function buy(c: SavedCharacter, shop: Shop, id: string) {
 export function sell(c: SavedCharacter, shop: Shop, id: string) {
   const r = sellItem(customer(c), shop, id);
   return r.ok ? { ok: true as const, character: fromCustomer(c, r.customer), price: r.price } : { ok: false as const, reason: r.reason };
+}
+
+/** the puppet's look with an item tried on: armour at its tier in its slot, a weapon in the hand (shop preview, #34) */
+export function lookWith(c: SavedCharacter, id: string): Look {
+  const armour = ITEMS.find((piece) => piece.id === id);
+  if (armour) return { ...c.look, [armour.slot]: armour.tier };
+  if (WEAPONS.some((w) => w.id === weaponBase(id))) return { ...c.look, weapon: weaponBase(id) };
+  return c.look;
+}
+
+export interface WornComparison {
+  /** 'Armour' or 'Damage' */
+  readonly label: string;
+  /** the offer's number minus the worn one's (all of it when nothing is worn there) */
+  readonly delta: number;
+  /** name of what is worn in that slot now */
+  readonly worn?: string;
+}
+
+const statNumber = (stat: string) => Number(/-?\d+/.exec(stat)?.[0] ?? 0);
+
+/** how an offer compares with what the gladiator wears in the same slot (#34) */
+export function compareWorn(c: SavedCharacter, id: string): WornComparison | undefined {
+  const offer = gearItem(id);
+  if (!offer) return undefined;
+  const wornId = savedInventory(c).equipped[offer.slot === 'hand' ? 'weapon' : offer.slot];
+  const worn = wornId === undefined ? undefined : gearItem(wornId);
+  return { label: offer.stat.split(' ')[0], delta: statNumber(offer.stat) - (worn ? statNumber(worn.stat) : 0), worn: worn?.name };
+}
+
+/** what the vendor says (#34): on entering, after a sale either way, when the gold is short, and at anything else refused */
+export type ShopMoment = 'hello' | 'bought' | 'sold' | 'poor' | 'refused';
+
+const LINES: Readonly<Record<Shop, Readonly<Record<ShopMoment, readonly string[]>>>> = {
+  weaponsmith: {
+    hello: ['Pressed carton, folded forty times. Nothing in Pulpport cuts cleaner.', 'Mind your fingers. Everything on that rack is sharp.'],
+    bought: ['Mind the edge. It remembers every fold.', 'A good blade. Bring it back dented and I’ll press it flat.'],
+    sold: ['I’ll smooth the creases out of this one.', 'Fair trade. It’ll find a new hand.'],
+    poor: ['Come back with more coin, friend.', 'That one costs more than your purse holds.'],
+    refused: ['That’s not something I deal in.'],
+  },
+  armourer: {
+    hello: ['Every plate here has stopped a blade. Most of them twice.', 'Looking for something between you and the sand?'],
+    bought: ['Wear it well. The straps go on the inside.', 'That will keep the worst of it off you.'],
+    sold: ['I’ll beat the dents out of it.', 'Still some wear left in this. I’ll take it.'],
+    poor: ['Gold first, armour after.', 'Not enough coin for that, I’m afraid.'],
+    refused: ['Not my trade, that.'],
+  },
+};
+
+/** the vendor's `n`th line for a moment (lines take turns) */
+export function vendorLine(shop: Shop, moment: ShopMoment, n = 0): string {
+  const lines = LINES[shop][moment];
+  return lines[((n % lines.length) + lines.length) % lines.length];
 }
