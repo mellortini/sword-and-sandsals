@@ -7,6 +7,7 @@
  */
 import type { StoryScene } from '../data/story';
 import { readingTime } from '../data/story';
+import { volumes } from '../audio/volume';
 import './story.css';
 
 const TITLE_FOR = 1.6;
@@ -55,6 +56,8 @@ export function playStory(scene: StoryScene): Promise<void> {
       line.classList.add('story__line--in');
       if (src) {
         voice = new Audio(base + src);
+        // the narrator on the voices channel (#73), under the master volume
+        voice.volume = Math.min(1, volumes().master * volumes().voices);
         const ended = new Promise<void>((next) => { voice!.onended = () => next(); voice!.onerror = () => next(); });
         void voice.play().catch(() => undefined);
         await Promise.race([ended, hold(30)]);

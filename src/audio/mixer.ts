@@ -9,6 +9,8 @@ export interface Mixer {
   ctx: AudioContext;
   foley: GainNode;
   crowd: GainNode;
+  /** the quiet themes of the arena and the town (#73) */
+  music: GainNode;
   /** one second of white noise, shared by every paper sound */
   noise: AudioBuffer;
 }
@@ -29,21 +31,25 @@ export function getMixer(): Mixer | null {
   master.connect(comp).connect(ctx.destination);
   const foley = ctx.createGain();
   const crowd = ctx.createGain();
+  const music = ctx.createGain();
   foley.connect(master);
   crowd.connect(master);
+  music.connect(master);
   const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const data = noise.getChannelData(0);
   for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-  mixer = { ctx, foley, crowd, noise };
+  mixer = { ctx, foley, crowd, music, noise };
   const apply = (v: Volumes) => {
     const t = ctx.currentTime;
     master.gain.setTargetAtTime(v.master, t, 0.03);
     foley.gain.setTargetAtTime(v.foley, t, 0.03);
     crowd.gain.setTargetAtTime(v.crowd, t, 0.03);
+    music.gain.setTargetAtTime(v.music, t, 0.08);
   };
   master.gain.value = volumes().master;
   foley.gain.value = volumes().foley;
   crowd.gain.value = volumes().crowd;
+  music.gain.value = volumes().music;
   onVolumeChange(apply);
   const unlock = () => { void ctx.resume(); };
   for (const ev of ['pointerdown', 'keydown'] as const) window.addEventListener(ev, unlock, { passive: true });

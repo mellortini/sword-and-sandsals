@@ -12,7 +12,7 @@ describe('volume settings (#18)', () => {
   });
 
   it('keeps saved channels and clamps them to 0..1', () => {
-    expect(parseVolumes('{"master":0.3,"foley":7,"crowd":-1}')).toEqual({ master: 0.3, foley: 1, crowd: 0 });
+    expect(parseVolumes('{"master":0.3,"foley":7,"crowd":-1}')).toEqual({ ...DEFAULT_VOLUMES, master: 0.3, foley: 1, crowd: 0 });
     expect(parseVolumes('{"master":"loud"}').master).toBe(DEFAULT_VOLUMES.master);
   });
 });

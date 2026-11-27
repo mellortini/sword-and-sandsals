@@ -37,7 +37,10 @@ function cycle<T extends { id: string }>(list: readonly T[], now: string, dir: 1
   return list[(i + dir + list.length) % list.length];
 }
 
-const VOLUME_NAMES: Readonly<Record<Channel, string>> = { master: 'Volume', foley: 'Fight sounds', crowd: 'Crowd' };
+const VOLUME_NAMES: Readonly<Record<Channel, string>> = { master: 'Volume', foley: 'Fight sounds', crowd: 'Crowd', music: 'Music', voices: 'Voices' };
+const VOLUME_HINTS: Readonly<Record<Channel, string>> = {
+  master: 'Everything you hear', foley: 'Blows, steps, blocks', crowd: 'The stands', music: 'The arena and town themes', voices: 'The narrator of the story',
+};
 
 export const SETTINGS: readonly SettingRow[] = [
   {
@@ -57,7 +60,7 @@ export const SETTINGS: readonly SettingRow[] = [
     value: () => (paperShadows() ? 'On' : 'Off'), step: () => setPaperShadows(!paperShadows()),
   },
   ...CHANNELS.map((c): SliderRow => ({
-    kind: 'slider', id: `volume-${c}`, label: VOLUME_NAMES[c], hint: c === 'master' ? 'Everything you hear' : c === 'foley' ? 'Blows, steps, blocks' : 'The stands',
+    kind: 'slider', id: `volume-${c}`, label: VOLUME_NAMES[c], hint: VOLUME_HINTS[c],
     value: () => Math.round(volumes()[c] * 100), set: (percent) => setVolume(c, Math.min(100, Math.max(0, percent)) / 100),
   })),
 ];
