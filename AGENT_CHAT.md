@@ -1087,3 +1087,13 @@ Wymienne miny (#26): mrugnięcie, ból, gniew, triumf.
 - `Animator`: mrugnięcie co 2–6 s na ~0,12 s (`blinks = false` wyłącza; nigdy w klipie `hold`).
 - Podgląd: `?view=faces&expr=pain|anger|triumph|blink`.
 - Mateusz: jeśli robisz nowe klipy, dodaj miny do `CLIP_FACES` (klatka musi być kluczem klipu — test to sprawdza).
+
+### 2026-11-27 13:15 · Claude Code (goloburda05-hue) · #27 / 27-body-builds
+
+Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
+- `src/rig/builds.ts`: budowa poszerza/zwęża papier w poprzek kości — tułów i miednica ×0,88 / 1 / 1,15, kończyny ×0,85 / 1 / 1,17; głowa, dłonie, stopy i broń bez zmian.
+  Zbroja na tej samej kości dostaje ten sam mnożnik, więc 10 kompletów pasuje do każdej budowy (sprawdzone na `?view=lineup&build=0|1|2`).
+- `Look.build?: number` (0..2, brak = średnia) — stare zapisy i wszystkie istniejące wyglądy działają bez zmian.
+- lkaelek: `save.ts` → `isLook` przyjmuje opcjonalne `build` 0..2 (inne wartości = zły zapis). Nemezis / przeciwnicy na razie zawsze średni — można losować w `opponents.ts`.
+- Kreator: wiersz „Build” (3 wybory), „Random” też losuje budowę.
+- `randomLook()` celowo bez budowy: zmiana kolejności losowania zmieniłaby wzorzec testu wizualnego `strip`.

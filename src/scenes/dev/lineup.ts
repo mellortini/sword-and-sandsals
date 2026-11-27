@@ -1,17 +1,21 @@
 import { item } from '../../data/equipment';
 import { DEFAULT_LOOK, EQUIP_SLOTS } from '../../rig/PaperRig';
+import { BUILDS } from '../../rig/builds';
 import type { Look } from '../../rig/PaperRig';
 import { PELVIS_ABOVE_FEET, W, label } from '../common';
 import type { SceneContext } from '../common';
 
-export async function showLineup({ world, kit, add }: SceneContext) {
+export async function showLineup({ world, kit, add, params }: SceneContext) {
   const J = kit.json;
-  world.addChild(label('Armour sets: tier 1 → 10', W / 2, 18, 34));
+  // &build=0|1|2: every fighter in that body build (#27)
+  const build = params.has('build') ? Math.max(0, Math.min(BUILDS.length - 1, Math.floor(+params.get('build')!) || 0)) : undefined;
+  world.addChild(label(`Armour sets: tier 1 → 10${build === undefined ? '' : ` · ${BUILDS[build].name}`}`, W / 2, 18, 34));
   for (let t = 1; t <= 10; t++) {
     const col = (t - 1) % 5, row = Math.floor((t - 1) / 5);
     const x = 230 + col * 365, feet = 500 + row * 520;
     const look: Look = { ...DEFAULT_LOOK, skin: (t * 3) % 10, face: t - 1, hair: (t + 2) % 10, hairColor: (t * 7) % 10, beard: (t * 3) % 10 };
     for (const s of EQUIP_SLOTS) look[s] = t;
+    if (build !== undefined) look.build = build;
     await add(look, x, feet - PELVIS_ABOVE_FEET * 32, 32, 1, world, t * 0.3, true);
     const sum = EQUIP_SLOTS.reduce((a, s) => a + (item(s, t)?.armor ?? 0), 0);
     const price = EQUIP_SLOTS.reduce((a, s) => a + (item(s, t)?.price ?? 0), 0);

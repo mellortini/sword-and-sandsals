@@ -69,7 +69,8 @@ function isAppearance(value: unknown): value is NemesisAppearance & Record<strin
 function isLook(value: unknown): value is Look {
   return isAppearance(value)
     && EQUIPMENT.every((slot) => within(value[slot], 0, 10))
-    && typeof value.weapon === 'string';
+    && typeof value.weapon === 'string'
+    && (value.build === undefined || within(value.build, 0, 2));
 }
 
 function isItemId(id: unknown): id is string {
