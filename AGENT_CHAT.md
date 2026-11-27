@@ -1219,6 +1219,15 @@ Po uwagach Mateusza: młot i włócznia to broń **dwuręczna**, młot bije znad
 - `Clip.reach`: włócznia trafia z dalszej odległości, więc `lunge` jest o tyle krótszy (2,4 j.) — nie wchodzi w przeciwnika.
 - ❓ goloburda05-hue: jeśli gdzieś odtwarzacie klip po nazwie bez `Animator` (np. `clips[name]`), użyjcie `animator.clipFor(name)`, żeby złapać wariant broni.
 
+### 2026-11-27 15:00 · Claude Code (goloburda05-hue) · #75 / 75-camera-juice
+
+- Kamera w walce: `src/ui/cameraJuice.ts` — mikro-zoom (4%) w stronę krytyka (dobicie mocniej), krótki wstrząs na evencie `impact`
+  (szarża 1, upadek 0.55), powolny dryf. Zawsze 1.5% zapasu i clamp, więc krawędź tła nie wchodzi w kadr (test).
+- `src/ui/motion.ts`: ustawienie „reduce motion” (domyślnie z prefers-reduced-motion, zapis w localStorage, `cycleMotion()` dla #80) — wyłącza całą kamerę.
+- Arena / walka AI / laboratorium: kontener `arena` jest teraz sceną pod kamerą, **HUD przeniesiony na `world`** (stoi w miejscu).
+  `CombatPresenter` ma opcję `camera`. Lab: checkbox „reduce motion”.
+- Kolejność zadań: #60 i #67 (F7) wymagają dużych zmian w `src/core` — zostawiam je, dopóki lkaelek ma #57 i (ew.) #258, żeby się nie zderzyć.
+
 ### 2026-11-27 15:45 · Claude Code (Mateusz) · #29 / 29-town-background
 
 Miasto żyje: cykl dnia i nocy (prośba Mateusza). Drzewa na tarasie obniżone (nie wchodzą już pod łuk i świątynię), bez plastrów na świątyni.
@@ -1253,11 +1262,3 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - `Animator`: przy `lunge` cios z dłuższą bronią (`reach`) może się cofnąć do 1,2 j., gdy przeciwnik stoi bliżej niż zasięg broni.
 - Lab `?view=anim&weapon=spear8&enemy=hammer8`: jeden klik = podejście na zasięg tej broni + cios (jak w grze).
 - lkaelek: przewagi broni są już w Twoich danych (włócznia zasięg 3 i odrzut, młot +4 obrażeń, przebicie zbroi i ogłuszenie) — ich nie ruszałem.
-### 2026-11-27 15:00 · Claude Code (goloburda05-hue) · #75 / 75-camera-juice
-
-- Kamera w walce: `src/ui/cameraJuice.ts` — mikro-zoom (4%) w stronę krytyka (dobicie mocniej), krótki wstrząs na evencie `impact`
-  (szarża 1, upadek 0.55), powolny dryf. Zawsze 1.5% zapasu i clamp, więc krawędź tła nie wchodzi w kadr (test).
-- `src/ui/motion.ts`: ustawienie „reduce motion” (domyślnie z prefers-reduced-motion, zapis w localStorage, `cycleMotion()` dla #80) — wyłącza całą kamerę.
-- Arena / walka AI / laboratorium: kontener `arena` jest teraz sceną pod kamerą, **HUD przeniesiony na `world`** (stoi w miejscu).
-  `CombatPresenter` ma opcję `camera`. Lab: checkbox „reduce motion”.
-- Kolejność zadań: #60 i #67 (F7) wymagają dużych zmian w `src/core` — zostawiam je, dopóki lkaelek ma #57 i (ew.) #258, żeby się nie zderzyć.
