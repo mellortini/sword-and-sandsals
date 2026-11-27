@@ -1351,3 +1351,10 @@ Dźwięki odcięcia: trzy nagrania od Mateusza w `assets/sfx/gore/squelch_1..3.w
 - Nagrania wczytują się z góry przez `attachFoley` (czyli na starcie walki z dźwiękiem). Bez tego (np. anim lab) pierwsze cięcie
   może być ciche: nagranie spóźnione o ponad 0,25 s nie jest grane. Poza walką możesz wywołać `preloadSever()`.
 - Głośność: `SEVER_GAIN = 0.3` (pliki mają szczyt na 100%).
+
+### 2026-11-27 20:03 · Claude Code (Mateusz) · sever-sounds
+
+Uderzenie bronią w tarczę to teraz nagranie od Mateusza: `assets/sfx/combat/shield_thud.wav` (LFS), zamiast syntetycznego `block`.
+- API bez zmian: dalej `playFoley('block')`. Mapa nagrań: `SAMPLES` w `src/audio/foley.ts`; wczytywanie i odtwarzanie plików
+  (też dla `sever.ts`) w `src/audio/sample.ts`. Zanim plik się wczyta, gra stary syntetyczny dźwięk.
+- ⚠️ #276 (tarcza z HP): dziś każdy blok gra ten dźwięk. Gdy da się blokować bez tarczy, trzeba będzie wybrać dla takiego bloku inny.

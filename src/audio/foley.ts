@@ -1,6 +1,6 @@
 /**
- * Quiet paper foley for the fight (#18), synthesised with Web Audio - no sound files (the wet tear of a cut is
- * recorded: sever.ts):
+ * Quiet paper foley for the fight (#18), synthesised with Web Audio. Recorded sounds are the exception: a weapon on a
+ * shield (SAMPLES below) and the wet tear of a cut (sever.ts). The synthesised kinds:
  *  - rustle: white noise through a band-pass that sweeps (paper moving, a blade cutting the air)
  *  - thump: a sine falling in pitch (cardboard slapping cardboard, a body on the sand)
  *  - ring: a few inharmonic partials with a fast decay (the foil of a shield or blade)
@@ -9,6 +9,7 @@
 import type { Animator } from '../anim/Animator';
 import { getMixer } from './mixer';
 import type { Mixer } from './mixer';
+import { loadSample, playSample, readySample } from './sample';
 import { preloadSever } from './sever';
 
 export type Sound = 'swing' | 'miss' | 'hit' | 'crit' | 'block' | 'step' | 'land' | 'impact';
@@ -47,6 +48,17 @@ export const RECIPES: Readonly<Record<Sound, readonly Layer[]>> = {
     { type: 'rustle', from: 1800, to: 900, q: 1.5, dur: 0.18, gain: 0.08, delay: 0.05 },
   ],
 };
+
+/** recordings that replace a synthesised sound; the recipe above plays until the file is decoded */
+export const SAMPLES: Readonly<Partial<Record<Sound, { file: string; gain: number }>>> = {
+  // a weapon on a shield: the recording peaks at full scale, so it is turned well down
+  block: { file: 'sfx/combat/shield_thud.wav', gain: 0.3 },
+};
+
+function preloadSamples() {
+  const m = getMixer();
+  if (m) for (const s of Object.values(SAMPLES)) void loadSample(m, s.file);
+}
 
 /** the same sound twice within this many seconds plays once (both fighters' events on one frame) */
 const MIN_GAP = 0.035;
@@ -102,6 +114,12 @@ export function playFoley(sound: Sound, random: () => number = Math.random) {
   last.set(sound, now);
   const pitch = 0.94 + random() * 0.12;
   const loud = 0.85 + random() * 0.3;
+  const sample = SAMPLES[sound];
+  if (sample) {
+    const buffer = readySample(sample.file);
+    if (buffer) return playSample(m, buffer, sample.gain * loud, pitch);
+    void loadSample(m, sample.file);
+  }
   for (const l of RECIPES[sound]) layer(m, l, now, pitch, loud);
 }
 
@@ -111,6 +129,7 @@ export const EVENT_SOUNDS: Readonly<Partial<Record<string, Sound>>> = { swing: '
 /** sound a fighter's own clip events: wind-ups, footsteps, landings, falls */
 export function attachFoley(anim: Animator): () => void {
   preloadSever();
+  preloadSamples();
   const listener = (e: { type: string }) => {
     const s = EVENT_SOUNDS[e.type];
     if (s) playFoley(s);

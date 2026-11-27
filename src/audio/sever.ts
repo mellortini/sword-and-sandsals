@@ -6,7 +6,7 @@
 import { goreMode } from '../ui/gore';
 import type { GoreMode } from '../ui/gore';
 import { getMixer } from './mixer';
-import type { Mixer } from './mixer';
+import { loadSample, playSample } from './sample';
 
 /** paths under assets/ */
 export const SEVER_FILES = ['sfx/gore/squelch_1.wav', 'sfx/gore/squelch_2.wav', 'sfx/gore/squelch_3.wav'] as const;
@@ -26,29 +26,13 @@ export function pickVariant(count: number, previous: number, random: () => numbe
   return i >= previous ? i + 1 : i;
 }
 
-let buffers: Promise<AudioBuffer | null>[] | null = null;
 let lastVariant = -1;
 let lastAt = -1;
-
-function load(m: Mixer): Promise<AudioBuffer | null>[] {
-  buffers ??= SEVER_FILES.map(async (file) => {
-    try {
-      const res = await fetch(`${import.meta.env.BASE_URL}${file}`);
-      if (!res.ok) throw new Error(`${res.status} ${file}`);
-      return await m.ctx.decodeAudioData(await res.arrayBuffer());
-    } catch (e) {
-      console.warn('sever sound not loaded', e);
-      buffers = null; // try again next time
-      return null;
-    }
-  });
-  return buffers;
-}
 
 /** fetch the recordings ahead of the first cut (a fight calls this through attachFoley) */
 export function preloadSever() {
   const m = getMixer();
-  if (m) void load(m);
+  if (m) for (const file of SEVER_FILES) void loadSample(m, file);
 }
 
 /**
@@ -64,14 +48,7 @@ export function playSever(mode: GoreMode = goreMode(), random: () => number = Ma
   lastAt = asked;
   lastVariant = pickVariant(SEVER_FILES.length, lastVariant, random);
   const pitch = 0.95 + random() * 0.1;
-  void load(m)[lastVariant].then((buffer) => {
-    if (!buffer || m.ctx.currentTime - asked > MAX_LATE) return;
-    const src = m.ctx.createBufferSource();
-    src.buffer = buffer;
-    src.playbackRate.value = pitch;
-    const gain = m.ctx.createGain();
-    gain.gain.value = SEVER_GAIN;
-    src.connect(gain).connect(m.foley);
-    src.start();
+  void loadSample(m, SEVER_FILES[lastVariant]).then((buffer) => {
+    if (buffer && m.ctx.currentTime - asked <= MAX_LATE) playSample(m, buffer, SEVER_GAIN, pitch);
   });
 }

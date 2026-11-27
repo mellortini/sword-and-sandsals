@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { SAMPLES } from './foley';
 import { SEVER_FILES, SEVER_GAIN, pickVariant, playSever } from './sever';
 
 afterEach(() => {
@@ -36,6 +37,15 @@ async function fakeAudio() {
   const settle = () => new Promise((r) => setTimeout(r, 0));
   return { play, started, clock, foley, settle };
 }
+
+describe('weapon on a shield', () => {
+  it('has its recording among the assets, played quietly', () => {
+    const onDisk = Object.keys(import.meta.glob('../../assets/sfx/combat/*.wav'));
+    const { file, gain } = SAMPLES.block!;
+    expect(onDisk).toContain(`../../assets/${file}`);
+    expect(gain).toBeLessThanOrEqual(0.4);
+  });
+});
 
 describe('sever sounds', () => {
   it('has three recordings among the assets', () => {
