@@ -1,4 +1,5 @@
 import { ITEMS } from '../data/equipment';
+import { findShield } from '../data/shields';
 import type { WeaponFamily } from '../data/weapons';
 import { readWeaponEnchantment } from './enchant';
 import { readForgedItem } from './forge';
@@ -34,12 +35,14 @@ export function equipItem(inventory: Inventory, id: string, character: EquipRequ
   const armour = ITEMS.find((piece) => piece.id === readForgedItem(id).baseId);
   const { baseId } = readForgedItem(readWeaponEnchantment(id).baseId);
   const weapon = findWeapon(baseId);
-  const item = armour ?? weapon;
+  // a shield (#273) always goes on the off hand
+  const shield = findShield(id);
+  const item = armour ?? weapon ?? shield;
   if (!item) return { ok: false, inventory, reason: 'unknown-item' };
   if (character.level < item.minLevel) return { ok: false, inventory, reason: 'level' };
   if (weapon && character.might < weapon.minMight) return { ok: false, inventory, reason: 'might' };
 
-  const slot = armour?.slot ?? hand;
+  const slot = armour?.slot ?? (shield ? 'offHand' : hand);
   const previous = inventory.equipped[slot];
   const backpack = inventory.backpack.slice();
   if (previous === undefined) backpack.splice(index, 1);
@@ -77,6 +80,8 @@ export function equipmentTotals(loadout: Readonly<EquipmentLoadout>): { armour: 
   const armourWeight = equipped.reduce((total, piece) => total + piece.weight, 0);
   const handWeight = [loadout.weapon, loadout.offHand].reduce((total, id) => {
     if (id === undefined) return total;
+    const shield = findShield(id);
+    if (shield) return total + shield.weight;
     const { baseId } = readForgedItem(readWeaponEnchantment(id).baseId);
     const weapon = findWeapon(baseId);
     return total + (weapon ? WEAPON_WEIGHT[weapon.family] : 0);

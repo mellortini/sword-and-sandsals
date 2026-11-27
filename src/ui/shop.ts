@@ -5,6 +5,7 @@ import type { Shop } from '../core/shop';
 import type { SavedCharacter } from '../core/save';
 import { ITEMS } from '../data/equipment';
 import { WEAPONS, WEAPON_FAMILIES } from '../data/weapons';
+import { SHIELDS } from '../data/shields';
 import { EQUIP_SLOTS } from '../rig/PaperRig';
 import type { EquipSlot } from '../rig/PaperRig';
 import { Counter } from './counter';
@@ -24,7 +25,11 @@ const REASON_TEXT: Readonly<Record<string, string>> = {
 
 /** what hangs on the weaponsmith's wall, and the armourer's mannequin parts, in plain words */
 const FAMILY_LABEL: Readonly<Record<string, string>> = { sword: 'Swords', axe: 'Axes', spear: 'Spears', hammer: 'Hammers' };
-const SLOT_LABEL: Readonly<Record<EquipSlot, string>> = { helmet: 'Helmet', shoulders: 'Shoulders', armor: 'Cuirass', greaves: 'Greaves', boots: 'Boots' };
+const SLOT_LABEL: Readonly<Record<EquipSlot | 'shield', string>> = { helmet: 'Helmet', shoulders: 'Shoulders', armor: 'Cuirass', greaves: 'Greaves', boots: 'Boots', shield: 'Shield' };
+/** the armourer's mannequin parts: the five armour slots and the shield (#273) */
+const ARMOURER_PARTS = [...EQUIP_SLOTS, 'shield'] as const;
+/** every ware either shop has, to name and picture a good that is not on the rack yet */
+const ALL_GOODS = [...WEAPONS, ...ITEMS, ...SHIELDS];
 
 /**
  * Sizes a blade that is turned upright: its length follows the box's height, but a broad head (axe, hammer) never grows
@@ -41,7 +46,8 @@ function standUp(img: HTMLImageElement, tall: number, wide: number) {
 
 /** the catalogue of one wall section or mannequin part, every tier, cheapest first */
 function section(shop: Shop, key: string): { id: string; tier: number }[] {
-  return shop === 'weaponsmith' ? WEAPONS.filter((w) => w.family === key) : ITEMS.filter((i) => i.slot === key);
+  if (shop === 'weaponsmith') return WEAPONS.filter((w) => w.family === key);
+  return key === 'shield' ? [...SHIELDS] : ITEMS.filter((i) => i.slot === key);
 }
 
 /** the first league that sells a tier, for goods not on the rack yet */
@@ -107,7 +113,7 @@ export function openShop(
   const describe = (id: string) => {
     const offer = shopOffers(draft, shop).find((o) => o.id === id);
     if (!offer) {
-      const item = [...WEAPONS, ...ITEMS].find((i) => i.id === id)!;
+      const item = ALL_GOODS.find((i) => i.id === id)!;
       return `${item.name}.\nNot on my rack yet: I sell it from the ${leagueFor(item.tier)}.`;
     }
     const c = compareWorn(draft, id);
@@ -118,7 +124,7 @@ export function openShop(
   };
 
   const ware = (id: string, offer: ShopOffer | undefined, tier: number) => {
-    const item = [...WEAPONS, ...ITEMS].find((i) => i.id === id)!;
+    const item = ALL_GOODS.find((i) => i.id === id)!;
     const cls = !offer ? 'locked' : offer.owned ? 'owned' : offer.affordable ? '' : 'poor';
     const has = offer?.owned ? (offer.equipped ? 'Equipped' : 'In your pack') : '';
     const label = !offer ? 'not sold yet' : has || `${offer.price} gold`;
@@ -160,9 +166,9 @@ export function openShop(
         <div class="counter__grid">${section(shop, open!).map((w) => ware(w.id, offers.get(w.id), w.tier)).join('')}</div>`;
       for (const img of board.querySelectorAll<HTMLImageElement>('.ware__pic img.blade')) standUp(img, 0.98, 0.94);
     } else {
-      title.innerHTML = open ? `${SLOT_LABEL[open as EquipSlot]} <small>${league()} league goods</small>` : `Your Armour <small>pick a part</small>`;
+      title.innerHTML = open ? `${SLOT_LABEL[open as EquipSlot | 'shield']} <small>${league()} league goods</small>` : `Your Armour <small>pick a part</small>`;
       const { x0, y0, x1, y1 } = MANNEQUIN_CROP;
-      board.innerHTML = `<div class="counter__split"><div class="mannequin">${EQUIP_SLOTS.map((s) => {
+      board.innerHTML = `<div class="counter__split"><div class="mannequin">${ARMOURER_PARTS.map((s) => {
         const [x, y] = MANNEQUIN_PARTS[s];
         return `<button type="button" class="mannequin__part" data-open="${s}" aria-pressed="${open === s}"
           style="left:${((x - x0) / (x1 - x0)) * 100}%;top:${((y1 - y) / (y1 - y0)) * 100}%">${SLOT_LABEL[s]}</button>`;
@@ -182,6 +188,8 @@ export function openShop(
     counter.say(describe(w.dataset.ware!), true);
     const piece = ITEMS.find((i) => i.id === w.dataset.ware);
     if (piece) putOn({ ...worn(), [piece.slot]: piece.tier });
+    const shield = SHIELDS.find((i) => i.id === w.dataset.ware);
+    if (shield) putOn({ ...worn(), shield: shield.tier });
   };
   board.addEventListener('mouseover', point);
   // only the keyboard's focus tries a piece on: focus set by the screen itself leaves the worn gear showing

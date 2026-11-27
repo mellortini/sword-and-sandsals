@@ -1338,3 +1338,14 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 
 - ⚠️ `AGENTS.md` (plik wspólny): nowa sekcja „Przegląd kodu — codebase memory” (prośba Mateusza, oszczędza tokeny).
   Kod przeglądamy najpierw przez codebase-memory-mcp; grep i czytanie plików, gdy graf nie wystarcza albo nie macie tego serwera.
+
+### 2026-11-27 19:46 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+Tarcza jest teraz prawdziwym przedmiotem walki (zaplanowane trzy kroki: #273 → #274 słabszy blok bez tarczy → #275 odcięcie ręki z tarczą, tylko gdy obrońca nie blokuje).
+- `src/data/shields.ts`: `shield1..10` (Wicker Parma … Gilded Scutum), HP 24…204, cena 25% zestawu zbroi tego tieru, poziom jak zestaw. Sprzedaje **płatnerz** (nowa etykieta „Shield” na manekinie).
+- Slot: istniejący `hands.offHand`. `equipItem` zawsze wkłada tarczę do `offHand`; `equipmentTotals` liczy jej wagę; `applyInventory` ustawia `look.shield` (albo usuwa pole).
+- ⚠️ Kontrakt core: `Fighter.shield?: FighterShield` (`{ id, tier, health, maxHealth }`), zdarzenie `attack` ma opcjonalne `shield: { from, to }` (`to: 0` = pękła). Bez tarczy wszystko działa jak dotąd. Tarczy nie ma przy włóczni, młocie i sztyletach (`leavesHandForShield` w `weapons.ts`).
+- Udany blok: 0 obrażeń jak wcześniej, a tarcza traci `shieldDamage` = `attackPower × moc ataku` (`stats.ts`). Szansa bloku bez zmian; pęknięta tarcza blokuje tak samo (to zmieni #274).
+- Scena: `loadoutFromLook` daje tarczę przeciwnikom z `look.shield` (dziś żaden jej nie ma). Presenter pokazuje BLOCK z „−N”, przy pęknięciu rdzawy BROKEN i zdejmuje tarczę z kukły (`reset` ją przywraca). HUD: odznaka z HP tarczy na końcu tabliczki z imieniem.
+- `tools/balance.ts`: cena zestawu liczy tylko 5 części zbroi (wyniki w BALANS.md bez zmian); nowe wiersze `shieldDefender` / `shieldAggressor` = 50,0% (tarcza nie zmienia jeszcze wyniku). AI blokuje rzadko, tarcza pęka w 0–2% walk.
+- Dev: `?view=arena&shield=3&eshield=6` daje losowym postaciom tarcze.

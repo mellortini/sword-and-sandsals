@@ -82,7 +82,9 @@ export function simulateBalance(pairs = 250) {
     const equipment = { helmet: tier, armor: tier, shoulders: tier, greaves: tier, boots: tier, weapon: `sword${tier}` };
     const setup = { level, attributes, equipment };
     const light = { level, attributes, equipment: { weapon: equipment.weapon } };
-    const cost = getShopStock('armourer', league).filter((item) => item.tier === tier)
+    const shielded = { ...setup, equipment: { ...equipment, offHand: `shield${tier}` } };
+    // the five armour pieces only: the armourer's shield (#273) is measured on its own below
+    const cost = getShopStock('armourer', league).filter((item) => item.tier === tier && 'slot' in item)
       .reduce((total, item) => total + shopPrices(item, 5).buy, 0);
     const sword = getShopStock('weaponsmith', league).find((item) => item.id === equipment.weapon);
     if (!sword) throw new Error(`Missing ${equipment.weapon} in ${league} stock`);
@@ -92,6 +94,9 @@ export function simulateBalance(pairs = 250) {
       level, tier, league, victoryGold, kitPrice,
       profiles: compareContenders({ setup, profile: 'aggressor' }, { setup, profile: 'defender' }, pairs, victoryGold),
       armour: compareContenders({ setup, profile: 'aggressor' }, { setup: light, profile: 'aggressor' }, pairs, victoryGold),
+      // the same gladiator with the shield of its tier against one without (#273), for a guarding and an attacking style
+      shieldDefender: compareContenders({ setup: shielded, profile: 'defender' }, { setup, profile: 'defender' }, pairs, victoryGold),
+      shieldAggressor: compareContenders({ setup: shielded, profile: 'aggressor' }, { setup, profile: 'aggressor' }, pairs, victoryGold),
     };
   });
 }

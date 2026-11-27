@@ -70,3 +70,26 @@ Sam bonus kompletu daje 53,2–60,4% wygranych. Zmiana tieru dodaje jeszcze ró�
 ```powershell
 npm test -- src/core/armourBalance.test.ts --silent=false
 ```
+
+## Tarcza z HP (#273)
+
+Tarcza jest przedmiotem drugiej ręki (`shield1..10`, płatnerz). HP: 24, 32, 42, 56, 72, 92, 112, 138, 168, 204. Udany blok
+nadal daje 0 obrażeń, ale zabiera tarczy surową siłę ciosu: `attackPower × moc ataku` (quick 0,7, normal 1, power 1,6, charge 1,2),
+bez pancerza i krytyka. Przy 0 HP tarcza pęka do końca walki. W tym kroku szansa bloku się nie zmienia.
+
+Symulator (`npm test -- src/core/balance.test.ts --silent=false`) ma dwa nowe zestawienia: ta sama postać z tarczą swojego tieru
+przeciw postaci bez tarczy, raz jako obrońca, raz jako agresor. Oba dają dokładnie 50,0% wygranych na każdym poziomie, a
+dotychczasowe tabele się nie zmieniły (cena zestawu liczy tylko pięć części zbroi). Tarcza zaczyna wpływać na wynik dopiero
+razem ze słabszym blokiem bez tarczy (#274).
+
+Dodatkowa próba (400 walk na wiersz, tarcza przeciw agresorowi bez tarczy):
+
+| Poziom | Tier | Udane bloki tarczą na walkę (obrońca) | Walki z pękniętą tarczą (obrońca) | Bloki do pęknięcia |
+| ---: | ---: | ---: | ---: | ---: |
+| 1 | 1 | 0,41 | 2,0% | 2,5 |
+| 5 | 3 | 0,36 | 0,5% | 3,0 |
+| 12 | 6 | 0,30 | 0,0% | — |
+| 25 | 9 | 0,43 | 0,3% | 3,0 |
+
+AI blokuje rzadko (agresor ~0,07 udanego bloku na walkę), więc tarcza pęka głównie graczowi, który często blokuje.
+Wytrzymałość 2–3 mocnych bloków trzeba sprawdzić ponownie w #274, gdy blok bez tarczy osłabnie, a AI zacznie liczyć się z tarczą.

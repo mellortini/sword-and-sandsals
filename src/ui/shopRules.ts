@@ -5,6 +5,7 @@ import type { SavedCharacter } from '../core/save';
 import type { Look } from '../rig/PaperRig';
 import { ITEMS } from '../data/equipment';
 import { WEAPONS } from '../data/weapons';
+import { findShield } from '../data/shields';
 import { applyInventory, gearItem, savedInventory, wear, weaponBase } from './gearRules';
 
 export const SHOP_NAMES: Readonly<Record<Shop, string>> = { armourer: 'Armourer', weaponsmith: 'Weaponsmith' };
@@ -95,6 +96,8 @@ export function sell(c: SavedCharacter, shop: Shop, id: string) {
 export function lookWith(c: SavedCharacter, id: string): Look {
   const armour = ITEMS.find((piece) => piece.id === id);
   if (armour) return { ...c.look, [armour.slot]: armour.tier };
+  const shield = findShield(id);
+  if (shield) return { ...c.look, shield: shield.tier };
   if (WEAPONS.some((w) => w.id === weaponBase(id))) return { ...c.look, weapon: weaponBase(id) };
   return c.look;
 }

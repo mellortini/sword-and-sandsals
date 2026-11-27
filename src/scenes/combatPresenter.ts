@@ -91,6 +91,9 @@ export class CombatPresenter {
     this.shown = { player: { ...state.fighters.player }, enemy: { ...state.fighters.enemy } };
     for (const side of ['player', 'enemy'] as const) {
       const a = this.o.fighters[side];
+      // a shield broken in the last bout is whole again (#273)
+      const shield = state.fighters[side].shield;
+      if (shield && a.rig.look.shield !== shield.tier) void a.rig.setLook({ shield: shield.tier });
       a.home.x = screenX(this.o.layout, side, state.fighters[side].position);
       a.play('idle', { blend: 0 });
     }
@@ -198,7 +201,13 @@ export class CombatPresenter {
     }
     const knockback = () => this.move(push!.fighter, push!.kind, push!.from, push!.to);
     if (a.blocked) {
-      this.o.fx.show(slot + 'b', new BlockShield(), h.x - 30 * facingDef, h.y + 6);
+      // a real shield (#273): what it lost, and at 0 it breaks and leaves the puppet's arm
+      const s = a.shield;
+      this.o.fx.show(slot + 'b', new BlockShield(s && { lost: s.from - s.to, broken: s.to === 0 }), h.x - 30 * facingDef, h.y + 6);
+      if (s && this.shown?.[a.target].shield) {
+        this.setShown(a.target, { shield: { ...this.shown[a.target].shield!, health: s.to } });
+        if (s.to === 0) void def.rig.setLook({ shield: 0 });
+      }
       return push ? knockback() : this.clip(def, 'block');
     }
     this.o.fx.show(slot, new DamageSplat(a.damage, a.crit), h.x + 34 * facingDef, h.y);

@@ -8,10 +8,11 @@ import { experienceForLevel, fightExperience } from './progression';
 import { nextRandom } from './rng';
 import { COMBAT_ITEMS, combatSlotOptions, consumeSlotItem, createCombatSlots } from './spells';
 import type { CombatSlotAction, CombatSlotOption } from './spells';
-import { attackDamage, attackHitChance, deriveStats, isAttack, resolveAttributes } from './stats';
+import { attackDamage, attackHitChance, deriveStats, isAttack, resolveAttributes, shieldDamage } from './stats';
 import { advanceStatusDurations, applyStatus, statusModifiers, tickStatuses } from './status';
 import type { StatusKind } from './status';
-import { combatWeapon, weaponMove, weaponReach } from './weapons';
+import { combatWeapon, leavesHandForShield, weaponMove, weaponReach } from './weapons';
+import { findShield } from '../data/shields';
 import type {
   ActionOption, ActionResult, AttackKind, AttackStrike, CombatAction, CombatEvent, CombatState,
   Attributes, Fighter, FighterSetup, FighterSide, FighterStats, MoveKind,
@@ -83,6 +84,8 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
   }
   const health = setup.health ?? stats.maxHealth;
   if (!Number.isInteger(health) || health < 1) throw new RangeError('Combat requires a positive starting health.');
+  // a shield in the off hand comes to the bout whole (#273), if the weapon leaves a hand free for it
+  const shieldItem = leavesHandForShield(weapon) ? findShield(setup.equipment?.offHand) : undefined;
 
   return {
     name: setup.name ?? defaultName,
@@ -91,6 +94,7 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     stats,
     armourByZone: { head: zoneArmour.head + zoneBonus, torso: zoneArmour.torso + zoneBonus, legs: zoneArmour.legs + zoneBonus },
     weapon,
+    ...(shieldItem && { shield: { id: shieldItem.id, tier: shieldItem.tier, health: shieldItem.health, maxHealth: shieldItem.health } }),
     position: roundPosition(position),
     health: Math.min(health, stats.maxHealth),
     energy: stats.maxEnergy,
@@ -388,6 +392,7 @@ function resolveAttack(
       * statusModifiers(defender.statuses).armourMultiplier * traits.armourMultiplier,
   };
   const strikes: AttackStrike[] = [];
+  let shield: { from: number; to: number } | undefined;
 
   for (let i = 0; i < traits.strikes && defender.health > 0; i++) {
     const hit = roll() < chance;
@@ -396,6 +401,13 @@ function resolveAttack(
     if (blocked && !defender.counterReady) {
       const chanceToCounter = Math.min(70, counterChance(defender.attributes.guard) + defender.skillRules.counterBonus);
       if (chanceToCounter > 0 && roll() < chanceToCounter) defender.counterReady = true;
+    }
+    // a shield takes the blocked blow's force off its own health (#273); once broken the arm blocks alone (weaker in #274)
+    if (blocked && defender.shield && defender.shield.health > 0) {
+      const from = defender.shield.health;
+      const to = Math.max(0, from - shieldDamage(kind, offense));
+      defender.shield = { ...defender.shield, health: to };
+      shield = { from: shield?.from ?? from, to };
     }
     const crit = hit && !blocked && roll() < attacker.stats.criticalChance;
     const damage = hit && !blocked ? Math.min(defender.health, attackDamage(kind, offense, defense, crit)) : 0;
@@ -413,5 +425,6 @@ function resolveAttack(
     damage,
     ...(traits.strikes > 1 ? { strikes } : {}),
     ...(zone ? { zone } : {}),
+    ...(shield ? { shield } : {}),
   };
 }

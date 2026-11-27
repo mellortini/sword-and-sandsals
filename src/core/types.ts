@@ -62,6 +62,14 @@ export interface FighterStats {
   spellPower: number;
 }
 
+/** The off-hand shield in a bout (#273): blocks take its health; at 0 it is broken until the bout ends. */
+export interface FighterShield {
+  readonly id: string;
+  readonly tier: number;
+  readonly health: number;
+  readonly maxHealth: number;
+}
+
 export interface Fighter {
   name: string;
   level: number;
@@ -69,6 +77,8 @@ export interface Fighter {
   stats: Readonly<FighterStats>;
   armourByZone: ZonedArmour;
   weapon?: CombatWeapon;
+  /** a shield in the off hand; a two-handed weapon (or the dagger pair) leaves no hand for one */
+  shield?: FighterShield;
   position: number;
   health: number;
   energy: number;
@@ -121,6 +131,8 @@ export type CombatEvent =
       counter?: true;
       damage: number;
       strikes?: readonly AttackStrike[];
+      /** the blocking shield's health before and after the blow (#273); `to: 0` = it broke */
+      shield?: { readonly from: number; readonly to: number };
     }
   | { type: 'energy'; fighter: FighterSide; from: number; to: number }
   | { type: 'block'; fighter: FighterSide }

@@ -77,7 +77,7 @@ const pause = (sec: number) => new Promise<void>((r) => setTimeout(r, sec * 1000
  * The arena fight (#12): the player picks from the action bar (#147), the opponent's AI (#6) answers after a short pause,
  * CombatPresenter animates every action and the HUD follows. The menu opens only when the player's action can be chosen,
  * never during an animation. At 0 HP the result screen offers a rematch or the way back to the title.
- * Pre-fight passes the two gladiators it showed; a direct visit (`?view=arena[&tier=N][&ai=aggressor|defender]`) uses random ones.
+ * Pre-fight passes the two gladiators it showed; a direct visit (`?view=arena[&tier=N][&ai=aggressor|defender][&shield=N][&eshield=N]`) uses random ones.
  */
 export async function showArena(
   context: SceneContext, fighters?: readonly [ArenaFighter, ArenaFighter], options: ArenaOptions = {},
@@ -91,8 +91,10 @@ export async function showArena(
 
   const tp = params.get('tier');
   const tier = tp ? +tp : undefined;
+  // a direct visit may hand out shields (#273): `&shield=3&eshield=6` (the look's shield becomes a real one in the bout)
+  const shieldOf = (key: string) => (params.has(key) ? { shield: +params.get(key)! } : {});
   const [player, firstEnemy]: readonly [ArenaFighter, ArenaFighter] = fighters
-    ?? [{ name: 'Player', look: randomLook(tier) }, { name: 'Opponent', look: randomLook(tier) }];
+    ?? [{ name: 'Player', look: { ...randomLook(tier), ...shieldOf('shield') } }, { name: 'Opponent', look: { ...randomLook(tier), ...shieldOf('eshield') } }];
   let enemy: ArenaFighter = firstEnemy;
   const asked = params.get('ai');
   const profile: AiProfile = asked === 'aggressor' || asked === 'defender' ? asked : PROFILES[Math.floor(Math.random() * PROFILES.length)];

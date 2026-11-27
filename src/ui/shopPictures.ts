@@ -10,6 +10,7 @@ import { readWeaponEnchantment } from '../core/enchant';
 import { readForgedItem } from '../core/forge';
 import { ITEMS } from '../data/equipment';
 import { WEAPONS } from '../data/weapons';
+import { findShield } from '../data/shields';
 import { PaperRig } from '../rig/PaperRig';
 import type { EquipSlot, Kit, Look } from '../rig/PaperRig';
 
@@ -30,18 +31,22 @@ export function itemPicture(id: string): { src: string; blade: boolean } | undef
   if (WEAPONS.some((w) => w.id === base)) return { src: `${import.meta.env.BASE_URL}ui/weapons/${base}.png`, blade: true };
   const piece = ITEMS.find((i) => i.id === base);
   if (piece) return { src: `${SPRITES()}${piece.slot}${piece.tier}${PIECE[piece.slot]}.png`, blade: false };
+  // a shield (#273) is the kit sprite the gladiator will carry
+  const shield = findShield(base);
+  if (shield) return { src: `${SPRITES()}shield${shield.tier}.png`, blade: false };
   return undefined;
 }
 
 /** window around the pelvis (rig units, y up): feet to the top of a crest */
 export const MANNEQUIN_CROP = { x0: -3.6, y0: -5.4, x1: 4.4, y1: 8.2 } as const;
 /** where each part's label sits on the mannequin, in the same units */
-export const MANNEQUIN_PARTS: Readonly<Record<EquipSlot, readonly [number, number]>> = {
-  helmet: [0.4, 7.75], shoulders: [-2.2, 4.2], armor: [0.6, 2.4], greaves: [-0.6, -2.4], boots: [1.0, -4.9],
+export const MANNEQUIN_PARTS: Readonly<Record<EquipSlot | 'shield', readonly [number, number]>> = {
+  helmet: [0.4, 7.75], shoulders: [-2.2, 4.2], armor: [0.6, 2.4], greaves: [-0.6, -2.4], boots: [1.0, -4.9], shield: [-1.3, 0.7],
 };
 
 /**
- * The gladiator standing at the armourer's: their own face, hair and build, the armour pieces of `look`, empty hands.
+ * The gladiator standing at the armourer's: their own face, hair and build, the armour pieces of `look` and its shield
+ * (#273), no weapon.
  * Calls queue up, so the newest look comes out last.
  */
 export function standingGladiator(kit: Kit, renderer: Renderer, scale = 90): (look: Look) => Promise<HTMLCanvasElement> {
@@ -50,7 +55,7 @@ export function standingGladiator(kit: Kit, renderer: Renderer, scale = 90): (lo
   let queue: Promise<unknown> = Promise.resolve();
   return (look) => {
     const job = queue.then(async () => {
-      await rig.setLook({ ...look, weapon: '', shield: 0 });
+      await rig.setLook({ ...look, weapon: '' });
       rig.render(renderer);
       return renderer.extract.canvas({ target: rig.view }) as HTMLCanvasElement;
     });
