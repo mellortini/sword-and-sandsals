@@ -1,0 +1,72 @@
+{
+  "size": [
+    1920,
+    1080
+  ],
+  "background": "town_bg.png",
+  "buildings": [
+    {
+      "id": "leagues",
+      "name": "Arena",
+      "image": "town_leagues.png",
+      "x": 592,
+      "y": 45,
+      "w": 736,
+      "h": 574
+    },
+    {
+      "id": "enchanter",
+      "name": "Enchantress",
+      "image": "town_enchanter.png",
+      "x": 140,
+      "y": 80,
+      "w": 379,
+      "h": 539
+    },
+    {
+      "id": "temple",
+      "name": "Glue Temple",
+      "image": "town_temple.png",
+      "x": 1396,
+      "y": 164,
+      "w": 468,
+      "h": 455
+    },
+    {
+      "id": "weaponsmith",
+      "name": "Weaponsmith",
+      "image": "town_weaponsmith.png",
+      "x": 22,
+      "y": 578,
+      "w": 398,
+      "h": 343
+    },
+    {
+      "id": "armourer",
+      "name": "Armourer",
+      "image": "town_armourer.png",
+      "x": 431,
+      "y": 607,
+      "w": 306,
+      "h": 314
+    },
+    {
+      "id": "trainer",
+      "name": "Trainer",
+      "image": "town_trainer.png",
+      "x": 1239,
+      "y": 575,
+      "w": 410,
+      "h": 346
+    },
+    {
+      "id": "tavern",
+      "name": "Tavern",
+      "image": "town_tavern.png",
+      "x": 1619,
+      "y": 585,
+      "w": 301,
+      "h": 336
+    }
+  ]
+}

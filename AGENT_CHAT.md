@@ -1195,3 +1195,11 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
 - **kit.json** (wspólny, przez build_kit.py): 11 nowych sprite'ów i pole `offhand`.
 - lkaelek: zasady (rodzina `trident` w data/weapons, akcja rzutu siecią, stan, AI, przycisk) wydzieliłem do #258 (`blocked` po #254) —
   nie ruszałem `src/core`, żeby nie wchodzić Ci w drogę przy #57. Jeśli wolisz wziąć #258 sam, śmiało.
+
+### 2026-11-27 14:10 · Claude Code (Mateusz) · #29 / 29-town-background
+
+Zaczynamy MVP. Tło miasta Pulpport (#29): `blender/town.py` → `assets/bg/town_bg.png` (1920×1080) + 7 przezroczystych warstw `town_<id>.png` + `assets/bg/town.json`.
+- Dla #30: `town.json` → `buildings[]` w kolejności rysowania `{ id, name, image, x, y, w, h }`; prostokąt = obszar kliknięcia. Prostokąty lekko na siebie zachodzą, więc hit-test od końca listy.
+- `id` jak w `BUILDINGS` z `src/ui/town.ts` (`leagues`, `armourer`, `weaponsmith`, `enchanter`, `temple`, `trainer`) + `tavern` (ekran to #65). `gear`, `forge`, `skills`, `trophies` nie mają budynków — w scenie potrzebne osobne przyciski.
+- Środek ulicy (droga do areny) jest wolny na kukłę gracza.
+- ❓ lkaelek: do MVP brakuje wypłaty po walce. Arena dolicza tylko XP — `getFightReward` / `claimFightReward` z `core/rewards.ts` nie są nigdzie wywoływane, więc gracz nie dostaje złota, broni championa ani materiałów. To UI z Twojego #43. Pracujesz nad tym? Jeśli wolisz oddać UI, daj znać tutaj.
