@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SHIELDS, findShield } from '../data/shields';
-import { PARRY_SHARE, blockChance, createCombat, getActionOptions, performAction } from './combat';
+import { PARRY_SHARE, SEVER_MAX, blockChance, createCombat, getActionOptions, performAction, severChance } from './combat';
 import { equipItem, equipmentTotals } from './inventory';
 import { getShopStock } from './shop';
 import { shieldDamage } from './stats';
@@ -149,5 +149,67 @@ describe('the blade alone parries less (#274)', () => {
     };
     expect(rate({ ...guard, equipment: { offHand: 'shield9' } })).toBeCloseTo(0.65, 1);
     expect(rate(guard)).toBeCloseTo(Math.round(65 * PARRY_SHARE) / 100, 1);
+  });
+});
+
+describe('cutting off the shield arm (#275)', () => {
+  const strong = { attributes: { might: 25 } };
+  const shielded = { attributes: { might: 5 }, equipment: { offHand: 'shield9' } };
+  /** the player strikes first; `guard` puts the enemy in a raised guard */
+  const strike = (seed: number, kind: 'power' | 'normal' | 'quick' | 'charge', guard: boolean, attacker = strong, defender: FighterSetup = shielded) => {
+    const start = createCombat(seed, { ...attacker, position: 4 }, { ...defender, position: kind === 'charge' ? 14 : 6 });
+    const state = guard ? { ...start, fighters: { ...start.fighters, enemy: { ...start.fighters.enemy, guarding: true } } } : start;
+    const result = performAction(state, kind);
+    if (!result.ok) throw new Error(`${kind} rejected`);
+    return { result, attack: result.events.find((e): e is AttackEvent => e.type === 'attack')! };
+  };
+
+  it('never happens while the defender guards, whatever the blow does', () => {
+    for (let seed = 1; seed <= 3000; seed++) {
+      const { attack, result } = strike(seed, 'power', true);
+      expect(attack.severed, `seed ${seed}`).toBeUndefined();
+      expect(result.state.fighters.enemy.shield?.health).toBeGreaterThan(0);
+    }
+  });
+
+  it('grows with the Might edge, capped, and is zero without an edge, a whole shield or a heavy blow', () => {
+    const at = (might: number, defender: FighterSetup = shielded, weapon?: string) =>
+      createCombat(1, { attributes: { might }, ...(weapon && { equipment: { weapon } }) }, defender).fighters;
+    const f = (might: number, weapon?: string) => at(might, shielded, weapon);
+    expect(severChance('power', f(5).player, f(5).enemy)).toBe(0);
+    expect(severChance('power', f(3).player, f(3).enemy)).toBe(0);
+    expect(severChance('power', f(9).player, f(9).enemy)).toBe(2);
+    expect(severChance('power', f(9, 'axe3').player, f(9, 'axe3').enemy)).toBe(3);
+    expect(severChance('charge', f(25).player, f(25).enemy)).toBe(SEVER_MAX);
+    expect(severChance('normal', f(25).player, f(25).enemy)).toBe(0);
+    expect(severChance('quick', f(25).player, f(25).enemy)).toBe(0);
+    expect(severChance('power', f(25).player, f(25).enemy, true)).toBe(0);
+    const bare = at(25, { attributes: { might: 5 } });
+    expect(severChance('power', bare.player, bare.enemy)).toBe(0);
+    const broken = { ...f(25).enemy, shield: { ...f(25).enemy.shield!, health: 0 } };
+    expect(severChance('power', f(25).player, broken)).toBe(0);
+  });
+
+  it('takes the arm off now and then on an unguarded heavy blow: the shield is gone and the stump bleeds', () => {
+    let landed = 0, cut = 0;
+    for (let seed = 1; seed <= 4000; seed++) {
+      const { attack, result } = strike(seed, 'power', false);
+      if (attack.damage > 0 && result.state.fighters.enemy.health > 0) landed++;
+      if (!attack.severed) continue;
+      cut++;
+      const enemy = result.state.fighters.enemy;
+      expect(enemy.shield?.health).toBe(0);
+      expect(enemy.statuses.some((s) => s.kind === 'torn')).toBe(true);
+      expect(blockChance(enemy)).toBe(Math.round(enemy.stats.blockChance * PARRY_SHARE));
+    }
+    expect(cut / landed).toBeGreaterThan(0.03);
+    expect(cut / landed).toBeLessThan(0.07);
+  });
+
+  it('never comes from a light blow', () => {
+    for (let seed = 1; seed <= 1500; seed++) {
+      expect(strike(seed, 'normal', false).attack.severed).toBeUndefined();
+      expect(strike(seed, 'quick', false).attack.severed).toBeUndefined();
+    }
   });
 });

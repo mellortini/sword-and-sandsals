@@ -48,7 +48,12 @@ export interface Look {
   build?: number;
   /** off-hand shield tier (#38): 0/undefined = none, 1-4 a round parma, 5-10 a scutum - src/rig/shield.ts */
   shield?: number;
+  /** the shield arm was cut off at the elbow in this bout (#275): no forearm, hand or shield; never saved */
+  armCut?: boolean;
 }
+
+/** what goes with the shield arm below the elbow (#275) */
+const CUT_ARM_BONES = new Set(['arm_b_lo', 'hand_b', 'shield', 'weapon_b']);
 
 export const DEFAULT_LOOK: Look = { skin: 3, face: 0, hair: 1, hairColor: 1, beard: 2, helmet: 0, armor: 0, shoulders: 0, greaves: 0, boots: 0, weapon: 'gladius' };
 
@@ -168,6 +173,7 @@ export class Kit {
 
   /** sprite key for a layer under a look (null = nothing drawn) */
   resolve(layer: KitJson['layers'][number], look: Look): string | null {
+    if (look.armCut && CUT_ARM_BONES.has(layer.bone)) return null;
     const p = layer.piece;
     switch (layer.slot) {
       case 'body': return `body_${p}`;
@@ -197,9 +203,17 @@ export class Kit {
     }
   }
 
+  /**
+   * the quarter turn of a shield fighter (#273): while the shield is carried, and still after the shield arm was cut
+   * off (#275), so the stump stays in front where the shield arm was and the body keeps its turn
+   */
+  turned(look: Look): boolean {
+    return this.shieldShown(look) || !!look.armCut;
+  }
+
   /** a shield is drawn when the look has one and the back hand is free (not on the haft of a two-handed weapon) */
   shieldShown(look: Look): boolean {
-    return isShieldTier(look.shield) && !this.json.sprites[`weapon_${look.weapon}`]?.grip2;
+    return isShieldTier(look.shield) && !look.armCut && !this.json.sprites[`weapon_${look.weapon}`]?.grip2;
   }
 
   keysFor(look: Look): string[] {
@@ -296,7 +310,7 @@ export class PaperRig {
     const hair = J.hair_colors[L.hairColor]?.color ?? J.hair_colors[1].color;
     const face = J.faces[L.face] ?? J.faces[0];
     // behind a shield the body stands in a quarter turn (#273): shield arm in front, sword shoulder behind, narrower chest
-    const turned = this.kit.shieldShown(L);
+    const turned = this.kit.turned(L);
     const layers = turned ? shieldArmInFront(J.layers) : J.layers;
     for (const layer of layers) {
       const key = this.kit.resolve(layer, L);
@@ -383,7 +397,7 @@ export class PaperRig {
     const key = this.look.weapon ? `weapon_${this.look.weapon}` : null;
     const grip2 = key ? this.kit.json.sprites[key]?.grip2 : undefined;
     if (grip2) return holdWithBothHands(this.kit.json.bones, pose, grip2);
-    return this.hasShield() ? holdShield(pose) : pose;
+    return this.kit.turned(this.look) ? holdShield(pose) : pose;
   }
 
   private solve(): Map<string, { x: number; y: number; r: number }> {
