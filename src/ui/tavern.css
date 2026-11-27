@@ -1,0 +1,28 @@
+/* The tavern (src/ui/tavern.ts, #65): reuses the forge panel (forge.css) and the counter room (counter.css). */
+.tavern__panel { width: min(96vw, 900px); overflow-y: auto; }
+.tavern .forge__head { justify-content: space-between; }
+.tavern__gold { margin-left: auto; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; }
+.tavern__gold b { font-size: 20px; letter-spacing: 0; }
+.tavern h4 { margin: 4px 0 2px; font-size: 15px; letter-spacing: 0.06em; }
+.tavern__rumours { margin: 0; padding: 0 0 0 18px; font-style: italic; color: #4a3020; }
+.tavern__rumours li + li { margin-top: 4px; }
+.tavern__quests, .tavern__bet { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px; padding: 2px 4px 6px; }
+.tavern__bet { grid-template-columns: 1fr auto 1fr; align-items: stretch; }
+.tavern__vs { align-self: center; font-family: 'Cinzel', Georgia, serif; font-weight: 800; color: #8b3324; }
+.tavern-quest__giver, .tavern-side__line { font-style: italic; color: #6b4a2e; }
+.tavern-quest__goal { font-weight: bold; }
+.tavern-quest__buttons, .tavern-side__stakes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+.tavern button.tavern__do {
+  font: inherit; font-size: 13px; padding: 6px 12px; border: 0; border-radius: 3px; cursor: pointer;
+  background: #9a6a2e; color: #f3e6d6; font-weight: bold;
+}
+.tavern button.tavern__do[aria-disabled='true'] { opacity: 0.45; cursor: default; }
+.tavern button.tavern__do:focus-visible { outline: 2px solid #5c2a1c; outline-offset: 2px; }
+.tavern-quest--completed { background: linear-gradient(160deg, #fffbe3 0%, transparent 50%), #f1dc93; }
+.tavern-quest--claimed { opacity: 0.6; }
+.tavern__result { min-height: 1.3em; font-weight: bold; color: #5c2a1c; }
+@media (max-width: 760px), (max-height: 500px) {
+  .tavern__quests { grid-template-columns: 1fr; }
+  .tavern__bet { grid-template-columns: 1fr; }
+  .tavern__vs { justify-self: center; }
+}
