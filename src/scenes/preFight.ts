@@ -2,6 +2,7 @@ import { Container, Sprite } from 'pixi.js';
 import { deriveStats, resolveAttributes } from '../core/stats';
 import type { Attributes, EquipmentLoadout } from '../core/types';
 import { EQUIP_SLOTS } from '../rig/PaperRig';
+import { isShieldTier } from '../rig/shield';
 import type { Look } from '../rig/PaperRig';
 import { goToTitle } from '../ui/backKey';
 import { playBanner } from '../ui/banner';
@@ -26,10 +27,11 @@ export interface PreFightFighter extends ComparedFighter {
 
 export type PreFightChoice = 'fight' | 'retreat' | 'leave';
 
-/** Equipment tiers worn on the puppet are the same numbers the combat core reads. */
+/** Equipment tiers worn on the puppet are the same numbers the combat core reads; a shield on the puppet is a real one (#273). */
 export function loadoutFromLook(look: Look): EquipmentLoadout {
   const loadout: EquipmentLoadout = {};
   for (const slot of EQUIP_SLOTS) if (look[slot] > 0) loadout[slot] = look[slot];
+  if (isShieldTier(look.shield)) loadout.offHand = `shield${look.shield}`;
   return loadout;
 }
 

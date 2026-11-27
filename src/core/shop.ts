@@ -2,6 +2,8 @@ import { ITEMS } from '../data/equipment';
 import type { Item } from '../data/equipment';
 import { WEAPONS } from '../data/weapons';
 import type { Weapon } from '../data/weapons';
+import { SHIELDS } from '../data/shields';
+import type { Shield } from '../data/shields';
 import { readWeaponEnchantment } from './enchant';
 import { readForgedItem } from './forge';
 import type { Inventory } from './inventory';
@@ -11,7 +13,7 @@ import { shopDiscount } from './stats';
 import type { Attributes } from './types';
 
 export type Shop = 'armourer' | 'weaponsmith';
-export type ShopItem = Readonly<Item> | Weapon;
+export type ShopItem = Readonly<Item> | Weapon | Shield;
 
 export interface ShopCustomer {
   readonly gold: number;
@@ -23,7 +25,8 @@ type Transaction =
   | { ok: true; customer: ShopCustomer; price: number }
   | { ok: false; customer: ShopCustomer; reason: 'not-stocked' | 'already-owned' | 'insufficient-gold' | 'not-owned' | 'wrong-shop' | 'gold-limit' };
 
-const CATALOGUE: Readonly<Record<Shop, readonly ShopItem[]>> = { armourer: ITEMS, weaponsmith: WEAPONS };
+// the armourer sells shields (#273) next to the armour of the same tier
+const CATALOGUE: Readonly<Record<Shop, readonly ShopItem[]>> = { armourer: [...ITEMS, ...SHIELDS], weaponsmith: WEAPONS };
 
 export function shopPrices(item: ShopItem, charm: number): { buy: number; sell: number } {
   return { buy: Math.ceil(item.price * (100 - shopDiscount(charm)) / 100), sell: Math.floor(item.price * 30 / 100) };

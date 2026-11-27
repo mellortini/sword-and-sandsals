@@ -12,7 +12,7 @@ import type { Mixer } from './mixer';
 import { loadSample, playSample, readySample } from './sample';
 import { preloadSever } from './sever';
 
-export type Sound = 'swing' | 'miss' | 'hit' | 'crit' | 'sword_hit' | 'sword_crit' | 'block' | 'step' | 'land' | 'impact';
+export type Sound = 'swing' | 'miss' | 'hit' | 'crit' | 'sword_hit' | 'sword_crit' | 'block' | 'parry' | 'step' | 'land' | 'impact';
 
 export type Layer =
   | { type: 'rustle'; from: number; to: number; q: number; dur: number; gain: number; delay?: number }
@@ -38,7 +38,13 @@ export const RECIPES: Readonly<Record<Sound, readonly Layer[]>> = {
   // a sword's blow is recorded (SAMPLES); these stand in until the file is decoded
   sword_hit: HIT,
   sword_crit: CRIT,
+  // the same clink for both: `block` is a shield (recorded, SAMPLES), `parry` the blade alone
   block: [
+    { type: 'ring', freqs: [930, 1390, 2210], dur: 0.32, gain: 0.12 },
+    { type: 'thump', from: 220, to: 140, dur: 0.07, gain: 0.25 },
+    { type: 'rustle', from: 5200, to: 3200, q: 3, dur: 0.08, gain: 0.1 },
+  ],
+  parry: [
     { type: 'ring', freqs: [930, 1390, 2210], dur: 0.32, gain: 0.12 },
     { type: 'thump', from: 220, to: 140, dur: 0.07, gain: 0.25 },
     { type: 'rustle', from: 5200, to: 3200, q: 3, dur: 0.08, gain: 0.1 },
@@ -114,10 +120,13 @@ function layer(m: Mixer, l: Layer, at: number, pitch: number, loud: number) {
   }
 }
 
-/** the sound of a blow's result; `family` = the attacker's weapon family */
-export function blowSound(blow: { hit: boolean; blocked: boolean; crit: boolean }, family?: string): Sound {
+/**
+ * the sound of a blow's result; `family` = the attacker's weapon family, `shield` = set when a whole shield
+ * took the blocked blow (the attack event's field, #273); without it the blade alone parried (#274)
+ */
+export function blowSound(blow: { hit: boolean; blocked: boolean; crit: boolean; shield?: unknown }, family?: string): Sound {
   if (!blow.hit) return 'miss';
-  if (blow.blocked) return 'block';
+  if (blow.blocked) return blow.shield ? 'block' : 'parry';
   if (family === 'sword') return blow.crit ? 'sword_crit' : 'sword_hit';
   return blow.crit ? 'crit' : 'hit';
 }

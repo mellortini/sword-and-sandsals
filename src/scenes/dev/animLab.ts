@@ -79,7 +79,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   const shield = (who: PaperRig) => { const h = head(who); layer.show(who === P ? 'pb' : 'eb', new BlockShield(), h.x - 30 * who.facing, h.y + 6); };
   const defend = (def: Animator, power: number, crit = false) => {
     if (state.response === 'dodge') { def.play('dodge'); miss(def.rig); playFoley('miss'); }
-    else if (state.response === 'block' && Math.random() < 0.9) { def.play('block'); shield(def.rig); playFoley('block'); }
+    else if (state.response === 'block' && Math.random() < 0.9) { def.play('block'); shield(def.rig); playFoley(def.rig.look.shield ? 'block' : 'parry'); }
     else {
       def.play('hit'); dmg(def.rig, Math.round(power * (0.7 + Math.random() * 0.6)), crit);
       const attacker = def === ea ? pa : ea;

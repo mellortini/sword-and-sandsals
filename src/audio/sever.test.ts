@@ -45,6 +45,14 @@ describe('weapon on a shield', () => {
     expect(onDisk).toContain(`../../assets/${file}`);
     expect(gain).toBeLessThanOrEqual(0.4);
   });
+
+  it('is heard only when a shield took the blow: the blade alone parries with another sound', () => {
+    const blocked = { hit: true, blocked: true, crit: false };
+    expect(blowSound({ ...blocked, shield: { from: 40, to: 31 } }, 'sword')).toBe('block');
+    expect(blowSound({ ...blocked, shield: { from: 6, to: 0 } }, 'axe')).toBe('block');
+    expect(blowSound(blocked, 'sword')).toBe('parry');
+    expect(SAMPLES.parry).toBeUndefined();
+  });
 });
 
 describe('sword blow', () => {
@@ -53,7 +61,7 @@ describe('sword blow', () => {
   it('plays the recording only when a sword lands on the fighter', () => {
     expect(blowSound(landed, 'sword')).toBe('sword_hit');
     expect(blowSound({ ...landed, crit: true }, 'sword')).toBe('sword_crit');
-    expect(blowSound({ ...landed, blocked: true }, 'sword')).toBe('block');
+    expect(blowSound({ ...landed, blocked: true }, 'sword')).toBe('parry');
     expect(blowSound({ ...landed, hit: false }, 'sword')).toBe('miss');
     for (const family of ['axe', 'spear', 'hammer', 'daggers', undefined]) expect(blowSound(landed, family)).toBe('hit');
   });

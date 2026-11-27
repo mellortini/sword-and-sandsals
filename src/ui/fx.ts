@@ -108,21 +108,36 @@ export class DamageSplat extends Pop {
   }
 }
 
+/**
+ * The grey BLOCK shield. With a real shield (#273) a red paper slip under it says what the blow took off the shield;
+ * the blow that breaks it turns the icon rust-red and says BROKEN.
+ */
 export class BlockShield extends Pop {
   private icon = new Container();
-  constructor() {
+  constructor(shield?: { lost: number; broken: boolean }) {
     super();
     const g = new Graphics();
     const shape = [-26, -24, 26, -24, 28, 4, 0, 34, -28, 4];
+    const broken = shield?.broken ?? false;
     const sh = new Graphics().poly(shape).fill(0x2e2a28);
     sh.position.set(3, 4);
     sh.alpha = 0.45;
-    g.poly(shape).fill(0xb9bec6);
-    const inner = new Graphics().poly([-18, -17, 18, -17, 19, 2, 0, 24, -19, 2]).fill(0x8d939b);
-    const tx = new Text({ text: 'BLOCK', style: { fill: '#f3e6d6', fontSize: 13, fontFamily: 'Georgia', fontWeight: 'bold', stroke: { color: '#3b3a38', width: 3 } } });
+    g.poly(shape).fill(broken ? 0xa5543c : 0xb9bec6);
+    const inner = new Graphics().poly([-18, -17, 18, -17, 19, 2, 0, 24, -19, 2]).fill(broken ? 0x7d3626 : 0x8d939b);
+    const tx = new Text({ text: broken ? 'BROKEN' : 'BLOCK', style: { fill: '#f3e6d6', fontSize: broken ? 11 : 13, fontFamily: 'Georgia', fontWeight: 'bold', stroke: { color: '#3b3a38', width: 3 } } });
     tx.anchor.set(0.5);
     tx.position.set(0, -3);
     this.icon.addChild(halo(62), sh, g, inner, tx);
+    if (broken) {
+      // the crack: a zigzag tear down the middle
+      this.icon.addChild(new Graphics().poly([-2, -24, 4, -10, -3, 2, 5, 14, 0, 34, -5, 14, -9, 2, -2, -10]).fill(0x2e1a14));
+    }
+    if (shield && shield.lost > 0) {
+      const slip = new Text({ text: `−${shield.lost}`, style: { fill: '#fbf3e6', fontSize: 18, fontFamily: 'Georgia', fontWeight: 'bold', stroke: { color: '#5a1612', width: 4 } } });
+      slip.anchor.set(0.5);
+      slip.position.set(0, 46);
+      this.icon.addChild(slip);
+    }
     this.icon.scale.set(0);
     this.addChild(this.icon);
   }

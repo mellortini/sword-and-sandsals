@@ -1366,3 +1366,76 @@ Trafienie mieczem ma nagranie od Mateusza: `assets/sfx/combat/sword_hit.wav` (LF
   i zamach bez zmian; pozostałe bronie (też sztylety) mają dalej syntetyczne `hit` / `crit`.
 - Nowe dźwięki `sword_hit` / `sword_crit` i funkcja `blowSound(cios, rodzinaBroni)` w `src/audio/foley.ts`; używa jej presenter i anim lab.
 - Mały ruch w `combatPresenter.ts` (jedna linia z dźwiękiem ciosu) — ten plik rusza też #276; przy konflikcie zostawcie wywołanie `blowSound`.
+### 2026-11-27 19:46 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+Tarcza jest teraz prawdziwym przedmiotem walki (zaplanowane trzy kroki: #273 → #274 słabszy blok bez tarczy → #275 odcięcie ręki z tarczą, tylko gdy obrońca nie blokuje).
+- `src/data/shields.ts`: `shield1..10` (Wicker Parma … Gilded Scutum), HP 24…204, cena 25% zestawu zbroi tego tieru, poziom jak zestaw. Sprzedaje **płatnerz** (nowa etykieta „Shield” na manekinie).
+- Slot: istniejący `hands.offHand`. `equipItem` zawsze wkłada tarczę do `offHand`; `equipmentTotals` liczy jej wagę; `applyInventory` ustawia `look.shield` (albo usuwa pole).
+- ⚠️ Kontrakt core: `Fighter.shield?: FighterShield` (`{ id, tier, health, maxHealth }`), zdarzenie `attack` ma opcjonalne `shield: { from, to }` (`to: 0` = pękła). Bez tarczy wszystko działa jak dotąd. Tarczy nie ma przy włóczni, młocie i sztyletach (`leavesHandForShield` w `weapons.ts`).
+- Udany blok: 0 obrażeń jak wcześniej, a tarcza traci `shieldDamage` = `attackPower × moc ataku` (`stats.ts`). Szansa bloku bez zmian; pęknięta tarcza blokuje tak samo (to zmieni #274).
+- Scena: `loadoutFromLook` daje tarczę przeciwnikom z `look.shield` (dziś żaden jej nie ma). Presenter pokazuje BLOCK z „−N”, przy pęknięciu rdzawy BROKEN i zdejmuje tarczę z kukły (`reset` ją przywraca). HUD: odznaka z HP tarczy na końcu tabliczki z imieniem.
+- `tools/balance.ts`: cena zestawu liczy tylko 5 części zbroi (wyniki w BALANS.md bez zmian); nowe wiersze `shieldDefender` / `shieldAggressor` = 50,0% (tarcza nie zmienia jeszcze wyniku). AI blokuje rzadko, tarcza pęka w 0–2% walk.
+- Dev: `?view=arena&shield=3&eshield=6` daje losowym postaciom tarcze.
+
+### 2026-11-27 19:51 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+Poprawki po uwagach (goloburda05-hue):
+- Sztylet jest jednoręczny: tarcza działa też przy `daggers` (`leavesHandForShield` wyklucza tylko włócznię i młot). Rig: z tarczą w ręce znika drugi sztylet (`weapon_b`). Mechanika sztyletów (2 uderzenia) bez zmian.
+- Blok trzymany do ciosu: akcja Blok gra nowy `guard_up` (podniesienie bez opuszczania), potem zapętlony `guard` (oba też `@shield`). Gardę opuszcza reakcja na cios (`block` / `hit` / `dodge`), a gdy rdzeń zdejmie ją bez ciosu, presenter wraca do `idle`. ⚠️ `combatPlan`: krok `pose` dla bloku ma teraz `clip: 'guard_up'` (było `'block'`). Klip `block` zostaje jako reakcja na zablokowany cios.
+- `expressions.test.ts`: klipy zapętlone i `guard_up` mogą kończyć się ze zmarszczonymi brwiami (garda trwa).
+
+### 2026-11-27 19:59 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+- Ramię z tarczą na pierwszym planie (prośba goloburda05-hue: bark ręki z tarczą wyglądał, jakby był po drugiej stronie ciała). `shieldArmInFront` w `src/rig/shield.ts`: gdy tarcza jest widoczna, `PaperRig.build` przenosi warstwy tylnego ramienia (przedramię, karwasz, ramię, naramiennik, dłoń) przed tułów, tuż pod tarczę, bez `BACK_TINT`. Ramię z mieczem zostaje nad tarczą. Przeciwnik (lustro) trzyma więc tarczę w lewej, bliższej ręce, a gracz w bliższej (prawej). **`kit.json` bez zmian** — kolejność zmienia się tylko w rigu, bez tarczy wszystko jak dotąd.
+- Testy wizualne (`tests/visual`) nie były uruchamiane; widoki z tarczą to tylko `?view=lineup&shield=1`, `anim`, `strip`.
+
+### 2026-11-27 20:05 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+- Za tarczą postać stoi w lekkim obrocie 3/4 (prośba goloburda05-hue: więcej 3D, łokieć z mieczem widoczny, tarcza nie może wchodzić pod bark z mieczem).
+  `holdShield` dokłada `arm_b_shift: +0,6` (bark z tarczą do przodu) i nowy klucz `arm_f_shift: −0,5` (bark z mieczem do tyłu, obsłużony w `boneOffset`), a `PaperRig.build` zwęża pierś do 0,9 (`SHIELD_TURN` w `src/rig/shield.ts`).
+- Kolejność warstw przy tarczy (`shieldArmInFront`): ramię i naramiennik z mieczem za piersią (w cieniu) → tułów, głowa → przedramię z mieczem, broń, dłoń → całe ramię z tarczą → tarcza na wierzchu. Bez tarczy wszystko jak w `kit.json`.
+- ⚠️ Mateusz / lkaelek: kto pisze klipy z tarczą (`@shield`) — bark z mieczem jest teraz ~0,5 j. bliżej środka, a z tarczą ~0,6 j. dalej do przodu.
+
+### 2026-11-27 20:15 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+- `rest@shield` (`clips.ts`, z klipu `rest`): przy obrocie 3/4 ręka z mieczem zwisająca pionowo miała łokieć w brzuchu. Teraz zwisa lekko do przodu: łokieć na krawędzi piersi, przedramię przy udzie, ostrze w dół.
+- `PaperRig`: tekstura postaci ma 9,5 j. za miednicą (było 6,5; szerokość 19 → 22). Leżący na plecach gladiator z tarczą miał ją uciętą. Pozycja na ekranie bez zmian (kotwica liczona z `origin`).
+
+### 2026-11-27 20:19 · Claude Code (goloburda05-hue) · #274 / 274-weaker-parry
+
+- #273 zmergowane (#276). Teraz #274: bez całej tarczy blok ma połowę szansy (`PARRY_SHARE = 0,5`, `blockChance(fighter)` w `core/combat.ts`). Z tarczą bez zmian.
+- ⚠️ Kontrakt: `ActionOption` dla `block` ma `blockChance` (karta Blok pokazuje procent, podpowiedź „Block chance”). Testy, które sprawdzają skutki udanego bloku (kontry, zaklęcia, seria pudeł, umiejętności), dają blokującemu `offHand: 'shield9'` — te same rzuty co wcześniej.
+- AI waży blok proporcjonalnie do tej szansy. Balans: obrońca bez tarczy traci 1–3 pkt; tarcza w rękach AI nadal ~50% (AI rzadko blokuje, blok zabiera turę). Szczegóły w `docs/BALANS.md`.
+
+### 2026-11-27 20:21 · Claude Code (goloburda05-hue) · #275 / 275-shield-arm-cut
+
+- Odcięcie ręki z tarczą: `severChance` (`core/combat.ts`). **Nigdy, gdy obrońca blokował w chwili ataku** (stan gardy sprzed pierwszego uderzenia). Poza tym: power/charge, cała tarcza, trafienie z obrażeniami, obrońca żyje, przewaga Might (0,5 pkt/pkt, topór ×1,5, maks. 5%). Rzut tylko przy szansie > 0 — reszta walk losuje jak dotąd.
+- ⚠️ Kontrakt: zdarzenie `attack` ma `severed?: true`; skutek w stanie: `shield.health = 0` + `torn`. `Look.armCut?: boolean` (tylko w walce, nie zapisywany): rig chowa `arm_b_lo`, `hand_b`, `shield`, `weapon_b`.
+- Presenter: gore `shreds`/`ink` — ręka znika od łokcia + konfetti/tusz; gore `off` — ręka zostaje, tarcza wytrącona (pop BROKEN). `reset` przywraca rękę w następnej walce.
+- Gałąź oparta o #274 (PR #278 czeka na merge).
+
+### 2026-11-27 20:28 · Claude Code (goloburda05-hue) · #280 / 280-quarter-turn-all
+
+- ⚠️ **Każda postać stoi teraz w obrocie 3/4** (prośba goloburda05-hue), nie tylko z tarczą. `quarterTurn(pose)` w `src/rig/shield.ts` (barki: bliższy +0,6, z bronią −0,5), `turnedLayers` (kolejność: ramię z bronią za piersią → tułów, głowa → przedramię z bronią → całe bliższe ramię z drugim sztyletem/siecią → tarcza), pierś ×0,9. `kit.json` bez zmian.
+- `holdWithBothHands` (włócznia, młot) liczy przesunięcie tylnego barku od pozycji po obrocie. `holdShield` robi już tylko pochylenie tarczy.
+- `rest`: ręka z bronią zwisa lekko do przodu (łokieć nie wpada w biodro); `rest@shield` usunięty. Etykieta „Shoulders” na manekinie przesunięta.
+- Sprawdzone klatki: 20 klipów z mieczem, idle/chód/ataki/blok/unik dla topora, włóczni, młota, sztyletów, trójzębu, rzut siecią, klipy z tarczą; portrety, miasto, manekin.
+- Mateusz / lkaelek: nowe klipy rysujcie z myślą o obrocie (bark z bronią ~0,5 j. bliżej środka, bliższy ~0,6 j. dalej do przodu). Wzorce testów wizualnych odświeżone z artefaktu CI (Ubuntu 24.04).
+
+### 2026-11-27 20:41 · Claude Code (goloburda05-hue) · #282 / 282-balance-tempo
+
+- Balans agresor kontra obrońca: 60,5% → 53,2% (symulator, równy sprzęt). Analiza 10 strategii w `docs/BALANS.md`: zmiany bloku nic nie dają (0,11 udanego bloku na walkę), przewagę daje tempo mocnego ciosu.
+- ⚠️ Wdrożone (dotyczy też gracza): mocny cios kosztuje **11** energii (było 8) i ma celność **48** (było 55); profil AI `defender` mniej pasywny (więcej ataków, blok 1,2 → 1,0).
+- Testy: energia (`combat.test.ts`) i ochrona przed pudłami (`hitProtection.test.ts`, baza 48%) przeliczone. Tabele „Walka” i „Złoto i ceny” w BALANS.md zaktualizowane.
+- lkaelek: jeśli ligi/bossy mają ustawiony profil `defender` z myślą o pasywnym stylu — teraz atakuje częściej.
+### 2026-11-27 20:55 · Claude Code (Mateusz) · #284 / 284-damage-stages
+
+- Obrażenia ciała: co 10 % HP przybywa ran (nakładki `wound_*` z `blender/wounds.py`, `kit.json` → `wounds`, 38 sprite'ów; w `kit.json` same dopiski). Etap ustawia `CombatPresenter` z pokazywanego HP; przy „gore off” ran nie ma.
+- ⚠️ Kontrakt: nowy slot warstwy `wound` (tuż nad gołą skórą) i `Look.wounds?: 1–10` (tylko w walce). Dopisałem `wound` do `ARM_ORDER` i `SWORD_SHOULDER` w `shield.ts`. Kto dokłada nową kolejność warstw, przenosi `wound` razem ze skórą.
+- goloburda05-hue: dostosowane do obrotu 3/4 (#280): bogatszy zestaw ran na ramieniu dostało bliższe ramię (`arm_b_up`), bo ramię z mieczem chowa się za klatką.
+
+### 2026-11-27 21:20 · Claude Code (Mateusz) · sever-sounds
+
+Synchronizacja z main (po #285) przed merge'em PR #277.
+- Dźwięk odcinanej ręki (#275) podłączyłem sam: `CombatPresenter.sever()` woła `playSever(mode)`. goloburda05-hue: nie musisz już nic robić z prośby wyżej.
+- Nagranie `shield_thud` gra tylko, gdy cios przyjęła cała tarcza (`attack.shield`). Blok samym ostrzem (#274) ma nowy dźwięk `parry` (dawny syntetyczny brzęk). To odpowiada na moje ostrzeżenie z 20:03.

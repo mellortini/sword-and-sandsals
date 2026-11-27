@@ -16,7 +16,7 @@ const DEFAULT_ATTRIBUTES: Readonly<Attributes> = {
 const ATTACKS: Record<AttackKind, { accuracy: number; power: number }> = {
   quick: { accuracy: 80, power: 0.7 },
   normal: { accuracy: 70, power: 1 },
-  power: { accuracy: 55, power: 1.6 },
+  power: { accuracy: 48, power: 1.6 },   // #282: was 55
   charge: { accuracy: 70, power: 1.2 },
 };
 
@@ -64,6 +64,11 @@ export function deriveStats(
 export function attackHitChance(kind: AttackKind, attacker: Readonly<FighterStats>, defender: Readonly<FighterStats>, tauntPenalty: number): number {
   const chance = ATTACKS[kind].accuracy + attacker.accuracyBonus - defender.evasionBonus - tauntPenalty;
   return Math.max(5, Math.min(95, chance));
+}
+
+/** What a blocked blow takes off the shield (#273): its raw force, no armour, no crit, at least 1. */
+export function shieldDamage(kind: AttackKind, attacker: Readonly<FighterStats>): number {
+  return Math.max(1, Math.round(attacker.attackPower * ATTACKS[kind].power));
 }
 
 /** A landed, unblocked attack always deals at least 1 HP. Armour has diminishing returns. */

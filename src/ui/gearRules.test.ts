@@ -52,4 +52,15 @@ describe('gear rules', () => {
   it('round-trips when nothing changes', () => {
     expect(applyInventory(base, savedInventory(base))).toEqual({ ...base, hands: {} });
   });
+
+  it('wears a shield on the off hand: puppet, gear line and combat follow (#273)', () => {
+    const c = wear({ ...base, inventory: ['shield2'] }, 'shield2');
+    expect(c.ok).toBe(true);
+    expect(c.character.hands).toEqual({ offHand: 'shield2' });
+    expect(c.character.look.shield).toBe(2);
+    expect(gearItem('shield2')).toMatchObject({ name: 'Hide Parma', slot: 'offHand', stat: 'Shield 32' });
+    expect(createCombat(1, { equipment: careerLoadout(c.character) }).fighters.player.shield?.health).toBe(32);
+    const off = takeOff(c.character, 'offHand');
+    expect(off.ok && off.character.look.shield).toBeUndefined();
+  });
 });

@@ -14,7 +14,7 @@ describe('shop rules', () => {
   it('stocks goods by league, which follows the level for now', () => {
     expect([1, 4, 9, 16, 25].map(shopLeague)).toEqual(['bronze', 'silver', 'gold', 'champion', 'legend']);
     const offers = shopOffers(c, 'armourer');
-    expect(offers).toHaveLength(10);
+    expect(offers).toHaveLength(12);   // two tiers of five armour pieces and a shield (#273)
     expect(offers.every((o) => o.tier <= 2)).toBe(true);
     const cap = offers.find((o) => o.id === 'helmet2')!;
     expect(cap).toMatchObject({ name: 'Leather Cap', stat: 'Armour 1', affordable: true, owned: false });
