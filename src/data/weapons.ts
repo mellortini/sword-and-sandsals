@@ -1,6 +1,6 @@
 import { ITEMS } from './equipment';
 
-export const WEAPON_FAMILIES = ['sword', 'axe', 'spear', 'hammer'] as const;
+export const WEAPON_FAMILIES = ['sword', 'axe', 'spear', 'hammer', 'trident'] as const;
 export type WeaponFamily = (typeof WEAPON_FAMILIES)[number];
 export type DamageType = 'cut' | 'pierce' | 'crush';
 
@@ -48,6 +48,8 @@ const FAMILIES: Record<WeaponFamily, FamilyBalance> = {
   axe: { name: 'Axe', damageType: 'cut', damageBonus: 2, speed: 0.88, range: 2, mightBonus: 2, armourPriceShare: 0.5 },
   spear: { name: 'Spear', damageType: 'pierce', damageBonus: 0, speed: 1.05, range: 3, mightBonus: 1, armourPriceShare: 0.55 },
   hammer: { name: 'Hammer', damageType: 'crush', damageBonus: 4, speed: 0.72, range: 1.5, mightBonus: 4, armourPriceShare: 0.6 },
+  // #258: one hand, a spear's reach (as long as one); the other hand throws the net once a bout
+  trident: { name: 'Trident', damageType: 'pierce', damageBonus: 0, speed: 1, range: 3, mightBonus: 1, armourPriceShare: 0.55 },
 };
 
 const weaponCatalogue: Weapon[] = TIERS.flatMap((balance, index) => {

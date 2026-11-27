@@ -409,7 +409,10 @@ def trident(t):
     def build(c):
         haft, grip, head, head_d, fit, torn = _tier(t)
         k = 0.9 + 0.025 * t
-        x0, x1 = -1.5, 3.4 + 0.02 * t
+        # #258: as long as a spear (the prongs reach past its point), still held in one hand
+        x0, x1 = -2.4, 5.15 + 0.03 * t
+        if ICON:   # shop picture: a shorter shaft, so the prongs are big enough to see
+            x0, x1 = -1.2, 2.6 + 0.01 * t
         w = 0.16
         _haft(c, t, x0, x1, w)
         _butt(c, t, x0, w)
