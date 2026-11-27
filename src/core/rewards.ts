@@ -31,6 +31,17 @@ export function getFightReward(state: CombatState, fightId: string, championPriz
   };
 }
 
+/** True when the weapon (plain, forged or enchanted) is already in the gladiator's hands or backpack. */
+export function ownsWeapon(character: SavedCharacter, id: string): boolean {
+  return [character.hands?.weapon, character.hands?.offHand, ...character.inventory]
+    .some((ownedId) => readForgedItem(ownedId).baseId === id);
+}
+
+/** Puts a prize taken on the reward scroll in the backpack; a weapon already owned changes nothing. */
+export function takePrizeWeapon(character: SavedCharacter, id: string): SavedCharacter {
+  return ownsWeapon(character, id) ? character : { ...character, inventory: [...character.inventory, id] };
+}
+
 export function applyFightReward(character: SavedCharacter, reward: FightReward, takeWeapon: boolean): SavedCharacter {
   const rewarded = character.rewardedFightIds ?? [];
   if (rewarded.includes(reward.fightId)) return character;
@@ -39,9 +50,7 @@ export function applyFightReward(character: SavedCharacter, reward: FightReward,
   if (!Number.isSafeInteger(gold)) throw new RangeError('Gold would exceed the save limit.');
   const progress = awardExperience(character, reward.experience);
   const id = reward.weapon?.id;
-  const hasWeapon = id !== undefined && [character.hands?.weapon, character.hands?.offHand, ...character.inventory]
-    .some((ownedId) => readForgedItem(ownedId).baseId === id);
-  const inventory = takeWeapon && id && !hasWeapon ? [...character.inventory, id] : character.inventory;
+  const inventory = takeWeapon && id ? takePrizeWeapon(character, id).inventory : character.inventory;
   const forgeMaterials = reward.forgeMaterials ? { ...reward.forgeMaterials } : undefined;
   if (forgeMaterials) {
     for (const material of FORGE_MATERIALS) {

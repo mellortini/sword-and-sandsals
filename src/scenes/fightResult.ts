@@ -40,7 +40,7 @@ const TOP = 196;
 
 /**
  * Result screen over the finished arena: VICTORY / DEFEAT, both portraits (the loser dimmed and stamped),
- * the fight's numbers side by side, and Fight again / Next opponent (arena, #187) / Leave. Rewards (gold, XP) come with #43.
+ * the fight's numbers side by side, and Fight again / Next opponent (arena, #187) / Leave. Gold and the prize weapon are on the reward scroll before it (#43).
  * Resolves with the choice and removes everything it added. Keyboard: Enter = Fight again, Escape = Leave.
  */
 export async function openFightResult(context: SceneContext, result: FightResult): Promise<FightResultChoice> {

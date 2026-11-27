@@ -1339,6 +1339,18 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - ⚠️ `AGENTS.md` (plik wspólny): nowa sekcja „Przegląd kodu — codebase memory” (prośba Mateusza, oszczędza tokeny).
   Kod przeglądamy najpierw przez codebase-memory-mcp; grep i czytanie plików, gdy graf nie wystarcza albo nie macie tego serwera.
 
+### 2026-11-27 18:34 · Claude Code (Mateusz) · #43 / 43-reward-screen
+
+- ⚠️ lkaelek: przejąłem #43 na decyzję Mateusza (bez wcześniejszego uzgodnienia z Tobą) — bez wypłaty po walce nie domkniemy MVP.
+  Robię brakującą część: wypłatę w arenie i zwój nagrody „weź / zostaw”. Jeśli masz coś lokalnie, **daj znać tutaj albo w PR, zanim to wypchniesz**.
+
+### 2026-11-27 18:39 · Claude Code (Mateusz) · #43 / 43-reward-screen
+
+- Wypłata po walce działa: arena kariery bierze `getFightReward` i od razu zapisuje złoto, XP i materiały do kuźni (`payFightReward` w `src/ui/rewardRules.ts`,
+  zamiast samego `applyFightExperience`). Broń championa (po id walki ligowej) czeka na zwój nagrody.
+- Nowy zwój `src/ui/rewardScroll.ts` (DOM) po wygranej, przed ekranem wyniku: Take / Leave it; posiadanej broni nie proponuje. Po przegranej zwoju nie ma.
+- `core/rewards.ts`: nowe `ownsWeapon` i `takePrizeWeapon` (broń dopisywana po wypłacie, bo `applyFightReward` płaci dany fightId tylko raz).
+- Po merge'u można odblokować #45 (i #163).
 ### 2026-11-27 19:28 · Claude Code (Mateusz) · #272 / 272-arena-kraftmoor
 
 - Druga arena walki: Kraftmoor (tektura, pochmurno, kałuże, wielka prasa). Podgląd: `?view=arena&arena=kraftmoor`.
@@ -1494,3 +1506,10 @@ Stan fabuły w zapisie.
 - `core/calendar.ts`: ile dni zabiera czynność (walka i odpoczynek 1, loch 1–2, podróż 2–3).
 - ⚠️ Kontrakt: nowe opcjonalne pole `SavedCharacter.story` (wersja zapisu bez zmian). Dzień rośnie po każdej walce w karierze (`arena.ts`). Akcji odpoczynku w grze jeszcze nie ma — kto ją doda, woła `passTime(c, 'rest')`.
 - goloburda05-hue / lkaelek: #287 (tawerna) też zmienia `save.ts` (pole `tavern`). Konflikt prosty: zostawcie oba pola i oba warunki w `isCharacter`.
+
+### 2026-11-28 01:00 · Claude Code (Mateusz) · #43 / 43-reward-screen
+
+Synchronizacja z main (po #325), lokalnie bez konfliktów.
+- Wypłata działa razem z kalendarzem (#291): po walce zapis ma złoto, XP, materiały i `story.day` o 1 większy; `payFightReward` zachowuje `story`.
+- Sprawdzone w przeglądarce na testowym zapisie: wygrana z nowicjuszem (złoto 50 → 70, dzień 1 → 2), „Next opponent” daje zwykłego przeciwnika, przegrana (bez zwoju i złota, dzień 3), champion Bronze → Escape nie zamyka zwoju z bronią, „Leave it” nie dodaje broni (złoto 70 → 105).
+- goloburda05-hue: #287 i #286 też ruszają `arena.ts` — po merge'u tego PR przy synchronizacji zostawcie `payFightReward` w miejscu `applyFightExperience`.
