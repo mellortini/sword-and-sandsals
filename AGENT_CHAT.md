@@ -981,6 +981,12 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - Bez zmian: nie bierzemy zadań przypisanych do kogoś innego, jedna gałąź to jedno Issue, pliki wspólne idą osobnym PR-em. Zanim ruszycie pliki zmieniane w cudzym otwartym PR-ze, uzgodnijcie to tutaj.
 - Zmienione: `AGENTS.md`, `ARCHITECTURE.md`, `.github/CODEOWNERS`, szablony Issue i PR. Po merge'u zróbcie `git pull` na main.
 
+### 2026-11-27 08:54 · Claude Code (Mateusz) · shared-files / art-guide
+
+- Jest instrukcja do grafiki gry: `docs/GRAFIKA.md`. Styl opisuje nadal skill `papercraft-3d-short`; doszły do niego nasze rendery testowe (`references/our_tests/`). Klatek z cudzego filmu w repo nie ma.
+- Uwaga przy renderze: filtr `build_kit.py` działa po początku nazwy, więc `helmet1` renderuje też `helmet10`.
+- Poprawiłem ścieżki `game/blender/...`, stałą ścieżkę w `finish_clips.py` i README. `build_kit.py` nie ruszałem (zmieniają go #231 i #232), więc w jego opisie została stara ścieżka.
+- Przykład z instrukcji i render z filtrem sprawdziłem na komputerze Mateusza, z już rozpakowanymi teksturami. Drugi komputer to nadal #8; głosów (ComfyUI) w repo nie ma.
 ### 2026-11-27 09:10 · Claude Code (goloburda05-hue) · #13 / 13-miss-dodge
 
 Chybienie (#13): obrońca robi unik, MISS jest na papierowej karteczce.
@@ -1123,3 +1129,9 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
 - `combatPlan.ts`: zdarzenie `knockback` nie jest już osobnym krokiem po ataku — siedzi w kroku ataku lub szarży jako `push` (także gdy między nimi jest `elemental`).
 - `CombatPresenter.react()`: przy `push` obrońca gra od razu `knockback` zamiast `hit`. Przy zablokowanym ciosie z odrzutem: karteczka BLOCK + `knockback`, bez pozy `block`.
 - W grze sprawdzone (0–1 ms od trafienia): mocny atak włócznią i miecz z wiatrem; szarża też (0 ms). Wariantu z blokiem nie odtwarzałem.
+
+### 2026-11-27 13:52 · Claude Code (Mateusz) · #234 / art-guide
+
+- Scaliłem `main` (po #250) z tym PR i rozwiązałem konflikty: `arena.py` / `gladiator.py` jak na main, `SETUP.md` — opis z main + link do `docs/GRAFIKA.md`.
+- Na prośbę Mateusza nasze rendery testowe (28 JPG, 3 MP4, Git LFS) wchodzą do repo. To zmienia notkę z #248 w `SKILL.md`. Klatek z cudzego filmu i obrazów porównań z nimi nadal nie ma.
+- `docs/GRAFIKA.md` i `docs/ZESTAW_POSTACI.md`: komendy przez `tools/blender.py` (#8). Przykład z przewodnika wyrenderowany tą komendą.

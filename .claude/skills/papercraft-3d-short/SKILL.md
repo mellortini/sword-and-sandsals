@@ -1,19 +1,22 @@
 ---
 name: papercraft-3d-short
-description: [VIDEO STYLE · Blender Cycles] Make a ~45-70 s vertical (1080x1920) science/body-explainer short in the "papercraft diorama" style - cut-paper and quilled-paper layers with real depth and soft shadows, macro camera with shallow depth of field, warm practical light (candles, a glowing flame hero with a face) against deep maroon darkness, deadpan flat-faced paper characters, dive-through-a-hole transitions, no outlines, no captions - rendered with Blender Cycles (primary) or three.js inside Remotion (fallback). Measured from a 59 s reference (birthday man -> belly slit -> flame judged by pointing hands -> family of candles -> quilled cell -> red paper town, sugar-cube and key/jar metaphors). Use when the user wants a video "in this papercraft style", "like the flame / metabolism video", "paper cut / quilling / diorama style", "w stylu papierowym / papercraft", or says "use the papercraft skill".
+description: [VIDEO STYLE · Blender Cycles] Also use for this game's art (blender/, assets/, "grafika w tym stylu"), and then read docs/GRAFIKA.md first. Make a ~45-70 s vertical (1080x1920) science/body-explainer short in the "papercraft diorama" style - cut-paper and quilled-paper layers with real depth and soft shadows, macro camera with shallow depth of field, warm practical light (candles, a glowing flame hero with a face) against deep maroon darkness, deadpan flat-faced paper characters, dive-through-a-hole transitions, no outlines, no captions - rendered with Blender Cycles (primary) or three.js inside Remotion (fallback). Measured from a 59 s reference (birthday man -> belly slit -> flame judged by pointing hands -> family of candles -> quilled cell -> red paper town, sugar-cube and key/jar metaphors). Use when the user wants a video "in this papercraft style", "like the flame / metabolism video", "paper cut / quilling / diorama style", "w stylu papierowym / papercraft", or says "use the papercraft skill".
 ---
 
 # Papercraft 3D short (Blender Cycles primary, three.js fallback)
 
+> **Grafika do gry?** Najpierw [`docs/GRAFIKA.md`](../../../docs/GRAFIKA.md) (wzorce, skala, assety, kontrola).
+>
 > **Kopia w repo gry.** To ten sam skill, którym Mateusz ustalił papierowy wygląd gry (materiał papieru z „ząbkiem”,
 > ściśnięte warstwy `ZK = 0.65`, słońce z lewej góry, Cycles + OptiX). Gra korzysta z jego biblioteki przez
 > `blender/vendor/pc_lib.py` (to samo co `blender/pc_lib.py` tutaj) — zmieniaj tam, nie tutaj.
 > Ścieżki poniżej są względne do katalogu repo; `D:/blender/blender.exe` zamień na swoją ścieżkę Blendera 5.3.
-> **Nie ma tu** obrazów i filmów z `references/frames|sheets|crops|our_tests` (klatki z cudzego filmu referencyjnego
-> i nasze testowe rendery, 31 MB) — prawa autorskie i rozmiar. Notatki z pomiarów (`references/*.md`, `references/data/`) są,
-> z `our_tests/` tylko tekst: `blender/COMPARISON.md` (porównanie renderów z referencją), `blender/compare/` (skrypty
-> porównania i ich `metrics*.json`) oraz `animation/our_motion.json`. Skrypty `compare*.py` mają ścieżkę roboczą
-> Mateusza (`D:\animacje\ref_style`) i obrazy, których tu nie ma — są do wglądu, nie do uruchomienia z repo.
+> **Nie ma tu** klatek z cudzego filmu referencyjnego (`references/frames|sheets|crops`) ani obrazów porównań z nimi
+> (`side_by_side_*`, `texture/`, `cmp_*`) — prawa autorskie. Notatki z pomiarów (`references/*.md`, `references/data/`) są.
+> W `references/our_tests/` są nasze rendery testowe (JPG i MP4, przez Git LFS) i tekst: `blender/COMPARISON.md`
+> (porównanie renderów z referencją), `blender/compare/` (tylko skrypty porównania i ich `metrics*.json`) oraz
+> `animation/our_motion.json`. Skrypty `compare*.py` mają ścieżkę roboczą Mateusza (`D:\animacje\ref_style`)
+> i potrzebują obrazów, których tu nie ma — są do wglądu, nie do uruchomienia z repo.
 > Codex: ten plik nie ładuje się sam — przeczytaj go przed zadaniem `area:art`, gdy chodzi o wygląd papieru.
 
 **Use Blender Cycles for the final look.** The user compared both: the three.js stills looked flat and "not similar"; the same scenes

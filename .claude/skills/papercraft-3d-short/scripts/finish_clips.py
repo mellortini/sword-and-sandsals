@@ -4,7 +4,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'
 import cv2, numpy as np
 import post
 
-ROOT = r'D:\animacje\ref_style\anim_test'
+# folder with the rendered clip frames; override with PAPERCRAFT_CLIPS
+ROOT = os.environ.get('PAPERCRAFT_CLIPS', os.path.abspath(os.path.join('ref_style', 'anim_test')))
 LOOK = {'belt': 'day', 'dive': 'day', 'cave': 'dark'}
 FFMPEG = 'ffmpeg'
 res = {}

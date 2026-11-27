@@ -45,8 +45,9 @@ Sprawdzanie wizualne: `?view=wardrobe | lineup | faces | anim | strip&clip=<nazw
 Jeśli okno przeglądarki jest ukryte, requestAnimationFrame stoi — w testach przesuwaj zegar ręcznie
 (`app.ticker.update(t)` co 1/30 s) i renderuj kukły przed `extract`.
 Grafika (Blender, tylko gdy zadanie tego wymaga): patrz README → „Grafika”.
-Styl papierowy (materiały, światło, warstwy, post): skill `.claude/skills/papercraft-3d-short/SKILL.md` —
-Claude Code ładuje go sam, Codex: przeczytaj go przed zadaniem `area:art` / `area:fx` dotyczącym wyglądu.
+Styl papierowy: skill `.claude/skills/papercraft-3d-short/SKILL.md`, dodawanie assetów do gry: `docs/GRAFIKA.md`.
+Przeczytaj oba przed zadaniem `area:art` / `area:fx` dotyczącym wyglądu; Claude Code może załadować skill sam,
+Codex czyta pliki ręcznie.
 
 ## Granice
 - **Zmieniaj tylko pliki potrzebne do zadania** (mapa modułów w `ARCHITECTURE.md`). Niezwiązana zmiana → osobne Issue.

@@ -68,6 +68,8 @@ python -I tools/blender.py blender/unpack_blenderkit.py     # rozpakowanie tekst
 KIT_NO_ATLAS=1 python -I tools/blender.py blender/build_kit.py -- 16 helmet1   # próbny render jednego elementu
 git checkout -- assets/chars/kit                            # próbny render nie idzie do commita
 ```
+Jak dodać lub zmienić asset i z czym porównać wygląd: [`docs/GRAFIKA.md`](docs/GRAFIKA.md).
+
 Blender jest szukany w zmiennej **`BLENDER`** (pełna ścieżka do programu), potem w typowych miejscach instalacji i w `PATH`.
 Bez karty graficznej render idzie na CPU (wolniej); `CYCLES_DEVICE=CPU` wymusza CPU. W logu renderu linia `CYCLES_DEVICE` mówi, czego użył.
 Sprawdzone na drugim komputerze (#8, Windows 11, Blender 5.3): pobranie → rozpakowanie → `helmet1` / `helmet10` dają te same sprite'y co w repo

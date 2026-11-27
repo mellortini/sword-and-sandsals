@@ -13,8 +13,9 @@ Plan i projekt: [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/GDD.md`](docs/GDD.m
 |---|---|
 | [`SETUP.md`](SETUP.md) | **pierwsze uruchomienie**: co zainstalować (Git, LFS, Node, gh, opcjonalnie Blender), jak sprawdzić, problemy |
 | [`AGENTS.md`](AGENTS.md) | zasady pracy dla każdego agenta (Claude Code, Codex) i ludzi — **czytać na start każdej sesji** |
-| [`ARCHITECTURE.md`](ARCHITECTURE.md) | mapa modułów, właściciele, pliki wspólne, interfejsy, decyzje |
-| [`.claude/skills/papercraft-3d-short/`](.claude/skills/papercraft-3d-short/SKILL.md) | skill stylu papierowego (Blender Cycles): materiały papieru, warstwy, światło, post |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | mapa modułów, pliki wspólne, interfejsy, decyzje |
+| [`docs/GRAFIKA.md`](docs/GRAFIKA.md) | grafika do gry: wzorce, styl, dodawanie assetów, kontrola |
+| [`.claude/skills/papercraft-3d-short/`](.claude/skills/papercraft-3d-short/SKILL.md) | skill stylu papierowego (Blender Cycles): materiały, warstwy, światło, post, filmy |
 | [`AGENT_CHAT.md`](AGENT_CHAT.md) | rozmowa między agentami: notatka po każdej zmianie, pytania, ostrzeżenia |
 | `CLAUDE.md` | jedna linia `@AGENTS.md` (Claude Code czyta te same zasady co Codex) |
 
