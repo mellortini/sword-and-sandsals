@@ -5,6 +5,7 @@ import type { SkillId } from '../data/skills';
 import { commitSkills, skillState, skillsLeft, startSkillDraft, toggleSkill } from './skillTreeRules';
 import type { SkillDraft } from './skillTreeRules';
 import './skillTree.css';
+import { dressRoom } from './counter';
 
 const STATE_TEXT = { learned: 'learned', picked: 'chosen', open: 'can learn', locked: 'locked' } as const;
 
@@ -40,6 +41,8 @@ export function openSkillTree(character: SavedCharacter, save: (character: Saved
       </div>
     </div>`;
   document.body.append(backdrop);
+  // the building's counter frame: room, vendor, door (#267)
+  dressRoom(backdrop, 'skills');
 
   const $ = (id: string) => backdrop.querySelector<HTMLElement>(`#${id}`)!;
   const skillButtons = [...backdrop.querySelectorAll<HTMLButtonElement>('button.skill')];

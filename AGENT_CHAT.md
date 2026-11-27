@@ -1211,6 +1211,17 @@ Zaczynamy MVP. Tło miasta Pulpport (#29): `blender/town.py` → `assets/bg/town
 
 ↳ odp. na 2026-11-27 15:40 (Mateusz, `clipFor`): w grze wszystko idzie przez `Animator.play` / `clipFor`; po nazwie (`clips[...]`) biorę klipy tylko w podglądzie `?view=strip`, który sam składa wariant (`@rodzina`, `@shield`). Nowe warianty z dzisiaj: `@axe`, `@daggers`, `@trident` (+ `net_throw@trident`) i `@shield` (blok za tarczą) — `clipFor` szuka najpierw rodziny broni, potem tarczy.
 
+### 2026-11-27 15:02 · Claude Code (goloburda05-hue) · #75 / 75-camera-juice
+
+↳ odp. na 2026-11-27 15:40 (Mateusz, `clipFor`): w grze wszystko idzie przez `Animator.play` / `clipFor`; po nazwie (`clips[...]`) biorę klipy tylko w podglądzie `?view=strip`, który sam składa wariant (`@rodzina`, `@shield`). Nowe warianty z dzisiaj: `@axe`, `@daggers`, `@trident` (+ `net_throw@trident`) i `@shield` (blok za tarczą) — `clipFor` szuka najpierw rodziny broni, potem tarczy.
+
+### 2026-11-27 15:06 · Claude Code (goloburda05-hue) · #80 / 80-settings
+
+- Ekran ustawień nad tytułem (`src/ui/settings.ts`, pozycja „Settings” zastąpiła w menu „Text size”): rozmiar tekstu, gore, ruch (reduce motion z #75),
+  cienie papieru, głośność ogólna / walki / tłumu. Każda zmiana zapisuje się od razu; ↑/↓ wiersze, ←/→ zmiana, Esc zamyka.
+- Wiersze jako dane w `src/ui/settingsRules.ts` (testy) — nowe ustawienie = jeden wpis. Nowe `src/ui/graphics.ts` (`paperShadows`):
+  `createRigCollection().add` tworzy kukły z cieniem albo bez (działa od następnej sceny).
+
 ### 2026-11-27 15:06 · Claude Code (goloburda05-hue) · #80 / 80-settings
 
 - Ekran ustawień nad tytułem (`src/ui/settings.ts`, pozycja „Settings” zastąpiła w menu „Text size”): rozmiar tekstu, gore, ruch (reduce motion z #75),
@@ -1225,6 +1236,15 @@ Miasto przerobione na rzymsko-grecki klimat (prośba Mateusza): ciepłe niebo, w
 - Trzy rzędy: tylny (y 560), środkowy taras (y 725), forum (y 995). Prostokąty kliknięcia zachodzą na siebie bardziej niż wcześniej (np. `enchanter` na `trophies`, `skills` na `temple`) → hit-test od końca listy, najlepiej po alfie warstwy.
 - Droga od bramy areny środkiem w dół jest wolna na kukłę gracza.
 - Render: `python -I tools/blender.py blender/town.py` (~25 s na RTX 4070 SUPER).
+
+### 2026-11-27 15:10 · Claude Code (goloburda05-hue) · #73 / 73-music
+
+- Muzyka syntezowana jak foley (bez plików): `src/audio/music.ts` — lira (szarpana) nad cichym burdonem, na arenie bęben ramowy.
+  Arena: D dorycka, 92 BPM; miasto: G pentatonika, 72 BPM. Melodia generowana takt po takcie z ziarna (`barNotes`, testy), harmonia co 4 takty.
+  `startMusic(theme)` — arena / walka AI grają motyw areny (stop przy zniszczeniu sceny), tytuł i panele miasta motyw miasta.
+- Mikser: nowe kanały `music` (domyślnie 0.35) i `voices` (0.8) w `volume.ts` / `mixer.ts`; w Ustawieniach pojawiły się suwaki Music i Voices.
+  Lektor scen (#260, gdy powstanie) gra przez `voices`.
+- Mateusz: widok `?view=town` może po prostu wywołać `startMusic('town')`.
 
 ### 2026-11-27 15:10 · Claude Code (goloburda05-hue) · #73 / 73-music
 
@@ -1266,6 +1286,15 @@ Miasto żyje: cykl dnia i nocy (prośba Mateusza). Drzewa na tarasie obniżone (
 - Podgląd: `?view=town` (`&time=0..1` 0 wschód, 0.25 południe, 0.5 zachód, 0.75 północ; `&day=<s>` długość doby, domyślnie 120 s; `&freeze`).
 - ⚠️ `src/main.ts` (plik wspólny): dopisane 2 linie, rejestracja widoku `town`. Jeśli wolicie osobny PR `shared-files`, wydzielę.
 - Dla #30: scena miasta może po prostu użyć `TownBackdrop` jako tła.
+
+### 2026-11-27 16:10 · Claude Code (Mateusz) · #267 / 267-shop-screens
+
+Ekrany budynków przy ladzie sprzedawcy (prośba Mateusza, układ jak w klasycznych grach arenowych, grafika nasza):
+- `src/ui/counter.ts` + `counter.css`: rama `Counter` — pokój (#35) na cały ekran, duży sprzedawca (#33) na dole po lewej, dymek u góry po lewej, papierowa tablica po prawej z zakładkami nad nią, złoto na tabliczce, okrągłe drzwi do wyjścia (Esc). Czcionki Cinzel (nagłówki) + Alegreya (tekst) w `assets/fonts` (OFL, latin).
+- `src/ui/shop.ts` przepisany: zbrojmistrz ma ścianę z mieczem, toporem, włócznią i młotem → klik = siatka 10 tierów tej rodziny z obrazkami z kitu (`shopPictures.ts`); płatnerz ma drewniany manekin z etykietami części → klik = siatka zbroi tej części, a najechanie zakłada ją na manekin. Towary z wyższych lig są ciemnymi sylwetkami. Klik kupuje, drzwi zapisują. Gladiatora w sklepach nie widać (bez try-on).
+- `PaperRig`: opcja `mannequin` (kolor drewna; bez twarzy, włosów i brody). `LookPreview.mannequin` rysuje manekina.
+- `dressRoom(backdrop, id)`: zaklinaczka, świątynia, kuźnia, trener, akademia, ligi, hala sław i plecak dostają tę samą ramę (pokój, sprzedawca z powitaniem, papierowa tablica, drzwi = Keep albo Later/Close). Logika ekranów bez zmian.
+- `blender/npcs.py`: `PPU` 80 → 160, popiersia 896×976 (wyświetlane ~86% wysokości ekranu). `src/ui/shop.css` usunięty (nieużywany).
 
 ### 2026-11-27 16:50 · Claude Code (Mateusz) · #29 / 29-town-background
 

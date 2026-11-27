@@ -6,6 +6,7 @@ import { openLevelUp } from './levelUp';
 import { pointsText, trainerView } from './trainerRules';
 import './forge.css';
 import './trainer.css';
+import { dressRoom } from './counter';
 
 const BLOCKED_TEXT = {
   'nothing-to-reset': 'Nothing trained yet, so there is nothing to reset.',
@@ -46,6 +47,8 @@ export function openTrainer(
       </div>
     </div>`;
   document.body.append(backdrop);
+  // the building's counter frame: room, vendor, door (#267)
+  dressRoom(backdrop, 'trainer');
 
   const $ = (id: string) => backdrop.querySelector<HTMLElement>(`#${id}`)!;
   const button = (act: string) => backdrop.querySelector<HTMLButtonElement>(`[data-act="${act}"]`)!;

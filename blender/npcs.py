@@ -25,7 +25,7 @@ M = armor.M
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 SAMPLES = int(argv[0]) if argv else 64
 OUT = os.path.join(sl.GAME, 'assets', 'npc')
-PPU = 80.0       # a bust is 6.1 units tall -> 488 px: sharp at ~240 css px on a 2x screen
+PPU = 160.0      # a bust is 6.1 units tall -> 976 px: the shop screen shows it ~half the screen high (#267)
 os.makedirs(OUT, exist_ok=True)
 
 sc = sl.setup(samples=SAMPLES)
