@@ -23,12 +23,16 @@ export const CLIPS: Clip[] = [
     ],
   },
   {
+    // #238: leg angles solved by 2-bone IK (as walk_back, #7): the front foot lifts and lands 1.6 ahead while the back
+    // one holds, then the back foot follows while the front one holds (no sliding soles)
     name: 'walk_fwd', length: 20,
     keys: [
       { f: 0 },
-      { f: 6, x: 0.55, pose: { leg_f_up: 42, leg_f_lo: -48, foot_f: 4, torso: 0, arm_b_up: -6 } },
-      { f: 12, x: 1.1, pose: { leg_f_up: 28, leg_f_lo: -6, leg_b_up: -28, leg_b_lo: 0, torso: 1, arm_b_up: -24 } },
-      { f: 16, x: 1.42, pose: { leg_b_up: 6, leg_b_lo: -48, foot_b: 14 } },
+      { f: 3, x: 0.22, pose: { leg_f_up: 43, leg_f_lo: -52, leg_b_up: -6, leg_b_lo: -20, torso: 1, arm_b_up: -10 } },
+      { f: 6, x: 0.5, pose: { leg_f_up: 51, leg_f_lo: -57, leg_b_up: -10, leg_b_lo: -20, torso: 0, arm_b_up: -6 } },
+      { f: 10, x: 0.8, pose: { leg_f_up: 35, leg_f_lo: -20, leg_b_up: -13, leg_b_lo: -24, torso: 1, arm_b_up: -20 } },
+      { f: 13, x: 1.05, pose: { leg_f_up: 31, leg_f_lo: -20, leg_b_up: 2, leg_b_lo: -52, arm_b_up: -24 } },
+      { f: 16, x: 1.32, pose: { leg_f_up: 27, leg_f_lo: -20, leg_b_up: 11, leg_b_lo: -58, torso: 2 } },
       { f: 20, x: 1.6, pose: { leg_f_up: 16, leg_f_lo: -6, leg_b_up: -14, leg_b_lo: 4, torso: 3, arm_b_up: -18 } },
     ],
   },

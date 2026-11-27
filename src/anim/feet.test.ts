@@ -32,8 +32,8 @@ function track(name: string) {
 }
 
 describe('feet on the floor (#7)', () => {
-  it('walk_back: the standing foot does not slide while the other one steps', () => {
-    const t = track('walk_back');
+  it.each(['walk_back', 'walk_fwd'])('%s: the standing foot does not slide while the other one steps (#238)', (name) => {
+    const t = track(name);
     for (const foot of FEET) {
       let planted: number | null = null;
       for (const fr of t) {
