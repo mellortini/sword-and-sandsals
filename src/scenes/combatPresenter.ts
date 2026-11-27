@@ -59,6 +59,8 @@ export class CombatPresenter {
       for (const side of ['player', 'enemy'] as const) attachGroundFx(options.fighters[side], options.fx.ground, options.floorY);
     }
     if (options.sound) for (const side of ['player', 'enemy'] as const) attachFoley(options.fighters[side]);
+    // statuses show on the bodies (#50): flames, wet stains, stars, tape
+    for (const side of ['player', 'enemy'] as const) options.fx.status.attach(side, options.fighters[side].rig);
   }
 
   get busy() { return this.running; }
@@ -79,6 +81,7 @@ export class CombatPresenter {
       a.play('idle', { blend: 0 });
     }
     this.o.fx.clear();
+    this.showStatuses(state);
     this.emit();
   }
 
@@ -101,10 +104,15 @@ export class CombatPresenter {
       }
       // the crowd reacts once the action has played out; a bouquet's health is already in `after`
       const gifts = events.filter((e): e is CrowdGiftEvent => e.type === 'crowd_gift');
+      this.showStatuses(after);
       this.emit(gifts.length ? gifts : undefined);
     } finally {
       this.running = false;
     }
+  }
+
+  private showStatuses(state: CombatState) {
+    for (const side of ['player', 'enemy'] as const) this.o.fx.status.set(side, state.fighters[side].statuses);
   }
 
   private emit(gifts?: readonly CrowdGiftEvent[]) {

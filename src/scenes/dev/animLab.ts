@@ -1,4 +1,5 @@
 import { Container, Sprite } from 'pixi.js';
+import type { StatusKind } from '../../core/status';
 import type { Animator } from '../../anim/Animator';
 import type { PaperRig } from '../../rig/PaperRig';
 import { createCombat, getActionOptions, performAction } from '../../core/combat';
@@ -16,6 +17,8 @@ import { FIGHT_LAYOUT, MIN_LUNGE, STRIKE_GAP } from '../combatPlan';
 import { WEAPONS } from '../../data/weapons';
 import { playFoley } from '../../audio/foley';
 import { setVolume, volumes } from '../../audio/volume';
+
+const STATUS_KINDS: readonly StatusKind[] = ['burning', 'soaked', 'stunned', 'taped', 'torn', 'feared', 'slowed'];
 
 export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: SceneContext): Promise<SceneUpdate> {
   const arena = new Container();
@@ -139,6 +142,7 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
     <label><input type="checkbox" id="cbCounter" checked> enemy answers</label>
     <label>gore <select id="sGore">${GORE_MODES.map((m) => `<option value="${m.id}"${m.id === goreMode() ? ' selected' : ''}>${m.name}</option>`).join('')}</select></label>
     <label>volume <input type="range" id="rVolume" min="0" max="1" step="0.05" value="${volumes().master}"></label>
+    <label>status <select id="sStatus"><option value="">none</option>${STATUS_KINDS.map((k) => `<option value="${k}">${k}</option>`).join('')}<option value="all">all</option></select></label>
     <label>speed <select id="sSpeed"><option value="1">1x</option><option value="0.5">0.5x</option><option value="0.25">0.25x</option><option value="0.1">0.1x</option></select></label>
     <div class="small"><a href="?view=arena">arena</a> &middot; <a href="?view=wardrobe">wardrobe</a> &middot; <a href="?view=strip&clip=attack_normal">frame strips</a></div>`;
   // --- core fight (#11): src/core decides, CombatPresenter animates, HUD follows. Both sides pick at random.
@@ -190,6 +194,13 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   (document.getElementById('cbCounter') as HTMLInputElement).onchange = (e) => (state.counter = (e.target as HTMLInputElement).checked);
   (document.getElementById('sGore') as HTMLSelectElement).onchange = (e) => setGoreMode((e.target as HTMLSelectElement).value as GoreMode);
   (document.getElementById('rVolume') as HTMLInputElement).oninput = (e) => setVolume('master', +(e.target as HTMLInputElement).value);
+  // statuses on both fighters (#50), 3 stacks so every spot shows; &status=burning,stunned picks them from the URL
+  const showStatus = (value: string) => {
+    const kinds = value === 'all' ? STATUS_KINDS : value.split(',').filter((k): k is StatusKind => (STATUS_KINDS as readonly string[]).includes(k));
+    for (const side of ['player', 'enemy'] as const) layer.status.set(side, kinds.map((kind) => ({ kind, stacks: 3 })));
+  };
+  showStatus(params.get('status') ?? '');
+  (document.getElementById('sStatus') as HTMLSelectElement).onchange = (e) => showStatus((e.target as HTMLSelectElement).value);
   (document.getElementById('sSpeed') as HTMLSelectElement).onchange = (e) => { const v = +(e.target as HTMLSelectElement).value; pa.speed = v; ea.speed = v; };
   (window as unknown as { __act: unknown }).__act = act;
   return (dt) => { layer.update(dt * pa.speed); hud.update(dt * pa.speed); };
