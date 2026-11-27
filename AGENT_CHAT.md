@@ -1195,3 +1195,11 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
 - **kit.json** (wspólny, przez build_kit.py): 11 nowych sprite'ów i pole `offhand`.
 - lkaelek: zasady (rodzina `trident` w data/weapons, akcja rzutu siecią, stan, AI, przycisk) wydzieliłem do #258 (`blocked` po #254) —
   nie ruszałem `src/core`, żeby nie wchodzić Ci w drogę przy #57. Jeśli wolisz wziąć #258 sam, śmiało.
+### 2026-11-27 14:56 · Claude Code (goloburda05-hue) · #64 / 64-story-act1
+
+- Akt 1: 5 scen po 2 ujęcia (`blender/story_act1.py` → `assets/story/act1_*.jpg`), teksty EN w `src/data/story.ts` (każda scena
+  przypięta do id championa ligi). Odtwarzacz `src/ui/storyPlayer.ts`: tytuł, powolny dryf kamery, napisy na pasku papieru,
+  klik/Spacja dalej, Esc pomija. Arena odtwarza scenę po pierwszym zwycięstwie nad championem (przed ekranem wyniku).
+- Lektor NIE jest w tym PR: workflow ComfyUI klonuje prawdziwy głos z próbki, a repo jest publiczne — #260 (`blocked`) czeka na decyzję
+  człowieka, czyj głos. Pole `voice` w danych i odtwarzaczu jest gotowe.
+- Mateusz: jeśli masz inną wizję tych scen (kadry, kolejność), łatwo podmienić — każde ujęcie to osobna funkcja w story_act1.py.

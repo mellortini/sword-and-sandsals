@@ -28,6 +28,9 @@ import { recordForCareer } from '../ui/achievementRules';
 import { showAchievements, showNotice } from '../ui/achievementToast';
 import { afterBout } from '../ui/nemesisRules';
 import { nextBout, recordLeagueWin } from '../ui/leagueRules';
+import { sceneAfter } from '../data/story';
+import type { StoryScene } from '../data/story';
+import { playStory } from '../ui/storyPlayer';
 import type { NemesisMemory } from '../core/nemesis';
 import { loadoutFromLook } from './preFight';
 import { aiPicker, nemesisPicker, runFight } from './turnLoop';
@@ -174,6 +177,7 @@ export async function showArena(
       // let the death and victory poses land before the result covers them
       await pause(1.2);
       let progress: FightProgress | undefined;
+      let story: StoryScene | undefined;
       if (career) {
         // health after the bout and the potions left (#191) go to the save with the XP
         const settled = settleTempleCombat(career, outcome.state.fighters.player);
@@ -185,6 +189,8 @@ export async function showArena(
         if (enemy.nemesis) enemy = { ...enemy, nemesis: feud.character.nemesis };
         // a league bout won goes on the ladder (#58); the champion's fall clears the league
         const leagueWon = outcome.state.winner === 'player' && enemy.bout ? recordLeagueWin(feud.character, enemy.bout.id) : feud.character;
+        // a champion beaten for the first time opens the next page of the story (#64), after the result is saved
+        if (leagueWon !== feud.character && enemy.bout) story = sceneAfter(enemy.bout.id);
         if (leagueWon !== feud.character) {
           const next = nextBout(leagueWon);
           showNotice('League', `${enemy.name} is beaten`, next ? `Next on the ladder: ${next.bout.name}.` : 'Every league with fighters is cleared.');
@@ -197,6 +203,10 @@ export async function showArena(
         showAchievements([...fought.unlocked, ...leveled.unlocked]);
         // the bar still shows the XP if saving fails; the next fight starts from it again
         await saveGame(career).catch(() => undefined);
+      }
+      if (story) {
+        await playStory(story);
+        story = undefined;
       }
       const choice = await openFightResult(context, {
         player, enemy, summary: summarizeFight(outcome.events), progress, spendPoints: career ? spendPoints : undefined,
