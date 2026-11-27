@@ -64,7 +64,7 @@ export async function showAiFight(context: SceneContext): Promise<SceneUpdate> {
   arena.addChild(hud);
   const presenter = new CombatPresenter({
     fighters: { player: rigs.find((r) => r.rig === P)!.anim!, enemy: rigs.find((r) => r.rig === E)!.anim! },
-    fx, unit: UNIT, layout: LAYOUT,
+    fx, unit: UNIT, layout: LAYOUT, floorY: FEET_Y,
     onState: (s) => hud.setState(s),
   });
 

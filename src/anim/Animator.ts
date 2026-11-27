@@ -28,6 +28,8 @@ export class Animator {
   home = { x: 0, y: 0 };      // display px of the pelvis at rest
   unit: number;
   speed = 1;
+  /** called for every event of every clip this Animator plays (effects that follow the fighter, e.g. ground fx #17) */
+  readonly listeners = new Set<(e: ClipEvent, clip: string) => void>();
   private cur: Baked;
   private frame = 0;
   private opts: PlayOpts = {};
@@ -89,6 +91,7 @@ export class Animator {
       if (f >= e.f && !this.fired.has(id)) {
         this.fired.add(id);
         this.opts.onEvent?.(e);
+        for (const l of this.listeners) l(e, c.name);
       }
     }
     const s = sample(c, f);
