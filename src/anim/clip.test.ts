@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { bake, sample } from './clip';
-import { CLIPS, bakeAll } from './clips';
+import { ALL_CLIPS, bakeAll } from './clips';
 
 describe('bake: root height', () => {
   it('puts a grounded key without y back on the floor after air keys', () => {
@@ -22,7 +22,7 @@ describe('bake: root height', () => {
 
   it('ends every non-looping, non-holding clip with both feet planted (root y = 0, grounded)', () => {
     const baked = bakeAll({});
-    for (const clip of CLIPS.filter((c) => !c.loop && !c.hold)) {
+    for (const clip of ALL_CLIPS.filter((c) => !c.loop && !c.hold)) {
       const end = sample(baked[clip.name], clip.length);
       expect({ clip: clip.name, y: end.y, air: end.air }).toEqual({ clip: clip.name, y: 0, air: false });
     }

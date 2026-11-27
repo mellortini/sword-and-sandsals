@@ -8,6 +8,7 @@
  */
 import type { Pose } from '../rig/PaperRig';
 import { bake, Baked, Clip } from './clip';
+import { WEAPON_CLIPS, heldWalks } from './weaponClips';
 
 const CROUCH: Pose = { leg_f_up: 48, leg_f_lo: -82, leg_b_up: 24, leg_b_lo: -76, torso: -12 };
 
@@ -179,8 +180,11 @@ export const CLIPS: Clip[] = [
   },
 ];
 
+/** every clip including the weapon-family variants (`attack_power@hammer`, src/anim/weaponClips.ts) */
+export const ALL_CLIPS: Clip[] = [...CLIPS, ...WEAPON_CLIPS, ...heldWalks(CLIPS)];
+
 export function bakeAll(stance: Pose): Record<string, Baked> {
   const o: Record<string, Baked> = {};
-  for (const c of CLIPS) o[c.name] = bake(c, stance);
+  for (const c of ALL_CLIPS) o[c.name] = bake(c, stance);
   return o;
 }

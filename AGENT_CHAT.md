@@ -940,6 +940,41 @@ Miecze tier 1–10 (#184) — sprite'y `weapon_sword1…10` są w kicie i atlasi
 - `kit.json` / atlas: tylko dopisane sprite'y (plik wspólny → label `shared-files`). Topory/włócznie/młoty (#36) dopiszę w tym samym `weapons.py`.
 - `?view=strip` ma nowy parametr `&weapon=sword7` (podgląd broni w pozach ciosu).
 - Testy wizualne nie odświeżane (domyślny wygląd się nie zmienił — wciąż gladius).
+
+### 2026-11-27 13:10 · Claude Code (Mateusz) · #36 / 36-axes-spears-hammers
+
+Topory, włócznie i młoty tier 1–10 (#36) — sprite'y `weapon_axe1…10`, `weapon_spear1…10`, `weapon_hammer1…10` w kicie i atlasie.
+Gałąź stoi na #184 (PR #231) — najpierw zmergujcie miecze, wtedy ten PR pokaże tylko swoje zmiany.
+- `blender/weapons.py`: wspólna drabina materiałów (`_tier`) jak u mieczy i zbroi: 1 drewno i szmaty, 2 masa papierowa, 3 karton, 4 karton
+  z nitami, 5 brąz, 6 żelazo, 7 stal + plecionka, 8 mosiądz i czerwień, 9 złoto i czerwień, 10 złoto, fiolet, laur.
+- Chwyt zawsze w początku układu (jak gladius): topór i młot trzymane przy końcu trzonka, włócznia na drzewcu — grot ~4,6 j. od dłoni
+  (miecz ~3), tył drzewca ~1 j. za dłonią. Ostrze topora po stronie −y (przód przy cięciu z góry). Głowice rosną z tierem.
+- ❓ goloburda05-hue / lkaelek: włócznia używa na razie tych samych klipów co miecz (zamach). Pchnięcie dla włóczni to osobne zadanie animacji — założę Issue, jeśli chcecie.
+
+### 2026-11-27 15:40 · Claude Code (Mateusz) · #36 / 36-axes-spears-hammers
+
+Po uwagach Mateusza: młot i włócznia to broń **dwuręczna**, młot bije znad głowy, włócznia dźga.
+- Grafika: młot bojowy ~6,5 j. z dużą głowicą, włócznia ~10,8 j. (dłuższa niż postać), oba z drugim owinięciem na tylną dłoń.
+  `kit.json` → sprite'y `weapon_hammer*` / `weapon_spear*` mają `grip2` (gdzie tylna dłoń trzyma trzonek).
+- `src/rig/twoHand.ts` (+ test): przy broni z `grip2` rig sam zgina tylną rękę (IK) tak, żeby dłoń trzymała trzonek; tylny bark
+  może wyjść do przodu za tułowiem (`arm_b_shift`, jak skręt klatki przy chwycie oburącz). Klipy nie muszą animować tylnej ręki.
+- `PaperRig`: tekstura kukły szersza (19 j. zamiast 15, 12,5 j. przed miednicą) — długa włócznia w pchnięciu się mieści. `fk()` liczy przez `forwardKinematics`.
+- `src/anim/weaponClips.ts`: warianty `idle@hammer`, `attack_quick|normal|power@hammer` (znad głowy) i to samo `@spear` (pchnięcia).
+  `Animator.play('attack_normal')` sam wybiera wariant dla rodzaju broni z wyglądu — **CombatPresenter nie wymaga zmian**.
+- `Clip.reach`: włócznia trafia z dalszej odległości, więc `lunge` jest o tyle krótszy (2,4 j.) — nie wchodzi w przeciwnika.
+- ❓ goloburda05-hue: jeśli gdzieś odtwarzacie klip po nazwie bez `Animator` (np. `clips[name]`), użyjcie `animator.clipFor(name)`, żeby złapać wariant broni.
+
+### 2026-11-27 18:20 · Claude Code (Mateusz) · #36 / 36-axes-spears-hammers
+
+Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z daleka, młot bije mocno z bliska).
+- ⚠️ goloburda05-hue: `FIGHT_LAYOUT` w `combatPlan.ts` → `{ left: 252, px: 60, contact: 215 }` (było 652 / 20). Pole logiczne = 60 px,
+  więc zasięg z katalogu jest widoczny: młot (1,5) bije z ~8,0 j., miecz (2) z ~8,8 j., włócznia (3) z ~10,4 j. Start 6/14 jest na środku sceny.
+  Miecz robi przez to dłuższy wypad przy ciosie (presenter i tak dopasowuje `lunge`). Kod presentera bez zmian.
+- Włócznia trzymana przy końcu drzewca (obie dłonie z tyłu, ~6,6 j. przed dłonią), w postawie uniesiona do góry; pchnięcie trafia grotem w przód
+  przeciwnika. Młot w postawie pionowo, uderza w głowę/barki. Klipy chodu mają warianty `@hammer` / `@spear` (ręce zostają w postawie broni).
+- `Animator`: przy `lunge` cios z dłuższą bronią (`reach`) może się cofnąć do 1,2 j., gdy przeciwnik stoi bliżej niż zasięg broni.
+- Lab `?view=anim&weapon=spear8&enemy=hammer8`: jeden klik = podejście na zasięg tej broni + cios (jak w grze).
+- lkaelek: przewagi broni są już w Twoich danych (włócznia zasięg 3 i odrzut, młot +4 obrażeń, przebicie zbroi i ogłuszenie) — ich nie ruszałem.
 ### 2026-11-27 08:46 · Claude Code (Mateusz) · shared-files / shared-files-no-area-owners
 
 - Na prośbę Mateusza zniosłem podział obszarów między osoby: każdy może wziąć każde wolne zadanie `ready`, od najniższej fazy. Labele `area:*` opisują już tylko część gry.

@@ -9,7 +9,8 @@ import { CombatPresenter } from '../combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from '../common';
 import type { SceneContext, SceneUpdate } from '../common';
 import { arenaBackdrop } from '../backdrop';
-import { FIGHT_LAYOUT } from '../combatPlan';
+import { FIGHT_LAYOUT, MIN_LUNGE, STRIKE_GAP } from '../combatPlan';
+import { WEAPONS } from '../../data/weapons';
 
 export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: SceneContext): Promise<SceneUpdate> {
   const arena = new Container();
@@ -17,7 +18,9 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   arena.addChild(new Sprite(arenaBackdrop(bgTex)));
   const gsh = groundShadowTexture();
   const tp = params.get('tier');
-  const L0 = randomLook(tp ? +tp : 4), L1 = randomLook(tp ? +tp : 6);
+  // &weapon=hammer8 / &enemy=spear6: try a weapon (and its clip variants, #36) in the lab
+  const armed = (look: ReturnType<typeof randomLook>, w: string | null) => (w ? { ...look, weapon: w } : look);
+  const L0 = armed(randomLook(tp ? +tp : 4), params.get('weapon')), L1 = armed(randomLook(tp ? +tp : 6), params.get('enemy'));
   const pY = FEET_Y - PELVIS_ABOVE_FEET * UNIT;
   const shadows: Sprite[] = [];
   for (let i = 0; i < 2; i++) {
@@ -44,7 +47,12 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
     }
   });
   const gap = () => Math.abs(ea.home.x - pa.home.x) / UNIT;
-  const MELEE = 5.0;
+  // melee distance as in the game: the pelvises at logical distance 2 (#151); a longer weapon strikes from further (#36)
+  const MELEE = (FIGHT_LAYOUT.contact + 2 * FIGHT_LAYOUT.px) / UNIT;
+  type Attack = 'attack_quick' | 'attack_normal' | 'attack_power';
+  /** the weapon's reach from the catalogue (spear 3, sword 2, hammer 1.5) as pelvis distance on screen */
+  const rangeOf = (a: Animator) => (FIGHT_LAYOUT.contact + (WEAPONS.find((w) => w.id === a.rig.look.weapon)?.range ?? 2) * FIGHT_LAYOUT.px) / UNIT;
+  const kindOf = (name: Attack) => name.slice('attack_'.length) as 'quick' | 'normal' | 'power';
   // game-time scheduler (follows slow motion and manual stepping, unlike setTimeout)
   const queue: { at: number; fn: () => void }[] = [];
   let clock = 0;
@@ -57,13 +65,26 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
     if (state.response === 'block' && Math.random() < 0.9) { def.play('block'); shield(def.rig); }
     else { def.play('hit'); dmg(def.rig, Math.round(power * (0.7 + Math.random() * 0.6)), crit); }
   };
-  const closeIn = (a: Animator) => a.play('walk_fwd', { commit: true, distance: Math.min(1.6, Math.max(0, gap() - MELEE)) });
+  /**
+   * Walk into this weapon's range (several strides if needed), then strike - one click is one attack.
+   * The lunge is fitted like the CombatPresenter does, so the blow lands on the strike point and nobody walks into the other.
+   */
+  const strike = (a: Animator, name: Attack, opts: { then?: string; onEnd?: () => void; onHit: () => void }) => {
+    const range = rangeOf(a), g = gap();
+    if (g > range + 0.3) {
+      a.play('walk_fwd', { commit: true, distance: Math.min(2.4, g - range), then: null, onEnd: () => strike(a, name, opts) });
+      return;
+    }
+    a.play(name, {
+      blend: 1, lunge: Math.max(MIN_LUNGE, g - STRIKE_GAP[kindOf(name)]), then: opts.then ?? 'idle', onEnd: opts.onEnd,
+      onEvent: (e) => { if (e.type === 'hit') opts.onHit(); },
+    });
+  };
   const enemyTurn = () => {
     if (!state.counter) return;
     later(0.5, () => {
       if (ea.busy) return;
-      if (gap() > MELEE + 0.6) { closeIn(ea); return; }
-      ea.play(Math.random() < 0.5 ? 'attack_normal' : 'attack_power', { blend: 1, onEvent: (e) => { if (e.type === 'hit') defend(pa, 9); } });
+      strike(ea, Math.random() < 0.5 ? 'attack_normal' : 'attack_power', { onHit: () => defend(pa, 9) });
     });
   };
   const act = (name: string) => {
@@ -86,13 +107,11 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
         break;
       case 'attack_quick': case 'attack_normal': case 'attack_power': {
         const pw = name === 'attack_quick' ? 4 : name === 'attack_normal' ? 9 : 16;
-        if (g > MELEE + 0.6) { closeIn(pa); break; }
-        pa.play(name, { blend: 1, onEnd: enemyTurn, onEvent: (e) => { if (e.type === 'hit') defend(ea, pw, name === 'attack_power' && Math.random() < 0.4); } });
+        strike(pa, name, { onEnd: enemyTurn, onHit: () => defend(ea, pw, name === 'attack_power' && Math.random() < 0.4) });
         break;
       }
       case 'finish':
-        if (g > MELEE + 0.6) { closeIn(pa); break; }
-        pa.play('attack_power', { blend: 1, then: 'victory', onEvent: (e) => { if (e.type === 'hit') { ea.play('death', { then: null }); dmg(E, 24, true); } } });
+        strike(pa, 'attack_power', { then: 'victory', onHit: () => { ea.play('death', { then: null }); dmg(E, 24, true); } });
         break;
       case 'reset':
         hud.visible = false;

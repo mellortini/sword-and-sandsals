@@ -6,9 +6,13 @@ import type { Look } from '../../rig/PaperRig';
 import { H, PELVIS_ABOVE_FEET, W, label, randomLook } from '../common';
 import type { SceneContext } from '../common';
 
+const c0 = (n: string) => n.split('@')[0];
+
 export async function showStrip({ world, kit, clips, params, add, rigs }: SceneContext) {
   const name = params.get('clip') ?? 'attack_normal';
-  const c = clips[name];
+  const weapon = params.get('weapon');   // e.g. &weapon=sword7 (#184); the clip's variant for that weapon family when it has one (#36)
+  const variant = `${c0(name)}@${(weapon ?? '').replace(/\d+$/, '')}`;
+  const c = clips[variant] ?? clips[name];
   const every = +(params.get('every') ?? 1);
   const frames: number[] = [];
   for (let f = 0; f <= c.length; f += every) frames.push(f);
@@ -17,9 +21,8 @@ export async function showStrip({ world, kit, clips, params, add, rigs }: SceneC
   const S = Math.min(cw / 10, ch / 14.5);
   const bgs = new Container();
   world.addChild(bgs);
-  world.addChild(label(`${name}: ${c.length} frames @ ${FPS} fps` + (every > 1 ? ` (every ${every})` : ''), W / 2, 8, 26));
+  world.addChild(label(`${c.name}: ${c.length} frames @ ${FPS} fps` + (every > 1 ? ` (every ${every})` : ''), W / 2, 8, 26));
   const tier = +(params.get('tier') ?? 6);
-  const weapon = params.get('weapon');   // e.g. &weapon=sword7 (#184); default: whatever randomLook gives
   const look: Look = { ...randomLook(tier), helmet: tier, armor: tier, shoulders: tier, greaves: tier, boots: tier, ...(weapon ? { weapon } : {}) };
   const probe = new PaperRig(kit, { scale: S, facing: 1 });
   const baseLow = probe.soleLow(kit.json.pose_test);

@@ -58,6 +58,9 @@ for key, (fn, bone, slot, piece, t) in armor.pieces().items():
 jobs['weapon_gladius'] = (gladius, None, False)
 for t, fn in weapons.SWORDS.items():
     jobs[f'weapon_sword{t}'] = (fn, None, False)
+for fam, table in (('axe', weapons.AXES), ('spear', weapons.SPEARS), ('hammer', weapons.HAMMERS)):
+    for t, fn in table.items():
+        jobs[f'weapon_{fam}{t}'] = (fn, None, False)
 
 meta_path = os.path.join(OUT, 'kit.json')
 old = json.load(open(meta_path)) if (ONLY and os.path.exists(meta_path)) else {}
@@ -87,6 +90,9 @@ for key, (fn, tint, head) in jobs.items():
             o.scale = (o.scale[0] * HEAD_S, o.scale[1] * HEAD_S, 1.0)
     info = sl.render_coll(coll, os.path.join(SPR, key + '.png'))
     info['tint'] = tint
+    fam = key[len('weapon_'):].rstrip('0123456789') if key.startswith('weapon_') else None
+    if fam in weapons.GRIP2:   # two-handed: where the back hand holds the haft (weapon-bone units)
+        info['grip2'] = list(weapons.GRIP2[fam])
     if key in SPRITE_ALPHA:
         info['alpha'] = SPRITE_ALPHA[key]
     sprites[key] = info

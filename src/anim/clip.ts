@@ -12,7 +12,11 @@ import type { Pose } from '../rig/PaperRig';
 export type Ease = 'linear' | 'in' | 'out' | 'inout' | 'step' | 'back';
 export interface Key { f: number; pose?: Pose; x?: number; y?: number; ease?: Ease; air?: boolean }
 export interface ClipEvent { f: number; type: 'hit' | 'block' | 'land' | 'swing' | 'impact' | 'end' }
-export interface Clip { name: string; length: number; loop?: boolean; hold?: boolean; keys: Key[]; events?: ClipEvent[] }
+/**
+ * `name@family` makes a clip the variant of `name` for one weapon family (Animator picks it by the look's weapon).
+ * `reach` = how much further than a sword the weapon strikes (units): the attack lunge is that much shorter.
+ */
+export interface Clip { name: string; length: number; loop?: boolean; hold?: boolean; keys: Key[]; events?: ClipEvent[]; reach?: number }
 
 export interface Sample { pose: Pose; x: number; y: number; air: boolean }
 
