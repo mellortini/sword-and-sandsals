@@ -35,8 +35,9 @@ import type { NemesisMemory } from '../core/nemesis';
 import { loadoutFromLook } from './preFight';
 import { aiPicker, nemesisPicker, runFight } from './turnLoop';
 import type { ActionPicker } from './turnLoop';
-import { arenaBackdrop } from './backdrop';
-import { CrowdFx } from '../ui/crowdFx';
+import { buildArenaStage } from './arenaStage';
+import { isArenaId } from './arenas';
+import type { ArenaId } from './arenas';
 import { startMusic } from '../audio/music';
 import { CameraJuice, applyCamera } from '../ui/cameraJuice';
 import { reduceMotion } from '../ui/motion';
@@ -59,6 +60,8 @@ export interface ArenaFighter {
 export interface ArenaOptions {
   /** the saved gladiator fighting as the player: wins add XP to the save and the result screen shows the XP bar (#24) */
   readonly career?: SavedCharacter;
+  /** where the bout is fought (#272); `?arena=` when not given, else Pulpport */
+  readonly arena?: ArenaId;
 }
 
 const LAYOUT = FIGHT_LAYOUT;
@@ -82,12 +85,13 @@ const pause = (sec: number) => new Promise<void>((r) => setTimeout(r, sec * 1000
 export async function showArena(
   context: SceneContext, fighters?: readonly [ArenaFighter, ArenaFighter], options: ArenaOptions = {},
 ): Promise<SceneUpdate> {
-  const { world, bgTex, params, ui, add, rigs } = context;
+  const { world, params, ui, add, rigs } = context;
+  const askedArena = params.get('arena');
+  const themeId: ArenaId = options.arena ?? (isArenaId(askedArena) ? askedArena : 'pulpport');
   const arena = new Container();
   world.addChild(arena);
-  arena.addChild(new Sprite(arenaBackdrop(bgTex)));
   // the painted stands come alive (#52): over the backdrop, under the fighters
-  const crowdFx = arena.addChild(new CrowdFx());
+  const crowdFx = await buildArenaStage(arena, themeId);
 
   const tp = params.get('tier');
   const tier = tp ? +tp : undefined;

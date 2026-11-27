@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import crowd from '../../assets/bg/arena_crowd.json';
+import crowd from '../../assets/bg/arena_people.json';
 import sheet from '../../assets/fx/crowd.json';
-import { WAVE_SPEED, armRaise, raisedShare, seatHash, throwGifts, throwPath } from './crowdWave';
+import { SWAY, WAVE_SPEED, armRaise, crowdPose, raisedShare, seatHash, throwGifts, throwPath } from './crowdWave';
 import type { Seat } from './crowdWave';
 
 const seats = crowd.seats as Seat[];
@@ -42,6 +42,25 @@ describe('the living crowd (#52)', () => {
     expect(share(1)).toBeGreaterThan(0.02);
     expect(share(1)).toBeLessThan(0.15);
     expect(seatHash(3)).toBe(seatHash(3));
+  });
+
+  it('is never quite still: a few fans cheer with both arms up, most of the others sway very gently', () => {
+    for (let time = 0; time < 30; time += 0.5) {
+      const poses = seats.map((s, i) => crowdPose(s, i, [], time));
+      const cheering = poses.filter((p) => p.up > 0.5).length / seats.length;
+      expect(cheering).toBeGreaterThan(0.01);
+      expect(cheering).toBeLessThan(0.1);
+      for (const p of poses) expect(Math.abs(p.sway)).toBeLessThanOrEqual(SWAY);
+    }
+    const swaying = seats.filter((s, i) => crowdPose(s, i, [], 3).sway !== 0).length / seats.length;
+    expect(swaying).toBeGreaterThan(0.6);
+    expect(swaying).toBeLessThan(0.8);
+  });
+
+  it('stays put with Reduce motion, but still answers a cheer', () => {
+    expect(seats.every((s, i) => { const p = crowdPose(s, i, [], 3, 0, true); return p.up === 0 && p.sway === 0 && p.bounce === 0; })).toBe(true);
+    const cheer = [{ start: 0, strength: 1, fromX: 960 }];
+    expect(seats.some((s, i) => crowdPose(s, i, cheer, 0.9, 0, true).up > 0.5)).toBe(true);
   });
 
   it('throws flowers and coins in an arc onto the sand, where they stay', () => {

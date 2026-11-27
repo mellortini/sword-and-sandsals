@@ -1,6 +1,6 @@
 """The living crowd (#52): paper pieces the game moves over the arena's painted spectators and throws onto the sand.
 
-  arm            a raised sleeve, white paper: the game tints it to the spectator's clothes (assets/bg/arena_crowd.json)
+  arm            a raised sleeve, white paper: the game tints it to the spectator's clothes (assets/bg/arena_people.json)
   hand0..2       a hand in three skin tones, drawn at the top of the sleeve
   flower0..2     a paper flower thrown onto the sand (red, pink, yellow)
   coin, coin_side  a gold coin, face on and turning edge-on (the game swaps them to spin it)

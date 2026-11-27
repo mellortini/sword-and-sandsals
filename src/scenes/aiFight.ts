@@ -15,8 +15,7 @@ import type { SceneContext, SceneUpdate } from './common';
 import { openFightResult } from './fightResult';
 import { loadoutFromLook } from './preFight';
 import { aiPicker, runFight } from './turnLoop';
-import { arenaBackdrop } from './backdrop';
-import { CrowdFx } from '../ui/crowdFx';
+import { buildArenaStage } from './arenaStage';
 import { startMusic } from '../audio/music';
 import { CameraJuice, applyCamera } from '../ui/cameraJuice';
 import { reduceMotion } from '../ui/motion';
@@ -34,12 +33,11 @@ const profileParam = (v: string | null): AiProfile | undefined => (v === 'aggres
  * Fight again → a rematch with new seeds; Leave → title. The arena turn loop (#12) swaps the player's AI for the action bar (#147).
  */
 export async function showAiFight(context: SceneContext): Promise<SceneUpdate> {
-  const { world, bgTex, params, ui, add, rigs } = context;
+  const { world, params, ui, add, rigs } = context;
   const arena = new Container();
   world.addChild(arena);
-  arena.addChild(new Sprite(arenaBackdrop(bgTex)));
   // the painted stands come alive (#52): over the backdrop, under the fighters
-  const crowdFx = arena.addChild(new CrowdFx());
+  const crowdFx = await buildArenaStage(arena);
 
   const tp = params.get('tier');
   const tier = tp ? Math.min(10, Math.max(1, +tp)) : undefined;
