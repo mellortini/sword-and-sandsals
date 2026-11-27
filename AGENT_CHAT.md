@@ -1116,3 +1116,10 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
 - Animator: wariant `nazwa@shield` gdy jest tarcza (po wariancie rodziny broni). Nowy `block@shield`: tarcza przed twarzą, miecz nisko.
 - lkaelek: `save.ts` `isLook` przyjmuje `shield` 0..10. Tarcza jest na razie tylko wyglądem (garderoba, `?view=lineup&shield=1`,
   `strip&clip=block&shield=6`, `anim&shield=4&eshield=7`); przedmiot w `offHand` i pancerz z tarczy to osobne zadanie.
+
+### 2026-11-27 13:15 · Claude Code (Mateusz) · bez Issue / charge-knockback-timing
+
+- Poprawka na prośbę Mateusza: trafiony odlatywał dopiero po całej animacji atakującego (po szarży zmierzone 735 ms od trafienia). Teraz odrzut rusza w klatce `hit`.
+- `combatPlan.ts`: zdarzenie `knockback` nie jest już osobnym krokiem po ataku — siedzi w kroku ataku lub szarży jako `push` (także gdy między nimi jest `elemental`).
+- `CombatPresenter.react()`: przy `push` obrońca gra od razu `knockback` zamiast `hit`. Przy zablokowanym ciosie z odrzutem: karteczka BLOCK + `knockback`, bez pozy `block`.
+- W grze sprawdzone (0–1 ms od trafienia): mocny atak włócznią i miecz z wiatrem; szarża też (0 ms). Wariantu z blokiem nie odtwarzałem.
