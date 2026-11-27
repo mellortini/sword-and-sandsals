@@ -11,6 +11,7 @@
  */
 import { EXPRESSION_KEYS, EXPRESSION_PIECES, pieceShown } from './expressions';
 import { widthScale } from './builds';
+import { holdShield, isShieldTier } from './shield';
 import { boneOffset, forwardKinematics, holdWithBothHands, looseHead } from './twoHand';
 import { Assets, Container, Rectangle, Renderer, RenderTexture, Sprite, Texture } from 'pixi.js';
 
@@ -45,6 +46,8 @@ export interface Look {
   weapon: string;
   /** body build (#27): 0 slim, 1 average (default), 2 heavy - src/rig/builds.ts */
   build?: number;
+  /** off-hand shield tier (#38): 0/undefined = none, 1-4 a round parma, 5-10 a scutum - src/rig/shield.ts */
+  shield?: number;
 }
 
 export const DEFAULT_LOOK: Look = { skin: 3, face: 0, hair: 1, hairColor: 1, beard: 2, helmet: 0, armor: 0, shoulders: 0, greaves: 0, boots: 0, weapon: 'gladius' };
@@ -178,12 +181,18 @@ export class Kit {
         return `hair${look.hair}_${p}`;
       case 'beard': return look.beard > 0 ? `beard${look.beard}` : null;
       case 'weapon': return look.weapon ? `weapon_${look.weapon}` : null;
+      case 'shield': return this.shieldShown(look) ? `shield${look.shield}` : null;
       default: {
         const tier = look[layer.slot as EquipSlot] ?? 0;
         if (!tier) return null;
         return `${layer.slot}${tier}${p ? '_' + p : ''}`;
       }
     }
+  }
+
+  /** a shield is drawn when the look has one and the back hand is free (not on the haft of a two-handed weapon) */
+  shieldShown(look: Look): boolean {
+    return isShieldTier(look.shield) && !this.json.sprites[`weapon_${look.weapon}`]?.grip2;
   }
 
   keysFor(look: Look): string[] {
@@ -351,14 +360,18 @@ export class PaperRig {
     return low;
   }
 
+  /** is a shield drawn on the back hand (#38)? */
+  hasShield(): boolean { return this.kit.shieldShown(this.look); }
+
   /**
    * The pose as drawn: with a two-handed weapon (sprite meta `grip2`, #36) the back arm is bent so its hand holds the
-   * haft, whatever the clip says about the back arm.
+   * haft, whatever the clip says about the back arm. A shield (#38) is turned to lean with the body instead of the arm.
    */
   heldPose(pose: Pose = this.pose): Pose {
     const key = this.look.weapon ? `weapon_${this.look.weapon}` : null;
     const grip2 = key ? this.kit.json.sprites[key]?.grip2 : undefined;
-    return grip2 ? holdWithBothHands(this.kit.json.bones, pose, grip2) : pose;
+    if (grip2) return holdWithBothHands(this.kit.json.bones, pose, grip2);
+    return this.hasShield() ? holdShield(pose) : pose;
   }
 
   private solve(): Map<string, { x: number; y: number; r: number }> {

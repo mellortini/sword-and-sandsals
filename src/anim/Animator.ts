@@ -61,7 +61,9 @@ export class Animator {
 
   /** a clip, or its variant for the held weapon family (`attack_power@hammer`, #36) when there is one */
   clipFor(name: string): Baked | undefined {
-    return this.clips[`${name}@${this.family()}`] ?? this.clips[name];
+    return this.clips[`${name}@${this.family()}`]
+      ?? (this.rig.hasShield() ? this.clips[`${name}@shield`] : undefined)   // #38: block behind the shield
+      ?? this.clips[name];
   }
 
   play(name: string, opts: PlayOpts = {}) {

@@ -7,6 +7,7 @@ import type { SceneContext } from './common';
 import { goToTitle, onEscape } from '../ui/backKey';
 import { WEAPON_FAMILIES, WEAPON_TIERS, familyName, shownWeapon, tierForSet, weaponName } from '../ui/weaponLooks';
 import { weapon } from '../data/weapons';
+import { SHIELD_TIERS, shieldName } from '../rig/shield';
 
 export async function showWardrobe({ world, bgTex, kit, ui, add }: SceneContext) {
   const J = kit.json;
@@ -29,8 +30,10 @@ export async function showWardrobe({ world, bgTex, kit, ui, add }: SceneContext)
     { key: 'family', title: 'Weapon', count: WEAPON_FAMILIES.length, name: (v: number) => familyName(WEAPON_FAMILIES[v]) },
     { key: 'tier', title: 'Weapon tier', count: WEAPON_TIERS + 1,
       name: (v: number) => weaponName(choice(v)) },
+    // #38: tiers 1-4 a round parma, 5-10 a scutum
+    { key: 'shield', title: 'Shield', count: SHIELD_TIERS + 1, name: (v: number) => shieldName(v, J.sets) },
   ];
-  const vals: Record<string, number> = { ...(look as unknown as Record<string, number>), set: 0, family: 0, tier: 0 };
+  const vals: Record<string, number> = { ...(look as unknown as Record<string, number>), set: 0, family: 0, tier: 0, shield: 0 };
   const choice = (tier = vals.tier) => ({ family: WEAPON_FAMILIES[vals.family], tier });
   const showWeapon = () => { look.weapon = shownWeapon(choice(), (k) => kit.has(k)).weapon; };
   const html = rows.map((r) => `<div class="row"><span class="t">${r.title}</span><button data-k="${r.key}" data-d="-1">◀</button><span class="v" id="v_${r.key}"></span><button data-k="${r.key}" data-d="1">▶</button></div>`).join('');
@@ -51,8 +54,8 @@ export async function showWardrobe({ world, bgTex, kit, ui, add }: SceneContext)
   ui.addEventListener('click', (e) => {
     const b = e.target as HTMLElement;
     if (b.id === 'rand') {
-      Object.assign(look, randomLook());
-      Object.assign(vals, look, { set: 0, family: 0, tier: 0 });
+      Object.assign(look, randomLook(), { shield: 0 });
+      Object.assign(vals, look, { set: 0, family: 0, tier: 0, shield: 0 });
       void refresh();
       return;
     }
@@ -62,6 +65,7 @@ export async function showWardrobe({ world, bgTex, kit, ui, add }: SceneContext)
     vals[k] = (vals[k] + +b.dataset.d! + r.count) % r.count;
     if (k === 'set') {
       for (const s of EQUIP_SLOTS) { look[s] = vals.set; vals[s] = vals.set; }
+      look.shield = vals.shield = vals.set;   // and the shield of its era (#38)
       // a full set brings the weapon of its tier, in the chosen family (#182, #185)
       vals.tier = tierForSet(vals.set);
       showWeapon();

@@ -1104,3 +1104,15 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
   końce linii i ścieżki, które w repo są już poprawione). Dodałem z niego tylko tekst z `references/our_tests/`: `blender/COMPARISON.md`,
   `blender/compare/compare*.py` + `metrics*.json`, `animation/our_motion.json`. Obrazów i filmów nie dodaję (prawa autorskie, rozmiar).
   Notka na górze `SKILL.md` mówi teraz, co z `our_tests/` jest w repo. W archiwum 5 JPG było uszkodzonych — nie dotyczy repo.
+
+### 2026-11-27 12:31 · Claude Code (goloburda05-hue) · #38 / 38-shields
+
+- Tarcze w 10 poziomach zbroi, kształt według epoki: poziomy 1–4 to okrągła parma (rośnie z poziomem),
+  od 5 (Bronze Recruit, epoka legionów) prostokątne scutum, coraz większe. Render: `blender/shields.py` → sprite'y `shield1..10`.
+- **kit.json** (plik wspólny, przez `build_kit.py`): nowa kość `shield` (dziecko `hand_b`, (0, −0.3)) i warstwa `slot: 'shield'`
+  nad ciałem i hełmem, pod ręką z mieczem; `pose_test.shield = 0`.
+- `Look.shield?: number` (0/brak = bez tarczy, 1..10). `src/rig/shield.ts`: `holdShield` obraca kość tak, żeby tarcza stała
+  z pochyleniem ciała, nie wisiała z ręką; klip może ją dodatkowo przechylić kluczem `shield`. Przy broni dwuręcznej (`grip2`) tarczy nie ma.
+- Animator: wariant `nazwa@shield` gdy jest tarcza (po wariancie rodziny broni). Nowy `block@shield`: tarcza przed twarzą, miecz nisko.
+- lkaelek: `save.ts` `isLook` przyjmuje `shield` 0..10. Tarcza jest na razie tylko wyglądem (garderoba, `?view=lineup&shield=1`,
+  `strip&clip=block&shield=6`, `anim&shield=4&eshield=7`); przedmiot w `offHand` i pancerz z tarczy to osobne zadanie.
