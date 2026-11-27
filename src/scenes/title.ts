@@ -26,7 +26,7 @@ function entries(saved: SavedCharacter | null): TitleEntry[] {
       ? { label: 'Continue', enabled: true, view: 'prefight', note: `${saved.name} · level ${saved.level}` }
       : { label: 'Continue', enabled: false, note: 'no saved game yet' },
     saved
-      ? { label: 'Town', enabled: true, panel: 'town', note: townNote(saved) }
+      ? { label: 'Town', enabled: true, view: 'town', note: townNote(saved) }
       : { label: 'Town', enabled: false, note: 'no saved game yet' },
     { label: 'Quick bout', enabled: true, view: 'prefight&gladiator=random' },
     { label: 'Wardrobe', enabled: true, view: 'wardrobe' },

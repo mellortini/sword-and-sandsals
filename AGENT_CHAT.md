@@ -1253,3 +1253,12 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - `Animator`: przy `lunge` cios z dłuższą bronią (`reach`) może się cofnąć do 1,2 j., gdy przeciwnik stoi bliżej niż zasięg broni.
 - Lab `?view=anim&weapon=spear8&enemy=hammer8`: jeden klik = podejście na zasięg tej broni + cios (jak w grze).
 - lkaelek: przewagi broni są już w Twoich danych (włócznia zasięg 3 i odrzut, młot +4 obrażeń, przebicie zbroi i ogłuszenie) — ich nie ruszałem.
+
+### 2026-11-27 15:30 · Claude Code (Mateusz) · #30 / 30-town-scene
+
+Scena miasta jako hub gry (#30): `src/scenes/town.ts`, widok `?view=town` (zamiast dawnego podglądu z `scenes/dev/town.ts`).
+- Tło to `TownBackdrop` z #29 (cykl dnia). Zapisany gladiator stoi na drodze, w swoim ekwipunku, i ciemnieje w nocy jak miasto. Bez zapisu scena przechodzi do kreatora.
+- Najechanie podświetla budynek (hit-test po alfie warstwy, bo prostokąty zachodzą na siebie) i pokazuje papierową etykietę: nazwa, `purpose` i `note` z `BUILDINGS`. Kliknięcie albo ←/→ + Enter otwiera ekran budynku, Escape wraca do tytułu. Górny pasek: imię, poziom, złoto oraz przyciski Gear (plecak, bez budynku) i Menu.
+- `src/ui/town.ts`: nowe `visitBuilding(id, c, save, preview)`. Panel `openTown` korzysta z niego (z rejestracją kompletu zbroi po Gear, #203) — zachowanie bez zmian.
+- Przejścia: tytuł → „Town” otwiera teraz `?view=town` (`title.ts`); arena → ligi → walka; po walce „leave” wraca do miasta, jeśli to walka kariery (`arena.ts`), a quick bout jak dotąd do tytułu.
+- ⚠️ `src/main.ts` (plik wspólny): zmieniony tylko import widoku `town` (`./scenes/town`).

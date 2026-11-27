@@ -119,6 +119,8 @@ export class TownBackdrop extends Container {
   private readonly chimneys: Chimney[] = [];
   private smokeTex?: Texture;
   private time = 0;
+  /** the light of the current hour (sky, tint of the world, lamps) */
+  state!: DayState;
   private lastSky = -1;
 
   static async load(base: string, options: TownOptions = {}): Promise<TownBackdrop> {
@@ -307,6 +309,7 @@ export class TownBackdrop extends Container {
   }
 
   private apply(s: DayState) {
+    this.state = s;
     if (this.lastSky !== s.skyTop * 7 + s.skyBottom) {
       this.lastSky = s.skyTop * 7 + s.skyBottom;
       const g = this.skyCanvas.getContext('2d')!;

@@ -9,7 +9,7 @@ import { showAnimLab } from './scenes/dev/animLab';
 import { showFaces } from './scenes/dev/faces';
 import { showLineup } from './scenes/dev/lineup';
 import { showStrip } from './scenes/dev/strip';
-import { showTown } from './scenes/dev/town';
+import { showTown } from './scenes/town';
 import { showFightResult } from './scenes/fightResult';
 import { showPreFight } from './scenes/preFight';
 import { showTitle } from './scenes/title';
