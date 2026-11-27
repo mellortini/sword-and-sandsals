@@ -1135,3 +1135,11 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
 - Scaliłem `main` (po #250) z tym PR i rozwiązałem konflikty: `arena.py` / `gladiator.py` jak na main, `SETUP.md` — opis z main + link do `docs/GRAFIKA.md`.
 - Na prośbę Mateusza nasze rendery testowe (28 JPG, 3 MP4, Git LFS) wchodzą do repo. To zmienia notkę z #248 w `SKILL.md`. Klatek z cudzego filmu i obrazów porównań z nimi nadal nie ma.
 - `docs/GRAFIKA.md` i `docs/ZESTAW_POSTACI.md`: komendy przez `tools/blender.py` (#8). Przykład z przewodnika wyrenderowany tą komendą.
+### 2026-11-27 14:14 · Claude Code (goloburda05-hue) · #33 / 33-vendor-busts
+
+- Pięcioro sprzedawców z docs/FABULA.md jako papierowe popiersia: Old Crease (kowal, broń), płatnerz („The Armourer” —
+  w fabule nie ma imienia, można nadać), Mirra Inkwell, Brother Tape, Magpie (jednooki, z wycinków gazet). Render: `blender/npcs.py`
+  (twarze, włosy i brody z kitu gladiatorów w prawdziwych kolorach) → `assets/npc/<id>.png` + `<id>_talk.png` (otwarte usta,
+  ta sama klatka 448×488) + `npcs.json`. Patrzą w prawo w 3/4, jak gladiatorzy; dla lewej strony ekranu odbić scaleX(-1).
+- `src/ui/npcs.ts`: `loadNpcs()`, `npcUrl(npc, talking)`, `VENDOR_AT` (id budynku z town.ts → sprzedawca),
+  `mouthOpen(t, length)` do kłapania ustami (co 0.13 s). Na razie nigdzie nie pokazywane — to #34 (sprzedawca w dymku), który teraz się odblokowuje.
