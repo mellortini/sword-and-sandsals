@@ -1,0 +1,52 @@
+/* Story scenes (src/ui/storyPlayer.ts, #64): a paper diorama full screen, subtitles on a paper strip. */
+.story {
+  position: fixed; inset: 0; z-index: 20; background: #0d0a0b; overflow: hidden;
+  font-family: Georgia, serif; color: #3a2418; cursor: pointer;
+  animation: story-in 0.4s ease-out both;
+}
+.story--out { animation: story-out 0.4s ease-in both; }
+@keyframes story-in { from { opacity: 0; } }
+@keyframes story-out { to { opacity: 0; } }
+
+.story__frame { position: absolute; inset: 0; }
+.story__shot {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.story__shot--on { opacity: 1; animation: story-drift var(--drift, 10s) linear both; }
+.story__shot--still { animation: none; }
+@keyframes story-drift {
+  from { transform: scale(1.04) translate(0, 0); }
+  to { transform: scale(1.1) translate(var(--dx, 0), var(--dy, 0)); }
+}
+
+.story__title {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2;
+  font-size: clamp(32px, 6vw, 72px); letter-spacing: 0.08em; color: #f2c14e; background: #0d0a0b;
+  transition: opacity 0.8s ease;
+}
+.story__title--out { opacity: 0; pointer-events: none; }
+
+/* a strip of paper at the bottom: dark letters on cream, never on the picture itself */
+.story__line {
+  position: absolute; left: 50%; bottom: 6vh; z-index: 3; box-sizing: border-box; margin: 0;
+  width: min(86vw, 980px); padding: 14px 26px; transform: translateX(-50%) rotate(-0.4deg);
+  font-size: clamp(16px, 2.1vw, 24px); line-height: 1.4; text-align: center; font-style: italic;
+  background: linear-gradient(160deg, #fffaf0 0%, #efe2c4 70%); box-shadow: 0 4px 0 rgba(10, 6, 8, 0.45);
+  clip-path: polygon(0 4%, 3% 0, 30% 3%, 62% 0, 97% 2%, 100% 0, 100% 96%, 96% 100%, 70% 97%, 40% 100%, 4% 97%, 0 100%);
+}
+.story__line:empty { visibility: hidden; }
+.story__line--in { animation: story-line 0.35s ease-out both; }
+@keyframes story-line { from { opacity: 0; transform: translateX(-50%) translateY(8px) rotate(-0.4deg); } }
+
+.story__skip {
+  position: absolute; top: 18px; right: 22px; z-index: 4; font: inherit; font-size: 14px; padding: 6px 14px;
+  border: 0; border-radius: 3px; cursor: pointer; color: #f3e6d6; background: rgba(40, 24, 28, 0.75);
+  box-shadow: inset 0 0 0 1px #815a46;
+}
+.story__skip:focus-visible { outline: 2px solid #fff0d0; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .story, .story--out, .story__line--in { animation: none; }
+  .story__shot, .story__title { transition: none; }
+}
