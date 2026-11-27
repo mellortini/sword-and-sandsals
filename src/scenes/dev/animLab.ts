@@ -17,7 +17,9 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   arena.addChild(new Sprite(arenaBackdrop(bgTex)));
   const gsh = groundShadowTexture();
   const tp = params.get('tier');
-  const L0 = randomLook(tp ? +tp : 4), L1 = randomLook(tp ? +tp : 6);
+  // &weapon=hammer8 / &enemy=spear6: try a weapon (and its clip variants, #36) in the lab
+  const armed = (look: ReturnType<typeof randomLook>, w: string | null) => (w ? { ...look, weapon: w } : look);
+  const L0 = armed(randomLook(tp ? +tp : 4), params.get('weapon')), L1 = armed(randomLook(tp ? +tp : 6), params.get('enemy'));
   const pY = FEET_Y - PELVIS_ABOVE_FEET * UNIT;
   const shadows: Sprite[] = [];
   for (let i = 0; i < 2; i++) {
