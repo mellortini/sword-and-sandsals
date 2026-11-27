@@ -2091,6 +2091,276 @@
     70.79
    ],
    "tint": null
+  },
+  "weapon_axe1": {
+   "w": 328,
+   "h": 110,
+   "pivot": [
+    79.47,
+    34.52
+   ],
+   "tint": null
+  },
+  "weapon_axe2": {
+   "w": 313,
+   "h": 111,
+   "pivot": [
+    61.2,
+    33.31
+   ],
+   "tint": null
+  },
+  "weapon_axe3": {
+   "w": 317,
+   "h": 115,
+   "pivot": [
+    61.2,
+    34.5
+   ],
+   "tint": null
+  },
+  "weapon_axe4": {
+   "w": 328,
+   "h": 118,
+   "pivot": [
+    68.4,
+    34.7
+   ],
+   "tint": null
+  },
+  "weapon_axe5": {
+   "w": 333,
+   "h": 122,
+   "pivot": [
+    68.4,
+    35.89
+   ],
+   "tint": null
+  },
+  "weapon_axe6": {
+   "w": 337,
+   "h": 159,
+   "pivot": [
+    68.4,
+    70.08
+   ],
+   "tint": null
+  },
+  "weapon_axe7": {
+   "w": 341,
+   "h": 166,
+   "pivot": [
+    68.4,
+    74.27
+   ],
+   "tint": null
+  },
+  "weapon_axe8": {
+   "w": 345,
+   "h": 172,
+   "pivot": [
+    68.4,
+    77.46
+   ],
+   "tint": null
+  },
+  "weapon_axe9": {
+   "w": 360,
+   "h": 178,
+   "pivot": [
+    79.21,
+    80.66
+   ],
+   "tint": null
+  },
+  "weapon_axe10": {
+   "w": 364,
+   "h": 185,
+   "pivot": [
+    79.21,
+    84.85
+   ],
+   "tint": null
+  },
+  "weapon_spear1": {
+   "w": 519,
+   "h": 61,
+   "pivot": [
+    124.47,
+    28.47
+   ],
+   "tint": null
+  },
+  "weapon_spear2": {
+   "w": 536,
+   "h": 59,
+   "pivot": [
+    106.2,
+    29.99
+   ],
+   "tint": null
+  },
+  "weapon_spear3": {
+   "w": 544,
+   "h": 60,
+   "pivot": [
+    106.2,
+    30.44
+   ],
+   "tint": null
+  },
+  "weapon_spear4": {
+   "w": 559,
+   "h": 61,
+   "pivot": [
+    113.4,
+    30.89
+   ],
+   "tint": null
+  },
+  "weapon_spear5": {
+   "w": 567,
+   "h": 71,
+   "pivot": [
+    113.4,
+    35.89
+   ],
+   "tint": null
+  },
+  "weapon_spear6": {
+   "w": 575,
+   "h": 63,
+   "pivot": [
+    113.4,
+    31.79
+   ],
+   "tint": null
+  },
+  "weapon_spear7": {
+   "w": 583,
+   "h": 64,
+   "pivot": [
+    113.4,
+    32.23
+   ],
+   "tint": null
+  },
+  "weapon_spear8": {
+   "w": 591,
+   "h": 71,
+   "pivot": [
+    113.4,
+    35.72
+   ],
+   "tint": null
+  },
+  "weapon_spear9": {
+   "w": 610,
+   "h": 71,
+   "pivot": [
+    124.21,
+    35.72
+   ],
+   "tint": null
+  },
+  "weapon_spear10": {
+   "w": 617,
+   "h": 78,
+   "pivot": [
+    124.21,
+    39.48
+   ],
+   "tint": null
+  },
+  "weapon_hammer1": {
+   "w": 300,
+   "h": 125,
+   "pivot": [
+    79.47,
+    62.82
+   ],
+   "tint": null
+  },
+  "weapon_hammer2": {
+   "w": 284,
+   "h": 118,
+   "pivot": [
+    61.2,
+    59.35
+   ],
+   "tint": null
+  },
+  "weapon_hammer3": {
+   "w": 287,
+   "h": 122,
+   "pivot": [
+    61.2,
+    61.35
+   ],
+   "tint": null
+  },
+  "weapon_hammer4": {
+   "w": 297,
+   "h": 126,
+   "pivot": [
+    68.4,
+    63.35
+   ],
+   "tint": null
+  },
+  "weapon_hammer5": {
+   "w": 300,
+   "h": 130,
+   "pivot": [
+    68.4,
+    65.35
+   ],
+   "tint": null
+  },
+  "weapon_hammer6": {
+   "w": 303,
+   "h": 134,
+   "pivot": [
+    68.4,
+    67.36
+   ],
+   "tint": null
+  },
+  "weapon_hammer7": {
+   "w": 335,
+   "h": 138,
+   "pivot": [
+    68.4,
+    69.36
+   ],
+   "tint": null
+  },
+  "weapon_hammer8": {
+   "w": 339,
+   "h": 142,
+   "pivot": [
+    68.4,
+    71.36
+   ],
+   "tint": null
+  },
+  "weapon_hammer9": {
+   "w": 353,
+   "h": 146,
+   "pivot": [
+    79.21,
+    73.36
+   ],
+   "tint": null
+  },
+  "weapon_hammer10": {
+   "w": 357,
+   "h": 150,
+   "pivot": [
+    79.21,
+    75.36
+   ],
+   "tint": null
   }
  }
 }

@@ -940,3 +940,13 @@ Miecze tier 1–10 (#184) — sprite'y `weapon_sword1…10` są w kicie i atlasi
 - `kit.json` / atlas: tylko dopisane sprite'y (plik wspólny → label `shared-files`). Topory/włócznie/młoty (#36) dopiszę w tym samym `weapons.py`.
 - `?view=strip` ma nowy parametr `&weapon=sword7` (podgląd broni w pozach ciosu).
 - Testy wizualne nie odświeżane (domyślny wygląd się nie zmienił — wciąż gladius).
+
+### 2026-11-27 13:10 · Claude Code (Mateusz) · #36 / 36-axes-spears-hammers
+
+Topory, włócznie i młoty tier 1–10 (#36) — sprite'y `weapon_axe1…10`, `weapon_spear1…10`, `weapon_hammer1…10` w kicie i atlasie.
+Gałąź stoi na #184 (PR #231) — najpierw zmergujcie miecze, wtedy ten PR pokaże tylko swoje zmiany.
+- `blender/weapons.py`: wspólna drabina materiałów (`_tier`) jak u mieczy i zbroi: 1 drewno i szmaty, 2 masa papierowa, 3 karton, 4 karton
+  z nitami, 5 brąz, 6 żelazo, 7 stal + plecionka, 8 mosiądz i czerwień, 9 złoto i czerwień, 10 złoto, fiolet, laur.
+- Chwyt zawsze w początku układu (jak gladius): topór i młot trzymane przy końcu trzonka, włócznia na drzewcu — grot ~4,6 j. od dłoni
+  (miecz ~3), tył drzewca ~1 j. za dłonią. Ostrze topora po stronie −y (przód przy cięciu z góry). Głowice rosną z tierem.
+- ❓ goloburda05-hue / lkaelek: włócznia używa na razie tych samych klipów co miecz (zamach). Pchnięcie dla włóczni to osobne zadanie animacji — założę Issue, jeśli chcecie.

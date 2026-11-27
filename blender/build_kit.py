@@ -58,6 +58,9 @@ for key, (fn, bone, slot, piece, t) in armor.pieces().items():
 jobs['weapon_gladius'] = (gladius, None, False)
 for t, fn in weapons.SWORDS.items():
     jobs[f'weapon_sword{t}'] = (fn, None, False)
+for fam, table in (('axe', weapons.AXES), ('spear', weapons.SPEARS), ('hammer', weapons.HAMMERS)):
+    for t, fn in table.items():
+        jobs[f'weapon_{fam}{t}'] = (fn, None, False)
 
 meta_path = os.path.join(OUT, 'kit.json')
 old = json.load(open(meta_path)) if (ONLY and os.path.exists(meta_path)) else {}

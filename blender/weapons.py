@@ -2,7 +2,7 @@
 
 Every builder works in weapon-bone space like the gladius in build_kit.py: the grip is centred on the origin
 (x -0.39 .. 0.39, under the hand), the pommel sits at x < -0.39, the blade points to +x. The pivot is the origin,
-so the hand holds every sword at the same point as the gladius. Axes, spears and hammers (#36) go here too.
+so the hand holds every sword at the same point as the gladius. Axes, spears and hammers (#36) are at the bottom.
 """
 import math
 import sprite_lib as sl
@@ -184,3 +184,190 @@ def sword10(c):
 
 
 SWORDS = {t: globals()[f'sword{t}'] for t in range(1, 11)}
+
+
+# ================================================================== AXES, SPEARS, HAMMERS (#36)
+# Same tier ladder as the swords. The axe and hammer are held at the end of the haft, the spear on the shaft
+# with its point past a sword's reach. The axe's cutting edge is on -y: the leading side in the downward swing.
+def _wood(name='haft', tint='#8a6a48'):
+    return sl.tex_board(name, 'brown', tint=tint, scale=0.3, rot=0.05)
+
+
+def _tier(t):
+    """(haft, grip, head, head_d, fitting, torn) materials for tier t"""
+    wood, wood_d = _wood(), _wood('haft_d', '#5e4530')
+    pulp = lambda n, c_: sl.tex_board(n, 'craft', tint=c_, scale=0.3)
+    return {
+        1: (_wood('scrapwood', '#9c7a52'), M('rag'), M('linen'), M('linen_d'), M('rag_d'), True),
+        2: (wood, M('leather'), pulp('pulp', '#aaa294'), pulp('pulp_d', '#857d70'), M('leather_d'), False),
+        3: (M('leather_l'), M('linen'), M('linen'), M('linen_d'), M('linen_d'), False),
+        4: (wood, M('leather'), M('leather_l'), M('leather_d'), M('bronze'), False),
+        5: (wood, M('leather'), M('bronze'), M('bronze_d'), M('bronze_d'), False),
+        6: (wood_d, M('leather_d'), M('iron'), M('iron_d'), M('iron'), False),
+        7: (wood_d, M('chain'), M('steel'), M('steel_d'), M('iron'), False),
+        8: (wood_d, M('red'), M('steel'), M('steel_d'), M('brass'), False),
+        9: (wood_d, M('red_d'), M('steel'), M('steel_d'), M('gold'), False),
+        10: (M('purple'), M('purple'), M('steel'), M('gold'), M('gold'), False),
+    }[t]
+
+
+def _poly(pts, torn, seed):
+    return sl.torn(pts, 0.025, seed) if torn else pts
+
+
+def _haft(c, t, x0, x1, w):
+    haft, grip = _tier(t)[:2]
+    torn = t == 1
+    L(c, _poly(R(x1 - x0, w, w * 0.4, (x0 + x1) / 2, 0.0), torn, 50 + t), haft, 0.0, 0.08, 'haft')
+    if t == 10:
+        for i in range(int((x1 - x0) / 0.5)):   # gold bands on the purple haft
+            L(c, R(0.05, w + 0.02, 0.02, x0 + 0.3 + i * 0.5, 0.0, 0.35), M('gold'), 0.08, 0.02, 'band')
+    L(c, _poly(R(0.8, w + 0.06, 0.08, 0.0, 0.0), torn, 60 + t), grip, 0.08, 0.04, 'grip')
+    if t in (1, 2, 4, 5, 6):
+        mat = M('rag_d') if t == 1 else (M('leather') if t == 6 else M('leather_d'))
+        wraps(c, mat, 0.12, n=3 if t == 1 else 4, w=0.05, h=w + 0.1)
+    elif t == 3:
+        wraps(c, M('linen_d'), 0.12, n=5, h=w + 0.1)
+    elif t >= 8:
+        mat = {8: M('red_d'), 9: M('gold_d'), 10: M('gold')}[t]
+        wraps(c, mat, 0.12, n=4, w=0.045, h=w + 0.1, ang=0.0)
+    if t == 4:
+        rivets(c, [-0.2, 0.2], M('bronze'), 0.14, r=0.04)
+
+
+def _butt(c, t, x, w):
+    """end of the haft behind the hand"""
+    fit = _tier(t)[4]
+    if t == 1:
+        L(c, sl.torn([(x + 0.1, 0.06), (x - 0.18, -0.16), (x - 0.12, -0.24), (x + 0.12, -0.04)], 0.02, 70), M('rag'), 0.06, 0.04, 'rag_end')
+    elif t >= 4:
+        L(c, R(0.16, w + 0.08, 0.05, x, 0.0), fit, 0.06, 0.06, 'butt')
+        if t >= 9:
+            L(c, E(0.1, 0.1, x - 0.1, 0.0, 20), M('gold') if t == 9 else M('purple'), 0.12, 0.03, 'butt_gem')
+
+
+def _collar(c, t, x, w, n=1):
+    fit = _tier(t)[4]
+    for i in range(n):
+        L(c, R(0.1, w + 0.1, 0.03, x - i * 0.16, 0.0), fit, 0.14, 0.04, 'collar')
+
+
+def _arc(cx, cy, rx, ry, a0, a1, k=12):
+    return [(cx + rx * math.cos(math.radians(a0 + (a1 - a0) * i / k)), cy + ry * math.sin(math.radians(a0 + (a1 - a0) * i / k)))
+            for i in range(k + 1)]
+
+
+# ------------------------------------------------------------------ AXE: grip at the end of the haft, heavy bearded head
+def axe(t):
+    def build(c):
+        haft, grip, head, head_d, fit, torn = _tier(t)
+        k = 0.86 + 0.04 * t                     # the head grows with the tier
+        x1 = 2.45 + 0.04 * t
+        hx = x1 - 0.28 * k
+        w = 0.18
+        _haft(c, t, -0.55, x1, w)
+        _butt(c, t, -0.55, w)
+        top, bot = -0.02, -0.62 * k
+        hw0, hw1 = 0.16 * k, 0.42 * k
+        blade = [(hx - hw0, top), (hx + hw0, top)] + _arc(hx, bot, hw1, 0.16 * k, 0, -180, 14)
+        blade = blade[:2] + blade[2:]
+        if t >= 3:
+            L(c, _poly(blade, torn, 80 + t), head_d, 0.1, 0.06, 'edge')
+            inner = [(hx - hw0 * 0.9, top - 0.02), (hx + hw0 * 0.9, top - 0.02)] + _arc(hx, bot + 0.1 * k, hw1 * 0.86, 0.12 * k, 0, -180, 14)
+            L(c, inner, head, 0.16, 0.05, 'blade')
+        else:
+            L(c, _poly(blade, torn, 80 + t), head, 0.1, 0.08, 'blade')
+        L(c, R(0.36 * k, 0.42 * k, 0.06, hx, 0.04), M('gold_d') if t == 10 else head_d, 0.2, 0.06, 'eye')
+        if t == 1:
+            for i in range(3):
+                L(c, R(0.05, 0.5 * k, 0.02, hx - 0.12 + i * 0.12, 0.04, 0.4), M('rag_d'), 0.26, 0.03, 'lash')
+        if t == 4:
+            rivets(c, [hx - 0.1, hx + 0.1], M('bronze'), 0.24, r=0.045, y=-0.3 * k)
+        if t >= 6:   # back spike
+            L(c, [(hx - 0.12 * k, 0.24 * k), (hx + 0.12 * k, 0.24 * k), (hx, 0.46 * k + 0.02 * t)], head_d, 0.12, 0.06, 'spike')
+        if t >= 8:
+            _collar(c, t, hx - 0.3 * k, w, 2 if t >= 9 else 1)
+        if t == 10:
+            for i in range(3):
+                L(c, E(0.1, 0.04, hx - 0.12 + i * 0.12, -0.34 * k, 16, 0.5), M('laurel'), 0.24 + i * 0.01, 0.02, 'leaf')
+    return build
+
+
+# ------------------------------------------------------------------ SPEAR: grip on the shaft, the point reaches past a sword
+def spear(t):
+    def build(c):
+        haft, grip, head, head_d, fit, torn = _tier(t)
+        k = 0.88 + 0.03 * t
+        x0, x1 = -1.05, 3.35 + 0.05 * t
+        w = 0.14
+        _haft(c, t, x0, x1 + 0.1, w)
+        _butt(c, t, x0, w)
+        hl = 1.25 * k
+        if t == 1:   # a sharpened, fire-hardened stick
+            L(c, sl.torn([(x1 - 0.2, 0.09), (x1 + 0.75, 0.0), (x1 - 0.2, -0.09)], 0.015, 90), _wood('charred', '#4a3626'), 0.04, 0.06, 'point')
+            L(c, sl.torn(R(0.5, 0.26, 0.06, x1 - 0.2, 0.0), 0.03, 91), M('rag'), 0.1, 0.05, 'binding')
+            return
+        leaf = 0.1 * k if t in (5, 10) else 0.05 * k
+
+        def head_pts(shorten=0.0):
+            return blade_pts(x1, x1 + hl - shorten, 0.12 * k, 0.2 * k, tip=0.55 * k - shorten * 0.5, leaf=leaf, n=12)
+        if t >= 6:
+            L(c, head_pts(), M('gold') if t == 10 else head_d, 0.06, 0.05, 'edge')
+            L(c, inset(head_pts(0.09), 0.74), head, 0.11, 0.05, 'head')
+        else:
+            L(c, head_pts(), head, 0.06, 0.08, 'head')
+        L(c, [(x1 + 0.05, 0.03), (x1 + hl - 0.3 * k, 0.012), (x1 + hl - 0.3 * k, -0.012), (x1 + 0.05, -0.03)], head_d, 0.16, 0.02, 'rib')
+        L(c, R(0.46, 0.28, 0.07, x1 - 0.12, 0.0), fit if t >= 4 else head_d, 0.12, 0.06, 'socket')
+        if t == 4:
+            rivets(c, [x1 - 0.12], M('bronze_d'), 0.18, r=0.04)
+        if t >= 8:   # horsehair tassel under the head
+            col = {8: M('red'), 9: M('red_d'), 10: M('purple')}[t]
+            for s_ in (1, -1):
+                L(c, [(x1 - 0.32, 0.0), (x1 - 0.22, 0.03 * s_), (x1 - 0.6, 0.26 * s_), (x1 - 0.68, 0.2 * s_)], col, 0.04, 0.03, 'tassel')
+        if t >= 7:
+            _collar(c, t, x1 - 0.4, w)
+    return build
+
+
+# ------------------------------------------------------------------ HAMMER: grip at the end, a block head heavier than any sword
+def hammer(t):
+    def build(c):
+        haft, grip, head, head_d, fit, torn = _tier(t)
+        k = 0.86 + 0.04 * t
+        x1 = 2.25 + 0.03 * t
+        hx = x1 - 0.3 * k
+        w = 0.2
+        _haft(c, t, -0.55, x1, w)
+        _butt(c, t, -0.55, w)
+        hw, hh = 0.62 * k, 1.05 * k            # along the haft, across it
+        if t == 1:   # a wooden mallet: a log lashed to the stick
+            L(c, sl.torn(R(hw, hh, 0.2, hx, 0.0), 0.03, 100), _wood('log', '#7d5e3e'), 0.1, 0.1, 'log')
+            for s_ in (1, -1):
+                L(c, sl.torn(E(hw * 0.46, 0.08, hx, s_ * hh * 0.5, 20), 0.015, 101), _wood('log_end', '#b0906a'), 0.2, 0.02, 'ring')
+            L(c, sl.torn(R(0.1, 0.6, 0.03, hx, 0.0, 0.5), 0.02, 102), M('rag_d'), 0.24, 0.03, 'lash')
+            return
+        L(c, R(hw, hh, 0.1, hx, 0.0), head, 0.1, 0.1, 'head')
+        for s_ in (1, -1):   # striking faces
+            L(c, R(hw * 1.08, 0.18 * k, 0.05, hx, s_ * (hh * 0.5 - 0.06 * k)), head_d, 0.2, 0.05, 'face')
+        if t in (3, 6):
+            for i in range(3):
+                L(c, R(hw * 0.9, 0.04, 0.01, hx, -0.18 * k + i * 0.18 * k), head_d, 0.2, 0.02, 'layer')
+        if t == 4:
+            for y in (0.2 * k, -0.2 * k):
+                rivets(c, [hx - 0.15 * k, hx + 0.15 * k], M('bronze'), 0.2, r=0.05, y=y)
+        if t >= 5:
+            L(c, E(0.13 * k, 0.13 * k, hx, 0.0, 24), fit, 0.2, 0.04, 'boss')
+        if t >= 7:   # short top spike
+            L(c, [(x1 - 0.02, 0.1 * k), (x1 + 0.3 * k, 0.0), (x1 - 0.02, -0.1 * k)], head_d, 0.08, 0.06, 'spike')
+        if t >= 8:
+            _collar(c, t, hx - hw * 0.5 - 0.08, w, 2 if t >= 9 else 1)
+        if t == 10:
+            L(c, E(0.08, 0.08, hx, 0.0, 20), M('purple'), 0.26, 0.03, 'gem')
+            for s_ in (1, -1):
+                L(c, E(0.11, 0.04, hx - 0.05, s_ * 0.22 * k, 16, s_ * 0.5), M('laurel'), 0.26, 0.02, 'leaf')
+    return build
+
+
+AXES = {t: axe(t) for t in range(1, 11)}
+SPEARS = {t: spear(t) for t in range(1, 11)}
+HAMMERS = {t: hammer(t) for t in range(1, 11)}
