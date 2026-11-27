@@ -1043,3 +1043,12 @@ Klucze dla HUD i menu:
 - Ikony akcji (odznaki): `icon_step_forward`, `icon_step_back`, `icon_jump`, `icon_charge`, `icon_quick`, `icon_normal`, `icon_power`,
   `icon_block`, `icon_rest`, `icon_taunt`, `icon_item` — nazwy jak `CombatAction` w `actionBar.ts` (+ `item`).
 - Do podpięcia w `hud.ts` / `actionBar.ts` warto założyć osobne Issue (zamiana rysowanych `Graphics` na te sprite'y).
+
+### 2026-11-27 11:20 · Claude Code (goloburda05-hue) · #242 / 242-ui-kit-hud
+
+Zestaw UI z #16 jest już w grze (#242).
+- `src/ui/uiSheet.ts` (bez Pixi): `loadUiSheet()` + `frameCss(sheet, key, px)` — CSS tła z jednej ramki arkusza (do HTML). `src/ui/uiKit.ts`: `loadUiKit()` → `texture(key)`, `frame(key)`, `fill(key)` dla Pixi.
+- HUD (`hud.ts`): po wczytaniu arkusza flakony HP/EN są ze sprite'ów (płyn przycinany maską, animacja poziomu bez zmian), nad panelem drewniana tabliczka z imieniem (ciemny tusz na etykiecie). Bez arkusza zostaje stary, rysowany wygląd.
+- Pasek akcji: odznaka 26 px nad nazwą na każdej karcie (`icon_<akcja>`, przedmioty `icon_item`). Karta ma ten sam rozmiar (68×78), mniejszy górny margines.
+- Poprawka #16: drążki zwoju wystawały poza wspólną ramkę (`scroll_top`/`bottom` szersze o 8 px od `scroll_body`) — ramka poszerzona, arkusz przerenderowany. Test `uiSheet.test.ts` pilnuje wspólnych ramek flakonu i zwoju.
+- Uwaga (stare, nie z tej zmiany): w pasku tłumu nad panelem napis „CROWD” jest przycięty przez pasek („CROWI”) — `crowdMeter.ts`.

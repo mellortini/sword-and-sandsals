@@ -1,6 +1,8 @@
-import { Container, Graphics, Text } from 'pixi.js';
+import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { CrowdGift } from '../core/crowd';
 import { CrowdMeter } from './crowdMeter';
+import type { UiKit } from './uiKit';
+import { loadUiKit } from './uiKit';
 
 interface HudFighter {
   readonly name: string;
@@ -49,6 +51,12 @@ export class CombatHud extends Container {
     this.setPanelScale(1);
     this.player.setState(state.fighters.player, true);
     this.enemy.setState(state.fighters.enemy, true);
+    // the paper UI kit (#16) replaces the drawn flasks and name boards once loaded; until then (or without it) they stay
+    void loadUiKit().then((kit) => {
+      if (!kit || this.destroyed) return;
+      this.player.useKit(kit);
+      this.enemy.useKit(kit);
+    });
   }
 
   /**
@@ -99,18 +107,21 @@ class FighterPanel extends Container {
   private readonly health = new Flask('HEALTH', 0xcf493d, 0xff987a);
   private readonly energy = new Flask('ENERGY', 0x377bb1, 0x9adcff);
   private readonly crowd = new CrowdMeter(PANEL_WIDTH - 36);
+  /** drawn name board; replaced by the wooden plate sprite once the UI kit has loaded (#242) */
+  private readonly header = new Graphics()
+    .roundRect(18, 0, PANEL_WIDTH - 36, 46, 6)
+    .fill(0x694630)
+    .stroke({ color: 0xb58758, width: 3 })
+    .moveTo(31, 6).lineTo(PANEL_WIDTH - 31, 6)
+    .stroke({ color: 0xd3a675, width: 2, alpha: 0.6 });
+  private nameRoom = PANEL_WIDTH - 56;
 
   constructor() {
     super();
     const plate = new Graphics()
       .roundRect(0, 17, PANEL_WIDTH, PANEL_HEIGHT - 17, 14)
       .fill({ color: 0x332124, alpha: 0.96 })
-      .stroke({ color: 0x815a46, width: 3 })
-      .roundRect(18, 0, PANEL_WIDTH - 36, 46, 6)
-      .fill(0x694630)
-      .stroke({ color: 0xb58758, width: 3 })
-      .moveTo(31, 6).lineTo(PANEL_WIDTH - 31, 6)
-      .stroke({ color: 0xd3a675, width: 2, alpha: 0.6 });
+      .stroke({ color: 0x815a46, width: 3 });
 
     this.nameText.anchor.set(0.5);
     this.nameText.position.set(PANEL_WIDTH / 2, 22);
@@ -118,7 +129,31 @@ class FighterPanel extends Container {
     this.energy.position.set(230, 104);
     this.crowd.position.set(18, CROWD_STRIP_TOP);
     this.crowd.visible = false;
-    this.addChild(this.crowd, plate, this.nameText, this.health, this.energy);
+    this.addChild(this.crowd, plate, this.header, this.nameText, this.health, this.energy);
+  }
+
+  /** swap the drawn name board and flasks for the paper UI kit sprites (#16) */
+  useKit(kit: UiKit) {
+    const f = kit.frame('plate');
+    const board = new Sprite(kit.texture('plate'));
+    // a little wider and taller than the drawn board, centred on the name, clear of the crowd strip above
+    board.width = PANEL_WIDTH - 20;
+    board.height = Math.min(56, board.width * (f.h / f.w));
+    board.position.set(10, 22 - board.height / 2);
+    this.header.visible = false;
+    this.addChildAt(board, this.getChildIndex(this.header));
+    // the name sits on the paper label (about 87 % of the board's width)
+    this.nameText.style.fill = '#3b2a22';
+    this.nameRoom = board.width * 0.8;
+    this.fitName();
+    this.health.useKit(kit, 'flask_liquid_hp');
+    this.energy.useKit(kit, 'flask_liquid_en');
+  }
+
+  private fitName() {
+    this.nameText.scale.x = 1;
+    const width = this.nameText.width;
+    if (width > this.nameRoom) this.nameText.scale.x = this.nameRoom / width;
   }
 
   celebrate(gift: CrowdGift, amount: number) { this.crowd.celebrate(gift, amount); }
@@ -126,9 +161,7 @@ class FighterPanel extends Container {
   setState(fighter: HudFighter, immediate = false) {
     if (this.nameText.text !== fighter.name) {
       this.nameText.text = fighter.name;
-      this.nameText.scale.x = 1;
-      const width = this.nameText.width;
-      if (width > PANEL_WIDTH - 56) this.nameText.scale.x = (PANEL_WIDTH - 56) / width;
+      this.fitName();
     }
     this.health.setValue(fighter.health, fighter.stats.maxHealth, immediate);
     this.energy.setValue(fighter.energy, fighter.stats.maxEnergy, immediate);
@@ -147,8 +180,14 @@ class FighterPanel extends Container {
   }
 }
 
+/** height of the kit flask on the panel (px): the drawn bottle with its cork is about this tall */
+const KIT_FLASK_HEIGHT = 96;
+
 class Flask extends Container {
   private readonly liquid: Graphics;
+  private readonly drawn: Container[] = [];
+  private kitMask: Graphics | null = null;
+  private kitLiquid: Sprite | null = null;
   private readonly maskShape = new Graphics().rect(-28, -LIQUID_HEIGHT, 56, LIQUID_HEIGHT).fill(0xffffff);
   private readonly valueText = new Text({
     style: { fontFamily: 'Georgia', fontSize: 31, fontWeight: 'bold', fill: '#fff0d6' },
@@ -180,7 +219,30 @@ class Flask extends Container {
     });
     label.position.set(38, -40);
     this.valueText.position.set(37, -7);
+    this.drawn.push(glass, this.liquid, this.maskShape, outline);
     this.addChild(glass, this.liquid, this.maskShape, outline, label, this.valueText);
+  }
+
+  /** draw the bottle from the UI kit (#16): back glass, liquid cropped to the level by a mask, front glass and cork */
+  useKit(kit: UiKit, liquidKey: string) {
+    const f = kit.frame('flask_back');
+    const s = KIT_FLASK_HEIGHT / f.h;
+    const box = new Container();
+    box.scale.set(s);
+    // same bottom as the drawn bottle (y 32), centred on x 0
+    box.position.set(-(f.w * s) / 2, 34 - f.h * s);
+    const fill = kit.fill(liquidKey);
+    const liquid = new Sprite(kit.texture(liquidKey));
+    const mask = new Graphics().rect(0, -(fill.bottom - fill.top), f.w, fill.bottom - fill.top).fill(0xffffff);
+    mask.position.y = fill.bottom;
+    liquid.mask = mask;
+    box.addChild(new Sprite(kit.texture('flask_back')), liquid, mask, new Sprite(kit.texture('flask_front')));
+    for (const d of this.drawn) d.visible = false;
+    this.liquid.mask = null;
+    this.addChildAt(box, 0);
+    this.kitMask = mask;
+    this.kitLiquid = liquid;
+    this.showFraction(this.shown);
   }
 
   setValue(value: number, max: number, immediate: boolean) {
@@ -210,6 +272,11 @@ class Flask extends Container {
   private showFraction(fraction: number) {
     this.shown = fraction;
     this.maskShape.scale.y = fraction;
-    this.liquid.visible = fraction > 0;
+    if (this.kitMask && this.kitLiquid) {
+      this.kitMask.scale.y = fraction;
+      this.kitLiquid.visible = fraction > 0;
+    } else {
+      this.liquid.visible = fraction > 0;
+    }
   }
 }

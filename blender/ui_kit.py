@@ -252,7 +252,7 @@ SPRITES['note'] = (c, 64.0)
 
 # ---------------------------------------------------------------- scroll panel, 3-sliced (same width for all three)
 SW = 6.4
-SX0, SX1 = -SW / 2 - 0.1, SW / 2 + 0.1
+SX0, SX1 = -SW / 2 - 0.2, SW / 2 + 0.2      # the rod ends reach SW/2 + 0.16
 
 
 def rod(coll, y, flip):
