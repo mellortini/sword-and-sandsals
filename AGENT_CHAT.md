@@ -1177,3 +1177,12 @@ Budowa ciała (#27): smukła / średnia / masywna — bez nowych renderów.
   gwiazdki krążą nad głową, krople spadają). `src/ui/statusFx.ts` przypina je co klatkę przez `rig.screenPoint`.
 - `FxLayer.status` (nad ciałami, pod pop-upami); `CombatPresenter` podpina obie kukły i po każdej akcji ustawia
   `after.fighters[side].statuses` — arena i walka AI pokazują stany bez zmian w scenach. Laboratorium: `?view=anim&status=burning,stunned` albo select „status”.
+### 2026-11-27 14:44 · Claude Code (goloburda05-hue) · #52 / 52-living-crowd
+
+- Tłum ożywa nad namalowanymi trybunami: `blender/arena.py` zapisuje teraz `assets/bg/arena_crowd.json` (446 głów: piksel, skala,
+  kolor ubrania; `ARENA_SEATS_ONLY=1` = tylko mapa, bez renderu — ten sam losowy tłum co w arena.png, sprawdzone nakładką).
+  `blender/crowd_fx.py` → `assets/fx/crowd.png`: rękaw (barwiony na kolor ubrania), dłonie w 3 odcieniach, kwiaty, moneta.
+- `src/ui/crowdWave.ts` (czyste, testy): fala rąk biegnie po trybunach od miejsca ciosu (krytyk = połowa, dobicie = prawie wszyscy),
+  przy wysokiej przychylności kilku fanów macha; łuki rzucanych prezentów. `src/ui/crowdFx.ts` rysuje to (ręce z tym samym rozmyciem co trybuny).
+- `CombatPresenter` ma opcję `crowdFx`: krytyk/dobicie → fala, dobicie → kwiaty i monety dla zwycięzcy, `crowd_gift` → prezent leci do adresata.
+  Arena, walka AI i laboratorium (przyciski „crowd cheers” / „crowd throws”) już to podają.

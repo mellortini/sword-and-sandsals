@@ -16,6 +16,7 @@ import { openFightResult } from './fightResult';
 import { loadoutFromLook } from './preFight';
 import { aiPicker, runFight } from './turnLoop';
 import { arenaBackdrop } from './backdrop';
+import { CrowdFx } from '../ui/crowdFx';
 import { FIGHT_LAYOUT } from './combatPlan';
 
 const LAYOUT = FIGHT_LAYOUT;
@@ -34,6 +35,8 @@ export async function showAiFight(context: SceneContext): Promise<SceneUpdate> {
   const arena = new Container();
   world.addChild(arena);
   arena.addChild(new Sprite(arenaBackdrop(bgTex)));
+  // the painted stands come alive (#52): over the backdrop, under the fighters
+  const crowdFx = arena.addChild(new CrowdFx());
 
   const tp = params.get('tier');
   const tier = tp ? Math.min(10, Math.max(1, +tp)) : undefined;
@@ -67,6 +70,7 @@ export async function showAiFight(context: SceneContext): Promise<SceneUpdate> {
   const hud = new CombatHud({ fighters: { player: empty, enemy: empty } }, W, H);
   arena.addChild(hud);
   const presenter = new CombatPresenter({
+    crowdFx,
     fighters: { player: rigs.find((r) => r.rig === P)!.anim!, enemy: rigs.find((r) => r.rig === E)!.anim! },
     fx, unit: UNIT, layout: LAYOUT, floorY: FEET_Y, sound: true, crowd,
     onState: (s) => hud.setState(s),
@@ -108,6 +112,7 @@ export async function showAiFight(context: SceneContext): Promise<SceneUpdate> {
     hud.setPanelScale(Math.min(1.6, hudScaleFor(world.scale.x) * textScale()));
     hud.update(dt);
     fx.update(dt); // damage numbers, MISS and BLOCK animate and fade only while ticked
+    crowdFx.update(dt);
     for (const [rig, g] of [[P, shadows[0]], [E, shadows[1]]] as const) {
       const lift = Math.max(0, (pelvisY - rig.view.y) / UNIT);
       g.position.set(rig.view.x + 0.35 * UNIT * rig.facing, FEET_Y);

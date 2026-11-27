@@ -7,6 +7,7 @@ import type { Animator } from '../anim/Animator';
 import type { ClipEvent } from '../anim/clip';
 import type { CombatEvent, CombatState, Fighter, FighterSide, MoveKind } from '../core/types';
 import { BlockShield, DamageSplat, FxLayer, MissText } from '../ui/fx';
+import type { CrowdFx } from '../ui/crowdFx';
 import { attachGroundFx } from '../ui/groundFx';
 import { attachFoley, playFoley } from '../audio/foley';
 import type { CrowdAmbience } from '../audio/crowd';
@@ -37,6 +38,8 @@ export interface PresenterOptions {
   sound?: boolean;
   /** the crowd cheers a critical blow and the end of a bout */
   crowd?: CrowdAmbience;
+  /** the painted stands come alive (#52): arms go up on a crit and a finishing blow, gifts fly onto the sand */
+  crowdFx?: CrowdFx;
   /**
    * called whenever the shown health/energy/crowd change (feed it to CombatHud.setState);
    * `gifts` lists what the crowd threw during the action that just ended
@@ -81,6 +84,7 @@ export class CombatPresenter {
       a.play('idle', { blend: 0 });
     }
     this.o.fx.clear();
+    this.o.crowdFx?.clear();
     this.showStatuses(state);
     this.emit();
   }
@@ -105,10 +109,20 @@ export class CombatPresenter {
       // the crowd reacts once the action has played out; a bouquet's health is already in `after`
       const gifts = events.filter((e): e is CrowdGiftEvent => e.type === 'crowd_gift');
       this.showStatuses(after);
+      this.showCrowd(after, gifts);
       this.emit(gifts.length ? gifts : undefined);
     } finally {
       this.running = false;
     }
+  }
+
+  /** the stands (#52): fans wave as the favour grows; a gift from the crowd flies to the fighter it is for */
+  private showCrowd(state: CombatState, gifts: readonly CrowdGiftEvent[]) {
+    const fx = this.o.crowdFx;
+    if (!fx) return;
+    fx.mood = Math.max(state.fighters.player.crowd.favour, state.fighters.enemy.crowd.favour) / 100;
+    if (this.o.floorY === undefined) return;
+    for (const g of gifts) fx.throw(g.gift, g.gift === 'coin' ? 3 : 1, this.o.fighters[g.fighter].rig.view.x, this.o.floorY);
   }
 
   private showStatuses(state: CombatState) {
@@ -155,7 +169,16 @@ export class CombatPresenter {
     const h = this.head(a.target);
     const facingDef = def.rig.facing;
     if (this.o.sound) playFoley(!a.hit ? 'miss' : a.blocked ? 'block' : a.crit ? 'crit' : 'hit');
-    if (a.hit && !a.blocked && (a.crit || fatal)) this.o.crowd?.cheer(fatal ? 1.4 : 0.8);
+    if (a.hit && !a.blocked && (a.crit || fatal)) {
+      this.o.crowd?.cheer(fatal ? 1.4 : 0.8);
+      // a crit brings half the stands up, a finishing blow all of it, and they throw flowers and coins at the winner
+      this.o.crowdFx?.cheer(fatal ? 1 : 0.5, h.x);
+      if (fatal && this.o.floorY !== undefined) {
+        const winner = this.o.fighters[other(a.target)].rig.view.x;
+        this.o.crowdFx?.throw('bouquet', 6, winner, this.o.floorY);
+        this.o.crowdFx?.throw('coin', 5, winner, this.o.floorY);
+      }
+    }
     if (!a.hit) {
       this.o.fx.show(slot, new MissText(), h.x + 34 * facingDef, h.y);
       // the blow passes: the defender leans away from it and steps back in (#13)
