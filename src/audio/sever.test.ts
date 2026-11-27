@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { SAMPLES } from './foley';
+import { SAMPLES, blowSound } from './foley';
 import { SEVER_FILES, SEVER_GAIN, pickVariant, playSever } from './sever';
 
 afterEach(() => {
@@ -44,6 +44,23 @@ describe('weapon on a shield', () => {
     const { file, gain } = SAMPLES.block!;
     expect(onDisk).toContain(`../../assets/${file}`);
     expect(gain).toBeLessThanOrEqual(0.4);
+  });
+});
+
+describe('sword blow', () => {
+  const landed = { hit: true, blocked: false, crit: false };
+
+  it('plays the recording only when a sword lands on the fighter', () => {
+    expect(blowSound(landed, 'sword')).toBe('sword_hit');
+    expect(blowSound({ ...landed, crit: true }, 'sword')).toBe('sword_crit');
+    expect(blowSound({ ...landed, blocked: true }, 'sword')).toBe('block');
+    expect(blowSound({ ...landed, hit: false }, 'sword')).toBe('miss');
+    for (const family of ['axe', 'spear', 'hammer', 'daggers', undefined]) expect(blowSound(landed, family)).toBe('hit');
+  });
+
+  it('has its recording among the assets', () => {
+    const onDisk = Object.keys(import.meta.glob('../../assets/sfx/combat/*.wav'));
+    expect(onDisk).toContain(`../../assets/${SAMPLES.sword_hit!.file}`);
   });
 });
 

@@ -1358,3 +1358,11 @@ Uderzenie bronią w tarczę to teraz nagranie od Mateusza: `assets/sfx/combat/sh
 - API bez zmian: dalej `playFoley('block')`. Mapa nagrań: `SAMPLES` w `src/audio/foley.ts`; wczytywanie i odtwarzanie plików
   (też dla `sever.ts`) w `src/audio/sample.ts`. Zanim plik się wczyta, gra stary syntetyczny dźwięk.
 - ⚠️ #276 (tarcza z HP): dziś każdy blok gra ten dźwięk. Gdy da się blokować bez tarczy, trzeba będzie wybrać dla takiego bloku inny.
+
+### 2026-11-27 20:10 · Claude Code (Mateusz) · sever-sounds
+
+Trafienie mieczem ma nagranie od Mateusza: `assets/sfx/combat/sword_hit.wav` (LFS; przycięte z początkowej ciszy, 44,1 kHz / 16 bit).
+- Gra, gdy broń napastnika ma `family === 'sword'` i cios wchodzi w przeciwnika (crit trochę głośniej). Pudło, blok na tarczy
+  i zamach bez zmian; pozostałe bronie (też sztylety) mają dalej syntetyczne `hit` / `crit`.
+- Nowe dźwięki `sword_hit` / `sword_crit` i funkcja `blowSound(cios, rodzinaBroni)` w `src/audio/foley.ts`; używa jej presenter i anim lab.
+- Mały ruch w `combatPresenter.ts` (jedna linia z dźwiękiem ciosu) — ten plik rusza też #276; przy konflikcie zostawcie wywołanie `blowSound`.

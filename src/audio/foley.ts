@@ -12,26 +12,32 @@ import type { Mixer } from './mixer';
 import { loadSample, playSample, readySample } from './sample';
 import { preloadSever } from './sever';
 
-export type Sound = 'swing' | 'miss' | 'hit' | 'crit' | 'block' | 'step' | 'land' | 'impact';
+export type Sound = 'swing' | 'miss' | 'hit' | 'crit' | 'sword_hit' | 'sword_crit' | 'block' | 'step' | 'land' | 'impact';
 
 export type Layer =
   | { type: 'rustle'; from: number; to: number; q: number; dur: number; gain: number; delay?: number }
   | { type: 'thump'; from: number; to: number; dur: number; gain: number; delay?: number }
   | { type: 'ring'; freqs: readonly number[]; dur: number; gain: number; delay?: number };
 
+const HIT: readonly Layer[] = [
+  { type: 'thump', from: 150, to: 70, dur: 0.12, gain: 0.42 },
+  { type: 'rustle', from: 1100, to: 500, q: 0.9, dur: 0.11, gain: 0.3 },
+];
+const CRIT: readonly Layer[] = [
+  { type: 'thump', from: 120, to: 50, dur: 0.22, gain: 0.55 },
+  { type: 'rustle', from: 1400, to: 380, q: 0.8, dur: 0.2, gain: 0.36 },
+  { type: 'rustle', from: 4200, to: 2500, q: 2.5, dur: 0.12, gain: 0.12, delay: 0.02 },
+];
+
 /** frequencies in Hz, times in seconds, gains before the foley / master volumes (kept low: nothing dominates) */
 export const RECIPES: Readonly<Record<Sound, readonly Layer[]>> = {
   swing: [{ type: 'rustle', from: 2200, to: 700, q: 1.4, dur: 0.17, gain: 0.22 }],
   miss: [{ type: 'rustle', from: 2600, to: 600, q: 1.2, dur: 0.24, gain: 0.24 }],
-  hit: [
-    { type: 'thump', from: 150, to: 70, dur: 0.12, gain: 0.42 },
-    { type: 'rustle', from: 1100, to: 500, q: 0.9, dur: 0.11, gain: 0.3 },
-  ],
-  crit: [
-    { type: 'thump', from: 120, to: 50, dur: 0.22, gain: 0.55 },
-    { type: 'rustle', from: 1400, to: 380, q: 0.8, dur: 0.2, gain: 0.36 },
-    { type: 'rustle', from: 4200, to: 2500, q: 2.5, dur: 0.12, gain: 0.12, delay: 0.02 },
-  ],
+  hit: HIT,
+  crit: CRIT,
+  // a sword's blow is recorded (SAMPLES); these stand in until the file is decoded
+  sword_hit: HIT,
+  sword_crit: CRIT,
   block: [
     { type: 'ring', freqs: [930, 1390, 2210], dur: 0.32, gain: 0.12 },
     { type: 'thump', from: 220, to: 140, dur: 0.07, gain: 0.25 },
@@ -51,6 +57,9 @@ export const RECIPES: Readonly<Record<Sound, readonly Layer[]>> = {
 
 /** recordings that replace a synthesised sound; the recipe above plays until the file is decoded */
 export const SAMPLES: Readonly<Partial<Record<Sound, { file: string; gain: number }>>> = {
+  // a sword landing on the fighter (a recording with a low peak, hence the higher gain); a crit is a little louder
+  sword_hit: { file: 'sfx/combat/sword_hit.wav', gain: 0.65 },
+  sword_crit: { file: 'sfx/combat/sword_hit.wav', gain: 0.85 },
   // a weapon on a shield: the recording peaks at full scale, so it is turned well down
   block: { file: 'sfx/combat/shield_thud.wav', gain: 0.3 },
 };
@@ -103,6 +112,14 @@ function layer(m: Mixer, l: Layer, at: number, pitch: number, loud: number) {
       osc.stop(t + l.dur + 0.05);
     }
   }
+}
+
+/** the sound of a blow's result; `family` = the attacker's weapon family */
+export function blowSound(blow: { hit: boolean; blocked: boolean; crit: boolean }, family?: string): Sound {
+  if (!blow.hit) return 'miss';
+  if (blow.blocked) return 'block';
+  if (family === 'sword') return blow.crit ? 'sword_crit' : 'sword_hit';
+  return blow.crit ? 'crit' : 'hit';
 }
 
 /** play one foley sound now (silent until the player has clicked or pressed a key once) */
