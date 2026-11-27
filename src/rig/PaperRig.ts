@@ -11,6 +11,7 @@
  */
 import { EXPRESSION_KEYS, EXPRESSION_PIECES, pieceShown } from './expressions';
 import { widthScale } from './builds';
+import { woundSprite } from './wounds';
 import { QUARTER_TURN, holdShield, isShieldTier, quarterTurn, turnedLayers } from './shield';
 import { boneOffset, forwardKinematics, holdWithBothHands, looseHead } from './twoHand';
 import { Assets, Container, Rectangle, Renderer, RenderTexture, Sprite, Texture } from 'pixi.js';
@@ -33,6 +34,8 @@ export interface KitJson {
   hood_helmets: number[];
   beards: string[];
   sets: string[];
+  /** body damage overlays (#284): part -> the sprite of each of the ten stages (null = unhurt there) */
+  wounds?: Record<string, (string | null)[]>;
   sprites: Record<string, { w: number; h: number; pivot: [number, number]; tint: 'skin' | 'hair' | null; alpha?: number; grip2?: [number, number]; pair?: boolean; offhand?: string }>;
 }
 
@@ -50,6 +53,8 @@ export interface Look {
   shield?: number;
   /** the shield arm was cut off at the elbow in this bout (#275): no forearm, hand or shield; never saved */
   armCut?: boolean;
+  /** damage stage 1-10 (#284), 1/undefined = unhurt; follows the health in a bout, never saved */
+  wounds?: number;
 }
 
 /** what goes with the shield arm below the elbow (#275) */
@@ -178,6 +183,7 @@ export class Kit {
     switch (layer.slot) {
       case 'body': return `body_${p}`;
       case 'cut': return `cut_${p}`;
+      case 'wound': return woundSprite(this.json.wounds, p, look.wounds);
       case 'face': return `face${look.face}_${p}`;
       case 'hair':
         if (look.helmet > 0) {
@@ -311,8 +317,9 @@ export class PaperRig {
       const s = new Sprite(this.kit.texture(key, color));
       s.anchor.set(m.pivot[0] / m.w, m.pivot[1] / m.h);
       if (layer.back) s.tint = BACK_TINT;
-      const flat = (m.alpha ?? 1) < 1;
-      if (flat) s.alpha = m.alpha!;
+      // a see-through layer and a wound lie flat on what is under them: no paper shadow of their own
+      const flat = (m.alpha ?? 1) < 1 || layer.slot === 'wound';
+      if (m.alpha !== undefined) s.alpha = m.alpha;
       const sh = new Sprite(this.kit.shadow(key, this.shadow.blur));
       sh.anchor.set((m.pivot[0] + SHADOW_PAD) / (m.w + SHADOW_PAD * 2), (m.pivot[1] + SHADOW_PAD) / (m.h + SHADOW_PAD * 2));
       sh.blendMode = 'multiply';

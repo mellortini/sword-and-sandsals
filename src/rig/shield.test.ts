@@ -97,9 +97,10 @@ describe('the quarter turn of every fighter (#273, #280)', () => {
       expect(i, `${bone} ${slot}`).toBeLessThan(nearArm);
     }
     // the whole near arm in full light, forearm to hand, with the second dagger / net in the hand, then the shield
-    const order = [['arm_b_lo', 'body'], ['arm_b_lo', 'armor'], ['arm_b_up', 'body'], ['arm_b_up', 'shoulders'], ['weapon_b', 'weapon_b'], ['hand_b', 'body']]
+    const order = [['arm_b_lo', 'body'], ['arm_b_lo', 'wound'], ['arm_b_lo', 'armor'], ['arm_b_up', 'body'], ['arm_b_up', 'wound'],
+      ['arm_b_up', 'shoulders'], ['weapon_b', 'weapon_b'], ['hand_b', 'body']]
       .map(([bone, slot]) => at(layers, bone, slot));
-    expect(order).toEqual([shield - 6, shield - 5, shield - 4, shield - 3, shield - 2, shield - 1]);
+    expect(order).toEqual([8, 7, 6, 5, 4, 3, 2, 1].map((back) => shield - back));
     for (const i of order) expect(layers[i].back).toBe(false);
     // the kit's own order is untouched
     expect(at(kit.layers, 'arm_b_up', 'body')).toBeLessThan(at(kit.layers, 'torso', 'body'));

@@ -8,6 +8,7 @@ import type { ClipEvent } from '../anim/clip';
 import type { CombatEvent, CombatState, Fighter, FighterSide, MoveKind } from '../core/types';
 import { BlockShield, DamageSplat, FxLayer, MissText } from '../ui/fx';
 import { goreMode } from '../ui/gore';
+import { woundStage } from '../rig/wounds';
 import { PaperScraps } from '../ui/scraps';
 import type { CrowdFx } from '../ui/crowdFx';
 import type { CameraJuice } from '../ui/cameraJuice';
@@ -149,7 +150,19 @@ export class CombatPresenter {
     for (const side of ['player', 'enemy'] as const) this.o.fx.status.set(side, state.fighters[side].statuses);
   }
 
+  /** the bodies show the health the bars show (#284); with gore off they stay unmarked */
+  private showWounds() {
+    if (!this.shown) return;
+    for (const side of ['player', 'enemy'] as const) {
+      const { health, stats } = this.shown[side];
+      const stage = goreMode() === 'off' ? 1 : woundStage(health, stats.maxHealth);
+      const rig = this.o.fighters[side].rig;
+      if ((rig.look.wounds ?? 1) !== stage) void rig.setLook({ wounds: stage });
+    }
+  }
+
   private emit(gifts?: readonly CrowdGiftEvent[]) {
+    this.showWounds();
     if (this.shown) this.o.onState?.(gifts ? { fighters: this.shown, gifts } : { fighters: this.shown });
   }
 
