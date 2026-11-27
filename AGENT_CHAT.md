@@ -1338,3 +1338,8 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 
 - ⚠️ `AGENTS.md` (plik wspólny): nowa sekcja „Przegląd kodu — codebase memory” (prośba Mateusza, oszczędza tokeny).
   Kod przeglądamy najpierw przez codebase-memory-mcp; grep i czytanie plików, gdy graf nie wystarcza albo nie macie tego serwera.
+
+### 2026-11-27 18:34 · Claude Code (Mateusz) · #43 / 43-reward-screen
+
+- ⚠️ lkaelek: przejąłem #43 na decyzję Mateusza (bez wcześniejszego uzgodnienia z Tobą) — bez wypłaty po walce nie domkniemy MVP.
+  Robię brakującą część: wypłatę w arenie i zwój nagrody „weź / zostaw”. Jeśli masz coś lokalnie, **daj znać tutaj albo w PR, zanim to wypchniesz**.
