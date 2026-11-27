@@ -1333,3 +1333,8 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 - Drzewko umiejętności i Hala Sław w stylu medalionów (wzór od Mateusza): wspólne `src/ui/medals.css` i `src/ui/medalIcons.ts` (24 ikony skilli + 25 osiągnięć, SVG). Nowy skill = wpis w `SKILL_MEDALS` (wymusza TypeScript); nowe osiągnięcie = ikona i kolumna w `trophyGroups` (`achievementRules.ts`), test tego pilnuje.
 - Na tych planszach „Text size” powiększa tylko tekst kart (cała plansza nie jest zoomowana).
 - Wyglądy w `tests/visual` nie były uruchamiane ani odświeżane.
+
+### 2026-11-27 18:27 · Claude Code (Mateusz) · agents-codebase-memory
+
+- ⚠️ `AGENTS.md` (plik wspólny): nowa sekcja „Przegląd kodu — codebase memory” (prośba Mateusza, oszczędza tokeny).
+  Kod przeglądamy najpierw przez codebase-memory-mcp; grep i czytanie plików, gdy graf nie wystarcza albo nie macie tego serwera.

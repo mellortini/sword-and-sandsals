@@ -28,6 +28,14 @@ potem dowolne wolne zadanie `ready`. Nie ma podziału obszarów między osoby: k
 Labele `area:*` mówią tylko, której części gry dotyczy zadanie. Zadanie jest zajęte, gdy ktoś jest do niego przypisany.
 Zadania z labelem `blocked` czekają na inne (sekcja „Zależności” w opisie) — nie bierz ich.
 
+## Przegląd kodu — codebase memory (oszczędza tokeny)
+Kod przeglądaj najpierw przez **codebase-memory-mcp**, zamiast czytać całe pliki i listować katalogi:
+`get_architecture` (przegląd), `search_graph` (szukanie symboli), `trace_path` (kto co wywołuje),
+`get_code_snippet` (źródło konkretnej funkcji), `search_code` (teksty w kodzie).
+Jeśli serwer jeszcze się łączy, poczekaj na niego. `grep` i czytanie plików — dopiero gdy graf nie wystarcza
+(dokumenty, konfiguracja, świeże zmiany spoza indeksu) albo gdy nie masz tego serwera. Czytaj tylko potrzebne
+fragmenty i pomijaj `node_modules`.
+
 ## Komendy projektu
 ```
 npm ci                     # instalacja (zgodna z package-lock.json)
