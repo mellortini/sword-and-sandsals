@@ -220,7 +220,8 @@ export async function showArena(
         nextOpponent: true,
       });
       if (choice === 'leave') {
-        location.search = '?view=title';
+        // a career fight goes back to the town (#30); a quick bout to the title
+        location.search = career ? '?view=town' : '?view=title';
         return;
       }
       if (choice === 'next') {

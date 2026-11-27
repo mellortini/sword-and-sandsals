@@ -65,6 +65,25 @@ export const BUILDINGS: readonly Building[] = [
 ];
 
 /**
+ * Opens one building's screen and waits until it closes (#30). New gear from the pack may complete an armour set
+ * (#203): that is recorded, saved and announced here, so every way into a building behaves the same.
+ */
+export async function visitBuilding(id: string, character: SavedCharacter, save: Save, preview?: LookPreview): Promise<SavedCharacter> {
+  const place = BUILDINGS.find((b) => b.id === id);
+  if (!place) return character;
+  let current = await place.open(character, save, preview);
+  if (place.id === 'gear' && current !== character) {
+    const { character: recorded, unlocked } = recordForCareer(current, equipmentSignal(careerLoadout(current)));
+    if (unlocked.length) {
+      current = recorded;
+      await save(current).catch(() => undefined);
+      showAchievements(unlocked);
+    }
+  }
+  return current;
+}
+
+/**
  * The town panel (#201): one card per building with what it is for and the gladiator's state there. A card opens its
  * screen over the town; when that closes, the town comes back with fresh notes. `onChange` hears every saved change
  * (the title updates its puppet and notes). Leave or Escape closes; arrows move between the cards.
@@ -127,16 +146,7 @@ export function openTown(character: SavedCharacter, save: Save, onChange?: (c: S
       keys.abort();
       backdrop.hidden = true;
       const before = current;
-      current = await place.open(current, save, preview);
-      // new gear may complete an armour set (#203)
-      if (place.id === 'gear' && current !== before) {
-        const { character, unlocked } = recordForCareer(current, equipmentSignal(careerLoadout(current)));
-        if (unlocked.length) {
-          current = character;
-          await save(current).catch(() => undefined);
-          showAchievements(unlocked);
-        }
-      }
+      current = await visitBuilding(place.id, current, save, preview);
       backdrop.hidden = false;
       if (current !== before) onChange?.(current);
       listen();

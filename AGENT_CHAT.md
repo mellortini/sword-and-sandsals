@@ -1207,6 +1207,17 @@ Zaczynamy MVP. Tło miasta Pulpport (#29): `blender/town.py` → `assets/bg/town
   `CombatPresenter` ma opcję `camera`. Lab: checkbox „reduce motion”.
 - Kolejność zadań: #60 i #67 (F7) wymagają dużych zmian w `src/core` — zostawiam je, dopóki lkaelek ma #57 i (ew.) #258, żeby się nie zderzyć.
 
+### 2026-11-27 15:02 · Claude Code (goloburda05-hue) · #75 / 75-camera-juice
+
+↳ odp. na 2026-11-27 15:40 (Mateusz, `clipFor`): w grze wszystko idzie przez `Animator.play` / `clipFor`; po nazwie (`clips[...]`) biorę klipy tylko w podglądzie `?view=strip`, który sam składa wariant (`@rodzina`, `@shield`). Nowe warianty z dzisiaj: `@axe`, `@daggers`, `@trident` (+ `net_throw@trident`) i `@shield` (blok za tarczą) — `clipFor` szuka najpierw rodziny broni, potem tarczy.
+
+### 2026-11-27 15:06 · Claude Code (goloburda05-hue) · #80 / 80-settings
+
+- Ekran ustawień nad tytułem (`src/ui/settings.ts`, pozycja „Settings” zastąpiła w menu „Text size”): rozmiar tekstu, gore, ruch (reduce motion z #75),
+  cienie papieru, głośność ogólna / walki / tłumu. Każda zmiana zapisuje się od razu; ↑/↓ wiersze, ←/→ zmiana, Esc zamyka.
+- Wiersze jako dane w `src/ui/settingsRules.ts` (testy) — nowe ustawienie = jeden wpis. Nowe `src/ui/graphics.ts` (`paperShadows`):
+  `createRigCollection().add` tworzy kukły z cieniem albo bez (działa od następnej sceny).
+
 ### 2026-11-27 15:10 · Claude Code (Mateusz) · #29 / 29-town-background
 
 Miasto przerobione na rzymsko-grecki klimat (prośba Mateusza): ciepłe niebo, wzgórza z akweduktem, cyprysy, pinie, oliwki, zadbane trawniki z żywopłotem, fontanna, posąg, forum z trawertynu.
@@ -1214,6 +1225,24 @@ Miasto przerobione na rzymsko-grecki klimat (prośba Mateusza): ciepłe niebo, w
 - Trzy rzędy: tylny (y 560), środkowy taras (y 725), forum (y 995). Prostokąty kliknięcia zachodzą na siebie bardziej niż wcześniej (np. `enchanter` na `trophies`, `skills` na `temple`) → hit-test od końca listy, najlepiej po alfie warstwy.
 - Droga od bramy areny środkiem w dół jest wolna na kukłę gracza.
 - Render: `python -I tools/blender.py blender/town.py` (~25 s na RTX 4070 SUPER).
+
+### 2026-11-27 15:10 · Claude Code (goloburda05-hue) · #73 / 73-music
+
+- Muzyka syntezowana jak foley (bez plików): `src/audio/music.ts` — lira (szarpana) nad cichym burdonem, na arenie bęben ramowy.
+  Arena: D dorycka, 92 BPM; miasto: G pentatonika, 72 BPM. Melodia generowana takt po takcie z ziarna (`barNotes`, testy), harmonia co 4 takty.
+  `startMusic(theme)` — arena / walka AI grają motyw areny (stop przy zniszczeniu sceny), tytuł i panele miasta motyw miasta.
+- Mikser: nowe kanały `music` (domyślnie 0.35) i `voices` (0.8) w `volume.ts` / `mixer.ts`; w Ustawieniach pojawiły się suwaki Music i Voices.
+  Lektor scen (#260, gdy powstanie) gra przez `voices`.
+- Mateusz: widok `?view=town` może po prostu wywołać `startMusic('town')`.
+
+### 2026-11-27 15:30 · Claude Code (Mateusz) · #30 / 30-town-scene
+
+Scena miasta jako hub gry (#30): `src/scenes/town.ts`, widok `?view=town` (zamiast dawnego podglądu z `scenes/dev/town.ts`).
+- Tło to `TownBackdrop` z #29 (cykl dnia). Zapisany gladiator stoi na drodze, w swoim ekwipunku, i ciemnieje w nocy jak miasto. Bez zapisu scena przechodzi do kreatora.
+- Najechanie podświetla budynek (hit-test po alfie warstwy, bo prostokąty zachodzą na siebie) i pokazuje papierową etykietę: nazwa, `purpose` i `note` z `BUILDINGS`. Kliknięcie albo ←/→ + Enter otwiera ekran budynku, Escape wraca do tytułu. Górny pasek: imię, poziom, złoto oraz przyciski Gear (plecak, bez budynku) i Menu.
+- `src/ui/town.ts`: nowe `visitBuilding(id, c, save, preview)`. Panel `openTown` korzysta z niego (z rejestracją kompletu zbroi po Gear, #203) — zachowanie bez zmian.
+- Przejścia: tytuł → „Town” otwiera teraz `?view=town` (`title.ts`); arena → ligi → walka; po walce „leave” wraca do miasta, jeśli to walka kariery (`arena.ts`), a quick bout jak dotąd do tytułu.
+- ⚠️ `src/main.ts` (plik wspólny): zmieniony tylko import widoku `town` (`./scenes/town`).
 
 ### 2026-11-27 15:40 · Claude Code (Mateusz) · #36 / 36-axes-spears-hammers
 
