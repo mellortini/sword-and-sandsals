@@ -32,29 +32,53 @@ export function shieldName(tier: number | undefined, sets: readonly string[]): s
   return `${shieldShape(tier) === 'round' ? 'Parma' : 'Scutum'} · ${sets[tier - 1] ?? tier}`;
 }
 
-/** the pose with the shield bone turned so the shield keeps the body's lean (plus the clip's own `shield` tilt) */
+/**
+ * The quarter turn behind a shield (#273): the body turns a little towards the enemy, so the shield shoulder comes
+ * forward (in front of the chest) and the sword shoulder slides back behind it; the chest reads a little narrower.
+ */
+export const SHIELD_TURN = { shieldShoulder: 0.6, swordShoulder: -0.5, chestWidth: 0.9 } as const;
+
+/**
+ * The pose with the shield bone turned so the shield keeps the body's lean (plus the clip's own `shield` tilt), and
+ * both shoulders where the quarter turn puts them.
+ */
 export function holdShield(pose: Pose): Pose {
   const arm = ARM.reduce((a, b) => a + (pose[b] ?? 0), 0);
-  return { ...pose, shield: (pose.shield ?? 0) - arm };
+  return {
+    ...pose,
+    shield: (pose.shield ?? 0) - arm,
+    arm_b_shift: (pose.arm_b_shift ?? 0) + SHIELD_TURN.shieldShoulder,
+    arm_f_shift: (pose.arm_f_shift ?? 0) + SHIELD_TURN.swordShoulder,
+  };
 }
 
 type Layer = KitJson['layers'][number];
-/** the shield arm's layers in front of the body, drawn like the sword arm: forearm, bracer, upper arm, shoulder, hand */
+/** the shield arm's layers, drawn like a near arm: forearm, bracer, upper arm, shoulder, hand */
 const ARM_ORDER: ReadonlyArray<[bone: string, slot: string]> = [
   ['arm_b_lo', 'body'], ['arm_b_lo', 'armor'], ['arm_b_up', 'body'], ['arm_b_up', 'shoulders'], ['hand_b', 'body'],
 ];
+/** the sword arm's upper arm and shoulder pad: behind the turned chest */
+const SWORD_SHOULDER: ReadonlyArray<[bone: string, slot: string]> = [['arm_f_up', 'body'], ['arm_f_up', 'shoulders']];
+
+const pick = (layers: readonly Layer[], which: ReadonlyArray<[string, string]>) =>
+  which.flatMap(([bone, slot]) => layers.filter((l) => l.bone === bone && l.slot === slot));
+const among = (which: ReadonlyArray<[string, string]>) => (l: Layer) => which.some(([bone, slot]) => l.bone === bone && l.slot === slot);
 
 /**
- * The draw order with a shield (#273): the arm that carries it comes out from behind the body, shoulder and all, and is
- * drawn in full light just under the shield, so the arm reads as the near one holding it. Mirrored, the opponent holds
- * the shield in the left hand the same way. Without the shield the arm stays behind the body (the kit's own order).
+ * The draw order of the quarter turn behind a shield (#273), from the back:
+ * - the sword shoulder and upper arm go behind the chest (in the back arm's shade): only the elbow comes out;
+ * - the chest, head and helmet;
+ * - the sword forearm, the blade and the sword hand, in front of the chest;
+ * - on top, the shield arm (shoulder and all, in full light) and the shield, the nearest things to the viewer: a
+ *   raised shield covers the sword shoulder, and a blade drawn back passes behind it.
+ * Mirrored, the opponent holds the shield in the near (left) hand the same way. Without a shield the kit's order stays.
  */
 export function shieldArmInFront(layers: readonly Layer[]): Layer[] {
-  const isArm = (l: Layer) => ARM_ORDER.some(([bone, slot]) => l.bone === bone && l.slot === slot);
-  const arm = ARM_ORDER.flatMap(([bone, slot]) => layers.filter((l) => l.bone === bone && l.slot === slot))
-    .map((l) => ({ ...l, back: false }));
-  const rest = layers.filter((l) => !isArm(l));
-  const at = rest.findIndex((l) => l.slot === 'shield');
-  if (at < 0) return [...layers];
-  return [...rest.slice(0, at), ...arm, ...rest.slice(at)];
+  const shield = layers.filter((l) => l.slot === 'shield');
+  if (!shield.length) return [...layers];
+  const arm = pick(layers, ARM_ORDER).map((l) => ({ ...l, back: false }));
+  const shoulder = pick(layers, SWORD_SHOULDER).map((l) => ({ ...l, back: true }));
+  const rest = layers.filter((l) => !among(ARM_ORDER)(l) && !among(SWORD_SHOULDER)(l) && l.slot !== 'shield');
+  const chest = rest.findIndex((l) => l.bone === 'torso' && l.slot === 'body');
+  return [...rest.slice(0, chest), ...shoulder, ...rest.slice(chest), ...arm, ...shield];
 }

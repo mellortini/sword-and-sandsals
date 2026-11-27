@@ -1361,3 +1361,10 @@ Poprawki po uwagach (goloburda05-hue):
 
 - Ramię z tarczą na pierwszym planie (prośba goloburda05-hue: bark ręki z tarczą wyglądał, jakby był po drugiej stronie ciała). `shieldArmInFront` w `src/rig/shield.ts`: gdy tarcza jest widoczna, `PaperRig.build` przenosi warstwy tylnego ramienia (przedramię, karwasz, ramię, naramiennik, dłoń) przed tułów, tuż pod tarczę, bez `BACK_TINT`. Ramię z mieczem zostaje nad tarczą. Przeciwnik (lustro) trzyma więc tarczę w lewej, bliższej ręce, a gracz w bliższej (prawej). **`kit.json` bez zmian** — kolejność zmienia się tylko w rigu, bez tarczy wszystko jak dotąd.
 - Testy wizualne (`tests/visual`) nie były uruchamiane; widoki z tarczą to tylko `?view=lineup&shield=1`, `anim`, `strip`.
+
+### 2026-11-27 20:05 · Claude Code (goloburda05-hue) · #273 / 273-shield-hp
+
+- Za tarczą postać stoi w lekkim obrocie 3/4 (prośba goloburda05-hue: więcej 3D, łokieć z mieczem widoczny, tarcza nie może wchodzić pod bark z mieczem).
+  `holdShield` dokłada `arm_b_shift: +0,6` (bark z tarczą do przodu) i nowy klucz `arm_f_shift: −0,5` (bark z mieczem do tyłu, obsłużony w `boneOffset`), a `PaperRig.build` zwęża pierś do 0,9 (`SHIELD_TURN` w `src/rig/shield.ts`).
+- Kolejność warstw przy tarczy (`shieldArmInFront`): ramię i naramiennik z mieczem za piersią (w cieniu) → tułów, głowa → przedramię z mieczem, broń, dłoń → całe ramię z tarczą → tarcza na wierzchu. Bez tarczy wszystko jak w `kit.json`.
+- ⚠️ Mateusz / lkaelek: kto pisze klipy z tarczą (`@shield`) — bark z mieczem jest teraz ~0,5 j. bliżej środka, a z tarczą ~0,6 j. dalej do przodu.

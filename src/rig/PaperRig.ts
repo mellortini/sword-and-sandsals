@@ -11,7 +11,7 @@
  */
 import { EXPRESSION_KEYS, EXPRESSION_PIECES, pieceShown } from './expressions';
 import { widthScale } from './builds';
-import { holdShield, isShieldTier, shieldArmInFront } from './shield';
+import { SHIELD_TURN, holdShield, isShieldTier, shieldArmInFront } from './shield';
 import { boneOffset, forwardKinematics, holdWithBothHands, looseHead } from './twoHand';
 import { Assets, Container, Rectangle, Renderer, RenderTexture, Sprite, Texture } from 'pixi.js';
 
@@ -293,8 +293,9 @@ export class PaperRig {
     const skin = J.skins[L.skin]?.color ?? J.skins[3].color;
     const hair = J.hair_colors[L.hairColor]?.color ?? J.hair_colors[1].color;
     const face = J.faces[L.face] ?? J.faces[0];
-    // with a shield the arm that carries it is drawn in front of the body (#273)
-    const layers = this.kit.shieldShown(L) ? shieldArmInFront(J.layers) : J.layers;
+    // behind a shield the body stands in a quarter turn (#273): shield arm in front, sword shoulder behind, narrower chest
+    const turned = this.kit.shieldShown(L);
+    const layers = turned ? shieldArmInFront(J.layers) : J.layers;
     for (const layer of layers) {
       const key = this.kit.resolve(layer, L);
       if (!key || !this.kit.has(key)) continue;
@@ -310,7 +311,7 @@ export class PaperRig {
       sh.blendMode = 'multiply';
       // beards are drawn on the reference jaw: stretch them to this face's jaw around the jaw centre
       // a build widens the paper across its bone (#27); armour on the bone follows, so every set fits
-      let sx = widthScale(L.build, layer.bone), sy = 1, ox = 0, oy = 0;
+      let sx = widthScale(L.build, layer.bone) * (turned && layer.bone === 'torso' ? SHIELD_TURN.chestWidth : 1), sy = 1, ox = 0, oy = 0;
       if (layer.slot === 'beard') {
         sx = face.jaw[0] / J.ref_jaw[0];
         sy = face.jaw[1] / J.ref_jaw[1];
