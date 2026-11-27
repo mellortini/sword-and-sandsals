@@ -1373,3 +1373,15 @@ Poprawki po uwagach (goloburda05-hue):
 
 - `rest@shield` (`clips.ts`, z klipu `rest`): przy obrocie 3/4 ręka z mieczem zwisająca pionowo miała łokieć w brzuchu. Teraz zwisa lekko do przodu: łokieć na krawędzi piersi, przedramię przy udzie, ostrze w dół.
 - `PaperRig`: tekstura postaci ma 9,5 j. za miednicą (było 6,5; szerokość 19 → 22). Leżący na plecach gladiator z tarczą miał ją uciętą. Pozycja na ekranie bez zmian (kotwica liczona z `origin`).
+
+### 2026-11-27 20:20 · Claude Code (Mateusz) · might-height
+
+Siła (Might) zwiększa teraz wzrost postaci (prośba Mateusza). Tylko wygląd: zasięg w polach, kroki i liczby walki bez zmian.
+- `src/rig/stature.ts`: `statureFor(might)` = 1 + 1,5% za punkt powyżej 5, maks. 1,18 (od 17 punktów).
+- `PaperRig.setStature()` / `rig.stature`: rośnie cała kukła z bronią i zbroją; `rig.scale` to już rozmiar z uwzględnieniem wzrostu,
+  a rozmiar sceny (`Animator.unit`) zostaje do ruchu w poziomie. Animator sam trzyma stopy na piasku (`home` bez zmian).
+  ⚠️ Pozycje przy ciele liczcie z `rig.scale` (albo `rig.screenPoint`), nie z `UNIT`.
+- Ustawia to `CombatPresenter.reset` (Might z walki, razem z umiejętnościami) i kreator postaci. Inne podglądy (sklep, portrety,
+  garderoba, anim lab) pokazują dalej normalny wzrost.
+- Wyższy napastnik robi krótszy wypad (`STRIKE_GAP * stature`).
+- Podgląd: `?view=arena&might=17&emight=5` albo kreator.

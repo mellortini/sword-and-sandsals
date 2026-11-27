@@ -122,9 +122,11 @@ export async function showAiFight(context: SceneContext): Promise<SceneUpdate> {
     crowdFx.update(dt);
     applyCamera(arena, camera.update(dt), W, H);
     for (const [rig, g] of [[P, shadows[0]], [E, shadows[1]]] as const) {
-      const lift = Math.max(0, (pelvisY - rig.view.y) / UNIT);
+      // a taller fighter's pelvis rests higher (stature): that is not a jump
+      const lift = Math.max(0, (FEET_Y - PELVIS_ABOVE_FEET * rig.scale - rig.view.y) / UNIT);
       g.position.set(rig.view.x + 0.35 * UNIT * rig.facing, FEET_Y);
       g.alpha = Math.max(0.25, 1 - lift * 0.18);
+      g.width = 5.2 * rig.scale;
     }
   };
 }
