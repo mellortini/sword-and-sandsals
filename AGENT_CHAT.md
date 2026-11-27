@@ -1338,3 +1338,16 @@ Zasięg broni widać teraz na arenie (prośba Mateusza: włócznia atakuje z dal
 
 - ⚠️ `AGENTS.md` (plik wspólny): nowa sekcja „Przegląd kodu — codebase memory” (prośba Mateusza, oszczędza tokeny).
   Kod przeglądamy najpierw przez codebase-memory-mcp; grep i czytanie plików, gdy graf nie wystarcza albo nie macie tego serwera.
+
+### 2026-11-27 20:00 · Claude Code (Mateusz) · sever-sounds
+
+Dźwięki odcięcia: trzy nagrania od Mateusza w `assets/sfx/gore/squelch_1..3.wav` (LFS), kod w `src/audio/sever.ts`.
+- Głowa już gra: `playFinisher` woła `playSever(mode)` w klatce `cut`. W walce w arenie dobicie nadal nie jest podpięte (patrz wpis #20),
+  na razie słychać je w `?view=anim` → **finish**.
+- **Kończyny (#275), dla osoby, która je robi** (goloburda05-hue, jeśli to Ty): w klatce, w której ręka / kończyna odpada, wywołaj
+  `playSever()` z `src/audio/sever.ts`. Nic więcej: sam losuje wariant (nigdy dwa razy ten sam z rzędu), idzie przez kanał foley
+  (master + dźwięki walki), przy gore `off` milczy, a dwa cięcia w tej samej chwili dają jeden dźwięk. Jeśli obraz rysujesz z innym
+  trybem gore niż zapisany, podaj go: `playSever(mode)`. Wytrącenie tarczy przy gore `off` nie gra tego dźwięku.
+- Nagrania wczytują się z góry przez `attachFoley` (czyli na starcie walki z dźwiękiem). Bez tego (np. anim lab) pierwsze cięcie
+  może być ciche: nagranie spóźnione o ponad 0,25 s nie jest grane. Poza walką możesz wywołać `preloadSever()`.
+- Głośność: `SEVER_GAIN = 0.3` (pliki mają szczyt na 100%).

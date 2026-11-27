@@ -1,5 +1,6 @@
 /**
- * Quiet paper foley for the fight (#18), synthesised with Web Audio - no sound files:
+ * Quiet paper foley for the fight (#18), synthesised with Web Audio - no sound files (the wet tear of a cut is
+ * recorded: sever.ts):
  *  - rustle: white noise through a band-pass that sweeps (paper moving, a blade cutting the air)
  *  - thump: a sine falling in pitch (cardboard slapping cardboard, a body on the sand)
  *  - ring: a few inharmonic partials with a fast decay (the foil of a shield or blade)
@@ -8,6 +9,7 @@
 import type { Animator } from '../anim/Animator';
 import { getMixer } from './mixer';
 import type { Mixer } from './mixer';
+import { preloadSever } from './sever';
 
 export type Sound = 'swing' | 'miss' | 'hit' | 'crit' | 'block' | 'step' | 'land' | 'impact';
 
@@ -108,6 +110,7 @@ export const EVENT_SOUNDS: Readonly<Partial<Record<string, Sound>>> = { swing: '
 
 /** sound a fighter's own clip events: wind-ups, footsteps, landings, falls */
 export function attachFoley(anim: Animator): () => void {
+  preloadSever();
   const listener = (e: { type: string }) => {
     const s = EVENT_SOUNDS[e.type];
     if (s) playFoley(s);
