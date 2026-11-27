@@ -31,7 +31,8 @@ const ENERGY_COSTS: Record<CombatAction, number> = {
   charge: 10,
   quick: 3,
   normal: 5,
-  power: 8,
+  // #282: the heaviest blow per turn now costs its tempo (was 8)
+  power: 11,
   block: 2,
   rest: 0,
   taunt: 2,

@@ -2,7 +2,7 @@ import { expect, it } from 'vitest';
 import { applyCombatStatus, createCombat, getActionOptions, performAction } from './combat';
 import { protectedHitChance } from './hitProtection';
 
-it('keeps the rate within three points of 55% and limits the dry streak in 10,000 actual attacks', () => {
+it('keeps the rate within three points of the 48% Power accuracy and limits the dry streak in 10,000 actual attacks', () => {
   let state = createCombat(11, { position: 4 }, { position: 5, attributes: { vitality: 100_000 } });
   let hits = 0;
   let misses = 0;
@@ -17,8 +17,9 @@ it('keeps the rate within three points of 55% and limits the dry streak in 10,00
     state = action.state;
   }
 
-  expect(hits / 100).toBeGreaterThanOrEqual(52);
-  expect(hits / 100).toBeLessThanOrEqual(58);
+  // Power accuracy is 48% since #282 (was 55%)
+  expect(hits / 100).toBeGreaterThanOrEqual(45);
+  expect(hits / 100).toBeLessThanOrEqual(51);
   expect(longest).toBe(3);
 });
 

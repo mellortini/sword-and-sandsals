@@ -94,7 +94,8 @@ describe('combat options', () => {
 
   it('rejects actions without enough energy and restores energy without exceeding the cap', () => {
     let state = atContact(1, { attributes: { stamina: 0 } }, { attributes: { vitality: 50 } });
-    for (const action of ['power', 'power', 'quick'] as const) {
+    // 20 energy: power 11, normal 5, quick 3 leave 1 (#282)
+    for (const action of ['power', 'normal', 'quick'] as const) {
       state = play(play(state, action).state, 'rest').state;
     }
 
