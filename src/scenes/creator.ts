@@ -1,4 +1,5 @@
 import { Sprite, Text } from 'pixi.js';
+import { BUILDS, DEFAULT_BUILD } from '../rig/builds';
 import { saveGame } from '../core/save';
 import { deriveStats } from '../core/stats';
 import { DEFAULT_LOOK } from '../rig/PaperRig';
@@ -14,7 +15,9 @@ import { PELVIS_ABOVE_FEET } from './common';
 import type { SceneContext } from './common';
 import { loadSavedGladiator } from './savedGladiator';
 
-const APPEARANCE_KEYS = ['skin', 'face', 'hair', 'hairColor', 'beard'] as const;
+const APPEARANCE_KEYS = ['skin', 'face', 'hair', 'hairColor', 'beard', 'build'] as const;
+/** how many choices each appearance row cycles through (#27: three builds) */
+const CHOICES: Partial<Record<(typeof APPEARANCE_KEYS)[number], number>> = { build: BUILDS.length };
 const SCALE = 58;
 
 const escape = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -37,7 +40,7 @@ export async function showCreator({ world, bgTex, kit, ui, add }: SceneContext) 
   heading.position.set(640, 70);
   world.addChild(heading);
 
-  const appearance: Appearance = { skin: DEFAULT_LOOK.skin, face: DEFAULT_LOOK.face, hair: DEFAULT_LOOK.hair, hairColor: DEFAULT_LOOK.hairColor, beard: DEFAULT_LOOK.beard };
+  const appearance: Required<Appearance> = { skin: DEFAULT_LOOK.skin, face: DEFAULT_LOOK.face, hair: DEFAULT_LOOK.hair, hairColor: DEFAULT_LOOK.hairColor, beard: DEFAULT_LOOK.beard, build: DEFAULT_BUILD };
   const look = (): Look => ({ ...DEFAULT_LOOK, ...appearance });
   const rig = await add(look(), 640, 1040 - PELVIS_ABOVE_FEET * SCALE, SCALE, 1, world, 0);
 
@@ -52,6 +55,7 @@ export async function showCreator({ world, bgTex, kit, ui, add }: SceneContext) 
     { key: 'hair', title: 'Hair', name: (v) => J.hairs[v] },
     { key: 'hairColor', title: 'Hair colour', name: (v) => J.hair_colors[v].name },
     { key: 'beard', title: 'Facial hair', name: (v) => J.beards[v] },
+    { key: 'build', title: 'Build', name: (v) => BUILDS[v].name },
   ];
 
   ui.className = 'creator';
@@ -100,14 +104,15 @@ export async function showCreator({ world, bgTex, kit, ui, add }: SceneContext) 
     const b = (e.target as HTMLElement).closest('button');
     if (!b || b.disabled) return;
     if (b.dataset.look) {
-      const key = b.dataset.look as keyof Appearance;
-      appearance[key] = (appearance[key] + +b.dataset.d! + 10) % 10;
+      const key = b.dataset.look as (typeof APPEARANCE_KEYS)[number];
+      const n = CHOICES[key] ?? 10;
+      appearance[key] = (appearance[key] + +b.dataset.d! + n) % n;
       showLook();
     } else if (b.dataset.attr) {
       const key = b.dataset.attr as AttributeKey;
       spread = +b.dataset.d! > 0 ? raise(spread, key) : lower(spread, key);
     } else if (b.id === 'cRandom') {
-      for (const k of APPEARANCE_KEYS) appearance[k] = rnd(10);
+      for (const k of APPEARANCE_KEYS) appearance[k] = rnd(CHOICES[k] ?? 10);
       spread = randomSpread();
       showLook();
     } else if (b.id === 'cReset') {

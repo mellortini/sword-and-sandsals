@@ -11,9 +11,12 @@ description: [VIDEO STYLE · Blender Cycles] Also use for this game's art (blend
 > ściśnięte warstwy `ZK = 0.65`, słońce z lewej góry, Cycles + OptiX). Gra korzysta z jego biblioteki przez
 > `blender/vendor/pc_lib.py` (to samo co `blender/pc_lib.py` tutaj) — zmieniaj tam, nie tutaj.
 > Ścieżki poniżej są względne do katalogu repo; `D:/blender/blender.exe` zamień na swoją ścieżkę Blendera 5.3.
-> **Nie ma tu** klatek z cudzego filmu referencyjnego: `references/frames|sheets|crops` ani porównań z nimi
-> (`side_by_side_*`, `compare/`, `texture/`, `cmp_*`) — prawa autorskie. Są nasze rendery testowe
-> (`references/our_tests/`) i notatki z pomiarów (`references/*.md`, `references/data/`).
+> **Nie ma tu** klatek z cudzego filmu referencyjnego (`references/frames|sheets|crops`) ani obrazów porównań z nimi
+> (`side_by_side_*`, `texture/`, `cmp_*`) — prawa autorskie. Notatki z pomiarów (`references/*.md`, `references/data/`) są.
+> W `references/our_tests/` są nasze rendery testowe (JPG i MP4, przez Git LFS) i tekst: `blender/COMPARISON.md`
+> (porównanie renderów z referencją), `blender/compare/` (tylko skrypty porównania i ich `metrics*.json`) oraz
+> `animation/our_motion.json`. Skrypty `compare*.py` mają ścieżkę roboczą Mateusza (`D:\animacje\ref_style`)
+> i potrzebują obrazów, których tu nie ma — są do wglądu, nie do uruchomienia z repo.
 > Codex: ten plik nie ładuje się sam — przeczytaj go przed zadaniem `area:art`, gdy chodzi o wygląd papieru.
 
 **Use Blender Cycles for the final look.** The user compared both: the three.js stills looked flat and "not similar"; the same scenes

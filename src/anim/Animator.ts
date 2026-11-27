@@ -4,9 +4,13 @@
  * Clips that end with `commit` root x move `home` (walks / jumps / charges really travel).
  */
 import type { PaperRig, Pose } from '../rig/PaperRig';
+import { BLINK } from '../rig/expressions';
 import { Baked, ClipEvent, lerpPose, sample } from './clip';
+import { poseWithLooseHead } from './decap';
 
 export const FPS = 30;
+/** how far an attack may step back when the enemy stands inside the weapon's reach (units) */
+const MAX_GIVE_GROUND = 1.2;
 
 export interface PlayOpts {
   blend?: number;              // frames to blend from the current pose
@@ -25,6 +29,12 @@ export class Animator {
   home = { x: 0, y: 0 };      // display px of the pelvis at rest
   unit: number;
   speed = 1;
+  /** called for every event of every clip this Animator plays (effects that follow the fighter, e.g. ground fx #17) */
+  readonly listeners = new Set<(e: ClipEvent, clip: string) => void>();
+  /** blink now and then (#26); never during a held pose such as death */
+  blinks = true;
+  private blinkIn = BLINK.min + Math.random() * (BLINK.max - BLINK.min);
+  private blinkLeft = 0;
   private cur: Baked;
   private frame = 0;
   private opts: PlayOpts = {};
@@ -46,8 +56,18 @@ export class Animator {
   get clip() { return this.cur.name; }
   get busy() { return !this.cur.loop && !this.cur.hold; }
 
+  /** weapon family of the rig's look ('sword3' -> 'sword', 'gladius' -> 'gladius') */
+  private family(): string { return (this.rig.look.weapon ?? '').replace(/\d+$/, ''); }
+
+  /** a clip, or its variant for the held weapon family (`attack_power@hammer`, #36) when there is one */
+  clipFor(name: string): Baked | undefined {
+    return this.clips[`${name}@${this.family()}`]
+      ?? (this.rig.hasShield() ? this.clips[`${name}@shield`] : undefined)   // #38: block behind the shield
+      ?? this.clips[name];
+  }
+
   play(name: string, opts: PlayOpts = {}) {
-    const c = this.clips[name];
+    const c = this.clipFor(name);
     if (!c) throw new Error(`no clip ${name}`);
     this.from = { ...this.last };
     this.cur = c;
@@ -58,8 +78,10 @@ export class Animator {
     const authored = c.full[c.full.length - 1].x;
     this.xScale = opts.distance !== undefined && Math.abs(authored) > 1e-6 ? opts.distance / authored : 1;
     if (opts.lunge !== undefined) {
+      // a longer weapon (clip `reach`, e.g. the spear) hits from further away, so the body steps in that much less;
+      // an enemy already inside that reach makes it thrust while giving a little ground instead of running him through
       const deepest = Math.max(...c.full.map((k) => k.x));
-      if (deepest > 1e-6) this.xScale = opts.lunge / deepest;
+      if (deepest > 1e-6) this.xScale = Math.max(-MAX_GIVE_GROUND, opts.lunge - (c.reach ?? 0)) / deepest;
     }
   }
 
@@ -76,6 +98,7 @@ export class Animator {
       if (f >= e.f && !this.fired.has(id)) {
         this.fired.add(id);
         this.opts.onEvent?.(e);
+        for (const l of this.listeners) l(e, c.name);
       }
     }
     const s = sample(c, f);
@@ -89,9 +112,19 @@ export class Animator {
       y = this.from.y + (y - this.from.y) * k;
     }
     this.last = { pose, x, y };
+    // a blink shuts the lids for a few frames every 2-6 s, over whatever the clip does with the face
+    this.blinkIn -= dt * this.speed;
+    if (this.blinkIn <= 0) {
+      this.blinkLeft = BLINK.shut;
+      this.blinkIn = BLINK.min + Math.random() * (BLINK.max - BLINK.min);
+    }
+    if (this.blinkLeft > 0) {
+      this.blinkLeft -= dt * this.speed;
+      if (this.blinks && !c.hold) pose = { ...pose, eyes: 1 };
+    }
     // grounded frames: lift / lower the pelvis so the lowest sole rests on the floor
     const yPos = s.air ? y : y + this.baseLow - this.rig.soleLow(pose);
-    this.rig.pose = pose;
+    this.rig.pose = s.head ? poseWithLooseHead(pose, s.head, x, yPos, this.baseLow) : pose;
     const k = this.unit;
     this.rig.view.position.set(this.home.x + x * k * this.rig.facing, this.home.y - yPos * k);
     if (!c.loop && this.frame >= c.length && !this.done) { this.done = true; this.finish(); }

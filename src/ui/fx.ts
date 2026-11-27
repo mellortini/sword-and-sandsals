@@ -5,6 +5,8 @@
  * ~1.6 s, so an old number never sits next to a new one.
  */
 import { Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
+import { PaperScraps } from './scraps';
+import { GroundFx } from './groundFx';
 
 const FPS = 30;
 /** frames a pop stays before it fades on its own */
@@ -130,34 +132,59 @@ export class BlockShield extends Pop {
   }
 }
 
-/** grey "MISS" slip of paper: pops up, drifts up a little and fades (a miss leaves nothing on screen) */
+/**
+ * "MISS" on a tilted grey slip of paper with a soft drop shadow (#13): pops in 2 frames with an overshoot, settles by
+ * frame 4, drifts up a little and fades (a miss leaves nothing on screen).
+ */
 export class MissText extends Pop {
-  private word: Text;
+  private slip = new Container();
   constructor() {
     super();
-    this.word = new Text({ text: 'MISS', style: { fill: '#efe6d8', fontSize: 40, fontFamily: 'Georgia', fontWeight: 'bold', letterSpacing: 3, stroke: { color: '#24191a', width: 6 } } });
-    this.word.anchor.set(0.5);
-    this.word.scale.set(0);
-    this.addChild(halo(70, 0.55), this.word);
+    // slightly uneven cut: a paper slip, not a UI box
+    const shape = [-62, -22, 58, -26, 64, 20, -58, 24];
+    const sh = new Graphics().poly(shape).fill(0x2a2224);
+    sh.position.set(4, 5);
+    sh.alpha = 0.45;
+    const paper = new Graphics().poly(shape).fill(0xd9d4ca);
+    const fold = new Graphics().poly([-62, -22, 58, -26, 59, -18, -61, -14]).fill(0xeae6dd);
+    const word = new Text({ text: 'MISS', style: { fill: '#3b3436', fontSize: 34, fontFamily: 'Georgia', fontWeight: 'bold', letterSpacing: 4 } });
+    word.anchor.set(0.5);
+    word.position.set(1, 1);
+    this.slip.addChild(halo(78, 0.5), sh, paper, fold, word);
+    this.slip.rotation = -0.09;
+    this.slip.scale.set(0);
+    this.addChild(this.slip);
   }
   protected step() {
     const t = this.t;
     if (this.dead) { this.alpha -= 0.2; if (this.alpha <= 0) this.destroy(); return; }
-    this.word.scale.set(t < 2 ? t * 0.6 : t < 4 ? 1.2 - (t - 2) * 0.1 : 1.0);
+    // 1.2: as large on screen as the damage splat
+    this.slip.scale.set((t < 2 ? t * 0.62 : t < 4 ? 1.24 - (t - 2) * 0.12 : 1.0) * 1.2);
+    this.slip.rotation = -0.09 + (t < 4 ? (4 - t) * 0.03 : 0);
   }
 }
 
 /** keeps at most one pop per fighter slot and ticks them */
 export class FxLayer extends Container {
   private slots = new Map<string, Pop>();
+  /** paper and dust kicked up from the sand (#17), under every pop-up */
+  readonly ground = this.addChild(new GroundFx());
   show(slot: string, p: Pop, x: number, y: number) {
     this.slots.get(slot)?.fadeOut();
     p.position.set(x, y);
     this.addChild(p);
     this.slots.set(slot, p);
   }
-  clear() { for (const p of this.slots.values()) p.fadeOut(); this.slots.clear(); }
+  /** finisher paper (#20): lies on the sand until clear(), under any pop-up shown later */
+  addScraps(s: PaperScraps) { this.addChild(s); }
+  clear() {
+    for (const p of this.slots.values()) p.fadeOut();
+    this.slots.clear();
+    for (const c of [...this.children]) if (c instanceof PaperScraps) c.destroy({ children: true });
+    this.ground.clear();
+  }
   update(dt: number) {
-    for (const c of [...this.children]) if (c instanceof Pop && !c.destroyed) c.update(dt);
+    this.ground.update(dt);
+    for (const c of [...this.children]) if ((c instanceof Pop || c instanceof PaperScraps) && !c.destroyed) c.update(dt);
   }
 }

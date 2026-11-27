@@ -26,8 +26,20 @@
 
 Porównanie rytmu normalnego ciosu z referencją: `out/compare_normal_attack.jpg`. Różnica: w oryginale wypad jest głębszy (niższy przysiad).
 
+## Dobicie (#20)
+| klip | długość | rytm |
+|---|---|---|
+| finish_decap | 56 (trzyma) | klatka 0 = cios; głowa odfruwa łukiem w górę i do przodu, odbija się w 19 / 28 / 34 i toczy do 44; ciało stoi chwilę bez głowy, uginają się kolana, pada na plecy (38) |
+| finish_fold | 44 (trzyma) | wersja bez gore: postać w całości zbita z nóg, płaskie lądowanie (16) i odbicie (26), chmura papierowego konfetti |
+
+- **Luźna głowa** (`src/anim/decap.ts`): klip z polem `head` (`HeadFlight`) prowadzi środek głowy po parabolach w przestrzeni areny, niezależnie od padającego ciała. Poza dostaje `neck_cut`, `head_x`, `head_y`, `head_rot`; rig odpina wtedy kość `head` od tułowia (twarz, włosy, zarost i hełm lecą razem z nią).
+- **Rozdarty kark**: sprite'y `cut_*` (`blender/kit.py` → `CUT`): biała włóknista krawędź, kikut i czerwona bibuła; widoczne tylko przy `neck_cut` (tułów `cut_torso` zastępuje wtedy `body_torso`).
+- **Papier w locie** (`src/ui/scraps.ts`): strzępki bibuły, krople czerwonego atramentu albo konfetti; leżą na piasku do `FxLayer.clear()`.
+- **Ustawienie gore** (`src/ui/gore.ts`): `shreds` (domyślnie) / `ink` / `off`, zapis w przeglądarce. Przycisk w ustawieniach gry to #80; na razie wybór jest w laboratorium.
+- **Odtworzenie**: `playFinisher(ofiara, fx, { floorY })` z `src/ui/finisher.ts`, wywołane w klatce `hit` ciosu zwycięzcy.
+
 ## Laboratorium
-http://localhost:5180/?view=anim (`&tier=N` = komplet zbroi): przyciski dla każdej akcji, przeciwnik reaguje (trafienie / blok / odrzut), odpowiada atakiem, `finish` = dobicie + zwycięstwo, prędkość 1× … 0.1×.
+http://localhost:5180/?view=anim (`&tier=N` = komplet zbroi): przyciski dla każdej akcji, przeciwnik reaguje (trafienie / blok / odrzut), odpowiada atakiem, `finish` = dobicie + zwycięstwo (lista **gore** wybiera wersję), prędkość 1× … 0.1×.
 Paski klatek: `?view=strip&clip=charge&every=2`.
 
 ## Lekcje

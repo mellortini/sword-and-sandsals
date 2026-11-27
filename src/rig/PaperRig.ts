@@ -9,6 +9,10 @@
  * - every part gets a soft paper shadow drawn right before it; 'multiply' is patched so shadows only darken paper that
  *   is already in the puppet texture (like canvas source-atop)
  */
+import { EXPRESSION_KEYS, EXPRESSION_PIECES, pieceShown } from './expressions';
+import { widthScale } from './builds';
+import { holdShield, isShieldTier } from './shield';
+import { boneOffset, forwardKinematics, holdWithBothHands, looseHead } from './twoHand';
 import { Assets, Container, Rectangle, Renderer, RenderTexture, Sprite, Texture } from 'pixi.js';
 
 export interface KitJson {
@@ -29,7 +33,7 @@ export interface KitJson {
   hood_helmets: number[];
   beards: string[];
   sets: string[];
-  sprites: Record<string, { w: number; h: number; pivot: [number, number]; tint: 'skin' | 'hair' | null; alpha?: number }>;
+  sprites: Record<string, { w: number; h: number; pivot: [number, number]; tint: 'skin' | 'hair' | null; alpha?: number; grip2?: [number, number] }>;
 }
 
 export type Pose = Record<string, number>;
@@ -40,6 +44,10 @@ export interface Look {
   skin: number; face: number; hair: number; hairColor: number; beard: number;
   helmet: number; armor: number; shoulders: number; greaves: number; boots: number;
   weapon: string;
+  /** body build (#27): 0 slim, 1 average (default), 2 heavy - src/rig/builds.ts */
+  build?: number;
+  /** off-hand shield tier (#38): 0/undefined = none, 1-4 a round parma, 5-10 a scutum - src/rig/shield.ts */
+  shield?: number;
 }
 
 export const DEFAULT_LOOK: Look = { skin: 3, face: 0, hair: 1, hairColor: 1, beard: 2, helmet: 0, armor: 0, shoulders: 0, greaves: 0, boots: 0, weapon: 'gladius' };
@@ -163,6 +171,7 @@ export class Kit {
     const p = layer.piece;
     switch (layer.slot) {
       case 'body': return `body_${p}`;
+      case 'cut': return `cut_${p}`;
       case 'face': return `face${look.face}_${p}`;
       case 'hair':
         if (look.helmet > 0) {
@@ -172,6 +181,7 @@ export class Kit {
         return `hair${look.hair}_${p}`;
       case 'beard': return look.beard > 0 ? `beard${look.beard}` : null;
       case 'weapon': return look.weapon ? `weapon_${look.weapon}` : null;
+      case 'shield': return this.shieldShown(look) ? `shield${look.shield}` : null;
       default: {
         const tier = look[layer.slot as EquipSlot] ?? 0;
         if (!tier) return null;
@@ -180,12 +190,22 @@ export class Kit {
     }
   }
 
+  /** a shield is drawn when the look has one and the back hand is free (not on the haft of a two-handed weapon) */
+  shieldShown(look: Look): boolean {
+    return isShieldTier(look.shield) && !this.json.sprites[`weapon_${look.weapon}`]?.grip2;
+  }
+
   keysFor(look: Look): string[] {
     return this.json.layers.map((l) => this.resolve(l, look)).filter((k): k is string => !!k && this.has(k));
   }
 }
 
-interface Part { bone: string; sprite: Sprite; shadow: Sprite; sx: number; sy: number; ox: number; oy: number; flat: boolean }
+/** `cut` = drawn only with a torn neck (true) or only with a whole one (false); undefined = always */
+/** `face` = a face piece an expression may show or hide (#26) */
+interface Part { bone: string; sprite: Sprite; shadow: Sprite; sx: number; sy: number; ox: number; oy: number; flat: boolean; cut?: boolean; face?: string }
+
+/** pose keys beyond the bones that change the picture */
+const EXTRA_POSE_KEYS = ['neck_cut', 'head_x', 'head_y', 'head_rot', ...EXPRESSION_KEYS];
 
 interface StillFrame {
   pose: Pose;
@@ -217,7 +237,7 @@ export class PaperRig {
     this.facing = opts.facing;
     this.shadow = { ...(opts.shadow ?? DEFAULT_SHADOW) };
     this.pose = { ...kit.json.pose_test };
-    const wU = 15, hU = 18;
+    const wU = 19, hU = 18;   // 12.5 units ahead of the pelvis: room for a spear thrust (#36)
     this.origin = { x: 6.5 * this.scale, y: 11.8 * this.scale };
     const resolution = window.matchMedia('(pointer: coarse)').matches ? 1 : 2;
     this.rt = RenderTexture.create({ width: Math.ceil(wU * this.scale), height: Math.ceil(hU * this.scale), resolution, antialias: true });
@@ -280,7 +300,8 @@ export class PaperRig {
       sh.anchor.set((m.pivot[0] + SHADOW_PAD) / (m.w + SHADOW_PAD * 2), (m.pivot[1] + SHADOW_PAD) / (m.h + SHADOW_PAD * 2));
       sh.blendMode = 'multiply';
       // beards are drawn on the reference jaw: stretch them to this face's jaw around the jaw centre
-      let sx = 1, sy = 1, ox = 0, oy = 0;
+      // a build widens the paper across its bone (#27); armour on the bone follows, so every set fits
+      let sx = widthScale(L.build, layer.bone), sy = 1, ox = 0, oy = 0;
       if (layer.slot === 'beard') {
         sx = face.jaw[0] / J.ref_jaw[0];
         sy = face.jaw[1] / J.ref_jaw[1];
@@ -288,7 +309,9 @@ export class PaperRig {
         oy = J.jaw_center[1] * (1 - sy);
       }
       this.inner.addChild(sh, s);
-      this.parts.push({ bone: layer.bone, sprite: s, shadow: sh, sx, sy, ox, oy, flat });
+      const cut = layer.slot === 'cut' ? true : layer.slot === 'body' && layer.piece === 'torso' ? false : undefined;
+      const expression = layer.slot === 'face' && layer.piece in EXPRESSION_PIECES ? layer.piece : undefined;
+      this.parts.push({ bone: layer.bone, sprite: s, shadow: sh, sx, sy, ox, oy, flat, cut, face: expression });
     }
     this.invalidateStillFrame();
   }
@@ -302,7 +325,8 @@ export class PaperRig {
     if (frame && frame.facing === this.facing && frame.scale === this.scale
       && frame.shadow.enabled === shadow.enabled && frame.shadow.depth === shadow.depth
       && frame.shadow.strength === shadow.strength && frame.shadow.color.every((value, index) => value === shadow.color[index])
-      && this.kit.json.bones.every(({ name }) => (frame.pose[name] ?? 0) === (pose[name] ?? 0))) return;
+      && this.kit.json.bones.every(({ name }) => (frame.pose[name] ?? 0) === (pose[name] ?? 0))
+      && EXTRA_POSE_KEYS.every((name) => (frame.pose[name] ?? 0) === (pose[name] ?? 0))) return;
 
     this.render(renderer);
     this.stillFrame = { pose: { ...pose }, facing: this.facing, scale: this.scale, shadow: { ...shadow, color: [...shadow.color] } };
@@ -310,15 +334,18 @@ export class PaperRig {
 
   /** forward kinematics in rig units (y up, pelvis joint at its rest place), rotations in radians CCW */
   fk(pose: Pose): Map<string, { x: number; y: number; r: number }> {
-    const out = new Map<string, { x: number; y: number; r: number }>();
-    for (const b of this.kit.json.bones) {
-      const rot = ((pose[b.name] ?? 0) * Math.PI) / 180;
-      if (!b.parent) { out.set(b.name, { x: b.x, y: b.y, r: rot }); continue; }
-      const p = out.get(b.parent)!;
-      const c = Math.cos(p.r), s = Math.sin(p.r);
-      out.set(b.name, { x: p.x + b.x * c - b.y * s, y: p.y + b.x * s + b.y * c, r: p.r + rot });
-    }
-    return out;
+    return forwardKinematics(this.kit.json.bones, pose);
+  }
+
+  /** a point given in a bone's own units (y up) in the coordinates of the view's parent, for effects */
+  screenPoint(bone: string, x = 0, y = 0): { x: number; y: number } {
+    const j = this.fk(this.heldPose()).get(bone)!;
+    const root = this.kit.json.bones[0];
+    const c = Math.cos(j.r), s = Math.sin(j.r);
+    return {
+      x: this.view.x + (j.x + x * c - y * s - root.x) * this.scale * this.facing,
+      y: this.view.y - (j.y + x * s + y * c - root.y) * this.scale,
+    };
   }
 
   /** lowest point of both soles (heel / toe), rig units */
@@ -333,14 +360,35 @@ export class PaperRig {
     return low;
   }
 
+  /** is a shield drawn on the back hand (#38)? */
+  hasShield(): boolean { return this.kit.shieldShown(this.look); }
+
+  /**
+   * The pose as drawn: with a two-handed weapon (sprite meta `grip2`, #36) the back arm is bent so its hand holds the
+   * haft, whatever the clip says about the back arm. A shield (#38) is turned to lean with the body instead of the arm.
+   */
+  heldPose(pose: Pose = this.pose): Pose {
+    const key = this.look.weapon ? `weapon_${this.look.weapon}` : null;
+    const grip2 = key ? this.kit.json.sprites[key]?.grip2 : undefined;
+    if (grip2) return holdWithBothHands(this.kit.json.bones, pose, grip2);
+    return this.hasShield() ? holdShield(pose) : pose;
+  }
+
   private solve(): Map<string, { x: number; y: number; r: number }> {
     const out = new Map<string, { x: number; y: number; r: number }>();
     const k = this.scale;
+    const pose = this.heldPose();
     for (const b of this.kit.json.bones) {
-      const rot = ((this.pose[b.name] ?? 0) * Math.PI) / 180;
+      const rot = ((pose[b.name] ?? 0) * Math.PI) / 180;
       if (!b.parent) { out.set(b.name, { x: this.origin.x, y: this.origin.y, r: -rot }); continue; }
+      if (b.name === 'head' && pose.neck_cut) {
+        const h = looseHead(pose), root = this.kit.json.bones[0];
+        out.set(b.name, { x: this.origin.x + (h.x - root.x) * k, y: this.origin.y - (h.y - root.y) * k, r: -h.r });
+        continue;
+      }
       const p = out.get(b.parent)!;
-      const lx = b.x * k, ly = -b.y * k;
+      const o = boneOffset(b, pose);
+      const lx = o.x * k, ly = -o.y * k;
       const c = Math.cos(p.r), s = Math.sin(p.r);
       out.set(b.name, { x: p.x + lx * c - ly * s, y: p.y + lx * s + ly * c, r: p.r - rot });
     }
@@ -358,7 +406,9 @@ export class PaperRig {
     const ch = (i: number) => Math.round((1 - sh.strength * (1 - sh.color[i])) * 255);
     const tint = (ch(0) << 16) | (ch(1) << 8) | ch(2);
     const k = this.scale;
+    const torn = !!this.pose.neck_cut;
     for (const p of this.parts) {
+      const shown = (p.cut === undefined || p.cut === torn) && (!p.face || pieceShown(p.face, this.pose));
       const t = W.get(p.bone)!;
       // local offset (bone units, y up) -> screen
       const lx = p.ox * k, ly = -p.oy * k;
@@ -369,7 +419,8 @@ export class PaperRig {
         spr.rotation = t.r;
         spr.scale.set(tex * p.sx, tex * p.sy);
       }
-      p.shadow.visible = sh.enabled && !p.flat;
+      p.sprite.visible = shown;
+      p.shadow.visible = shown && sh.enabled && !p.flat;
       p.shadow.tint = tint;
     }
     renderer.render({ container: this.inner, target: this.rt, clear: true });

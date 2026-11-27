@@ -45,7 +45,7 @@
   justify-content: center;
   width: 68px;
   height: 78px;
-  padding: 12px 3px 6px;
+  padding: 9px 3px 5px;
   border: 0;
   background: none;
   color: #3a2418;
@@ -78,9 +78,13 @@
   font-weight: bold;
 }
 
+/* paper badge from the UI kit (#16); the card shows only its name until the sheet has loaded */
+.action-card__icon { flex: none; margin-bottom: 2px; filter: drop-shadow(0 1px 0 #2a171244); }
+.action-card__icon[hidden] { display: none; }
+
 .action-card__label { font-size: 13.5px; font-weight: bold; line-height: 1.1; }
 
-.action-card__cost { min-height: 1.2em; margin-top: 4px; color: #2f5f88; font-size: 11px; font-weight: bold; }
+.action-card__cost { min-height: 1.2em; margin-top: 2px; color: #2f5f88; font-size: 11px; font-weight: bold; }
 
 /* hit chance as an inked stamp in the corner */
 .action-card__stamp {

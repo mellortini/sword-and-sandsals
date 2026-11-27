@@ -4,12 +4,18 @@ import type { PaperRig } from '../../rig/PaperRig';
 import { createCombat, getActionOptions, performAction } from '../../core/combat';
 import type { ActionOption, CombatAction, CombatState } from '../../core/types';
 import { CombatHud } from '../../ui/hud';
-import { BlockShield, DamageSplat, FxLayer } from '../../ui/fx';
+import { BlockShield, DamageSplat, FxLayer, MissText } from '../../ui/fx';
+import { playFinisher } from '../../ui/finisher';
+import { GORE_MODES, goreMode, setGoreMode } from '../../ui/gore';
+import type { GoreMode } from '../../ui/gore';
 import { CombatPresenter } from '../combatPresenter';
 import { FEET_Y, H, PELVIS_ABOVE_FEET, UNIT, W, groundShadowTexture, randomLook } from '../common';
 import type { SceneContext, SceneUpdate } from '../common';
 import { arenaBackdrop } from '../backdrop';
-import { FIGHT_LAYOUT } from '../combatPlan';
+import { FIGHT_LAYOUT, MIN_LUNGE, STRIKE_GAP } from '../combatPlan';
+import { WEAPONS } from '../../data/weapons';
+import { playFoley } from '../../audio/foley';
+import { setVolume, volumes } from '../../audio/volume';
 
 export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: SceneContext): Promise<SceneUpdate> {
   const arena = new Container();
@@ -17,7 +23,10 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   arena.addChild(new Sprite(arenaBackdrop(bgTex)));
   const gsh = groundShadowTexture();
   const tp = params.get('tier');
-  const L0 = randomLook(tp ? +tp : 4), L1 = randomLook(tp ? +tp : 6);
+  // &weapon=hammer8 / &enemy=spear6: try a weapon (and its clip variants, #36) in the lab
+  const armed = (look: ReturnType<typeof randomLook>, w: string | null) => (w ? { ...look, weapon: w } : look);
+  // &shield=4 / &eshield=7: a shield of that tier on the back hand (#38)
+  const L0 = { ...armed(randomLook(tp ? +tp : 4), params.get('weapon')), shield: +(params.get('shield') ?? 0) }, L1 = { ...armed(randomLook(tp ? +tp : 6), params.get('enemy')), shield: +(params.get('eshield') ?? 0) };
   const pY = FEET_Y - PELVIS_ABOVE_FEET * UNIT;
   const shadows: Sprite[] = [];
   for (let i = 0; i < 2; i++) {
@@ -44,26 +53,46 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
     }
   });
   const gap = () => Math.abs(ea.home.x - pa.home.x) / UNIT;
-  const MELEE = 5.0;
+  // melee distance as in the game: the pelvises at logical distance 2 (#151); a longer weapon strikes from further (#36)
+  const MELEE = (FIGHT_LAYOUT.contact + 2 * FIGHT_LAYOUT.px) / UNIT;
+  type Attack = 'attack_quick' | 'attack_normal' | 'attack_power';
+  /** the weapon's reach from the catalogue (spear 3, sword 2, hammer 1.5) as pelvis distance on screen */
+  const rangeOf = (a: Animator) => (FIGHT_LAYOUT.contact + (WEAPONS.find((w) => w.id === a.rig.look.weapon)?.range ?? 2) * FIGHT_LAYOUT.px) / UNIT;
+  const kindOf = (name: Attack) => name.slice('attack_'.length) as 'quick' | 'normal' | 'power';
   // game-time scheduler (follows slow motion and manual stepping, unlike setTimeout)
   const queue: { at: number; fn: () => void }[] = [];
   let clock = 0;
   const later = (sec: number, fn: () => void) => queue.push({ at: clock + sec, fn });
-  const state = { response: 'hit' as 'hit' | 'block', counter: true };
+  const state = { response: 'hit' as 'hit' | 'block' | 'dodge', counter: true };
   const head = (r: PaperRig) => ({ x: r.view.x + 0.3 * UNIT * r.facing, y: r.view.y - 8.9 * UNIT });
   const dmg = (who: PaperRig, n: number, crit = false) => { const h = head(who); layer.show(who === P ? 'p' : 'e', new DamageSplat(n, crit), h.x + 34 * who.facing, h.y); };
+  const miss = (who: PaperRig) => { const h = head(who); layer.show(who === P ? 'p' : 'e', new MissText(), h.x + 34 * who.facing, h.y); };
   const shield = (who: PaperRig) => { const h = head(who); layer.show(who === P ? 'pb' : 'eb', new BlockShield(), h.x - 30 * who.facing, h.y + 6); };
   const defend = (def: Animator, power: number, crit = false) => {
-    if (state.response === 'block' && Math.random() < 0.9) { def.play('block'); shield(def.rig); }
-    else { def.play('hit'); dmg(def.rig, Math.round(power * (0.7 + Math.random() * 0.6)), crit); }
+    if (state.response === 'dodge') { def.play('dodge'); miss(def.rig); playFoley('miss'); }
+    else if (state.response === 'block' && Math.random() < 0.9) { def.play('block'); shield(def.rig); playFoley('block'); }
+    else { def.play('hit'); dmg(def.rig, Math.round(power * (0.7 + Math.random() * 0.6)), crit); playFoley(crit ? 'crit' : 'hit'); }
   };
-  const closeIn = (a: Animator) => a.play('walk_fwd', { commit: true, distance: Math.min(1.6, Math.max(0, gap() - MELEE)) });
+  /**
+   * Walk into this weapon's range (several strides if needed), then strike - one click is one attack.
+   * The lunge is fitted like the CombatPresenter does, so the blow lands on the strike point and nobody walks into the other.
+   */
+  const strike = (a: Animator, name: Attack, opts: { then?: string; onEnd?: () => void; onHit: () => void }) => {
+    const range = rangeOf(a), g = gap();
+    if (g > range + 0.3) {
+      a.play('walk_fwd', { commit: true, distance: Math.min(2.4, g - range), then: null, onEnd: () => strike(a, name, opts) });
+      return;
+    }
+    a.play(name, {
+      blend: 1, lunge: Math.max(MIN_LUNGE, g - STRIKE_GAP[kindOf(name)]), then: opts.then ?? 'idle', onEnd: opts.onEnd,
+      onEvent: (e) => { if (e.type === 'hit') opts.onHit(); },
+    });
+  };
   const enemyTurn = () => {
     if (!state.counter) return;
     later(0.5, () => {
       if (ea.busy) return;
-      if (gap() > MELEE + 0.6) { closeIn(ea); return; }
-      ea.play(Math.random() < 0.5 ? 'attack_normal' : 'attack_power', { blend: 1, onEvent: (e) => { if (e.type === 'hit') defend(pa, 9); } });
+      strike(ea, Math.random() < 0.5 ? 'attack_normal' : 'attack_power', { onHit: () => defend(pa, 9) });
     });
   };
   const act = (name: string) => {
@@ -79,20 +108,20 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
         pa.play('charge', {
           commit: true, distance: Math.max(0.5, g - 3.4), onEnd: enemyTurn, onEvent: (e) => {
             if (e.type !== 'hit') return;
-            if (state.response === 'block') { ea.play('block'); shield(E); }
+            if (state.response === 'dodge') { ea.play('dodge'); miss(E); }
+            else if (state.response === 'block') { ea.play('block'); shield(E); }
             else { ea.play('knockback', { commit: true }); dmg(E, 7 + Math.floor(Math.random() * 6)); }
           },
         });
         break;
       case 'attack_quick': case 'attack_normal': case 'attack_power': {
         const pw = name === 'attack_quick' ? 4 : name === 'attack_normal' ? 9 : 16;
-        if (g > MELEE + 0.6) { closeIn(pa); break; }
-        pa.play(name, { blend: 1, onEnd: enemyTurn, onEvent: (e) => { if (e.type === 'hit') defend(ea, pw, name === 'attack_power' && Math.random() < 0.4); } });
+        strike(pa, name, { onEnd: enemyTurn, onHit: () => defend(ea, pw, name === 'attack_power' && Math.random() < 0.4) });
         break;
       }
       case 'finish':
-        if (g > MELEE + 0.6) { closeIn(pa); break; }
-        pa.play('attack_power', { blend: 1, then: 'victory', onEvent: (e) => { if (e.type === 'hit') { ea.play('death', { then: null }); dmg(E, 24, true); } } });
+        // no damage splat here: it would sit right where the head takes off
+        strike(pa, 'attack_power', { then: 'victory', onHit: () => playFinisher(ea, layer, { floorY: FEET_Y }) });
         break;
       case 'reset':
         hud.visible = false;
@@ -104,17 +133,19 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   ui.classList.add('lab');
   ui.innerHTML = `<h3>Animation lab</h3>
     <div class="grid">${btn('walk_back', '&#9664; step')}${btn('walk_fwd', 'step &#9654;')}${btn('jump', 'jump')}${btn('charge', 'charge')}
-    ${btn('attack_quick', 'quick')}${btn('attack_normal', 'normal')}${btn('attack_power', 'power')}${btn('block', 'block')}
+    ${btn('attack_quick', 'quick')}${btn('attack_normal', 'normal')}${btn('attack_power', 'power')}${btn('block', 'block')}${btn('dodge', 'dodge')}
     ${btn('taunt', 'taunt')}${btn('rest', 'rest')}${btn('hit', 'hit')}${btn('finish', 'finish')}${btn('victory', 'victory')}${btn('death', 'die')}${btn('reset', 'reset')}${btn('fight', 'core fight')}</div>
-    <label><input type="checkbox" id="cbBlock"> enemy blocks</label>
+    <label>enemy <select id="sResponse"><option value="hit">gets hit</option><option value="block">blocks</option><option value="dodge">dodges (miss)</option></select></label>
     <label><input type="checkbox" id="cbCounter" checked> enemy answers</label>
+    <label>gore <select id="sGore">${GORE_MODES.map((m) => `<option value="${m.id}"${m.id === goreMode() ? ' selected' : ''}>${m.name}</option>`).join('')}</select></label>
+    <label>volume <input type="range" id="rVolume" min="0" max="1" step="0.05" value="${volumes().master}"></label>
     <label>speed <select id="sSpeed"><option value="1">1x</option><option value="0.5">0.5x</option><option value="0.25">0.25x</option><option value="0.1">0.1x</option></select></label>
     <div class="small"><a href="?view=arena">arena</a> &middot; <a href="?view=wardrobe">wardrobe</a> &middot; <a href="?view=strip&clip=attack_normal">frame strips</a></div>`;
   // --- core fight (#11): src/core decides, CombatPresenter animates, HUD follows. Both sides pick at random.
   // same staging as the arena (#151): bodies never overlap, lunges stretch to the strike point
   const layout = FIGHT_LAYOUT;
   const presenter = new CombatPresenter({
-    fighters: { player: pa, enemy: ea }, fx: layer, unit: UNIT, layout,
+    fighters: { player: pa, enemy: ea }, fx: layer, unit: UNIT, layout, floorY: FEET_Y, sound: true,
     onState: (s) => hud.setState(s),
   });
   const full = { name: '', health: 1, energy: 1, stats: { maxHealth: 1, maxEnergy: 1 } };
@@ -155,8 +186,10 @@ export async function showAnimLab({ app, world, bgTex, params, ui, add, rigs }: 
   (window as unknown as { __fight: unknown }).__fight = coreFight;
 
   ui.addEventListener('click', (e) => { const a = (e.target as HTMLElement).dataset.a; if (a === 'fight') void coreFight(); else if (a) act(a); });
-  (document.getElementById('cbBlock') as HTMLInputElement).onchange = (e) => (state.response = (e.target as HTMLInputElement).checked ? 'block' : 'hit');
+  (document.getElementById('sResponse') as HTMLSelectElement).onchange = (e) => (state.response = (e.target as HTMLSelectElement).value as typeof state.response);
   (document.getElementById('cbCounter') as HTMLInputElement).onchange = (e) => (state.counter = (e.target as HTMLInputElement).checked);
+  (document.getElementById('sGore') as HTMLSelectElement).onchange = (e) => setGoreMode((e.target as HTMLSelectElement).value as GoreMode);
+  (document.getElementById('rVolume') as HTMLInputElement).oninput = (e) => setVolume('master', +(e.target as HTMLInputElement).value);
   (document.getElementById('sSpeed') as HTMLSelectElement).onchange = (e) => { const v = +(e.target as HTMLSelectElement).value; pa.speed = v; ea.speed = v; };
   (window as unknown as { __act: unknown }).__act = act;
   return (dt) => { layer.update(dt * pa.speed); hud.update(dt * pa.speed); };

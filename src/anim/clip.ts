@@ -8,13 +8,22 @@
  * jumps / falls where root.y is authored by hand.
  */
 import type { Pose } from '../rig/PaperRig';
+import { headAt } from './decap';
+import type { HeadFlight, LooseHead } from './decap';
 
 export type Ease = 'linear' | 'in' | 'out' | 'inout' | 'step' | 'back';
 export interface Key { f: number; pose?: Pose; x?: number; y?: number; ease?: Ease; air?: boolean }
-export interface ClipEvent { f: number; type: 'hit' | 'block' | 'land' | 'swing' | 'impact' | 'end' }
-export interface Clip { name: string; length: number; loop?: boolean; hold?: boolean; keys: Key[]; events?: ClipEvent[] }
+/** `struck` = the fighter flinches from a blow (#17: paper flakes fly off), `impact` = the body hits the sand */
+/** `step` = a foot comes down while walking (#18: footstep sound) */
+export interface ClipEvent { f: number; type: 'hit' | 'block' | 'land' | 'swing' | 'impact' | 'struck' | 'step' | 'cut' | 'bounce' | 'end' }
+/**
+ * `name@family` makes a clip the variant of `name` for one weapon family (Animator picks it by the look's weapon).
+ * `reach` = how much further than a sword the weapon strikes (units): the attack lunge is that much shorter.
+ * `head` = the head leaves the neck and flies on its own path (finishers, #20, src/anim/decap.ts).
+ */
+export interface Clip { name: string; length: number; loop?: boolean; hold?: boolean; keys: Key[]; events?: ClipEvent[]; reach?: number; head?: HeadFlight }
 
-export interface Sample { pose: Pose; x: number; y: number; air: boolean }
+export interface Sample { pose: Pose; x: number; y: number; air: boolean; head?: LooseHead }
 
 const EASE: Record<Ease, (t: number) => number> = {
   linear: (t) => t,
@@ -52,6 +61,11 @@ export function bake(clip: Clip, stance: Pose): Clip & { full: { f: number; pose
 export type Baked = ReturnType<typeof bake>;
 
 export function sample(c: Baked, frame: number): Sample {
+  const head = c.head ? headAt(c.head, frame) : null;
+  return head ? { ...sampleBody(c, frame), head } : sampleBody(c, frame);
+}
+
+function sampleBody(c: Baked, frame: number): Sample {
   const K = c.full;
   if (frame <= K[0].f) return { pose: K[0].pose, x: K[0].x, y: K[0].y, air: K[0].air };
   for (let i = 1; i < K.length; i++) {

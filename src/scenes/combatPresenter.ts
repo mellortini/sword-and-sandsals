@@ -4,8 +4,12 @@
  * The hit result (damage number, BLOCK shield, MISS) appears on the clip's `hit` event frame, as in the reference.
  */
 import type { Animator } from '../anim/Animator';
+import type { ClipEvent } from '../anim/clip';
 import type { CombatEvent, CombatState, Fighter, FighterSide, MoveKind } from '../core/types';
 import { BlockShield, DamageSplat, FxLayer, MissText } from '../ui/fx';
+import { attachGroundFx } from '../ui/groundFx';
+import { attachFoley, playFoley } from '../audio/foley';
+import type { CrowdAmbience } from '../audio/crowd';
 import { MIN_LUNGE, STRIKE_GAP, forwardDelta, planSteps, screenX } from './combatPlan';
 import type { Layout, Step } from './combatPlan';
 
@@ -13,7 +17,8 @@ export type { Layout } from './combatPlan';
 
 type Fighters = Record<FighterSide, Fighter>;
 type AttackEvent = Extract<CombatEvent, { type: 'attack' }>;
-type CrowdGiftEvent = Extract<CombatEvent, { type: 'crowd_gift' }>;
+type MoveEvent = Extract<CombatEvent, { type: 'move' }>;
+type CrowdGiftEvent =Extract<CombatEvent, { type: 'crowd_gift' }>;
 
 /** core move kind -> clip name */
 const MOVE_CLIP: Record<MoveKind, string> = {
@@ -26,6 +31,12 @@ export interface PresenterOptions {
   /** px per rig unit (the scene's UNIT) */
   unit: number;
   layout: Layout;
+  /** screen y of the sand: set it and landings, falls and blows kick up paper bits (#17) */
+  floorY?: number;
+  /** play the paper foley (#18): footsteps, swings, landings from the clips, and each blow's result */
+  sound?: boolean;
+  /** the crowd cheers a critical blow and the end of a bout */
+  crowd?: CrowdAmbience;
   /**
    * called whenever the shown health/energy/crowd change (feed it to CombatHud.setState);
    * `gifts` lists what the crowd threw during the action that just ended
@@ -42,7 +53,13 @@ export class CombatPresenter {
   private cancelled = false;
   private pending = new Set<() => void>();
 
-  constructor(options: PresenterOptions) { this.o = options; }
+  constructor(options: PresenterOptions) {
+    this.o = options;
+    if (options.floorY !== undefined) {
+      for (const side of ['player', 'enemy'] as const) attachGroundFx(options.fighters[side], options.fx.ground, options.floorY);
+    }
+    if (options.sound) for (const side of ['player', 'enemy'] as const) attachFoley(options.fighters[side]);
+  }
 
   get busy() { return this.running; }
 
@@ -114,42 +131,47 @@ export class CombatPresenter {
     return { x: r.view.x + 0.3 * this.o.unit * r.facing, y: r.view.y - 8.9 * this.o.unit };
   }
 
+  /** play a move clip so that its root motion carries the fighter from `from` to `to` */
+  private move(side: FighterSide, move: MoveKind, from: number, to: number, onEvent?: (e: ClipEvent) => void): Promise<void> {
+    const anim = this.o.fighters[side];
+    const target = anim.home.x + (to - from) * this.o.layout.px;
+    const distance = (forwardDelta(side, from, to) * this.o.layout.px) / this.o.unit;
+    // root motion is scaled to land on the target; snap away rounding drift (only when the clip really ends)
+    return this.clip(anim, MOVE_CLIP[move], { commit: true, distance, onEvent, onEnd: () => { anim.home.x = target; } });
+  }
+
   /** defender's reaction on the attacker's hit frame; resolves when the reaction clip ends */
-  private react(a: AttackEvent, fatal: boolean): Promise<void> {
+  private react(a: AttackEvent, fatal: boolean, push?: MoveEvent): Promise<void> {
     const def = this.o.fighters[a.target];
     const slot = a.target === 'player' ? 'p' : 'e';
     const h = this.head(a.target);
     const facingDef = def.rig.facing;
+    if (this.o.sound) playFoley(!a.hit ? 'miss' : a.blocked ? 'block' : a.crit ? 'crit' : 'hit');
+    if (a.hit && !a.blocked && (a.crit || fatal)) this.o.crowd?.cheer(fatal ? 1.4 : 0.8);
     if (!a.hit) {
       this.o.fx.show(slot, new MissText(), h.x + 34 * facingDef, h.y);
-      return Promise.resolve();
+      // the blow passes: the defender leans away from it and steps back in (#13)
+      return this.clip(def, 'dodge');
     }
+    const knockback = () => this.move(push!.fighter, push!.kind, push!.from, push!.to);
     if (a.blocked) {
       this.o.fx.show(slot + 'b', new BlockShield(), h.x - 30 * facingDef, h.y + 6);
-      return this.clip(def, 'block');
+      return push ? knockback() : this.clip(def, 'block');
     }
     this.o.fx.show(slot, new DamageSplat(a.damage, a.crit), h.x + 34 * facingDef, h.y);
     if (this.shown) this.setShown(a.target, { health: Math.max(0, this.shown[a.target].health - a.damage) });
     if (fatal) return this.clip(def, 'death', { then: null });
-    // a charge pushes the defender back with its own move step (knockback), so only flinch here
-    return a.kind === 'charge' ? Promise.resolve() : this.clip(def, 'hit');
+    return push ? knockback() : this.clip(def, 'hit');
   }
 
   private async play(step: Step): Promise<void> {
     const { fighters, unit } = this.o;
     switch (step.kind) {
       case 'move': {
-        const anim = fighters[step.side];
-        const px = (step.to - step.from) * this.o.layout.px;
-        const distance = (forwardDelta(step.side, step.from, step.to) * this.o.layout.px) / unit;
-        const target = anim.home.x + px;
         let reaction: Promise<void> = Promise.resolve();
         const strike = step.strike;
-        await this.clip(anim, MOVE_CLIP[step.move], {
-          commit: true, distance,
-          onEvent: strike ? (e) => { if (e.type === 'hit') reaction = this.react(strike, step.fatal ?? false); } : undefined,
-        });
-        anim.home.x = target; // root motion is scaled to land here; snap away rounding drift
+        await this.move(step.side, step.move, step.from, step.to,
+          strike ? (e) => { if (e.type === 'hit') reaction = this.react(strike, step.fatal ?? false, step.push); } : undefined);
         await reaction;
         return;
       }
@@ -161,7 +183,7 @@ export class CombatPresenter {
         await this.clip(anim, `attack_${step.attack.kind}`, {
           blend: 1,
           lunge: Math.max(MIN_LUNGE, gap - STRIKE_GAP[step.attack.kind]),
-          onEvent: (e) => { if (e.type === 'hit') reaction = this.react(step.attack, step.fatal); },
+          onEvent: (e) => { if (e.type === 'hit') reaction = this.react(step.attack, step.fatal, step.push); },
         });
         await reaction;
         return;

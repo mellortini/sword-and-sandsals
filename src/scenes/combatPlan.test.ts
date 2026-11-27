@@ -39,10 +39,29 @@ describe('planSteps', () => {
       strike,
       { type: 'move', fighter: 'enemy', kind: 'knockback', from: 10, to: 12 },
     ]);
+    // the knockback belongs to the charge step: it starts on the hit frame, not after the whole dive
     expect(steps).toEqual([
-      { kind: 'move', side: 'player', move: 'charge', from: 2, to: 9, strike, fatal: false },
-      { kind: 'move', side: 'enemy', move: 'knockback', from: 10, to: 12 },
+      { kind: 'move', side: 'player', move: 'charge', from: 2, to: 9, strike, fatal: false, push: { type: 'move', fighter: 'enemy', kind: 'knockback', from: 10, to: 12 } },
     ]);
+  });
+
+  it('finds the charge knockback behind an elemental hit, and adds none when there is none', () => {
+    const strike = attack({ kind: 'charge' });
+    const charge: CombatEvent = { type: 'move', fighter: 'player', kind: 'charge', from: 2, to: 9 };
+    const push: CombatEvent = { type: 'move', fighter: 'enemy', kind: 'knockback', from: 10, to: 12 };
+    const fire: CombatEvent = { type: 'elemental', actor: 'player', target: 'enemy', damage: 2, element: 'fire', power: 1 };
+    const withFire = planSteps([charge, strike, fire, push]);
+    expect(withFire).toHaveLength(1);
+    expect(withFire[0]).toMatchObject({ push });
+    expect(planSteps([charge, strike])[0]).not.toHaveProperty('push');
+  });
+
+  it('keeps the knockback of a plain attack in the attack step, so it starts on the hit frame', () => {
+    const strike = attack({ kind: 'power' });
+    const push: CombatEvent = { type: 'move', fighter: 'enemy', kind: 'knockback', from: 9, to: 10.6 };
+    const wind: CombatEvent = { type: 'elemental', actor: 'player', target: 'enemy', damage: 2, element: 'wind', power: 1 };
+    expect(planSteps([strike, push])).toEqual([{ kind: 'attack', attack: strike, fatal: false, push }]);
+    expect(planSteps([strike, wind, push])).toEqual([{ kind: 'attack', attack: strike, fatal: false, push }]);
   });
 
   it('marks the killing blow as fatal and ends with the death step', () => {

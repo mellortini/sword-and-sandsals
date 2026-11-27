@@ -1,11 +1,14 @@
 import { Graphics } from 'pixi.js';
 import { DEFAULT_LOOK } from '../../rig/PaperRig';
 import type { Look } from '../../rig/PaperRig';
+import { EXPRESSIONS } from '../../rig/expressions';
 import { label } from '../common';
 import type { SceneContext } from '../common';
 
-export async function showFaces({ world, kit, add }: SceneContext) {
+export async function showFaces({ world, kit, add, rigs, params }: SceneContext) {
   const J = kit.json;
+  // &expr=pain | anger | triumph | blink: every portrait wears that expression (#26)
+  const expr = EXPRESSIONS[params.get('expr') as keyof typeof EXPRESSIONS] ?? EXPRESSIONS.neutral;
   const rows: [string, (i: number) => Partial<Look>][] = [
     ['Faces', (i) => ({ face: i, skin: 3, hair: 1, hairColor: 1, beard: 0 })],
     ['Hair', (i) => ({ face: 0, skin: 3, hair: i, hairColor: i === 0 ? 1 : i, beard: 0 })],
@@ -24,6 +27,7 @@ export async function showFaces({ world, kit, add }: SceneContext) {
       const wu = (cw - 8) / S, hu = (ch - 34) / S;
       const rig = await add(look, cx - cw / 2 + 4, top, S, 1, world, i * 0.2, true);
       rig.crop(0.3 - wu / 2, 7.3 - hu, 0.3 + wu / 2, 7.3);
+      if (expr !== EXPRESSIONS.neutral) rigs.find((x) => x.rig === rig)!.fixed = { ...J.pose_test, ...expr };
       const nm = r === 0 ? J.faces[i].name : r === 1 ? J.hairs[i] : r === 2 ? J.beards[i] : J.skins[i].name;
       const tl = label(nm, cx, top + ch - 62, 17);
       world.addChild(tl);

@@ -35,8 +35,8 @@ Dane: `src/data/equipment.ts` (nazwy, pancerz, waga, cena, poziom, bonusy; pełn
 
 ## Komendy
 ```
-<blender> -b --python blender/build_kit.py -- 32                 # cały zestaw (~75 s na GPU)
-<blender> -b --python blender/build_kit.py -- 32 helmet9,face3   # tylko wybrane (kit.json scalany)
+python -I tools/blender.py blender/build_kit.py -- 32                 # cały zestaw (~75 s na GPU)
+python -I tools/blender.py blender/build_kit.py -- 32 helmet9,face3   # tylko wybrane (kit.json scalany)
 ```
 Gra: http://localhost:5180 — `?view=wardrobe` (garderoba/kreator), `?view=lineup` (10 kompletów), `?view=faces` (arkusz wariantów),
 `?` arena z losowymi gladiatorami (`?tier=7` = wszyscy w danym komplecie).

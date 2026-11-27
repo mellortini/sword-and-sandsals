@@ -10,6 +10,7 @@ import type { Attributes, CombatAction, EquipmentLoadout, FighterSide } from '..
 import type { Look } from '../rig/PaperRig';
 import { summarizeFight } from '../ui/fightSummary';
 import { FxLayer } from '../ui/fx';
+import { startCrowd } from '../audio/crowd';
 import { hudScaleFor } from '../ui/phone';
 import { textScale } from '../ui/textSize';
 import { openLevelUp } from '../ui/levelUp';
@@ -100,13 +101,16 @@ export async function showArena(
   const E = await add(enemy.look, W - LAYOUT.left, pelvisY, UNIT, -1, arena, 0.7);
   const fx = new FxLayer();
   arena.addChild(fx);
+  // the crowd murmurs while the arena is shown (#18); it fades out with the scene
+  const crowd = startCrowd();
+  arena.on('destroyed', () => crowd.stop());
 
   const empty = { name: '', health: 1, energy: 1, stats: { maxHealth: 1, maxEnergy: 1 } };
   const hud = new CombatHud({ fighters: { player: empty, enemy: empty } }, W, H);
   arena.addChild(hud);
   const presenter = new CombatPresenter({
     fighters: { player: rigs.find((r) => r.rig === P)!.anim!, enemy: rigs.find((r) => r.rig === E)!.anim! },
-    fx, unit: UNIT, layout: LAYOUT,
+    fx, unit: UNIT, layout: LAYOUT, floorY: FEET_Y, sound: true, crowd,
     onState: (s) => hud.setState(s),
   });
 

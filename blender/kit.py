@@ -76,6 +76,11 @@ def torso_outline():
 
 def body_torso(c):
     L(c, R(0.82, 0.95, 0.3, 0.12, 3.2), M_skin(NS['lo']), 0.0, 0.1, 'neck')
+    torso_flesh(c)
+
+
+def torso_flesh(c):
+    """the torso without its neck (shared with the torn-neck variant)"""
     L(c, torso_outline(), M_skin(NS['skin']), 0.1, 0.12, 'torso')
     hi = M_skin(NS['hi'])
     L(c, pc.xf(pc.blob_pts(0.74, 0.48, 0.05, 2), -0.6, 2.18), hi, 0.22, 0.07, 'pec_l')
@@ -133,6 +138,78 @@ def body_pelvis(c):
 BODY = dict(torso=body_torso, arm_up=body_arm_up, arm_lo=body_arm_lo, hand=body_hand, leg_up=body_leg_up,
             leg_lo=body_leg_lo, foot=body_foot, pelvis=body_pelvis)
 BODY_TINT = dict(torso='skin', arm_up='skin', arm_lo='skin', hand='skin', leg_up='skin', leg_lo='skin', foot='skin', pelvis=None)
+
+
+# ================================================================== torn neck (finishers, #20)
+# Drawn only when a pose has `neck_cut`: the torso gets a short neck stump instead of the whole neck, the flying head
+# gets the other half. White fibre edge = torn paper; the red crepe tissue stands in for gore.
+NECK_X = 0.12            # neck centre in torso space (the head joint)
+TEETH = [0.02, 0.17, -0.04, 0.11, -0.07, 0.2, 0.0, 0.1, -0.03]
+FIBRE = '#fbf3e4'
+
+
+def _stump(y_base, y_edge, seed, cx, half=0.42, grow=0.0):
+    """neck piece between a straight base and a torn edge; `y_edge` may be below the base (hanging from a head)"""
+    import random
+    rnd = random.Random(seed)
+    x0, x1, n = cx + half + grow, cx - half - grow, len(TEETH)
+    edge = [(x0 + (x1 - x0) * i / (n - 1), y_edge + t + rnd.uniform(-0.02, 0.02)) for i, t in enumerate(TEETH)]
+    pts = [(cx - half - grow, y_base), (cx + half + grow, y_base)] + edge
+    return pts if y_edge > y_base else list(reversed(pts))
+
+
+def cut_torso(c):
+    """replaces body_torso when the neck is cut: the same torso with a torn stump for a neck"""
+    torso_flesh(c)
+    L(c, _stump(2.75, 3.5, 3, NECK_X), M_skin(NS['lo']), 0.04, 0.08, 'stump')
+
+
+def cut_torso_edge(c):
+    m = sl.tex_paper('cut_fibre', FIBRE, 'washi', 1.0)
+    L(c, sl.torn(_stump(3.2, 3.59, 3, NECK_X, grow=0.03), 0.035, 11, 0.07), m, 0.0, 0.04, 'fibre')
+
+
+def _shreds(c, cx, base_y, sign, seed):
+    """crepe-paper strips fanning out of the torn edge; sign +1 = standing up, -1 = hanging down"""
+    import random
+    rnd = random.Random(seed)
+    mats = [sl.tex_paper('cut_red%d' % i, h, 'washi', 1.0, tooth=0.7) for i, h in enumerate(('#8f141c', '#c3262b', '#e0483c'))]
+    for i in range(11):
+        layer = i % 3
+        x = cx - 0.36 + 0.72 * ((i * 7) % 11) / 10.0
+        length = rnd.uniform(0.28, 0.62) * (1.0 if layer else 1.15)
+        w = rnd.uniform(0.07, 0.13)
+        lean = (x - cx) * 0.75 + rnd.uniform(-0.1, 0.1)
+        tip = (x + lean, base_y + sign * length)
+        mid = (x + lean * 0.35 + rnd.uniform(-0.09, 0.09), base_y + sign * length * 0.55)
+        pts = [(x - w, base_y - sign * 0.06), (x + w, base_y - sign * 0.06), (mid[0] + w * 0.75, mid[1]),
+               (tip[0] + 0.025, tip[1]), (tip[0] - 0.025, tip[1] - sign * 0.07), (mid[0] - w * 0.75, mid[1])]
+        if sign < 0:
+            pts = list(reversed(pts))
+        L(c, pts, mats[layer], 0.02 + 0.05 * layer, 0.04, 'shred')
+    L(c, sl.torn(E(0.4, 0.12, cx, base_y, 32), 0.03, seed + 40, 0.07), mats[0], 0.0, 0.05, 'core')
+
+
+def cut_torso_tissue(c):
+    _shreds(c, NECK_X, 3.47, 1, 21)
+
+
+# the flying half lives in head-bone space: the joint is the origin, the chin sits just above it
+def cut_head_neck(c):
+    L(c, _stump(0.55, -0.2, 5, 0.0, half=0.4), M_skin(NS['lo']), 0.04, 0.08, 'stump')
+
+
+def cut_head_edge(c):
+    m = sl.tex_paper('cut_fibre', FIBRE, 'washi', 1.0)
+    L(c, sl.torn(_stump(0.2, -0.29, 5, 0.0, half=0.4, grow=0.03), 0.035, 13, 0.07), m, 0.0, 0.04, 'fibre')
+
+
+def cut_head_tissue(c):
+    _shreds(c, 0.0, -0.2, -1, 31)
+
+
+CUT = dict(torso_edge=(cut_torso_edge, None), torso=(cut_torso, 'skin'), torso_tissue=(cut_torso_tissue, None),
+           head_tissue=(cut_head_tissue, None), head_edge=(cut_head_edge, None), head_neck=(cut_head_neck, 'skin'))
 
 
 # ================================================================== faces
@@ -255,6 +332,38 @@ def face_nose(c, f):
     elif kind == 'roman':
         pts = [(0.0, 0.78), (0.1, 0.62), (0.24, 0.36), (0.36, 0.16), (0.3, 0.02), (0.12, -0.02), (-0.12, 0.0), (-0.22, 0.12), (-0.16, 0.36), (-0.08, 0.62)]
         L(c, pc.xf([(x * s, y * s) for x, y in pts], bx + 0.02, by), m, 0.0, 0.1, 'nose')
+
+
+# ================================================================== expressions (#26): drawn over the neutral face when a pose asks
+# eyes > 0.5 -> lids_closed over the eyes (blink, pain); mouth > 0.5 -> mouth_open over the mouth (pain, shout);
+# brows > 0.5 -> brows_angry instead of the brows (anger, effort)
+def face_lids_closed(c, f):
+    """both eyes shut: a skin lid over the whole eye and a dark lash line low on it (tinted skin)"""
+    rx0, rx1, ry = f['eye']
+    lid = M_skin(NS['lid'])
+    lash = M_skin(NS['mouth'])
+    for x, rx in ((-0.02, rx0), (0.72, rx1)):
+        L(c, E(rx * 1.14, ry * 1.22, x, 1.36), lid, 0.0, 0.04, 'lid_closed')
+        # the lash line sags a little: a thin crescent across the lower half of the lid
+        L(c, sl.arc_pts(x, 1.36 + ry * 0.55, ry * 0.85, ry * 0.85 + 0.045, 200, 340, 16), lash, 0.05, 0.02, 'lash')
+
+
+def face_mouth_open(c, f):
+    """an open mouth (pain, a triumphant shout) covering any of the neutral mouths (tinted skin)"""
+    chin, _ = face_geo(f)
+    my = chin + 0.34
+    L(c, E(0.24, 0.17, 0.45, my - 0.01), M_skin(NS['lo']), 0.0, 0.03, 'lips')
+    L(c, E(0.18, 0.12, 0.45, my - 0.02), M_skin(NS['mouth']), 0.04, 0.03, 'mouth_in')
+    L(c, E(0.1, 0.045, 0.47, my - 0.1), M_skin(NS['blush']), 0.08, 0.02, 'tongue')
+
+
+def face_brows_angry(c, f):
+    """the face's brows pulled down towards the nose (tinted hair colour)"""
+    ln, th, _, _, dy = f['brow']
+    hair = M_hair()
+    th = th * 1.15
+    L(c, R(ln, th, th * 0.45, -0.04, 1.62 + dy, -0.32), hair, 0.0, 0.05, 'brow_l')
+    L(c, R(ln * 0.82, th * 0.95, th * 0.45, 0.74, 1.64 + dy, 0.34), hair, 0.0, 0.05, 'brow_r')
 
 
 # ================================================================== hair (tinted). front = over the head, back = behind the whole body

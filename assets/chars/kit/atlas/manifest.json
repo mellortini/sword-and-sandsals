@@ -569,571 +569,1173 @@
       "h": 122
     },
     "beard1": {
-      "page": "look-0-3131fa6ecbfd.webp",
+      "page": "look-0-876ee2ebbc3d.webp",
       "x": 2,
       "y": 2,
       "w": 203,
       "h": 90
     },
     "face0_brows": {
-      "page": "look-0-3131fa6ecbfd.webp",
+      "page": "look-0-876ee2ebbc3d.webp",
       "x": 2,
       "y": 96,
       "w": 153,
       "h": 47
     },
-    "face0_eyes": {
-      "page": "look-0-3131fa6ecbfd.webp",
+    "face0_brows_angry": {
+      "page": "look-0-876ee2ebbc3d.webp",
       "x": 2,
       "y": 147,
+      "w": 152,
+      "h": 55
+    },
+    "face0_eyes": {
+      "page": "look-0-876ee2ebbc3d.webp",
+      "x": 2,
+      "y": 206,
       "w": 147,
       "h": 66
     },
     "face0_head": {
-      "page": "look-0-3131fa6ecbfd.webp",
+      "page": "look-0-876ee2ebbc3d.webp",
       "x": 209,
       "y": 2,
       "w": 258,
       "h": 251
     },
     "face0_lids": {
-      "page": "look-0-3131fa6ecbfd.webp",
+      "page": "look-0-876ee2ebbc3d.webp",
       "x": 2,
-      "y": 257,
+      "y": 276,
       "w": 151,
       "h": 49
     },
-    "face0_nose": {
-      "page": "look-0-3131fa6ecbfd.webp",
+    "face0_lids_closed": {
+      "page": "look-0-876ee2ebbc3d.webp",
       "x": 2,
-      "y": 310,
+      "y": 329,
+      "w": 154,
+      "h": 76
+    },
+    "face0_mouth_open": {
+      "page": "look-0-876ee2ebbc3d.webp",
+      "x": 157,
+      "y": 257,
+      "w": 73,
+      "h": 58
+    },
+    "face0_nose": {
+      "page": "look-0-876ee2ebbc3d.webp",
+      "x": 234,
+      "y": 257,
       "w": 83,
       "h": 105
     },
     "face1_brows": {
-      "page": "look-0-3131fa6ecbfd.webp",
-      "x": 89,
-      "y": 310,
+      "page": "look-0-876ee2ebbc3d.webp",
+      "x": 2,
+      "y": 409,
       "w": 158,
       "h": 51
     },
+    "face1_brows_angry": {
+      "page": "look-0-876ee2ebbc3d.webp",
+      "x": 164,
+      "y": 366,
+      "w": 157,
+      "h": 61
+    },
     "face1_eyes": {
-      "page": "look-0-3131fa6ecbfd.webp",
-      "x": 251,
+      "page": "look-0-876ee2ebbc3d.webp",
+      "x": 325,
       "y": 257,
       "w": 136,
       "h": 58
     },
     "face1_head": {
-      "page": "look-0-3131fa6ecbfd.webp",
+      "page": "look-0-876ee2ebbc3d.webp",
       "x": 2,
-      "y": 419,
+      "y": 464,
       "w": 260,
       "h": 260
     },
     "face1_lids": {
-      "page": "look-0-3131fa6ecbfd.webp",
-      "x": 89,
-      "y": 365,
+      "page": "look-0-876ee2ebbc3d.webp",
+      "x": 321,
+      "y": 319,
       "w": 138,
       "h": 43
     },
-    "face1_nose": {
-      "page": "look-0-3131fa6ecbfd.webp",
+    "face1_lids_closed": {
+      "page": "look-0-876ee2ebbc3d.webp",
+      "x": 325,
+      "y": 366,
+      "w": 141,
+      "h": 66
+    },
+    "face1_mouth_open": {
+      "page": "look-0-876ee2ebbc3d.webp",
       "x": 266,
-      "y": 319,
+      "y": 436,
+      "w": 73,
+      "h": 58
+    },
+    "face1_nose": {
+      "page": "look-0-876ee2ebbc3d.webp",
+      "x": 343,
+      "y": 436,
       "w": 105,
       "h": 103
     },
     "hair1_front": {
-      "page": "look-0-3131fa6ecbfd.webp",
+      "page": "look-0-876ee2ebbc3d.webp",
       "x": 471,
       "y": 2,
       "w": 254,
       "h": 162
     },
     "beard2": {
-      "page": "look-1-f373c6a8cfa4.webp",
+      "page": "look-1-2a75dea481db.webp",
       "x": 2,
       "y": 2,
       "w": 121,
       "h": 70
     },
     "beard3": {
-      "page": "look-1-f373c6a8cfa4.webp",
+      "page": "look-1-2a75dea481db.webp",
       "x": 2,
       "y": 76,
       "w": 147,
       "h": 61
     },
     "face2_brows": {
-      "page": "look-1-f373c6a8cfa4.webp",
+      "page": "look-1-2a75dea481db.webp",
       "x": 2,
       "y": 141,
       "w": 146,
       "h": 43
     },
-    "face2_eyes": {
-      "page": "look-1-f373c6a8cfa4.webp",
+    "face2_brows_angry": {
+      "page": "look-1-2a75dea481db.webp",
       "x": 153,
       "y": 2,
+      "w": 145,
+      "h": 48
+    },
+    "face2_eyes": {
+      "page": "look-1-2a75dea481db.webp",
+      "x": 2,
+      "y": 188,
       "w": 155,
       "h": 77
     },
     "face2_head": {
-      "page": "look-1-f373c6a8cfa4.webp",
+      "page": "look-1-2a75dea481db.webp",
       "x": 2,
-      "y": 188,
+      "y": 269,
       "w": 261,
       "h": 242
     },
     "face2_lids": {
-      "page": "look-1-f373c6a8cfa4.webp",
-      "x": 312,
+      "page": "look-1-2a75dea481db.webp",
+      "x": 302,
       "y": 2,
       "w": 160,
       "h": 37
     },
+    "face2_lids_closed": {
+      "page": "look-1-2a75dea481db.webp",
+      "x": 267,
+      "y": 54,
+      "w": 163,
+      "h": 88
+    },
+    "face2_mouth_open": {
+      "page": "look-1-2a75dea481db.webp",
+      "x": 161,
+      "y": 54,
+      "w": 73,
+      "h": 58
+    },
     "face2_nose": {
-      "page": "look-1-f373c6a8cfa4.webp",
+      "page": "look-1-2a75dea481db.webp",
       "x": 153,
-      "y": 83,
+      "y": 116,
       "w": 66,
       "h": 58
     },
     "face3_brows": {
-      "page": "look-1-f373c6a8cfa4.webp",
-      "x": 312,
-      "y": 43,
+      "page": "look-1-2a75dea481db.webp",
+      "x": 267,
+      "y": 146,
       "w": 156,
       "h": 48
     },
+    "face3_brows_angry": {
+      "page": "look-1-2a75dea481db.webp",
+      "x": 161,
+      "y": 198,
+      "w": 155,
+      "h": 57
+    },
     "face3_eyes": {
-      "page": "look-1-f373c6a8cfa4.webp",
-      "x": 223,
-      "y": 95,
+      "page": "look-1-2a75dea481db.webp",
+      "x": 267,
+      "y": 259,
       "w": 145,
       "h": 54
     },
     "face3_head": {
-      "page": "look-1-f373c6a8cfa4.webp",
-      "x": 2,
-      "y": 434,
+      "page": "look-1-2a75dea481db.webp",
+      "x": 466,
+      "y": 2,
       "w": 249,
       "h": 271
     },
     "face3_lids": {
-      "page": "look-1-f373c6a8cfa4.webp",
-      "x": 267,
-      "y": 153,
+      "page": "look-1-2a75dea481db.webp",
+      "x": 416,
+      "y": 277,
       "w": 149,
       "h": 42
     },
-    "face3_nose": {
-      "page": "look-1-f373c6a8cfa4.webp",
+    "face3_lids_closed": {
+      "page": "look-1-2a75dea481db.webp",
       "x": 267,
-      "y": 199,
+      "y": 323,
+      "w": 152,
+      "h": 61
+    },
+    "face3_mouth_open": {
+      "page": "look-1-2a75dea481db.webp",
+      "x": 267,
+      "y": 388,
+      "w": 73,
+      "h": 58
+    },
+    "face3_nose": {
+      "page": "look-1-2a75dea481db.webp",
+      "x": 344,
+      "y": 388,
       "w": 86,
       "h": 110
     },
     "hair2_front": {
-      "page": "look-1-f373c6a8cfa4.webp",
-      "x": 476,
-      "y": 2,
+      "page": "look-1-2a75dea481db.webp",
+      "x": 2,
+      "y": 515,
       "w": 309,
       "h": 191
     },
     "hair3_back": {
-      "page": "look-1-f373c6a8cfa4.webp",
-      "x": 267,
-      "y": 313,
+      "page": "look-1-2a75dea481db.webp",
+      "x": 434,
+      "y": 323,
       "w": 266,
       "h": 377
     },
     "hair3_front": {
-      "page": "look-1-f373c6a8cfa4.webp",
+      "page": "look-1-2a75dea481db.webp",
       "x": 2,
-      "y": 709,
+      "y": 710,
       "w": 254,
       "h": 205
     },
     "beard4": {
-      "page": "look-2-927ccab36466.webp",
+      "page": "look-2-50740760737c.webp",
       "x": 2,
       "y": 2,
       "w": 235,
       "h": 140
     },
     "beard5": {
-      "page": "look-2-927ccab36466.webp",
+      "page": "look-2-50740760737c.webp",
       "x": 2,
       "y": 146,
       "w": 80,
       "h": 129
     },
     "face4_brows": {
-      "page": "look-2-927ccab36466.webp",
+      "page": "look-2-50740760737c.webp",
       "x": 86,
       "y": 146,
       "w": 148,
       "h": 47
     },
-    "face4_eyes": {
-      "page": "look-2-927ccab36466.webp",
+    "face4_brows_angry": {
+      "page": "look-2-50740760737c.webp",
       "x": 86,
       "y": 197,
+      "w": 147,
+      "h": 51
+    },
+    "face4_eyes": {
+      "page": "look-2-50740760737c.webp",
+      "x": 241,
+      "y": 2,
       "w": 149,
       "h": 68
     },
     "face4_head": {
-      "page": "look-2-927ccab36466.webp",
-      "x": 241,
-      "y": 2,
+      "page": "look-2-50740760737c.webp",
+      "x": 2,
+      "y": 279,
       "w": 263,
       "h": 248
     },
     "face4_lids": {
-      "page": "look-2-927ccab36466.webp",
-      "x": 2,
-      "y": 279,
+      "page": "look-2-50740760737c.webp",
+      "x": 237,
+      "y": 197,
       "w": 153,
       "h": 38
     },
+    "face4_lids_closed": {
+      "page": "look-2-50740760737c.webp",
+      "x": 394,
+      "y": 2,
+      "w": 156,
+      "h": 78
+    },
+    "face4_mouth_open": {
+      "page": "look-2-50740760737c.webp",
+      "x": 241,
+      "y": 84,
+      "w": 73,
+      "h": 58
+    },
     "face4_nose": {
-      "page": "look-2-927ccab36466.webp",
-      "x": 2,
-      "y": 321,
+      "page": "look-2-50740760737c.webp",
+      "x": 394,
+      "y": 84,
       "w": 94,
       "h": 121
     },
     "face5_brows": {
-      "page": "look-2-927ccab36466.webp",
-      "x": 100,
-      "y": 321,
+      "page": "look-2-50740760737c.webp",
+      "x": 238,
+      "y": 146,
       "w": 150,
       "h": 45
     },
+    "face5_brows_angry": {
+      "page": "look-2-50740760737c.webp",
+      "x": 394,
+      "y": 209,
+      "w": 149,
+      "h": 51
+    },
     "face5_eyes": {
-      "page": "look-2-927ccab36466.webp",
-      "x": 239,
-      "y": 254,
+      "page": "look-2-50740760737c.webp",
+      "x": 269,
+      "y": 264,
       "w": 145,
       "h": 60
     },
     "face5_head": {
-      "page": "look-2-927ccab36466.webp",
+      "page": "look-2-50740760737c.webp",
       "x": 2,
-      "y": 446,
+      "y": 531,
       "w": 249,
       "h": 256
     },
     "face5_lids": {
-      "page": "look-2-927ccab36466.webp",
-      "x": 100,
-      "y": 370,
+      "page": "look-2-50740760737c.webp",
+      "x": 269,
+      "y": 328,
       "w": 149,
       "h": 46
     },
+    "face5_lids_closed": {
+      "page": "look-2-50740760737c.webp",
+      "x": 269,
+      "y": 378,
+      "w": 152,
+      "h": 68
+    },
+    "face5_mouth_open": {
+      "page": "look-2-50740760737c.webp",
+      "x": 418,
+      "y": 264,
+      "w": 73,
+      "h": 58
+    },
     "face5_nose": {
-      "page": "look-2-927ccab36466.webp",
-      "x": 388,
-      "y": 254,
+      "page": "look-2-50740760737c.webp",
+      "x": 425,
+      "y": 326,
       "w": 70,
       "h": 130
     },
     "hair4_front": {
-      "page": "look-2-927ccab36466.webp",
-      "x": 508,
+      "page": "look-2-50740760737c.webp",
+      "x": 554,
       "y": 2,
       "w": 331,
       "h": 209
     },
     "hair5_back": {
-      "page": "look-2-927ccab36466.webp",
-      "x": 254,
-      "y": 318,
+      "page": "look-2-50740760737c.webp",
+      "x": 269,
+      "y": 450,
       "w": 127,
       "h": 124
     },
     "hair5_front": {
-      "page": "look-2-927ccab36466.webp",
-      "x": 508,
-      "y": 215,
+      "page": "look-2-50740760737c.webp",
+      "x": 255,
+      "y": 578,
       "w": 246,
       "h": 160
     },
     "beard6": {
-      "page": "look-3-6662e841812e.webp",
+      "page": "look-3-94419dc7ed2a.webp",
       "x": 2,
       "y": 2,
       "w": 226,
       "h": 124
     },
     "beard7": {
-      "page": "look-3-6662e841812e.webp",
+      "page": "look-3-94419dc7ed2a.webp",
       "x": 2,
       "y": 130,
       "w": 230,
       "h": 120
     },
     "face6_brows": {
-      "page": "look-3-6662e841812e.webp",
+      "page": "look-3-94419dc7ed2a.webp",
       "x": 236,
       "y": 2,
       "w": 156,
       "h": 47
     },
-    "face6_eyes": {
-      "page": "look-3-6662e841812e.webp",
-      "x": 232,
+    "face6_brows_angry": {
+      "page": "look-3-94419dc7ed2a.webp",
+      "x": 236,
       "y": 53,
+      "w": 155,
+      "h": 59
+    },
+    "face6_eyes": {
+      "page": "look-3-94419dc7ed2a.webp",
+      "x": 236,
+      "y": 116,
       "w": 143,
       "h": 62
     },
     "face6_head": {
-      "page": "look-3-6662e841812e.webp",
+      "page": "look-3-94419dc7ed2a.webp",
       "x": 2,
       "y": 254,
       "w": 254,
       "h": 253
     },
     "face6_lids": {
-      "page": "look-3-6662e841812e.webp",
+      "page": "look-3-94419dc7ed2a.webp",
       "x": 236,
-      "y": 119,
+      "y": 182,
       "w": 147,
       "h": 47
     },
+    "face6_lids_closed": {
+      "page": "look-3-94419dc7ed2a.webp",
+      "x": 396,
+      "y": 2,
+      "w": 149,
+      "h": 71
+    },
+    "face6_mouth_open": {
+      "page": "look-3-94419dc7ed2a.webp",
+      "x": 383,
+      "y": 116,
+      "w": 73,
+      "h": 58
+    },
     "face6_nose": {
-      "page": "look-3-6662e841812e.webp",
-      "x": 260,
-      "y": 170,
+      "page": "look-3-94419dc7ed2a.webp",
+      "x": 460,
+      "y": 77,
       "w": 77,
       "h": 97
     },
     "face7_brows": {
-      "page": "look-3-6662e841812e.webp",
-      "x": 396,
-      "y": 2,
+      "page": "look-3-94419dc7ed2a.webp",
+      "x": 260,
+      "y": 233,
       "w": 163,
       "h": 51
     },
+    "face7_brows_angry": {
+      "page": "look-3-94419dc7ed2a.webp",
+      "x": 260,
+      "y": 288,
+      "w": 162,
+      "h": 65
+    },
     "face7_eyes": {
-      "page": "look-3-6662e841812e.webp",
-      "x": 379,
-      "y": 57,
+      "page": "look-3-94419dc7ed2a.webp",
+      "x": 260,
+      "y": 357,
       "w": 138,
       "h": 58
     },
     "face7_head": {
-      "page": "look-3-6662e841812e.webp",
+      "page": "look-3-94419dc7ed2a.webp",
       "x": 2,
       "y": 511,
       "w": 254,
       "h": 254
     },
     "face7_lids": {
-      "page": "look-3-6662e841812e.webp",
-      "x": 387,
-      "y": 119,
+      "page": "look-3-94419dc7ed2a.webp",
+      "x": 402,
+      "y": 357,
       "w": 141,
       "h": 44
     },
+    "face7_lids_closed": {
+      "page": "look-3-94419dc7ed2a.webp",
+      "x": 260,
+      "y": 419,
+      "w": 144,
+      "h": 66
+    },
+    "face7_mouth_open": {
+      "page": "look-3-94419dc7ed2a.webp",
+      "x": 426,
+      "y": 288,
+      "w": 73,
+      "h": 58
+    },
     "face7_nose": {
-      "page": "look-3-6662e841812e.webp",
-      "x": 387,
-      "y": 167,
+      "page": "look-3-94419dc7ed2a.webp",
+      "x": 408,
+      "y": 405,
       "w": 100,
       "h": 129
     },
     "hair6_front": {
-      "page": "look-3-6662e841812e.webp",
+      "page": "look-3-94419dc7ed2a.webp",
       "x": 260,
-      "y": 300,
+      "y": 538,
       "w": 178,
       "h": 135
     },
     "hair7_front": {
-      "page": "look-3-6662e841812e.webp",
-      "x": 563,
+      "page": "look-3-94419dc7ed2a.webp",
+      "x": 549,
       "y": 2,
       "w": 344,
       "h": 214
     },
     "beard8": {
-      "page": "look-4-f9fea1232953.webp",
+      "page": "look-4-90d927afa646.webp",
       "x": 2,
       "y": 2,
       "w": 231,
       "h": 277
     },
     "beard9": {
-      "page": "look-4-f9fea1232953.webp",
+      "page": "look-4-90d927afa646.webp",
       "x": 237,
       "y": 2,
       "w": 232,
       "h": 125
     },
     "face8_brows": {
-      "page": "look-4-f9fea1232953.webp",
+      "page": "look-4-90d927afa646.webp",
       "x": 237,
       "y": 131,
       "w": 148,
       "h": 48
     },
-    "face8_eyes": {
-      "page": "look-4-f9fea1232953.webp",
+    "face8_brows_angry": {
+      "page": "look-4-90d927afa646.webp",
       "x": 237,
       "y": 183,
+      "w": 147,
+      "h": 52
+    },
+    "face8_eyes": {
+      "page": "look-4-90d927afa646.webp",
+      "x": 2,
+      "y": 283,
       "w": 157,
       "h": 79
     },
     "face8_head": {
-      "page": "look-4-f9fea1232953.webp",
+      "page": "look-4-90d927afa646.webp",
       "x": 2,
-      "y": 283,
+      "y": 366,
       "w": 256,
       "h": 246
     },
     "face8_lids": {
-      "page": "look-4-f9fea1232953.webp",
+      "page": "look-4-90d927afa646.webp",
       "x": 262,
-      "y": 266,
+      "y": 239,
       "w": 162,
       "h": 31
     },
-    "face8_nose": {
-      "page": "look-4-f9fea1232953.webp",
+    "face8_lids_closed": {
+      "page": "look-4-90d927afa646.webp",
       "x": 262,
-      "y": 301,
+      "y": 274,
+      "w": 165,
+      "h": 91
+    },
+    "face8_mouth_open": {
+      "page": "look-4-90d927afa646.webp",
+      "x": 389,
+      "y": 131,
+      "w": 73,
+      "h": 58
+    },
+    "face8_nose": {
+      "page": "look-4-90d927afa646.webp",
+      "x": 163,
+      "y": 283,
       "w": 73,
       "h": 64
     },
     "face9_brows": {
-      "page": "look-4-f9fea1232953.webp",
+      "page": "look-4-90d927afa646.webp",
       "x": 262,
       "y": 369,
       "w": 148,
       "h": 39
     },
-    "face9_eyes": {
-      "page": "look-4-f9fea1232953.webp",
+    "face9_brows_angry": {
+      "page": "look-4-90d927afa646.webp",
       "x": 262,
       "y": 412,
+      "w": 147,
+      "h": 49
+    },
+    "face9_eyes": {
+      "page": "look-4-90d927afa646.webp",
+      "x": 262,
+      "y": 465,
       "w": 145,
       "h": 64
     },
     "face9_head": {
-      "page": "look-4-f9fea1232953.webp",
+      "page": "look-4-90d927afa646.webp",
       "x": 473,
       "y": 2,
       "w": 251,
       "h": 258
     },
     "face9_lids": {
-      "page": "look-4-f9fea1232953.webp",
+      "page": "look-4-90d927afa646.webp",
       "x": 262,
-      "y": 480,
+      "y": 533,
       "w": 154,
       "h": 45
     },
+    "face9_lids_closed": {
+      "page": "look-4-90d927afa646.webp",
+      "x": 413,
+      "y": 412,
+      "w": 152,
+      "h": 73
+    },
+    "face9_mouth_open": {
+      "page": "look-4-90d927afa646.webp",
+      "x": 420,
+      "y": 489,
+      "w": 73,
+      "h": 58
+    },
     "face9_nose": {
-      "page": "look-4-f9fea1232953.webp",
-      "x": 414,
-      "y": 301,
+      "page": "look-4-90d927afa646.webp",
+      "x": 497,
+      "y": 489,
       "w": 74,
       "h": 94
     },
     "hair8_back": {
-      "page": "look-4-f9fea1232953.webp",
-      "x": 492,
+      "page": "look-4-90d927afa646.webp",
+      "x": 575,
       "y": 264,
       "w": 118,
       "h": 248
     },
     "hair8_front": {
-      "page": "look-4-f9fea1232953.webp",
+      "page": "look-4-90d927afa646.webp",
       "x": 2,
-      "y": 533,
+      "y": 616,
       "w": 254,
       "h": 163
     },
     "hair9_back": {
-      "page": "look-4-f9fea1232953.webp",
-      "x": 614,
+      "page": "look-4-90d927afa646.webp",
+      "x": 431,
       "y": 264,
       "w": 109,
       "h": 93
     },
     "hair9_front": {
-      "page": "look-4-f9fea1232953.webp",
+      "page": "look-4-90d927afa646.webp",
       "x": 260,
-      "y": 533,
+      "y": 616,
       "w": 258,
       "h": 162
     },
     "body_arm_lo": {
-      "page": "base-d3cd2d5bbc63.webp",
+      "page": "base-3936a88ba1a5.webp",
       "x": 2,
       "y": 2,
       "w": 91,
       "h": 224
     },
     "body_arm_up": {
-      "page": "base-d3cd2d5bbc63.webp",
+      "page": "base-3936a88ba1a5.webp",
       "x": 97,
       "y": 2,
       "w": 119,
       "h": 269
     },
     "body_foot": {
-      "page": "base-d3cd2d5bbc63.webp",
+      "page": "base-3936a88ba1a5.webp",
       "x": 220,
       "y": 2,
       "w": 161,
       "h": 68
     },
     "body_hand": {
-      "page": "base-d3cd2d5bbc63.webp",
+      "page": "base-3936a88ba1a5.webp",
       "x": 220,
       "y": 74,
       "w": 86,
       "h": 87
     },
     "body_leg_lo": {
-      "page": "base-d3cd2d5bbc63.webp",
+      "page": "base-3936a88ba1a5.webp",
       "x": 2,
       "y": 275,
       "w": 103,
       "h": 267
     },
     "body_leg_up": {
-      "page": "base-d3cd2d5bbc63.webp",
+      "page": "base-3936a88ba1a5.webp",
       "x": 220,
       "y": 165,
       "w": 130,
       "h": 303
     },
     "body_pelvis": {
-      "page": "base-d3cd2d5bbc63.webp",
+      "page": "base-3936a88ba1a5.webp",
       "x": 385,
       "y": 2,
       "w": 242,
       "h": 193
     },
     "body_torso": {
-      "page": "base-d3cd2d5bbc63.webp",
+      "page": "base-3936a88ba1a5.webp",
       "x": 2,
       "y": 546,
       "w": 336,
       "h": 355
     },
-    "weapon_gladius": {
-      "page": "base-d3cd2d5bbc63.webp",
+    "cut_head_edge": {
+      "page": "base-3936a88ba1a5.webp",
+      "x": 109,
+      "y": 275,
+      "w": 107,
+      "h": 77
+    },
+    "cut_head_neck": {
+      "page": "base-3936a88ba1a5.webp",
+      "x": 109,
+      "y": 356,
+      "w": 96,
+      "h": 98
+    },
+    "cut_head_tissue": {
+      "page": "base-3936a88ba1a5.webp",
+      "x": 354,
+      "y": 199,
+      "w": 144,
+      "h": 97
+    },
+    "cut_torso": {
+      "page": "base-3936a88ba1a5.webp",
       "x": 631,
       "y": 2,
+      "w": 336,
+      "h": 357
+    },
+    "cut_torso_edge": {
+      "page": "base-3936a88ba1a5.webp",
+      "x": 502,
+      "y": 199,
+      "w": 111,
+      "h": 79
+    },
+    "cut_torso_tissue": {
+      "page": "base-3936a88ba1a5.webp",
+      "x": 354,
+      "y": 300,
+      "w": 144,
+      "h": 90
+    },
+    "shield1": {
+      "page": "base-3936a88ba1a5.webp",
+      "x": 342,
+      "y": 472,
+      "w": 239,
+      "h": 238
+    },
+    "shield10": {
+      "page": "base-3936a88ba1a5.webp",
+      "x": 585,
+      "y": 363,
+      "w": 244,
+      "h": 415
+    },
+    "weapon_axe1": {
+      "page": "base-3936a88ba1a5.webp",
+      "x": 342,
+      "y": 782,
+      "w": 328,
+      "h": 110
+    },
+    "weapon_axe2": {
+      "page": "base-3936a88ba1a5.webp",
+      "x": 2,
+      "y": 905,
+      "w": 313,
+      "h": 111
+    },
+    "weapon_axe3": {
+      "page": "base-3936a88ba1a5.webp",
+      "x": 342,
+      "y": 896,
+      "w": 317,
+      "h": 115
+    },
+    "shield2": {
+      "page": "base-f158483ba30b.webp",
+      "x": 2,
+      "y": 2,
+      "w": 251,
+      "h": 251
+    },
+    "shield3": {
+      "page": "base-f158483ba30b.webp",
+      "x": 257,
+      "y": 2,
+      "w": 265,
+      "h": 265
+    },
+    "shield4": {
+      "page": "base-f158483ba30b.webp",
+      "x": 2,
+      "y": 271,
+      "w": 280,
+      "h": 280
+    },
+    "shield5": {
+      "page": "base-f158483ba30b.webp",
+      "x": 526,
+      "y": 2,
+      "w": 208,
+      "h": 352
+    },
+    "shield6": {
+      "page": "base-f158483ba30b.webp",
+      "x": 2,
+      "y": 555,
+      "w": 216,
+      "h": 365
+    },
+    "shield7": {
+      "page": "base-f158483ba30b.webp",
+      "x": 286,
+      "y": 271,
+      "w": 223,
+      "h": 378
+    },
+    "shield8": {
+      "page": "base-f158483ba30b.webp",
+      "x": 738,
+      "y": 2,
+      "w": 230,
+      "h": 390
+    },
+    "shield9": {
+      "page": "base-f158483ba30b.webp",
+      "x": 513,
+      "y": 396,
+      "w": 237,
+      "h": 403
+    },
+    "weapon_gladius": {
+      "page": "base-f158483ba30b.webp",
+      "x": 222,
+      "y": 803,
       "w": 359,
       "h": 81
+    },
+    "weapon_spear1": {
+      "page": "base-f158483ba30b.webp",
+      "x": 2,
+      "y": 924,
+      "w": 774,
+      "h": 61
+    },
+    "weapon_sword1": {
+      "page": "base-f158483ba30b.webp",
+      "x": 585,
+      "y": 803,
+      "w": 329,
+      "h": 82
+    },
+    "weapon_axe10": {
+      "page": "base-ad67bd852f46.webp",
+      "x": 2,
+      "y": 2,
+      "w": 364,
+      "h": 185
+    },
+    "weapon_axe4": {
+      "page": "base-ad67bd852f46.webp",
+      "x": 2,
+      "y": 191,
+      "w": 328,
+      "h": 118
+    },
+    "weapon_axe5": {
+      "page": "base-ad67bd852f46.webp",
+      "x": 2,
+      "y": 313,
+      "w": 333,
+      "h": 122
+    },
+    "weapon_axe6": {
+      "page": "base-ad67bd852f46.webp",
+      "x": 370,
+      "y": 2,
+      "w": 337,
+      "h": 159
+    },
+    "weapon_axe7": {
+      "page": "base-ad67bd852f46.webp",
+      "x": 339,
+      "y": 191,
+      "w": 341,
+      "h": 166
+    },
+    "weapon_axe8": {
+      "page": "base-ad67bd852f46.webp",
+      "x": 2,
+      "y": 439,
+      "w": 345,
+      "h": 172
+    },
+    "weapon_axe9": {
+      "page": "base-ad67bd852f46.webp",
+      "x": 2,
+      "y": 615,
+      "w": 360,
+      "h": 178
+    },
+    "weapon_hammer1": {
+      "page": "base-ad67bd852f46.webp",
+      "x": 2,
+      "y": 797,
+      "w": 563,
+      "h": 197
+    },
+    "weapon_sword2": {
+      "page": "base-ad67bd852f46.webp",
+      "x": 339,
+      "y": 361,
+      "w": 337,
+      "h": 74
+    },
+    "weapon_sword3": {
+      "page": "base-ad67bd852f46.webp",
+      "x": 351,
+      "y": 439,
+      "w": 348,
+      "h": 80
+    },
+    "weapon_sword4": {
+      "page": "base-ad67bd852f46.webp",
+      "x": 351,
+      "y": 523,
+      "w": 353,
+      "h": 80
+    },
+    "weapon_hammer10": {
+      "page": "base-34ecc8c8e9b3.webp",
+      "x": 2,
+      "y": 2,
+      "w": 662,
+      "h": 248
+    },
+    "weapon_hammer2": {
+      "page": "base-34ecc8c8e9b3.webp",
+      "x": 2,
+      "y": 254,
+      "w": 552,
+      "h": 191
+    },
+    "weapon_hammer3": {
+      "page": "base-34ecc8c8e9b3.webp",
+      "x": 2,
+      "y": 449,
+      "w": 558,
+      "h": 199
+    },
+    "weapon_hammer4": {
+      "page": "base-34ecc8c8e9b3.webp",
+      "x": 2,
+      "y": 652,
+      "w": 571,
+      "h": 206
+    },
+    "weapon_spear10": {
+      "page": "base-34ecc8c8e9b3.webp",
+      "x": 2,
+      "y": 862,
+      "w": 864,
+      "h": 91
+    },
+    "weapon_hammer5": {
+      "page": "base-c992d13d5220.webp",
+      "x": 2,
+      "y": 2,
+      "w": 576,
+      "h": 213
+    },
+    "weapon_hammer6": {
+      "page": "base-c992d13d5220.webp",
+      "x": 2,
+      "y": 219,
+      "w": 582,
+      "h": 220
+    },
+    "weapon_hammer7": {
+      "page": "base-c992d13d5220.webp",
+      "x": 2,
+      "y": 443,
+      "w": 630,
+      "h": 227
+    },
+    "weapon_hammer8": {
+      "page": "base-c992d13d5220.webp",
+      "x": 2,
+      "y": 674,
+      "w": 637,
+      "h": 234
+    },
+    "weapon_spear2": {
+      "page": "base-c992d13d5220.webp",
+      "x": 2,
+      "y": 912,
+      "w": 804,
+      "h": 68
+    },
+    "weapon_hammer9": {
+      "page": "base-def17d755fb7.webp",
+      "x": 2,
+      "y": 2,
+      "w": 655,
+      "h": 241
+    },
+    "weapon_spear3": {
+      "page": "base-def17d755fb7.webp",
+      "x": 2,
+      "y": 247,
+      "w": 810,
+      "h": 69
+    },
+    "weapon_spear4": {
+      "page": "base-def17d755fb7.webp",
+      "x": 2,
+      "y": 320,
+      "w": 822,
+      "h": 71
+    },
+    "weapon_spear5": {
+      "page": "base-def17d755fb7.webp",
+      "x": 2,
+      "y": 395,
+      "w": 827,
+      "h": 82
+    },
+    "weapon_spear6": {
+      "page": "base-def17d755fb7.webp",
+      "x": 2,
+      "y": 481,
+      "w": 833,
+      "h": 74
+    },
+    "weapon_spear7": {
+      "page": "base-def17d755fb7.webp",
+      "x": 2,
+      "y": 559,
+      "w": 838,
+      "h": 75
+    },
+    "weapon_spear8": {
+      "page": "base-def17d755fb7.webp",
+      "x": 2,
+      "y": 638,
+      "w": 843,
+      "h": 85
+    },
+    "weapon_spear9": {
+      "page": "base-def17d755fb7.webp",
+      "x": 2,
+      "y": 727,
+      "w": 859,
+      "h": 85
+    },
+    "weapon_sword10": {
+      "page": "base-def17d755fb7.webp",
+      "x": 2,
+      "y": 816,
+      "w": 421,
+      "h": 141
+    },
+    "weapon_sword5": {
+      "page": "base-def17d755fb7.webp",
+      "x": 427,
+      "y": 816,
+      "w": 362,
+      "h": 89
+    },
+    "weapon_sword6": {
+      "page": "base-52dcb023da3a.webp",
+      "x": 2,
+      "y": 2,
+      "w": 364,
+      "h": 89
+    },
+    "weapon_sword7": {
+      "page": "base-52dcb023da3a.webp",
+      "x": 2,
+      "y": 95,
+      "w": 382,
+      "h": 125
+    },
+    "weapon_sword8": {
+      "page": "base-52dcb023da3a.webp",
+      "x": 2,
+      "y": 224,
+      "w": 389,
+      "h": 87
+    },
+    "weapon_sword9": {
+      "page": "base-52dcb023da3a.webp",
+      "x": 2,
+      "y": 315,
+      "w": 404,
+      "h": 125
     }
   }
 }

@@ -1,6 +1,6 @@
 """Render the whole modular gladiator kit -> game/assets/chars/kit/{sprites/*.png, kit.json}
 
-  D:/blender/blender.exe -b --python game/blender/build_kit.py -- [samples] [only_prefix,...]
+  python -I tools/blender.py blender/build_kit.py -- [samples] [only_prefix,...]
 
 only_prefix limits the render to keys starting with any of the prefixes (kit.json is merged, not replaced).
 At the end the production atlases are rebuilt (`npm run assets:atlas`), so the WebP pages never lag behind the PNGs.
@@ -11,6 +11,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sprite_lib as sl  # noqa: E402
 import kit  # noqa: E402
 import armor  # noqa: E402
+import weapons  # noqa: E402
+import shields  # noqa: E402
 
 pc = sl.pc
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
@@ -39,6 +41,8 @@ def gladius(c):
 jobs = {}
 for part, fn in kit.BODY.items():
     jobs['body_' + part] = (fn, kit.BODY_TINT[part], False)
+for part, (fn, tint) in kit.CUT.items():
+    jobs['cut_' + part] = (fn, tint, False)
 for i, f in enumerate(kit.FACES):
     jobs[f'face{i}_head'] = ((lambda c, f=f: kit.face_head(c, f)), 'skin', True)
     jobs[f'face{i}_eyes'] = ((lambda c, f=f: kit.face_eyes(c, f)), None, True)
@@ -46,6 +50,9 @@ for i, f in enumerate(kit.FACES):
         jobs[f'face{i}_lids'] = ((lambda c, f=f: kit.face_lids(c, f)), 'skin', True)
     jobs[f'face{i}_brows'] = ((lambda c, f=f: kit.face_brows(c, f)), 'hair', True)
     jobs[f'face{i}_nose'] = ((lambda c, f=f: kit.face_nose(c, f)), 'skin', True)
+    jobs[f'face{i}_lids_closed'] = ((lambda c, f=f: kit.face_lids_closed(c, f)), 'skin', True)
+    jobs[f'face{i}_mouth_open'] = ((lambda c, f=f: kit.face_mouth_open(c, f)), 'skin', True)
+    jobs[f'face{i}_brows_angry'] = ((lambda c, f=f: kit.face_brows_angry(c, f)), 'hair', True)
 HAIR_PARTS = {}
 for i, (name, fn) in enumerate(kit.HAIRS):
     jobs[f'hair{i}_front'] = ((lambda c, fn=fn: fn(c, sl.new_coll('_trash'))), 'hair', True)
@@ -55,6 +62,13 @@ for i, (name, fn) in enumerate(kit.BEARDS):
 for key, (fn, bone, slot, piece, t) in armor.pieces().items():
     jobs[key] = (fn, None, bone == 'head')
 jobs['weapon_gladius'] = (gladius, None, False)
+for t, fn in weapons.SWORDS.items():
+    jobs[f'weapon_sword{t}'] = (fn, None, False)
+for fam, table in (('axe', weapons.AXES), ('spear', weapons.SPEARS), ('hammer', weapons.HAMMERS)):
+    for t, fn in table.items():
+        jobs[f'weapon_{fam}{t}'] = (fn, None, False)
+for t, fn in shields.SHIELDS.items():
+    jobs[f'shield{t}'] = (fn, None, False)
 
 meta_path = os.path.join(OUT, 'kit.json')
 old = json.load(open(meta_path)) if (ONLY and os.path.exists(meta_path)) else {}
@@ -84,6 +98,9 @@ for key, (fn, tint, head) in jobs.items():
             o.scale = (o.scale[0] * HEAD_S, o.scale[1] * HEAD_S, 1.0)
     info = sl.render_coll(coll, os.path.join(SPR, key + '.png'))
     info['tint'] = tint
+    fam = key[len('weapon_'):].rstrip('0123456789') if key.startswith('weapon_') else None
+    if fam in weapons.GRIP2:   # two-handed: where the back hand holds the haft (weapon-bone units)
+        info['grip2'] = list(weapons.GRIP2[fam])
     if key in SPRITE_ALPHA:
         info['alpha'] = SPRITE_ALPHA[key]
     sprites[key] = info
@@ -97,7 +114,7 @@ BONES = [
     ('pelvis', None, 0.0, 4.75), ('torso', 'pelvis', 0.0, 0.0), ('head', 'torso', 0.12, 3.35),
     ('arm_b_up', 'torso', -1.35, 2.6), ('arm_b_lo', 'arm_b_up', 0.0, -1.85), ('hand_b', 'arm_b_lo', 0.0, -1.6),
     ('arm_f_up', 'torso', 1.42, 2.6), ('arm_f_lo', 'arm_f_up', 0.0, -1.85), ('hand_f', 'arm_f_lo', 0.0, -1.6),
-    ('weapon', 'hand_f', 0.06, -0.38),
+    ('weapon', 'hand_f', 0.06, -0.38), ('shield', 'hand_b', 0.0, -0.3),
     ('leg_b_up', 'pelvis', -0.52, -0.55), ('leg_b_lo', 'leg_b_up', 0.0, -2.1), ('foot_b', 'leg_b_lo', 0.0, -2.0),
     ('leg_f_up', 'pelvis', 0.55, -0.55), ('leg_f_lo', 'leg_f_up', 0.0, -2.1), ('foot_f', 'leg_f_lo', 0.0, -2.0),
 ]
@@ -120,17 +137,23 @@ LAYERS += [dict(bone='hand_b', slot='body', piece='hand', back=True),
            dict(bone='arm_b_lo', slot='body', piece='arm_lo', back=True), dict(bone='arm_b_lo', slot='armor', piece='bracer', back=True),
            dict(bone='arm_b_up', slot='body', piece='arm_up', back=True), dict(bone='arm_b_up', slot='shoulders', piece='', back=True)]
 LAYERS += limb('b') + limb('f')
-LAYERS += [dict(bone='torso', slot='body', piece='torso'), dict(bone='torso', slot='armor', piece='torso'),
+# slot 'cut' = the two halves of a torn neck, drawn only for a pose with `neck_cut` (finishers, #20)
+LAYERS += [dict(bone='torso', slot='body', piece='torso'),
+           dict(bone='torso', slot='cut', piece='torso_edge'), dict(bone='torso', slot='cut', piece='torso'),
+           dict(bone='torso', slot='armor', piece='torso'), dict(bone='torso', slot='cut', piece='torso_tissue'),
            dict(bone='pelvis', slot='body', piece='pelvis'), dict(bone='pelvis', slot='armor', piece='skirt'),
-           dict(bone='head', slot='face', piece='head'), dict(bone='head', slot='face', piece='eyes'), dict(bone='head', slot='face', piece='lids'),
-           dict(bone='head', slot='face', piece='brows'), dict(bone='head', slot='beard', piece=''), dict(bone='head', slot='face', piece='nose'),
+           dict(bone='head', slot='cut', piece='head_tissue'), dict(bone='head', slot='cut', piece='head_edge'),
+           dict(bone='head', slot='cut', piece='head_neck'), dict(bone='head', slot='face', piece='head'), dict(bone='head', slot='face', piece='mouth_open'),
+           dict(bone='head', slot='face', piece='eyes'), dict(bone='head', slot='face', piece='lids'), dict(bone='head', slot='face', piece='lids_closed'),
+           dict(bone='head', slot='face', piece='brows'), dict(bone='head', slot='face', piece='brows_angry'), dict(bone='head', slot='beard', piece=''), dict(bone='head', slot='face', piece='nose'),
            dict(bone='head', slot='hair', piece='front'), dict(bone='head', slot='helmet', piece=''),
+           dict(bone='shield', slot='shield', piece=''),   # off hand (#38): in front of the body, under the sword arm
            dict(bone='arm_f_lo', slot='body', piece='arm_lo'), dict(bone='arm_f_lo', slot='armor', piece='bracer'),
            dict(bone='arm_f_up', slot='body', piece='arm_up'), dict(bone='arm_f_up', slot='shoulders', piece=''),
            dict(bone='weapon', slot='weapon', piece='gladius'), dict(bone='hand_f', slot='body', piece='hand')]
 
 POSE = {'pelvis': 0, 'torso': 3, 'head': -3, 'arm_b_up': -18, 'arm_b_lo': 35, 'hand_b': 0,
-        'arm_f_up': 22, 'arm_f_lo': 62, 'hand_f': -10, 'weapon': -40,
+        'arm_f_up': 22, 'arm_f_lo': 62, 'hand_f': -10, 'weapon': -40, 'shield': 0,
         'leg_b_up': -14, 'leg_b_lo': 4, 'foot_b': 10, 'leg_f_up': 16, 'leg_f_lo': -6, 'foot_f': -10}
 
 kitjson = {
@@ -146,7 +169,9 @@ kitjson = {
     'sets': armor.SET_NAMES,
     'sprites': sprites,
 }
-json.dump(kitjson, open(meta_path, 'w'), indent=1)
+# LF on every OS: kit.json is tracked in git and must not show up as changed after a render on Windows
+with open(meta_path, 'w', newline='\n') as fh:
+    json.dump(kitjson, fh, indent=1)
 print('KIT', n, 'sprites rendered,', len(sprites), 'in kit.json', f'{time.time() - t0:.0f}s')
 
 

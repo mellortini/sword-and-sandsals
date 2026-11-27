@@ -4,8 +4,8 @@ Dla ludzi i agentów (Claude Code, Codex). Opisuje grafikę **gry**. Sam styl op
 [`papercraft-3d-short`](../.claude/skills/papercraft-3d-short/SKILL.md); jego części o filmach do gry nie są potrzebne.
 
 Przed pierwszym renderem: `SETUP.md` → punkt 5 (Blender 5.3, Python, pobranie i rozpakowanie tekstur).
-Wszystkie komendy uruchamiaj w katalogu repo. `<blender>` to ścieżka do programu. Blender działa w tle (`-b`),
-dodatki ani Blender MCP nie są potrzebne.
+Wszystkie komendy uruchamiaj w katalogu repo. `tools/blender.py` sam znajduje Blendera (zmienna `BLENDER`, typowe
+miejsca instalacji, `PATH`) i uruchamia go w tle; dodatki ani Blender MCP nie są potrzebne.
 
 ## Wzorce wyglądu
 Wzorcem są nasze rendery z repo. Zanim zaczniesz, otwórz te, które są najbliżej tego, co robisz:
@@ -62,13 +62,14 @@ Materiały z `sl` są zapamiętywane po parametrach. Nowy wariant dostaje nową 
 - Sloty i elementy zbroi są w `armor.SLOTS` i `armor.PIECE_BONE`. Funkcja o innej nazwie nie zostanie wyrenderowana.
 - Skórę i włosy renderuj na **neutralnym papierze** (`kit.neutral()`, `kit.HAIR_N`) z barwieniem `skin` albo `hair`.
   Kolor nadaje gra.
-- Nowa broń: zanim zaczniesz, sprawdź w otwartych PR-ach (`gh pr list`) i w `AGENT_CHAT.md`, jak dodaje się broń.
+- Broń jest w `blender/weapons.py` (`SWORDS`, `AXES`, `SPEARS`, `HAMMERS`; dwuręczna ma wpis w `GRIP2`), tarcze
+  w `blender/shields.py` (`SHIELDS`).
 
 ### Render
 ```
-<blender> -b --python blender/build_kit.py -- 16 helmet3          # szybki podgląd
-<blender> -b --python blender/build_kit.py -- 32 helmet3,face2    # wybrane części, jakość do commita
-<blender> -b --python blender/build_kit.py -- 32                  # cały zestaw
+python -I tools/blender.py blender/build_kit.py -- 16 helmet3          # szybki podgląd
+python -I tools/blender.py blender/build_kit.py -- 32 helmet3,face2    # wybrane części, jakość do commita
+python -I tools/blender.py blender/build_kit.py -- 32                  # cały zestaw
 ```
 Liczba to próbki Cycles. Filtr działa po **początku nazwy**: `helmet1` wyrenderuje też `helmet10`, a `armor1` także
 `armor10_*`. Żeby tego uniknąć przy elementach zbroi, podaj pełny klucz z końcówką (np. `armor1_torso`).
@@ -98,7 +99,7 @@ info = sl.render_coll(coll, os.path.join(sl.GAME, 'out', 'sign.png'))
 print('SPRITE', info)
 ```
 ```
-<blender> -b --python blender/example.py
+python -I tools/blender.py blender/example.py
 ```
 Do prób zapisuj w `out/` (poza git), gotowe assety w `assets/<folder>/`. Jeśli gra potrzebuje pivotu albo prostokątów
 kliknięcia, zapisz je obok w manifeście JSON. Tło z perspektywą i głębią ostrości: wzoruj się na `blender/arena.py`.
@@ -114,5 +115,4 @@ PNG, JPG i WebP idą przez Git LFS automatycznie (`.gitattributes`).
 5. Zrzut „przed i po” do opisu PR oraz wpis w `AGENT_CHAT.md`.
 
 ## Czego tu jeszcze nie ma
-- Pipeline nie został potwierdzony na drugim komputerze (zadanie #8).
 - Dźwięk i głosy: workflow ComfyUI i próbek głosu nie ma w repo.
