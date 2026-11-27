@@ -1,6 +1,7 @@
 import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { CrowdGift } from '../core/crowd';
 import { CrowdMeter } from './crowdMeter';
+import { RhythmTrack } from './rhythmTrack';
 import type { UiKit } from './uiKit';
 import { loadUiKit } from './uiKit';
 
@@ -16,6 +17,8 @@ interface HudFighter {
   readonly crowd?: { readonly favour: number };
   /** the off-hand shield (#273): a badge with its health at the end of the name board; none = no badge */
   readonly shield?: { readonly health: number; readonly maxHealth: number };
+  /** Rhythm 0-100 (#294); without it the footprint strip stays hidden */
+  readonly rhythm?: number;
 }
 
 /** a gift the crowd threw during the last action (the core's `crowd_gift` event) */
@@ -41,6 +44,8 @@ const LIQUID_HEIGHT = 71;
 const FILL_DURATION = 0.24;
 /** the crowd strip sits this far above a panel's origin */
 const CROWD_STRIP_TOP = -38;
+/** and the Rhythm strip (#294) above it */
+const RHYTHM_STRIP_TOP = -72;
 
 export class CombatHud extends Container {
   private readonly player = new FighterPanel();
@@ -77,7 +82,7 @@ export class CombatHud extends Container {
 
   /** stage y of the panels' top edge, crowd strip included (the action bar goes above it when it does not fit between the panels) */
   get panelTop(): number {
-    return this.player.y + CROWD_STRIP_TOP * this.panelScale;
+    return this.player.y + (this.player.hasRhythm || this.enemy.hasRhythm ? RHYTHM_STRIP_TOP : CROWD_STRIP_TOP) * this.panelScale;
   }
 
   /** Stage-space room between the two panels, from the crowd strips' top to the panels' bottom: the action bar's slot (#147). */
@@ -110,6 +115,7 @@ class FighterPanel extends Container {
   private readonly energy = new Flask('ENERGY', 0x377bb1, 0x9adcff);
   private readonly crowd = new CrowdMeter(PANEL_WIDTH - 36);
   private readonly shield = new ShieldBadge();
+  private readonly rhythm = new RhythmTrack(PANEL_WIDTH - 36);
   /** drawn name board; replaced by the wooden plate sprite once the UI kit has loaded (#242) */
   private readonly header = new Graphics()
     .roundRect(18, 0, PANEL_WIDTH - 36, 46, 6)
@@ -132,9 +138,11 @@ class FighterPanel extends Container {
     this.energy.position.set(230, 104);
     this.crowd.position.set(18, CROWD_STRIP_TOP);
     this.crowd.visible = false;
+    this.rhythm.position.set(18, RHYTHM_STRIP_TOP);
+    this.rhythm.visible = false;
     this.shield.position.set(PANEL_WIDTH - 2, 26);
     this.shield.visible = false;
-    this.addChild(this.crowd, plate, this.header, this.nameText, this.health, this.energy, this.shield);
+    this.addChild(this.rhythm, this.crowd, plate, this.header, this.nameText, this.health, this.energy, this.shield);
   }
 
   /** swap the drawn name board and flasks for the paper UI kit sprites (#16) */
@@ -163,6 +171,8 @@ class FighterPanel extends Container {
 
   celebrate(gift: CrowdGift, amount: number) { this.crowd.celebrate(gift, amount); }
 
+  get hasRhythm() { return this.rhythm.visible; }
+
   setState(fighter: HudFighter, immediate = false) {
     if (this.nameText.text !== fighter.name) {
       this.nameText.text = fighter.name;
@@ -172,6 +182,8 @@ class FighterPanel extends Container {
     this.shield.visible = fighter.shield !== undefined;
     if (fighter.shield) this.shield.setValue(fighter.shield.health, fighter.shield.maxHealth);
     this.energy.setValue(fighter.energy, fighter.stats.maxEnergy, immediate);
+    this.rhythm.visible = fighter.rhythm !== undefined;
+    if (fighter.rhythm !== undefined) this.rhythm.setRhythm(fighter.rhythm);
     if (fighter.crowd) {
       this.crowd.setFavour(fighter.crowd.favour, immediate || !this.crowd.visible);
       this.crowd.visible = true;
@@ -184,6 +196,7 @@ class FighterPanel extends Container {
     this.health.update(dt);
     this.energy.update(dt);
     this.crowd.update(dt);
+    this.rhythm.update(dt);
   }
 }
 
