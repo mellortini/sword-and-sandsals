@@ -1,7 +1,9 @@
 import { Container, Sprite } from 'pixi.js';
 import type { AiProfile } from '../core/ai';
 import { createCombat, getAttackZoneOptions } from '../core/combat';
-import { passTime } from '../core/story';
+import { passTime, storyOf } from '../core/story';
+import { learnedTechniques, parseTechniques } from '../core/techniques';
+import type { TechniqueId } from '../core/techniques';
 import type { TargetedAttack } from '../core/hitZones';
 import { saveGame } from '../core/save';
 import type { CombatSlotAction } from '../core/spells';
@@ -65,6 +67,8 @@ export interface ArenaFighter {
   readonly successor?: ArenaFighter;
   /** the gear the fighter really fights with when it is more than its look shows (weapon, league fighters) */
   readonly equipment?: EquipmentLoadout;
+  /** the Masters' techniques this fighter uses in the bout (#295), e.g. Ser Corvin Lach's */
+  readonly techniques?: readonly TechniqueId[];
 }
 
 export interface ArenaOptions {
@@ -91,7 +95,7 @@ const pause = (sec: number) => new Promise<void>((r) => setTimeout(r, sec * 1000
  * CombatPresenter animates every action and the HUD follows. The menu opens only when the player's action can be chosen,
  * never during an animation. At 0 HP the result screen offers a rematch or the way back to the title.
  * Pre-fight passes the two gladiators it showed; a direct visit (`?view=arena[&tier=N][&ai=aggressor|defender][&shield=N][&eshield=N]
- * [&weapon=id][&eweapon=id]`) uses random ones.
+ * [&weapon=id][&eweapon=id][&techniques=all|feint_step,…][&etechniques=…]`) uses random ones.
  */
 export async function showArena(
   context: SceneContext, fighters?: readonly [ArenaFighter, ArenaFighter], options: ArenaOptions = {},
@@ -167,7 +171,8 @@ export async function showArena(
     choose = resolve;
     // aimed attacks (#195): the zone chances of this turn and the opponent's armour per zone
     const zones = (['quick', 'normal', 'power'] as const).flatMap((a) => getAttackZoneOptions(state, a));
-    menu.open(options, slots, { zones, armour: state.fighters.enemy.armourByZone }, state.fighters.player.net === true);
+    menu.open(options, slots, { zones, armour: state.fighters.enemy.armourByZone }, state.fighters.player.net === true,
+      state.fighters.player.techniques);
   });
 
   ui.innerHTML = '<a href="?view=title">title</a> · <a href="?view=prefight">new opponent</a> · '
@@ -193,10 +198,15 @@ export async function showArena(
           equipment: career ? careerLoadout(career) : devLoadout(player.look, 'weapon'),
           // skills learned on the skill screen (#54) work in the fight
           skills: career?.skills,
+          // the Masters' techniques learned in the story (#295); a direct visit may hand them out: `&techniques=all`
+          techniques: career ? learnedTechniques(storyOf(career)) : player.techniques ?? parseTechniques(params.get('techniques')),
           // health carries over between bouts and potions from the temple sit in the combat slots (#191)
           ...(career && { health: boutStartHealth(career.health), slots: templeCombatSlots(career.inventory) }),
         },
-        { name: enemy.name, attributes: enemy.attributes, level: enemy.level, equipment: enemy.equipment ?? devLoadout(enemy.look, 'eweapon') });
+        {
+          name: enemy.name, attributes: enemy.attributes, level: enemy.level, equipment: enemy.equipment ?? devLoadout(enemy.look, 'eweapon'),
+          techniques: enemy.techniques ?? (career ? [] : parseTechniques(params.get('etechniques'))),
+        });
       presenter.reset(start);
       menu.setVisible(true);
       fighting = true;

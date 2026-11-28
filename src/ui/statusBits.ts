@@ -90,6 +90,10 @@ export function statusBits(statuses: readonly ShownStatus[], t: number): StatusB
           });
         }
         break;
+      case 'blinded':
+        // sand in the eyes (#295): a grey-gold smear across the face
+        out.push({ frame: 'blot1', bone: 'head', x: 0.7, y: 1.5, rot: 0.3, scale: SIZE * 0.75, alpha: 0.55, multiply: true });
+        break;
       case 'netted':
         out.push({ frame: 'mesh', bone: 'torso', x: 0.35, y: 1.6, rot: 0.15 + 0.04 * Math.sin(t * 2.4), scale: SIZE * 1.15, alpha: 1 });
         break;

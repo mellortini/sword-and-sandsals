@@ -24,6 +24,11 @@ const ACTION_FAVOUR: Readonly<Record<CombatAction, number>> = {
   rest: -3,
   taunt: 6,
   net: 5,
+  // the Masters' techniques (#295): the stands love a trick
+  feint_step: 4,
+  stone_guard: 1,
+  sand_veil: 3,
+  burning_edge: 6,
 };
 
 export function createCrowdStanding(seed: number): CrowdStanding {

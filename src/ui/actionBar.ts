@@ -7,6 +7,8 @@ import type { CombatSlotAction, CombatSlotOption } from '../core/spells';
 import { AIMS, AIM_INFO, aimDescription, aimedChance, aimedCommand } from './aimRules';
 import type { Aim, AimInfo } from './aimRules';
 import type { ActionOption, CombatAction } from '../core/types';
+import { isTechnique, TECHNIQUES, TECHNIQUE_RULES } from '../core/techniques';
+import type { TechniqueId } from '../core/techniques';
 import { frameCss, loadUiSheet } from './uiSheet';
 import type { UiSheet } from './uiSheet';
 import './actionBar.css';
@@ -30,6 +32,11 @@ const ACTION_INFO = {
   rest: { label: 'Rest', description: 'Recover energy for later turns.' },
   taunt: { label: 'Taunt', description: 'Distract the opponent before their next action.' },
   net: { label: 'Net', description: 'Throw the net: a caught opponent loses the next turn. One net per fight; Agility helps it land.' },
+  // the Masters' techniques (#295), paid with energy and Rhythm
+  feint_step: { label: 'Feint Step', description: 'Old Hask\'s technique. Step in with a feint and strike: the blow cannot be blocked, so it earns no counter.' },
+  stone_guard: { label: 'Stone Guard', description: 'Brann\'s technique. Raise a guard of stone: a blow you block always earns a free counter-attack.' },
+  sand_veil: { label: 'Sand Veil', description: 'Sefa\'s technique. Slip back behind a veil of sand: blows against you are 25% less likely to land until your next turn, and a blow that misses blinds the attacker for a turn.' },
+  burning_edge: { label: 'Burning Edge', description: 'The Kindler\'s technique. A blow that sets the opponent on fire.' },
 } satisfies Record<CombatAction, { label: string; description: string }>;
 
 /** What each combat-slot item does, for its card's tooltip (numbers from core/spells.ts). */
@@ -47,6 +54,13 @@ const UNAVAILABLE_TEXT = { energy: 'Not enough energy.', arcana: 'Needs more Arc
  * the net. It has no number (they stay 1–0 for the ten cards above): key N.
  */
 export const NET_KEY = 'N';
+
+/** The Masters' techniques (#295) sit in a group of their own, shown only to a fighter who knows one, with letter keys. */
+export const TECHNIQUE_KEYS: Readonly<Record<TechniqueId, string>> = { feint_step: 'F', stone_guard: 'G', sand_veil: 'V', burning_edge: 'E' };
+/** the paper icon of the plain action closest to each technique, until the techniques get icons of their own */
+const TECHNIQUE_ICONS: Readonly<Record<TechniqueId, CombatAction>> = {
+  feint_step: 'step_forward', stone_guard: 'block', sand_veil: 'step_back', burning_edge: 'power',
+};
 
 /** Keyboard key of the n-th card: 1–9, then 0. */
 export const cardKey = (index: number) => String((index + 1) % 10);
@@ -105,6 +119,8 @@ export class ActionBar {
   private readonly aimButtons = new Map<Aim, HTMLButtonElement>();
   /** the paper UI kit (#16) for the card icons; until it loads the cards show their names only */
   private sheet: UiSheet | null = null;
+  /** the techniques group (#295); hidden for a fighter who knows none */
+  private readonly techniques = document.createElement('div');
 
   constructor(private readonly onAction: (action: CombatAction | CombatSlotAction | TargetedAttack) => void) {
     this.element.className = 'action-bar';
@@ -129,6 +145,16 @@ export class ActionBar {
       box.append(title, row);
       this.element.append(box);
     }
+    this.techniques.className = 'action-bar__group action-bar__group--techniques';
+    const techniqueTitle = document.createElement('div');
+    techniqueTitle.className = 'action-bar__title';
+    techniqueTitle.textContent = 'Techniques';
+    const techniqueRow = document.createElement('div');
+    techniqueRow.className = 'action-bar__row';
+    TECHNIQUES.forEach((id, i) => techniqueRow.append(this.makeCard(id, i + 3, TECHNIQUE_KEYS[id])));
+    this.techniques.append(techniqueTitle, techniqueRow);
+    this.techniques.hidden = true;
+    this.element.append(this.techniques);
     this.items.className = 'action-bar__group action-bar__group--items';
     this.itemRow.className = 'action-bar__row';
     const itemTitle = document.createElement('div');
@@ -157,11 +183,17 @@ export class ActionBar {
   /**
    * The player's turn: these options can be picked, every other card is faded. `slots` are the items in the combat
    * slots; an unavailable one (energy, Arcana) is shown faded with the reason. `hasNet`: the fighter still holds the
-   * trident's net (#258), so its card is on the bar (faded when the opponent is out of reach).
+   * trident's net (#258), so its card is on the bar (faded when the opponent is out of reach). `techniques`: the
+   * Masters' techniques the fighter knows (#295); each has a card, faded while out of reach or short of Rhythm.
    */
-  open(options: readonly ActionOption[], slots: readonly CombatSlotOption[] = [], aim?: AimInfo, hasNet = false) {
+  open(
+    options: readonly ActionOption[], slots: readonly CombatSlotOption[] = [], aim?: AimInfo, hasNet = false,
+    techniques: readonly TechniqueId[] = [],
+  ) {
     this.options = new Map(options.map((o) => [o.action, o]));
     this.cards.get('net')!.hidden = !hasNet && !this.options.has('net');
+    for (const id of TECHNIQUES) this.cards.get(id)!.hidden = !techniques.includes(id) && !this.options.has(id);
+    this.techniques.hidden = TECHNIQUES.every((id) => this.cards.get(id)!.hidden);
     this.aimInfo = aim;
     this.fillAim();
     for (const [action, card] of this.cards) this.fill(card, action, this.options.get(action));
@@ -211,16 +243,21 @@ export class ActionBar {
     card.dataset.action = action;
     card.style.setProperty('--tilt', `${[-1.2, 0.8, -0.4, 1, -0.8, 0.5, -1, 0.7, -0.5, 1.1][index % 10]}deg`);
     card.innerHTML = `<span class="action-card__key" aria-hidden="true">${key}</span>`
-      + `<span class="action-card__icon" data-icon="icon_${action}" aria-hidden="true" hidden></span>`
+      + `<span class="action-card__icon" data-icon="icon_${isTechnique(action) ? TECHNIQUE_ICONS[action] : action}" aria-hidden="true" hidden></span>`
       + `<span class="action-card__label">${label}</span>`
       + '<span class="action-card__cost"></span><span class="action-card__stamp" aria-hidden="true"></span>';
     this.tooltip.attach(card, () => {
       const option = this.options.get(action);
-      if (!option) return { title: label, description: `${description} Not possible now.` };
+      if (!option) {
+        // a technique the fighter knows but cannot use now: say what it costs (#295)
+        const rhythm = isTechnique(action) ? TECHNIQUE_RULES[action].rhythm : undefined;
+        const why = rhythm !== undefined ? ` Needs ${rhythm} Rhythm and energy, and the opponent in reach.` : ' Not possible now.';
+        return { title: label, description: `${description}${why}`, ...(rhythm !== undefined && { rhythmCost: rhythm }) };
+      }
       return {
         title: option.counter ? `${label} · counter` : label,
         description: option.counter ? `${description} A counter-attack costs no energy.` : description,
-        energyCost: option.energyCost, hitChance: option.hitChance, blockChance: option.blockChance,
+        energyCost: option.energyCost, hitChance: option.hitChance, blockChance: option.blockChance, rhythmCost: option.rhythmCost,
       };
     });
     card.addEventListener('click', () => this.pick(action));
@@ -234,7 +271,9 @@ export class ActionBar {
     card.setAttribute('aria-disabled', String(!option));
     card.classList.toggle('counter', option?.counter === true);
     const cost = card.querySelector('.action-card__cost')!;
-    cost.textContent = option ? (option.energyCost > 0 ? `${option.energyCost} EN` : 'free') : '';
+    const energy = option ? (option.energyCost > 0 ? `${option.energyCost} EN` : 'free') : '';
+    // a technique also spends Rhythm (#295)
+    cost.textContent = option?.rhythmCost ? `${energy} · ${option.rhythmCost} RH` : energy;
     const hitChance = aimedChance(action, option, this.aim, this.aimInfo);
     const aimed = typeof aimedCommand(action, this.aim, this.aimInfo) !== 'string';
     card.classList.toggle('aimed', aimed);
@@ -246,7 +285,8 @@ export class ActionBar {
     const at = aimed ? ` at the ${AIM_INFO[this.aim].label.toLowerCase()}` : '';
     const chance = hitChance !== undefined ? `, ${hitChance}% to hit${at}`
       : option?.blockChance !== undefined ? `, ${option.blockChance}% to block` : '';
-    card.setAttribute('aria-label', `${label}${chance}${option ? '' : ', not possible now'}`);
+    const rhythm = option?.rhythmCost ? `, costs ${option.rhythmCost} Rhythm` : '';
+    card.setAttribute('aria-label', `${label}${chance}${rhythm}${option ? '' : ', not possible now'}`);
   }
 
   /** Body / Head / Torso / Legs: one is always pressed; keys B, H, T, L. */
@@ -339,6 +379,14 @@ export class ActionBar {
   private readonly onKey = (e: KeyboardEvent) => {
     if (this.element.inert || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.target instanceof HTMLElement && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    const technique = TECHNIQUES.find((id) => TECHNIQUE_KEYS[id].toLowerCase() === e.key.toLowerCase());
+    if (technique) {
+      if (this.options.has(technique)) {
+        e.preventDefault();
+        this.pick(technique);
+      }
+      return;
+    }
     if (e.key.toLowerCase() === NET_KEY.toLowerCase()) {
       if (this.options.has('net')) {
         e.preventDefault();

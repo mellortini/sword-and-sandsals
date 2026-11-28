@@ -4,6 +4,7 @@
  */
 import type { CombatItemId } from '../core/spells';
 import type { CombatEvent, FighterSide, MoveKind } from '../core/types';
+import type { TechniqueId } from '../core/techniques';
 
 type AttackEvent = Extract<CombatEvent, { type: 'attack' }>;
 type MoveEvent = Extract<CombatEvent, { type: 'move' }>;
@@ -19,6 +20,8 @@ export type Step =
   | { kind: 'pose'; side: FighterSide; clip: 'guard_up' | 'rest' | 'taunt' }
   /** the trident's net thrown (#258): `hit` = the target is caught */
   | { kind: 'net'; side: FighterSide; target: FighterSide; hit: boolean }
+  /** a Master's technique called out (#295) before the step, guard or blow it makes */
+  | { kind: 'technique'; side: FighterSide; technique: TechniqueId }
   /** a potion or spell from a combat slot (#191): `healthDelta` is applied to `target` */
   | { kind: 'item'; side: FighterSide; target: FighterSide; item: CombatItemId; healthDelta: number }
   | { kind: 'death'; side: FighterSide; winner: FighterSide };
@@ -109,6 +112,9 @@ export function planSteps(events: readonly CombatEvent[]): Step[] {
         break;
       case 'net':
         steps.push({ kind: 'net', side: e.actor, target: e.target, hit: e.hit });
+        break;
+      case 'technique':
+        steps.push({ kind: 'technique', side: e.fighter, technique: e.technique });
         break;
       case 'slot':
         steps.push({ kind: 'item', side: e.actor, target: e.target, item: e.item, healthDelta: e.healthDelta });
