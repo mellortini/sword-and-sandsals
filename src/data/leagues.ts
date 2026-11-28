@@ -88,7 +88,7 @@ export const PULPPORT_SILVER: readonly PulpportBout[] = [
   leagueContender({ id: 'silver-cleaver', name: 'Cato the Laminate', level: 6, profile: 'aggressor', face: 1, tier: 3, family: 'axe', strengths: { might: 2 } }),
   leagueContender({ id: 'silver-windlass', name: 'Sabina Windlass', level: 7, profile: 'defender', face: 2, tier: 4, family: 'spear', strengths: { precision: 2 } }),
   leagueContender({ id: 'silver-press', name: 'Marcellus of the Press', level: 8, profile: 'aggressor', face: 3, tier: 4, family: 'hammer', strengths: { stamina: 2 } }),
-  leagueContender({ id: 'silver-sash', name: 'Tullia Silver Sash', level: 9, profile: 'aggressor', face: 4, tier: 4, family: 'sword', strengths: { agility: 2 } }),
+  leagueContender({ id: 'silver-sash', name: 'Tullia Silver Sash', level: 9, profile: 'aggressor', face: 4, tier: 4, family: 'trident', strengths: { agility: 2 } }),
   leagueChampion({
     id: 'silver-champion', name: 'Livia of the Floodgate', level: 10, profile: 'defender', face: 5, tier: 4, family: 'spear',
     strengths: { guard: 3, precision: 2, vitality: 4 },

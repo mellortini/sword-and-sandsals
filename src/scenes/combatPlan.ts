@@ -17,6 +17,8 @@ export type Step =
   | { kind: 'move'; side: FighterSide; move: MoveKind; from: number; to: number; strike?: AttackEvent; fatal?: boolean; push?: MoveEvent }
   | { kind: 'attack'; attack: AttackEvent; fatal: boolean; push?: MoveEvent }
   | { kind: 'pose'; side: FighterSide; clip: 'guard_up' | 'rest' | 'taunt' }
+  /** the trident's net thrown (#258): `hit` = the target is caught */
+  | { kind: 'net'; side: FighterSide; target: FighterSide; hit: boolean }
   /** a potion or spell from a combat slot (#191): `healthDelta` is applied to `target` */
   | { kind: 'item'; side: FighterSide; target: FighterSide; item: CombatItemId; healthDelta: number }
   | { kind: 'death'; side: FighterSide; winner: FighterSide };
@@ -104,6 +106,9 @@ export function planSteps(events: readonly CombatEvent[]): Step[] {
         break;
       case 'taunt':
         steps.push({ kind: 'pose', side: e.actor, clip: 'taunt' });
+        break;
+      case 'net':
+        steps.push({ kind: 'net', side: e.actor, target: e.target, hit: e.hit });
         break;
       case 'slot':
         steps.push({ kind: 'item', side: e.actor, target: e.target, item: e.item, healthDelta: e.healthDelta });
