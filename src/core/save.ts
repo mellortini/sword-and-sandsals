@@ -12,6 +12,8 @@ import type { TavernState } from './quests';
 import { MAX_LEVEL } from './progression';
 import { resolveAttributes } from './stats';
 import { isStoryState } from './story';
+import { isDuelBookState } from './duelBook';
+import type { DuelBookState } from './duelBook';
 import type { StoryState } from './story';
 import type { ArmourImprovements, Attributes, EquipmentLoadout } from './types';
 
@@ -50,6 +52,8 @@ export interface SavedCharacter {
   story?: StoryState;
   /** the tavern (#65): side tasks taken, done and paid, and how many bets were placed */
   tavern?: TavernState;
+  /** the Book of Duels (#293): the challenges signed, with their day; league wins are read from `leagueWins` */
+  duelBook?: DuelBookState;
 }
 
 type DecodeFailure = 'invalid' | 'unsupported';
@@ -136,7 +140,8 @@ function isCharacter(value: unknown): value is SavedCharacter {
     && (value.nemesis === undefined || isNemesisMemory(value.nemesis))
     && (value.leagueWins === undefined || (Array.isArray(value.leagueWins) && value.leagueWins.length <= 200 && value.leagueWins.every(isItemId)))
     && (value.story === undefined || isStoryState(value.story))
-    && (value.tavern === undefined || isTavernState(value.tavern));
+    && (value.tavern === undefined || isTavernState(value.tavern))
+    && (value.duelBook === undefined || isDuelBookState(value.duelBook));
 }
 
 export function serializeSave(character: SavedCharacter): string {

@@ -6,6 +6,8 @@ import { openEnchanter } from './enchanter';
 import { openForge } from './forge';
 import { openGear } from './gear';
 import { openHome } from './home';
+import { openDuelBook } from './duelBook';
+import { BOOK_FULL, bookEntries, bookValue } from '../core/duelBook';
 import { openLeagues } from './leagues';
 import { ladderNote } from './leagueRules';
 import { careerLoadout } from './gearRules';
@@ -77,6 +79,10 @@ export const BUILDINGS: readonly Building[] = [
       return ready ? `${plural(ready, 'task')} to collect` : `${c.gold} gold`;
     },
     open: openTavern,
+  },
+  {
+    id: 'book', name: 'Book of Duels', purpose: 'Your witnessed bouts and challenges',
+    note: (c) => `${bookValue(bookEntries(c))} / ${BOOK_FULL}`, open: (c) => openDuelBook(c),
   },
   { id: 'trophies', name: 'Hall of Fame', purpose: 'Your achievements and record', note: (c) => `${trophyCount(c)} earned`, open: (c) => openTrophies(c) },
 ];
