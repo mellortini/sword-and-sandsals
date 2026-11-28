@@ -155,7 +155,7 @@ export async function showArena(
   const presenter = new CombatPresenter({
     crowdFx, camera,
     fighters: { player: rigs.find((r) => r.rig === P)!.anim!, enemy: rigs.find((r) => r.rig === E)!.anim! },
-    fx, unit: UNIT, layout: LAYOUT, floorY: FEET_Y, sound: true, crowd,
+    fx, unit: UNIT, layout: LAYOUT, floorY: FEET_Y, sound: true, crowd, renderer: context.app.renderer,
     onState: (s) => hud.setState(s),
   });
 

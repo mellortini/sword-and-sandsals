@@ -225,10 +225,15 @@ export class FxLayer extends Container {
   }
   /** finisher paper (#20): lies on the sand until clear(), under any pop-up shown later */
   addScraps(s: PaperScraps) { this.addChild(s); }
+  /** a cut-off limb (#332): falls, then lies on the sand until clear(), like the scraps */
+  addLimb(limb: Container & { update(dt: number): void }) { this.limbs.add(limb); this.addChild(limb); }
+  private limbs = new Set<Container & { update(dt: number): void }>();
   clear() {
     for (const p of this.slots.values()) p.fadeOut();
     this.slots.clear();
     for (const c of [...this.children]) if (c instanceof PaperScraps) c.destroy({ children: true });
+    for (const l of this.limbs) if (!l.destroyed) l.destroy({ children: true });
+    this.limbs.clear();
     this.ground.clear();
     this.status.clear();
   }
@@ -236,5 +241,6 @@ export class FxLayer extends Container {
     this.ground.update(dt);
     this.status.update(dt);
     for (const c of [...this.children]) if ((c instanceof Pop || c instanceof PaperScraps) && !c.destroyed) c.update(dt);
+    for (const l of this.limbs) if (!l.destroyed) l.update(dt);
   }
 }

@@ -8,6 +8,7 @@
   rip         torn: a torn flap of paper with a white fibrous edge
   sweat       feared: a pale blue sweat drop flying off the head
   glue        slowed: a sticky glue drip hanging from a hand or a foot
+  blood       bleeding (#332): a dark red drop falling from the stump of a cut-off arm
   mesh        netted (#258): the trident's rope net thrown over the body, holes in the mesh, lead weights on the hem
 
   python -I tools/blender.py blender/status_fx.py -- [samples]
@@ -48,6 +49,8 @@ SWEAT = pc.paper_mat('st_sweat', '#a9d4f0', rough=0.3, grain=0.2, grit=0.2, sss=
 GLUE = pc.paper_mat('st_glue', '#f3efe2', rough=0.25, grain=0.1, grit=0.1, sss=0.4)
 ROPE = pc.paper_mat('st_rope', '#cdb183', rough=0.8, grain=0.6, grit=0.6, mottle=0.25)
 ROPE_D = pc.paper_mat('st_rope_d', '#9c7f52', rough=0.8, grain=0.6, grit=0.6)
+BLOOD = pc.paper_mat('st_blood', '#9c1620', rough=0.35, grain=0.2, grit=0.2, sss=0.2)
+BLOOD_HI = pc.paper_mat('st_blood_hi', '#e2564a', rough=0.35, grain=0.2, grit=0.2)
 LEAD = pc.paper_mat('st_lead', '#4a4b52', rough=0.5, grain=0.3, grit=0.3)
 
 
@@ -117,6 +120,11 @@ def glue(c):
     L(c, pts, GLUE, 0.0, 0.04)
 
 
+def blood(c):
+    L(c, pc.teardrop_pts(0.13, 0.22), BLOOD, 0.0)
+    L(c, pc.xf(pc.ellipse_pts(0.025, 0.04, 12), -0.025, -0.02), BLOOD_HI, 0.04, 0.01)
+
+
 def mesh(c):
     """the net over a body: a sagging rope sheet with diamond holes (the body shows through) and weights on the hem"""
     outline = [(-0.42, 0.62), (-0.1, 0.7), (0.24, 0.66), (0.48, 0.5), (0.54, 0.0), (0.5, -0.5), (0.3, -0.7),
@@ -150,6 +158,7 @@ PIECES = {
     'drop': drop, 'star': star,
     'tape1': tape(21, 1.1), 'tape2': tape(22, 0.85),
     'rip': rip, 'sweat': sweat, 'glue': glue, 'mesh': mesh,
+    'blood': blood,   # last: the frames before it keep their places in the sheet
 }
 
 renders = {}

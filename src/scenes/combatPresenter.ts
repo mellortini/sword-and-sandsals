@@ -5,12 +5,14 @@
  */
 import type { Animator } from '../anim/Animator';
 import type { ClipEvent } from '../anim/clip';
+import type { Renderer } from 'pixi.js';
 import type { CombatEvent, CombatState, Fighter, FighterSide, MoveKind } from '../core/types';
 import { BlockShield, DamageSplat, FxLayer, MissText, TechniqueText } from '../ui/fx';
 import { TECHNIQUE_RULES } from '../core/techniques';
 import { goreMode } from '../ui/gore';
 import { woundStage } from '../rig/wounds';
 import { PaperScraps } from '../ui/scraps';
+import { LooseArm } from '../ui/looseArm';
 import type { CrowdFx } from '../ui/crowdFx';
 import type { CameraJuice } from '../ui/cameraJuice';
 import { attachGroundFx } from '../ui/groundFx';
@@ -41,6 +43,8 @@ export interface PresenterOptions {
   layout: Layout;
   /** screen y of the sand: set it and landings, falls and blows kick up paper bits (#17) */
   floorY?: number;
+  /** with the sand's floorY: a cut-off shield arm (#332) falls as a drawn piece of the puppet (else it only vanishes) */
+  renderer?: Renderer;
   /** play the paper foley (#18): footsteps, swings, landings from the clips, and each blow's result */
   sound?: boolean;
   /** the crowd cheers a critical blow and the end of a bout */
@@ -270,7 +274,12 @@ export class CombatPresenter {
       this.o.fx.show((side === 'player' ? 'p' : 'e') + 'b', new BlockShield({ lost: 0, broken: true }), h.x - 30 * rig.facing, h.y + 6);
       void rig.setLook({ shield: 0 });
     } else {
-      void rig.setLook({ armCut: true, shield: 0 });
+      const { renderer, floorY } = this.o;
+      // the forearm with the shield is copied off the puppet as it stands, then the puppet drops it (#332)
+      const loose = renderer && floorY !== undefined
+        ? LooseArm.create(rig, renderer, floorY).then((arm) => { if (!this.cancelled) this.o.fx.addLimb(arm); else arm.destroy({ children: true }); })
+        : Promise.resolve();
+      void loose.catch((e: unknown) => console.warn('loose arm', e)).then(() => rig.setLook({ armCut: true, shield: 0 }));
     }
     if (this.shown?.[side].shield) this.setShown(side, { shield: { ...this.shown[side].shield!, health: 0 } });
   }

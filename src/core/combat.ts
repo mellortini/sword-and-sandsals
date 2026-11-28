@@ -592,6 +592,8 @@ function resolveAttack(
         severed = true;
         defender.shield = { ...defender.shield!, health: 0 };
         defender.statuses = applyStatus(defender.statuses, 'torn', defender.statusResistances);
+        // and the stump keeps bleeding to the end of the bout (#332): no resistance, no cure
+        defender.statuses = applyStatus(defender.statuses, 'bleeding');
       }
     }
     if (hit) defender.guarding = false;

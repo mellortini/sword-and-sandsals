@@ -4,6 +4,7 @@ import { PARRY_SHARE, SEVER_MAX, blockChance, createCombat, getActionOptions, pe
 import { equipItem, equipmentTotals } from './inventory';
 import { getShopStock } from './shop';
 import { shieldDamage } from './stats';
+import { stumpBleed } from './status';
 import type { CombatEvent, CombatState, FighterSetup } from './types';
 
 type AttackEvent = Extract<CombatEvent, { type: 'attack' }>;
@@ -204,6 +205,25 @@ describe('cutting off the shield arm (#275)', () => {
     }
     expect(cut / landed).toBeGreaterThan(0.03);
     expect(cut / landed).toBeLessThan(0.07);
+  });
+
+  it('leaves a stump that bleeds every turn to the end of the bout (#332)', () => {
+    let seed = 1;
+    while (!strike(seed, 'power', false).attack.severed) seed++;
+    let state = strike(seed, 'power', false).result.state;
+    const enemy = () => state.fighters.enemy;
+    const bleed = stumpBleed(enemy().stats.maxHealth);
+    expect(enemy().statuses.find((s) => s.kind === 'bleeding')?.turns).toBe(Infinity);
+    // long after the torn flap has closed, every one of the enemy's turns still costs the same
+    for (let turn = 0; turn < 8 && !state.winner; turn++) {
+      const result = performAction(state, 'rest');
+      if (!result.ok) throw new Error('rest rejected');
+      const ticks = result.events.filter((e) => e.type === 'status' && e.fighter === 'enemy' && e.kind === 'bleeding');
+      if (state.active === 'player') expect(ticks.map((e) => e.type === 'status' && e.healthDelta)).toEqual([-Math.min(bleed, enemy().health)]);
+      state = result.state;
+    }
+    expect(enemy().statuses.some((s) => s.kind === 'torn')).toBe(false);
+    expect(enemy().statuses.some((s) => s.kind === 'bleeding')).toBe(true);
   });
 
   it('never comes from a light blow', () => {

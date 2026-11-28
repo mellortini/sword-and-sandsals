@@ -145,6 +145,12 @@
   },
   {
    "bone": "arm_b_lo",
+   "slot": "stump_rim",
+   "piece": "arm_lo_rim",
+   "back": true
+  },
+  {
+   "bone": "arm_b_lo",
    "slot": "body",
    "piece": "arm_lo",
    "back": true
@@ -162,6 +168,18 @@
    "back": true
   },
   {
+   "bone": "arm_b_lo",
+   "slot": "stump",
+   "piece": "arm_lo_tissue",
+   "back": true
+  },
+  {
+   "bone": "arm_b_up",
+   "slot": "stump_rim",
+   "piece": "arm_up_rim",
+   "back": true
+  },
+  {
    "bone": "arm_b_up",
    "slot": "body",
    "piece": "arm_up",
@@ -171,6 +189,12 @@
    "bone": "arm_b_up",
    "slot": "wound",
    "piece": "arm_b_up",
+   "back": true
+  },
+  {
+   "bone": "arm_b_up",
+   "slot": "stump",
+   "piece": "arm_up_tissue",
    "back": true
   },
   {
@@ -3579,6 +3603,60 @@
    "pivot": [
     86.97,
     218.55
+   ],
+   "tint": null
+  },
+  "cut_arm_up": {
+   "w": 119,
+   "h": 235,
+   "pivot": [
+    56.7,
+    56.74
+   ],
+   "tint": "skin"
+  },
+  "cut_arm_up_rim": {
+   "w": 95,
+   "h": 63,
+   "pivot": [
+    47.63,
+    -113.4
+   ],
+   "tint": null
+  },
+  "cut_arm_up_tissue": {
+   "w": 102,
+   "h": 76,
+   "pivot": [
+    55.37,
+    -124.17
+   ],
+   "tint": null
+  },
+  "cut_arm_lo": {
+   "w": 91,
+   "h": 208,
+   "pivot": [
+    45.9,
+    25.29
+   ],
+   "tint": "skin"
+  },
+  "cut_arm_lo_rim": {
+   "w": 96,
+   "h": 74,
+   "pivot": [
+    48.57,
+    27.86
+   ],
+   "tint": null
+  },
+  "cut_arm_lo_tissue": {
+   "w": 108,
+   "h": 73,
+   "pivot": [
+    55.73,
+    37.32
    ],
    "tint": null
   }
