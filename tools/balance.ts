@@ -2,15 +2,17 @@ import { chooseAction } from '../src/core/ai';
 import type { AiProfile } from '../src/core/ai';
 import { createCombat, performAction } from '../src/core/combat';
 import { crowdGoldReward } from '../src/core/crowd';
+import { victoryGold } from '../src/core/rewards';
 import type { League } from '../src/core/leagues';
 import { getShopStock, shopPrices } from '../src/core/shop';
 import type { Fighter, FighterSetup, FighterStats } from '../src/core/types';
 
+// the victory pay is the game's own (#163: it follows the price of armour at the level)
 const SCENARIOS: ReadonlyArray<{ level: number; tier: number; league: League; victoryGold: number }> = [
-  { level: 1, tier: 1, league: 'bronze', victoryGold: 20 },
-  { level: 5, tier: 3, league: 'silver', victoryGold: 40 },
-  { level: 12, tier: 6, league: 'gold', victoryGold: 75 },
-  { level: 25, tier: 9, league: 'legend', victoryGold: 140 },
+  { level: 1, tier: 1, league: 'bronze', victoryGold: victoryGold(1) },
+  { level: 5, tier: 3, league: 'silver', victoryGold: victoryGold(5) },
+  { level: 12, tier: 6, league: 'gold', victoryGold: victoryGold(12) },
+  { level: 25, tier: 9, league: 'legend', victoryGold: victoryGold(25) },
 ];
 
 const MAX_ACTIONS = 300;

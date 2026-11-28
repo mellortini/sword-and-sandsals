@@ -5,7 +5,7 @@ import { createCombat, performAction } from './combat';
 import { enchantWeapon } from './enchant';
 import { upgradeForgeItem } from './forge';
 import { equipItem } from './inventory';
-import { applyFightReward, claimFightReward, getFightReward } from './rewards';
+import { applyFightReward, claimFightReward, getFightReward, victoryGold } from './rewards';
 import * as save from './save';
 import type { SavedCharacter } from './save';
 import { resolveAttributes } from './stats';
@@ -27,12 +27,18 @@ function championWin() {
   return reward;
 }
 
+it('pays more for stronger opponents, following the price of armour (#163)', () => {
+  expect(victoryGold(1)).toBe(33);
+  expect(victoryGold(4)).toBe(55);
+  for (let level = 2; level <= 60; level++) expect(victoryGold(level)).toBeGreaterThan(victoryGold(level - 1));
+});
+
 it('awards gold, XP, forge materials and the champion prize once, including after loading', () => {
   const reward = championWin();
   expect(reward.weapon).toBe(PULPPORT_CHAMPION_WEAPON);
   const updated = applyFightReward(character, reward, true);
   expect(updated).toMatchObject({
-    gold: 85, level: 2, attributePoints: 5, inventory: ['armor1', PULPPORT_CHAMPION_WEAPON.id],
+    gold: 50 + victoryGold(4), level: 2, attributePoints: 5, inventory: ['armor1', PULPPORT_CHAMPION_WEAPON.id],
     forgeMaterials: { scraps: 3, glue: 1, ink: 0, threads: 1 },
   });
   const loaded = save.deserializeSave(save.serializeSave(updated));
@@ -47,7 +53,7 @@ it('adds rewards to existing materials even when the weapon is left behind', () 
   const stocked = { ...character, forgeMaterials: { scraps: 9, glue: 3, ink: 2, threads: 1 } };
   const updated = applyFightReward(stocked, reward, false);
   expect(updated).toMatchObject({
-    gold: 85, level: 2, inventory: ['armor1'], rewardedFightIds: ['bronze-final'],
+    gold: 50 + victoryGold(4), level: 2, inventory: ['armor1'], rewardedFightIds: ['bronze-final'],
     forgeMaterials: { scraps: 12, glue: 4, ink: 2, threads: 2 },
   });
   expect(stocked.forgeMaterials.scraps).toBe(9);

@@ -35,6 +35,18 @@ const MIN_LEVEL = [1, 2, 4, 6, 9, 12, 16, 20, 25, 30];
 const SHARE: Record<EquipSlot, number> = { armor: 0.4, helmet: 0.2, greaves: 0.15, boots: 0.13, shoulders: 0.12 };
 const BONUS: Record<number, string> = { 9: '+5% crowd favour', 10: '+3 Charm, +10% crowd favour' };
 
+/**
+ * What a full armour set costs at a gladiator's level (#163): the set of the highest tier the level may wear, growing
+ * smoothly (log-linear) towards the next tier's price until that tier opens. The victory pay follows it.
+ */
+export function setPriceAtLevel(level: number): number {
+  let t = 0;
+  while (t < SET_PRICE.length - 1 && MIN_LEVEL[t + 1] <= level) t++;
+  if (t === SET_PRICE.length - 1 || level <= MIN_LEVEL[t]) return SET_PRICE[t];
+  const f = (level - MIN_LEVEL[t]) / (MIN_LEVEL[t + 1] - MIN_LEVEL[t]);
+  return SET_PRICE[t] * (SET_PRICE[t + 1] / SET_PRICE[t]) ** f;
+}
+
 export const ITEMS: Item[] = [];
 for (let t = 1; t <= 10; t++) {
   for (const slot of Object.keys(NAMES) as EquipSlot[]) {
