@@ -8,6 +8,7 @@
   rip         torn: a torn flap of paper with a white fibrous edge
   sweat       feared: a pale blue sweat drop flying off the head
   glue        slowed: a sticky glue drip hanging from a hand or a foot
+  mesh        netted (#258): the trident's rope net thrown over the body, holes in the mesh, lead weights on the hem
 
   python -I tools/blender.py blender/status_fx.py -- [samples]
 
@@ -45,6 +46,9 @@ TISSUE = pc.paper_mat('st_tissue', '#f7f1e3', rough=0.95, grain=0.5, grit=0.5, s
 SHADE = pc.paper_mat('st_shade', '#5a3a30', rough=0.9)
 SWEAT = pc.paper_mat('st_sweat', '#a9d4f0', rough=0.3, grain=0.2, grit=0.2, sss=0.3)
 GLUE = pc.paper_mat('st_glue', '#f3efe2', rough=0.25, grain=0.1, grit=0.1, sss=0.4)
+ROPE = pc.paper_mat('st_rope', '#cdb183', rough=0.8, grain=0.6, grit=0.6, mottle=0.25)
+ROPE_D = pc.paper_mat('st_rope_d', '#9c7f52', rough=0.8, grain=0.6, grit=0.6)
+LEAD = pc.paper_mat('st_lead', '#4a4b52', rough=0.5, grain=0.3, grit=0.3)
 
 
 def L(coll, pts, mat, z, h=0.03):
@@ -113,12 +117,39 @@ def glue(c):
     L(c, pts, GLUE, 0.0, 0.04)
 
 
+def mesh(c):
+    """the net over a body: a sagging rope sheet with diamond holes (the body shows through) and weights on the hem"""
+    outline = [(-0.42, 0.62), (-0.1, 0.7), (0.24, 0.66), (0.48, 0.5), (0.54, 0.0), (0.5, -0.5), (0.3, -0.7),
+               (0.0, -0.74), (-0.32, -0.68), (-0.52, -0.45), (-0.56, 0.1)]
+
+    def inside(px, py):
+        hit = False
+        for i in range(len(outline)):
+            (x1, y1), (x2, y2) = outline[i], outline[(i + 1) % len(outline)]
+            if (y1 > py) != (y2 > py) and px < (x2 - x1) * (py - y1) / ((y2 - y1) or 1e-9) + x1:
+                hit = not hit
+        return hit
+    holes = []
+    step, r = 0.15, 0.062
+    for i in range(-5, 6):
+        for j in range(-11, 12):
+            cx, cy = i * step + (j % 2) * step / 2, j * step / 2
+            diamond = [(cx + r, cy), (cx, cy + r), (cx - r, cy), (cx, cy - r)]
+            if all(inside(x * 1.35 - cx * 0.35, y * 1.35 - cy * 0.35) for x, y in diamond):
+                holes.append(list(reversed(diamond)))
+    pc.layer(sl.torn(outline, 0.012, 31, 0.04), ROPE, h=0.025, z=0.0, holes=holes, coll=c, name='p', bevel=0.004)
+    for i, (x, y, a) in enumerate(((0.1, 0.35, 0.3), (-0.2, -0.1, -0.5), (0.25, -0.35, 0.9))):   # thicker folds of rope
+        L(c, pc.xf(pc.rrect(0.04, 0.55, 0.015), x, y, a), ROPE_D, 0.03 + i * 0.005, 0.01)
+    for x, y in ((0.32, -0.72), (0.0, -0.77), (-0.33, -0.7), (-0.54, -0.46), (0.52, -0.5)):
+        L(c, pc.xf(pc.ellipse_pts(0.05, 0.05, 14), x, y), LEAD, 0.05, 0.03)
+
+
 PIECES = {
     'flame1': flame(1, 0.42, 0.75), 'flame2': flame(2, 0.34, 0.6), 'flame3': flame(3, 0.5, 0.9),
     'blot1': blot(11, 0.45, 0.32), 'blot2': blot(12, 0.34, 0.4),
     'drop': drop, 'star': star,
     'tape1': tape(21, 1.1), 'tape2': tape(22, 0.85),
-    'rip': rip, 'sweat': sweat, 'glue': glue,
+    'rip': rip, 'sweat': sweat, 'glue': glue, 'mesh': mesh,
 }
 
 renders = {}

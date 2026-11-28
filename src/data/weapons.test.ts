@@ -3,8 +3,8 @@ import { ITEMS } from './equipment';
 import { WEAPONS, WEAPON_FAMILIES, weapon } from './weapons';
 
 it('defines ten progressively stronger weapons per family with unique identifiers', () => {
-  expect(WEAPONS).toHaveLength(40);
-  expect(new Set(WEAPONS.map(({ id }) => id)).size).toBe(40);
+  expect(WEAPONS).toHaveLength(50);
+  expect(new Set(WEAPONS.map(({ id }) => id)).size).toBe(50);
 
   for (const family of WEAPON_FAMILIES) {
     const entries = WEAPONS.filter((entry) => entry.family === family);

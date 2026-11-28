@@ -4,7 +4,7 @@ import { WEAPON_FAMILIES, shownWeapon, tierForSet, weaponId, weaponName, drawabl
 
 describe('wardrobe weapons', () => {
   it('offers every family of the catalogue', () => {
-    expect([...WEAPON_FAMILIES]).toEqual(['sword', 'axe', 'spear', 'hammer']);
+    expect([...WEAPON_FAMILIES]).toEqual(['sword', 'axe', 'spear', 'hammer', 'trident']);
   });
 
   it('names the choices like the catalogue and the sprites of #36', () => {

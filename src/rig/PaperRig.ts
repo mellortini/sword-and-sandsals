@@ -55,6 +55,8 @@ export interface Look {
   armCut?: boolean;
   /** damage stage 1-10 (#284), 1/undefined = unhurt; follows the health in a bout, never saved */
   wounds?: number;
+  /** the trident's net was thrown in this bout (#258): the other hand is empty; never saved */
+  netThrown?: boolean;
 }
 
 /** what goes with the shield arm below the elbow (#275) */
@@ -199,7 +201,7 @@ export class Kit {
       case 'weapon_b': {
         const main = look.weapon ? this.json.sprites[`weapon_${look.weapon}`] : undefined;
         if (main?.pair) return this.shieldShown(look) ? null : `weapon_${look.weapon}`;
-        return main?.offhand ?? null;
+        return look.netThrown ? null : main?.offhand ?? null;
       }
       default: {
         const tier = look[layer.slot as EquipSlot] ?? 0;
