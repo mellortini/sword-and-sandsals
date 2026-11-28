@@ -1,0 +1,304 @@
+{
+ "ppu": 90.0,
+ "sprites": {
+  "pelvis": {
+   "w": 242,
+   "h": 196,
+   "pivot": [
+    120.6,
+    29.5
+   ]
+  },
+  "torso": {
+   "w": 336,
+   "h": 355,
+   "pivot": [
+    164.7,
+    343.3
+   ]
+  },
+  "head": {
+   "w": 263,
+   "h": 282,
+   "pivot": [
+    125.71,
+    272.71
+   ]
+  },
+  "helmet": {
+   "w": 356,
+   "h": 298,
+   "pivot": [
+    172.41,
+    359.22
+   ]
+  },
+  "arm_up_b": {
+   "w": 119,
+   "h": 269,
+   "pivot": [
+    56.7,
+    57.49
+   ]
+  },
+  "arm_lo_b": {
+   "w": 91,
+   "h": 224,
+   "pivot": [
+    45.9,
+    41.29
+   ]
+  },
+  "hand_b": {
+   "w": 86,
+   "h": 87,
+   "pivot": [
+    36.0,
+    11.4
+   ]
+  },
+  "arm_up": {
+   "w": 119,
+   "h": 269,
+   "pivot": [
+    56.7,
+    57.49
+   ]
+  },
+  "arm_lo": {
+   "w": 91,
+   "h": 224,
+   "pivot": [
+    45.9,
+    41.29
+   ]
+  },
+  "hand": {
+   "w": 86,
+   "h": 87,
+   "pivot": [
+    36.0,
+    11.4
+   ]
+  },
+  "gladius": {
+   "w": 359,
+   "h": 81,
+   "pivot": [
+    70.2,
+    40.5
+   ]
+  },
+  "leg_up_b": {
+   "w": 130,
+   "h": 303,
+   "pivot": [
+    63.89,
+    61.79
+   ]
+  },
+  "leg_lo_b": {
+   "w": 103,
+   "h": 267,
+   "pivot": [
+    56.68,
+    46.49
+   ]
+  },
+  "foot_b": {
+   "w": 170,
+   "h": 79,
+   "pivot": [
+    52.2,
+    26.35
+   ]
+  },
+  "leg_up": {
+   "w": 130,
+   "h": 303,
+   "pivot": [
+    63.89,
+    61.79
+   ]
+  },
+  "leg_lo": {
+   "w": 103,
+   "h": 267,
+   "pivot": [
+    56.68,
+    46.49
+   ]
+  },
+  "foot": {
+   "w": 170,
+   "h": 79,
+   "pivot": [
+    52.2,
+    26.35
+   ]
+  }
+ },
+ "bones": [
+  {
+   "name": "pelvis",
+   "parent": null,
+   "x": 0.0,
+   "y": 4.75,
+   "sprite": "pelvis"
+  },
+  {
+   "name": "torso",
+   "parent": "pelvis",
+   "x": 0.0,
+   "y": 0.0,
+   "sprite": "torso"
+  },
+  {
+   "name": "head",
+   "parent": "torso",
+   "x": 0.12,
+   "y": 3.35,
+   "sprite": "head"
+  },
+  {
+   "name": "helmet",
+   "parent": "head",
+   "x": 0.0,
+   "y": 0.0,
+   "sprite": "helmet"
+  },
+  {
+   "name": "arm_b_up",
+   "parent": "torso",
+   "x": -1.35,
+   "y": 2.6,
+   "sprite": "arm_up_b"
+  },
+  {
+   "name": "arm_b_lo",
+   "parent": "arm_b_up",
+   "x": 0.0,
+   "y": -1.85,
+   "sprite": "arm_lo_b"
+  },
+  {
+   "name": "hand_b",
+   "parent": "arm_b_lo",
+   "x": 0.0,
+   "y": -1.6,
+   "sprite": "hand_b"
+  },
+  {
+   "name": "arm_f_up",
+   "parent": "torso",
+   "x": 1.42,
+   "y": 2.6,
+   "sprite": "arm_up"
+  },
+  {
+   "name": "arm_f_lo",
+   "parent": "arm_f_up",
+   "x": 0.0,
+   "y": -1.85,
+   "sprite": "arm_lo"
+  },
+  {
+   "name": "hand_f",
+   "parent": "arm_f_lo",
+   "x": 0.0,
+   "y": -1.6,
+   "sprite": "hand"
+  },
+  {
+   "name": "weapon",
+   "parent": "hand_f",
+   "x": 0.06,
+   "y": -0.38,
+   "sprite": "gladius"
+  },
+  {
+   "name": "leg_b_up",
+   "parent": "pelvis",
+   "x": -0.52,
+   "y": -0.55,
+   "sprite": "leg_up_b"
+  },
+  {
+   "name": "leg_b_lo",
+   "parent": "leg_b_up",
+   "x": 0.0,
+   "y": -2.1,
+   "sprite": "leg_lo_b"
+  },
+  {
+   "name": "foot_b",
+   "parent": "leg_b_lo",
+   "x": 0.0,
+   "y": -2.0,
+   "sprite": "foot_b"
+  },
+  {
+   "name": "leg_f_up",
+   "parent": "pelvis",
+   "x": 0.55,
+   "y": -0.55,
+   "sprite": "leg_up"
+  },
+  {
+   "name": "leg_f_lo",
+   "parent": "leg_f_up",
+   "x": 0.0,
+   "y": -2.1,
+   "sprite": "leg_lo"
+  },
+  {
+   "name": "foot_f",
+   "parent": "leg_f_lo",
+   "x": 0.0,
+   "y": -2.0,
+   "sprite": "foot"
+  }
+ ],
+ "draw": [
+  "hand_b",
+  "arm_b_lo",
+  "arm_b_up",
+  "foot_b",
+  "leg_b_lo",
+  "leg_b_up",
+  "foot_f",
+  "leg_f_lo",
+  "leg_f_up",
+  "torso",
+  "pelvis",
+  "head",
+  "helmet",
+  "arm_f_lo",
+  "arm_f_up",
+  "weapon",
+  "hand_f"
+ ],
+ "pose_test": {
+  "pelvis": 0,
+  "torso": 3,
+  "head": -3,
+  "arm_b_up": -18,
+  "arm_b_lo": 35,
+  "hand_b": 0,
+  "arm_f_up": 22,
+  "arm_f_lo": 62,
+  "hand_f": -10,
+  "weapon": -40,
+  "leg_b_up": -14,
+  "leg_b_lo": 4,
+  "foot_b": 10,
+  "leg_f_up": 16,
+  "leg_f_lo": -6,
+  "foot_f": -10
+ },
+ "sun_dir": [
+  0.375,
+  -0.5625
+ ],
+ "zk": 0.65
+}
