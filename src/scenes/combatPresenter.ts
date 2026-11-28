@@ -6,7 +6,8 @@
 import type { Animator } from '../anim/Animator';
 import type { ClipEvent } from '../anim/clip';
 import type { CombatEvent, CombatState, Fighter, FighterSide, MoveKind } from '../core/types';
-import { BlockShield, DamageSplat, FxLayer, MissText } from '../ui/fx';
+import { BlockShield, DamageSplat, FxLayer, MissText, TechniqueText } from '../ui/fx';
+import { TECHNIQUE_RULES } from '../core/techniques';
 import { goreMode } from '../ui/gore';
 import { woundStage } from '../rig/wounds';
 import { PaperScraps } from '../ui/scraps';
@@ -329,6 +330,19 @@ export class CombatPresenter {
         // a clip without the hit frame (an older kit) still empties the hand
         if (!thrower.rig.look.netThrown) void thrower.rig.setLook({ netThrown: true });
         await reaction;
+        return;
+      }
+      case 'technique': {
+        // the technique's name beside the fighter (#295); then its step, guard or blow plays as usual
+        const h = this.head(step.side);
+        const rig = fighters[step.side].rig;
+        this.o.fx.show(`${step.side === 'player' ? 'p' : 'e'}t`, new TechniqueText(TECHNIQUE_RULES[step.technique].name),
+          // behind the fighter's back at shoulder height: clear of the action bar and of the opponent's pops
+          h.x - 70 * rig.facing, h.y + 50);
+        // the Sand Veil throws sand up from the fighter's feet; the stands like a trick
+        if (step.technique === 'sand_veil' && this.o.floorY !== undefined) this.o.fx.ground.kick('land', rig.view.x, this.o.floorY, rig.facing);
+        this.o.crowd?.cheer(0.4);
+        await new Promise<void>((r) => setTimeout(r, 250));
         return;
       }
       case 'item':

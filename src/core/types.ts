@@ -7,11 +7,12 @@ import type { CrowdGift, CrowdStanding } from './crowd';
 import type { CombatItemId, CombatSlots } from './spells';
 import type { StatusEffect, StatusResistances, StatusTick } from './status';
 import type { CombatWeapon } from './weapons';
+import type { TechniqueId } from './techniques';
 
 export type FighterSide = 'player' | 'enemy';
 export type AttackKind = 'quick' | 'normal' | 'power' | 'charge';
 export type MoveKind = 'step_forward' | 'step_back' | 'jump' | 'charge' | 'knockback';
-export type CombatAction = AttackKind | Exclude<MoveKind, 'knockback'> | 'block' | 'rest' | 'taunt' | 'net';
+export type CombatAction = AttackKind | Exclude<MoveKind, 'knockback'> | 'block' | 'rest' | 'taunt' | 'net' | TechniqueId;
 
 export interface Attributes {
   might: number;
@@ -42,6 +43,8 @@ export interface FighterSetup {
   slots?: CombatSlots;
   /** `false` fights without Rhythm (#294): the balance tools measure what it changes */
   rhythm?: boolean;
+  /** the Masters' techniques this fighter knows (#295); they need Rhythm, so `rhythm: false` leaves them out */
+  techniques?: readonly TechniqueId[];
   skills?: readonly SkillId[];
   position?: number;
 }
@@ -94,6 +97,12 @@ export interface Fighter {
   rhythm?: number;
   /** the fighter's last action, for the Rhythm's variety and repetition */
   lastAction?: CombatAction;
+  /** the Masters' techniques this fighter can use (#295) */
+  techniques?: readonly TechniqueId[];
+  /** Stone Guard raised (#295): a block made in it always earns the counter; drops with the guard */
+  stoneGuard?: boolean;
+  /** behind the Sand Veil (#295) until its next turn: blows are harder to land, a miss blinds the attacker */
+  veiled?: boolean;
   crowd: CrowdStanding;
   statuses: readonly StatusEffect[];
   statusResistances: StatusResistances;
@@ -117,6 +126,8 @@ export interface ActionOption {
   /** Percentage to block a landed strike, for the Block action (#274): lower without a whole shield. */
   blockChance?: number;
   counter?: true;
+  /** Rhythm the action spends, for the Masters' techniques (#295) */
+  rhythmCost?: number;
 }
 
 export interface AttackStrike {
@@ -145,10 +156,14 @@ export type CombatEvent =
       shield?: { readonly from: number; readonly to: number };
       /** the blow took off the defender's shield arm (#275): the shield is gone and the stump bleeds */
       severed?: true;
+      /** struck with a Master's technique (#295): Feint Step (cannot be blocked) or Burning Edge (sets on fire) */
+      technique?: TechniqueId;
     }
   | { type: 'energy'; fighter: FighterSide; from: number; to: number }
   /** the Rhythm moved (#294); `to: 100` = the Seventh Step, a drop to 0 after an attack = the step was used */
   | { type: 'rhythm'; fighter: FighterSide; from: number; to: number }
+  /** a Master's technique (#295), before what it does (a step, a guard, a blow); `rhythm` = the Rhythm it spent */
+  | { type: 'technique'; fighter: FighterSide; technique: TechniqueId; rhythm: number }
   | { type: 'block'; fighter: FighterSide }
   | { type: 'rest'; fighter: FighterSide; restored: number }
   | { type: 'taunt'; actor: FighterSide; target: FighterSide; penalty: number }

@@ -1,4 +1,4 @@
-export type StatusKind = 'torn' | 'stunned' | 'burning' | 'soaked' | 'feared' | 'taped' | 'slowed' | 'netted';
+export type StatusKind = 'torn' | 'stunned' | 'burning' | 'soaked' | 'feared' | 'taped' | 'slowed' | 'netted' | 'blinded';
 
 export interface StatusTick {
   kind: StatusKind;
@@ -26,7 +26,12 @@ const RULES: Readonly<Record<StatusKind, { turns: number; maxStacks: number }>> 
   slowed: { turns: 2, maxStacks: 1 },
   // #258: caught in a thrown net, the fighter spends the next turn getting out of it
   netted: { turns: 1, maxStacks: 1 },
+  // #295: sand in the eyes after a blow that missed the Sand Veil; the next turn's blows go wide
+  blinded: { turns: 1, maxStacks: 1 },
 };
+
+/** percentage points off the blows of a blinded fighter (#295) */
+export const BLINDED_ACCURACY_PENALTY = 30;
 
 export function applyStatus(
   statuses: readonly StatusEffect[], kind: StatusKind, resistances: StatusResistances = {},
@@ -54,10 +59,11 @@ export function statusModifiers(statuses: readonly StatusEffect[]): {
   const soaked = statuses.find((effect) => effect.kind === 'soaked')?.stacks ?? 0;
   const feared = statuses.find((effect) => effect.kind === 'feared')?.stacks ?? 0;
   const slowed = statuses.some((effect) => effect.kind === 'slowed');
+  const blinded = statuses.some((effect) => effect.kind === 'blinded');
   return {
     armourMultiplier: 1 - 0.2 * soaked,
     movementMultiplier: (1 - 0.2 * soaked) * (slowed ? 0.75 : 1),
-    accuracyPenalty: 10 * feared,
+    accuracyPenalty: 10 * feared + (blinded ? BLINDED_ACCURACY_PENALTY : 0),
   };
 }
 

@@ -1,4 +1,5 @@
-import { getActionOptions, getDistance, MIN_MELEE_ENERGY } from './combat';
+import { getActionOptions, getDistance, MIN_MELEE_ENERGY, strikeOf } from './combat';
+import { RHYTHM_MAX } from './rhythm';
 import { nextRandom } from './rng';
 import { attackDamage, isAttack } from './stats';
 import type { ActionOption, CombatAction, CombatState } from './types';
@@ -17,19 +18,23 @@ const PROFILE_WEIGHTS: Record<AiProfile, Record<CombatAction, number>> = {
   aggressor: {
     quick: 1, normal: 1.2, power: 1.6, charge: 2.2,
     step_forward: 1, jump: 1.4, step_back: 0.1, block: 0.3, rest: 0.6, taunt: 0.3, net: 1,
+    feint_step: 1.3, stone_guard: 0.8, sand_veil: 0.6, burning_edge: 1.4,
   },
   // #282: a defender that still answers blow for blow; the old, more passive one lost ~60% to the aggressor
   defender: {
     quick: 1.4, normal: 1.3, power: 1.0, charge: 0.9,
     step_forward: 1, jump: 0.8, step_back: 0.3, block: 1.0, rest: 0.9, taunt: 0.1, net: 1.2,
+    feint_step: 1, stone_guard: 1.3, sand_veil: 1.1, burning_edge: 1,
   },
   lion: {
     quick: 1.8, normal: 1, power: 0.7, charge: 3.4,
     step_forward: 0.55, jump: 3.2, step_back: 0.05, block: 0.1, rest: 0.85, taunt: 0, net: 0,
+    feint_step: 0, stone_guard: 0, sand_veil: 0, burning_edge: 0,
   },
   bear: {
     quick: 0.45, normal: 1.1, power: 2.9, charge: 0.55,
     step_forward: 1.6, jump: 0.08, step_back: 0.15, block: 1.15, rest: 1.2, taunt: 0, net: 0,
+    feint_step: 0, stone_guard: 0, sand_veil: 0, burning_edge: 0,
   },
 };
 
@@ -72,11 +77,19 @@ function situationalScore(state: CombatState, option: ActionOption): number {
   const energy = me.energy / me.stats.maxEnergy;
   const foeCanStrike = distance <= weaponReach(foe.weapon) && foe.energy >= MIN_MELEE_ENERGY;
 
-  if (option.hitChance !== undefined && isAttack(option.action)) {
-    const damage = attackDamage(option.action, me.stats, foe.stats);
+  // a Master's technique (#295) spends Rhythm: close to the Seventh Step it is worth less, the step is worth more
+  const rhythmCost = option.rhythmCost ? Math.max(0.3, 1 - (me.rhythm ?? 0) / RHYTHM_MAX * 0.7) : 1;
+
+  const strike = strikeOf(option.action);
+  if (option.hitChance !== undefined && strike) {
+    const damage = attackDamage(strike, me.stats, foe.stats);
     // hit chance times damage, measured against the foe's remaining health; a likely kill is worth a lot more
-    const value = (option.hitChance / 100) * (damage / Math.max(1, foe.health)) * 10 + (option.hitChance / 100) * 2;
-    return damage >= foe.health ? value * 3 : value;
+    let value = (option.hitChance / 100) * (damage / Math.max(1, foe.health)) * 10 + (option.hitChance / 100) * 2;
+    if (damage >= foe.health) value *= 3;
+    // Feint Step: best against a raised guard; Burning Edge: the fire is worth a few more blows, not on one already burning
+    if (option.action === 'feint_step') value *= foe.guarding ? 2 : 1.1;
+    if (option.action === 'burning_edge' && !foe.statuses.some((s) => s.kind === 'burning')) value *= 1.5;
+    return isAttack(option.action) ? value : value * rhythmCost;
   }
 
   switch (option.action) {
@@ -100,6 +113,14 @@ function situationalScore(state: CombatState, option: ActionOption): number {
     }
     case 'taunt':
       return getDistance(state) > 0 ? 0.25 : 0.1;
+    // the techniques' stances (#295): worth it only when a blow is coming
+    case 'stone_guard': {
+      const worth = (option.blockChance ?? me.stats.blockChance) / Math.max(1, me.stats.blockChance);
+      // a block in it always earns the counter: worth more than a plain guard
+      return (foeCanStrike ? (health < 0.5 ? 2.4 : 1.4) : 0.1) * worth * rhythmCost;
+    }
+    case 'sand_veil':
+      return (foeCanStrike ? (health < 0.5 ? 1.4 : 0.8) : 0.05) * rhythmCost;
     case 'net': {
       // #258: a caught foe loses a turn; worth most when it is about to strike, nothing on one already caught
       if (foe.statuses.some((s) => s.kind === 'netted' || s.kind === 'stunned')) return 0;

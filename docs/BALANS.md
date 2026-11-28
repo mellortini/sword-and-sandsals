@@ -168,3 +168,19 @@ Siódme Kroki liczone dla obu stron razem (agresor kontra obrońca, 300 walk na 
 3–7 pkt procentowych przewagi i jest rzadszy na wyższych poziomach (krótsze walki). Balans profili prawie się nie
 zmienia (+0–1,8 pkt dla agresora). Wiersze `profilesPlain`, `rhythmAggressor`, `rhythmDefender` w `tools/balance.ts`;
 `FighterSetup.rhythm: false` wyłącza Rytm.
+
+## Techniki Mistrzów (#295)
+Cztery akcje płacone energią i Rytmem (`core/techniques.ts`): Feint Step 6 EN + 25 Rytmu (krok i cios bez możliwości bloku),
+Stone Guard 3 + 20 (blok z pewną kontrą), Sand Veil 4 + 20 (pół kroku w tył, −25 pkt trafienia w ciebie, pudło oślepia
+atakującego na turę: −30 pkt), Burning Edge 7 + 35 (cios podpala). Koszt w Rytmie zabiera Siódmy Krok — technika nigdy nie trafia „na pewno”.
+
+Pomiar (1000 walk AI kontra AI, poziom 10, równy sprzęt, jedna strona zna wszystkie cztery):
+
+| ze znajomością technik | przeciwnik | wygrane | technik na walkę |
+|---|---|---|---|
+| aggressor | aggressor | 52,2% | 0,84 |
+| defender | defender | 53,2% | 0,93 |
+| aggressor | defender | 55,6% (bez technik 53,2%) | 0,87 |
+| defender | aggressor | 51,5% (bez technik 46,8%) | 0,93 |
+
+Przewaga 2–5 pkt: technika pomaga, ale nie rozstrzyga walki sama. AI używa jej zwykle raz na walkę, bo Rytm rośnie powoli.
