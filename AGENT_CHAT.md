@@ -1498,6 +1498,17 @@ Nowa fabuła „Siódmy Krok” (decyzja Mateusza): **świat to zwykłe średnio
 - Zamknięte jako zastąpione: #70, #71, #72, #86. Przepisane: #60 (lew i niedźwiedź), #61 (boss z 2. fazą), #67 Kragmoor, #68 mapa, #69 Red Sands.
 - ⚠️ Wszyscy: nowe teksty w grze piszcie już bez papierowego świata (nazwy z sekcji 2 SCENARIUSZ.md). Identyfikatory i nazwy techniczne grafiki (`PaperRig`, cień papieru) zostają.
 
+### 2026-11-27 22:10 · Claude Code (goloburda05-hue) · #65 / 65-tavern
+
+- Tawerna „The Blotted Cup”: nowy budynek `tavern` w `BUILDINGS` (`ui/town.ts`) — klikalny w mieście (był już w `town.json`). Ekran `ui/tavern.ts` + `tavern.css` w ramie `dressRoom` (bez sprzedawcy i bez własnego pokoju — tło `training`; jak będzie NPC/pokój tawerny, wystarczy wpis w `VENDOR_AT` / `ROOM_AT`).
+- Logika w `core/quests.ts` (testy w `quests.test.ts`):
+  - plotki o wymazanych (`tavernRumours`): 2 na raz, zmieniają się co walkę, mroczniejsze odblokowują wygrane w ligach;
+  - 3 zadania poboczne: Open Guard (wygraj bez bloku), Crowd Pleaser (przychylność ≥ 80 na koniec), Quick Work (≤ 8 własnych akcji). Przyjmuje się w tawernie, wykonuje w arenie, nagroda 40 + 10 × poziom złota do odebrania w tawernie;
+  - zakłady na walkę dwóch NPC: stawka 10/25/50, kurs z siły (prowizja domu 10%, min. ×1,2), walka rozgrywana od razu przez rdzeń + AI (`fightBet`). Karta stała do czasu zakładu (nie da się „przewijać” par).
+- ⚠️ Kontrakt zapisu: `SavedCharacter.tavern?: { accepted, completed, claimed, bets }` (walidacja w `save.ts`). Wersja zapisu bez zmian (pole opcjonalne).
+- Arena (`scenes/arena.ts`): po walce kariery `recordQuestBout(tallyBout(...))` przed osiągnięciami; ukończone zadanie → powiadomienie „Tavern”.
+- Każda akcja w tawernie zapisuje grę od razu (przegranego zakładu nie cofnie „Later”), więc ekran ma tylko Leave.
+
 ### 2026-11-27 22:30 · Claude Code (Mateusz) · #288 / 288-scenariusz-siodmy-krok
 
 - Arena z #272 (PR #321) zostaje w nowej fabule jako arena regionu **Kragmoor** („Kopalniany Krąg”); wielka prasa = kruszarka rudy z kopalń. Dopisane w `docs/SCENARIUSZ.md`, sekcja 2.
@@ -1523,3 +1534,9 @@ Synchronizacja z main (po #325), lokalnie bez konfliktów.
 - Wypłata działa razem z kalendarzem (#291): po walce zapis ma złoto, XP, materiały i `story.day` o 1 większy; `payFightReward` zachowuje `story`.
 - Sprawdzone w przeglądarce na testowym zapisie: wygrana z nowicjuszem (złoto 50 → 70, dzień 1 → 2), „Next opponent” daje zwykłego przeciwnika, przegrana (bez zwoju i złota, dzień 3), champion Bronze → Escape nie zamyka zwoju z bronią, „Leave it” nie dodaje broni (złoto 70 → 105).
 - goloburda05-hue: #287 i #286 też ruszają `arena.ts` — po merge'u tego PR przy synchronizacji zostawcie `payFightReward` w miejscu `applyFightExperience`.
+
+### 2026-11-28 01:36 · Claude Code (goloburda05-hue) · #65 / 65-tavern
+
+Synchronizacja z main (po #320, #291, #43) i dopasowanie tawerny do „Siódmego Kroku” (`docs/SCENARIUSZ.md`):
+- Nazwa „The Crooked Fredi”, zakłady prowadzi Adi the Odds („Trust Adi.”), zadanie Crowd Pleaser daje Fabian the Lute. Plotki bez papierowych wątków: Fredi i pieśni, Zakon i ostatni Mistrzowie, Old Hask, Corvin Lach, mężczyzna w szarym kapturze; zabity Mistrz dopiero od aktu 2 (`story.act`). Rotacja plotek po `story.day`.
+- `save.ts`: `story` (#291) i `tavern` obok siebie. `arena.ts`: zadania tawerny liczone przed `recordForCareer`, wypłata `payFightReward` (#43) bez zmian.

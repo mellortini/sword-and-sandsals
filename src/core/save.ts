@@ -7,6 +7,8 @@ import { FORGE_MATERIALS } from './forge';
 import type { ForgeMaterials } from './forge';
 import { LEAGUE_MAX_TIER } from './leagues';
 import type { NemesisAppearance, NemesisMemory } from './nemesis';
+import { isQuestId } from './quests';
+import type { TavernState } from './quests';
 import { MAX_LEVEL } from './progression';
 import { resolveAttributes } from './stats';
 import { isStoryState } from './story';
@@ -46,6 +48,8 @@ export interface SavedCharacter {
   leagueWins?: string[];
   /** the story (#291): act, decision flags, reputation and the day; missing in saves from before it (`storyOf`) */
   story?: StoryState;
+  /** the tavern (#65): side tasks taken, done and paid, and how many bets were placed */
+  tavern?: TavernState;
 }
 
 type DecodeFailure = 'invalid' | 'unsupported';
@@ -106,6 +110,12 @@ function isNemesisMemory(value: unknown): value is NemesisMemory {
     && within(value.encounters, 1, 20) && within(value.charges, 0, 20) && within(value.heavyAttacks, 0, 20);
 }
 
+function isTavernState(value: unknown): value is TavernState {
+  if (!isRecord(value)) return false;
+  const list = (v: unknown) => Array.isArray(v) && v.length <= 20 && v.every(isQuestId);
+  return list(value.accepted) && list(value.completed) && list(value.claimed) && within(value.bets, 0);
+}
+
 function isCharacter(value: unknown): value is SavedCharacter {
   if (!isRecord(value)) return false;
   const { attributes, hands, inventory } = value;
@@ -125,7 +135,8 @@ function isCharacter(value: unknown): value is SavedCharacter {
     && (value.armourImprovements === undefined || isArmourImprovements(value.armourImprovements))
     && (value.nemesis === undefined || isNemesisMemory(value.nemesis))
     && (value.leagueWins === undefined || (Array.isArray(value.leagueWins) && value.leagueWins.length <= 200 && value.leagueWins.every(isItemId)))
-    && (value.story === undefined || isStoryState(value.story));
+    && (value.story === undefined || isStoryState(value.story))
+    && (value.tavern === undefined || isTavernState(value.tavern));
 }
 
 export function serializeSave(character: SavedCharacter): string {
