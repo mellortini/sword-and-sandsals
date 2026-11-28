@@ -333,10 +333,12 @@ export class CombatPresenter {
         return;
       }
       case 'technique': {
-        // the technique's name over the fighter (#295); then its step, guard or blow plays as usual
+        // the technique's name beside the fighter (#295); then its step, guard or blow plays as usual
         const h = this.head(step.side);
         const rig = fighters[step.side].rig;
-        this.o.fx.show(`${step.side === 'player' ? 'p' : 'e'}t`, new TechniqueText(TECHNIQUE_RULES[step.technique].name), h.x, h.y - 56);
+        this.o.fx.show(`${step.side === 'player' ? 'p' : 'e'}t`, new TechniqueText(TECHNIQUE_RULES[step.technique].name),
+          // behind the fighter's back at shoulder height: clear of the action bar and of the opponent's pops
+          h.x - 70 * rig.facing, h.y + 50);
         // the Sand Veil throws sand up from the fighter's feet; the stands like a trick
         if (step.technique === 'sand_veil' && this.o.floorY !== undefined) this.o.fx.ground.kick('land', rig.view.x, this.o.floorY, rig.facing);
         this.o.crowd?.cheer(0.4);

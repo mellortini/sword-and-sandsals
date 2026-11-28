@@ -1567,3 +1567,16 @@ Przejście całej pętli MVP. Dwie poprawki:
 - Kontrakt danych (jak w `docs/SCENARIUSZ.md` 7): `Dialogue { id, start, nodes }`, `DialogueNode { id, speaker, lines, choices?, next? }`, `Choice { label, requires?, check?, effects?, failEffects?, next?, nextOnFail? }`. Warunki: `attribute`, `reputation`, `flag`/`noFlag`, `gold`, `item`, `ward`. Skutki: `flag`, `reputation`, `gold`, `item`, `recruit`, `loyalty`, `duelBook`. Test: 50% przy atrybucie = trudność, ±8 pkt za punkt, 5–95%; porażka też prowadzi dalej (`nextOnFail`). `*kursywa*` w kwestiach = didaskalia. `dialogueProblems()` sprawdza dane (test przechodzi po wszystkich dialogach).
 - ⚠️ Podopieczni (#301), lojalność i Księga Pojedynków (#293) jeszcze nie istnieją — na razie trzymane we flagach `ward.<id>`, `loyalty.<id>`, `book.<entry>`; te moduły mogą je przejąć.
 - Przykład: Old Hask (6.3) z 4 wyborami (umowa / [Precision %] „Show me first” / [5 gold] kolejka, raz / [Order ≥ 20] wyszarzony). Podgląd: `?view=town&dialogue=old-hask` (parametr w `scenes/town.ts`, bez ruszania `main.ts`). Każdy wybór zapisuje grę od razu. Sama próba Haska to #299.
+
+### 2026-11-28 03:10 · Claude Code (goloburda05-hue) · #295 / 295-master-techniques
+
+- Techniki Mistrzów jako akcje walki: `src/core/techniques.ts` (zasady, `TECHNIQUE_RULES`, `learnedTechniques(story)`), `src/data/masters.ts` (4 Mistrzów + `CORVIN_LACH` ze wszystkimi technikami).
+  - **Feint Step** 6 EN + 25 Rytmu: krok i cios `normal`, którego nie da się zablokować (więc bez kontry). Zasięg: broń + jeden krok.
+  - **Stone Guard** 3 + 20: blok, w którym udany blok zawsze daje kontrę.
+  - **Sand Veil** 4 + 20: pół kroku w tył, −25 pkt trafienia w ciebie do twojej tury; pudło oślepia atakującego (nowy status `blinded`, −30 pkt, 1 tura).
+  - **Burning Edge** 7 + 35: cios `normal`, który podpala (`burning`).
+- ⚠️ Kontrakt core: `CombatAction` ma 4 nowe wartości (`feint_step`, `stone_guard`, `sand_veil`, `burning_edge`) — każda mapa `Record<CombatAction, …>` musi je mieć. `FighterSetup.techniques?`, `Fighter.techniques?/stoneGuard?/veiled?`, `ActionOption.rhythmCost?`, zdarzenie `{ type: 'technique', fighter, technique, rhythm }` przed skutkami, `attack.technique?`. Koszt w Rytmie płaci się przed ciosem, więc technika nie korzysta z Siódmego Kroku. Bez Rytmu (`rhythm: false`) nie ma technik. `strikeOf(action)` w `combat.ts` mówi, jakim ciosem bije akcja.
+- Gracz zna techniki z flag fabuły `technique.<id>` (= `true`) — ❓ #296 (próby Mistrzów): ustawiajcie je przez `setFlag(story, techniqueFlag(id))`. Dev: `?view=arena&techniques=all&etechniques=all`.
+- AI: wagi technik w profilach (bestie 0); Corvin (aggressor) używa wszystkich czterech. Symulacja w `docs/BALANS.md`: techniki dają 2–5 pkt przewagi, ~0,9 użycia na walkę.
+- UI: grupa „Techniques” na pasku akcji (klawisze F, G, V, E), widoczna tylko z technikami; koszt „6 EN · 25 RH”, tooltip z % i Rytmem. Prezenter: złota karteczka z nazwą techniki obok postaci, Sand Veil sypie piaskiem.
+- Poprawka przy okazji: `.action-card[hidden]` w `actionBar.css` — karta „Net” była widoczna także bez trójzębu (CSS `display:flex` wygrywał z `hidden`).

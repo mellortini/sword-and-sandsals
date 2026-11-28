@@ -167,3 +167,9 @@
 .action-bar[data-open='false'] .aim-toggle { opacity: 0.55; cursor: default; }
 /* an attack card aimed at a zone: the hit-chance stamp is filled red, like an inked target */
 .action-card.aimed .action-card__stamp { background: #a8322a; color: #fff3e0; }
+
+/* `hidden` must win over the cards' and groups' own display (#295): the net card without a net, techniques not known */
+.action-card[hidden],
+.action-bar__group[hidden] {
+  display: none;
+}
