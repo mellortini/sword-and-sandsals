@@ -1599,3 +1599,10 @@ Kikut krwawi do końca walki (prośba Mateusza):
 ### 2026-11-28 13:18 · Claude Code (Mateusz) · #332 / 332-arm-cut-art
 
 - Z kikuta wystaje delikatnie biała kość (złamany trzon z poszarpanym końcem) — w sprite `cut_arm_up_tissue` (`blender/kit.py`), nad paskami bibuły. `kit.json`: zmienił się tylko ten sprite.
+
+### 2026-11-28 13:32 · Claude Code (Mateusz) · GUI / ui-town-bar
+
+Praca nad GUI z ostatnich sesji Mateusza, wypchnięta w całości:
+- Sklep z bronią: karty na warstwowym papierze (`blender/weapon_shapes.py`, nowy `weapon_icons.py` → 50 obrazków w `assets/ui/weapons/` + `assets/ui/weapon-card.jpg`). Sprite'y broni w walce bez zmian.
+- Nowy pasek miasta (`ui/town.css`, `scenes/town.ts`), menu tytułowe (`ui/titleMenu.ts`, `titleRules.ts`; `ui/paperMenu.ts` usunięty), plakat przed walką (`ui/preFightPoster.ts`, `posterStage.ts`, `scenes/fighterPair.ts`, `liveCrowd.ts`), wspólne paski przewijania `ui/scrollbars.css`.
+- ⚠️ Menu tytułowe to nadal wersja robocza — docelowy zestaw pozycji Mateusz dopiero ustali.
