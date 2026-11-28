@@ -1535,6 +1535,16 @@ Synchronizacja z main (po #325), lokalnie bez konfliktów.
 - Sprawdzone w przeglądarce na testowym zapisie: wygrana z nowicjuszem (złoto 50 → 70, dzień 1 → 2), „Next opponent” daje zwykłego przeciwnika, przegrana (bez zwoju i złota, dzień 3), champion Bronze → Escape nie zamyka zwoju z bronią, „Leave it” nie dodaje broni (złoto 70 → 105).
 - goloburda05-hue: #287 i #286 też ruszają `arena.ts` — po merge'u tego PR przy synchronizacji zostawcie `payFightReward` w miejscu `applyFightExperience`.
 
+### 2026-11-28 02:00 · Claude Code (Mateusz) · #45 / 45-mvp-loop
+
+Przejście całej pętli MVP. Dwie poprawki:
+- Blokada gry: po przegranej gladiator miał 0 HP, kolejne walki zaczynał z 1 HP, a świątynia kosztuje ~20 złota. Bez złota nie było wyjścia (w symulacji: kupno sprzętu przed leczeniem → ~48% prób utykało). Teraz po przegranej wraca do 50% HP za darmo (`recoverFromDefeat` w `core/temple.ts`, wybór Mateusza). Po poprawce symulacja (3 style zakupów × 600 prób) przechodzi ligę Bronze w 100% przy limicie 15 przegranych.
+- Po wygranej walce ligowej „Next opponent” prowadzi do następnego rywala z drabinki (wcześniej losował kopię pokonanego). `src/scenes/arena.ts`.
+- goloburda05-hue: #287 i #286 też ruszają `arena.ts` — przy synchronizacji zostawcie `recoverFromDefeat` przy zapisie po walce i blok `ladder` przed `choice === 'next'`.
+- Zauważone, poza zakresem MVP: drabinka (`ui/leagueRules.ts` `LEAGUES`) pokazuje ligi od Silver wzwyż jako puste, choć `PULPPORT_LEAGUES` ma ich zawodników.
+- Nowe: **dom i nocleg** (prośba Mateusza), żeby nie dało się zablokować zapisu: `core/home.ts` (`sleepAtHome`: +25% pełnego HP, 1 dzień przez `passTime(…, 'rest')`, za darmo), ekran `ui/home.ts`, `home` w `BUILDINGS` (`ui/town.ts`) i przycisk „Home” na górnym pasku miasta — bez budynku na mapie (brak sprite'a; render tylko za zgodą).
+- goloburda05-hue: #287 (tawerna) też rusza `ui/town.ts`; przy konflikcie zostają oba wpisy w `BUILDINGS`.
+- Pełne przejście w czystym Chrome (skrypt klikający jak gracz, bez zmian w zapisie): nowa postać → łatwa walka → 6 walk Bronze (broń, zbroja, trener, świątynia, 2 noce w domu) → fabuła i zwój championa → miasto. Champion pokonany, 0 przegranych w tym przebiegu; wcześniejsze przebiegi słabszej wersji bota przegrywały. W konsoli tylko 404 na `favicon.ico`.
 ### 2026-11-28 01:36 · Claude Code (goloburda05-hue) · #65 / 65-tavern
 
 Synchronizacja z main (po #320, #291, #43) i dopasowanie tawerny do „Siódmego Kroku” (`docs/SCENARIUSZ.md`):

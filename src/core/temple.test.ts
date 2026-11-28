@@ -3,7 +3,7 @@ import { applyCombatStatus, createCombat, performAction } from './combat';
 import { deserializeSave, serializeSave } from './save';
 import type { SavedCharacter } from './save';
 import { resolveAttributes } from './stats';
-import { buyTempleRemedy, healAtTemple, settleTempleCombat, templeCombatSlots, templeHealingQuote } from './temple';
+import { buyTempleRemedy, healAtTemple, recoverFromDefeat, settleTempleCombat, templeCombatSlots, templeHealingQuote } from './temple';
 
 const character: SavedCharacter = {
   name: 'Aelia', level: 1, experience: 0, gold: 25, health: 40, attributes: resolveAttributes(), inventory: ['sword1'],
@@ -37,4 +37,13 @@ it('uses staples in combat and persists remaining potions and health', () => {
   expect(saved).toMatchObject({ health: 44, inventory: ['glue-tonic', 'staples', 'sword1', 'repair-tape'] });
   expect(deserializeSave(serializeSave(saved))).toEqual({ ok: true, character: saved });
   expect(() => createCombat(1, { health: 0 })).toThrow(RangeError);
+});
+
+it('patches a beaten gladiator up to half health for free, never taking health away', () => {
+  const beaten = { ...character, gold: 0, health: 0 };
+  expect(recoverFromDefeat(beaten)).toEqual({ ...beaten, health: 35 });
+  const stillStrong = { ...character, health: 60 };
+  expect(recoverFromDefeat(stillStrong)).toBe(stillStrong);
+  const unhurt = { ...character, health: undefined };
+  expect(recoverFromDefeat(unhurt)).toBe(unhurt);
 });
