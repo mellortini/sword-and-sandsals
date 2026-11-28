@@ -1595,3 +1595,7 @@ Grafika odciętej ręki z tarczą (dokończenie #275, na tej samej zasadzie co o
 Kikut krwawi do końca walki (prośba Mateusza):
 - ⚠️ Core: nowy status `bleeding` (`core/status.ts`): `turns: Infinity`, 1 stack, co turę `-stumpBleed(maxHealth)` = 3% maks. HP, min. 2. Nakładany przy odcięciu ręki obok `torn`, bez odporności i bez leczenia (Staples czyści tylko `torn`). Kto robi mapy `Record<StatusKind, …>` — jest nowa wartość.
 - Wygląd: co ~1,7 s z kikuta zbiera się i spada kropla krwi (`statusBits`, klatka `blood` w `assets/fx/status.png`, `blender/status_fx.py`, dodana na końcu arkusza — reszta klatek bez zmian). `StatusFx` pokazuje ją tylko, gdy `rig.look.armCut` (przy gore off ręka zostaje, więc nic nie kapie, ale HP dalej spada).
+
+### 2026-11-28 13:18 · Claude Code (Mateusz) · #332 / 332-arm-cut-art
+
+- Z kikuta wystaje delikatnie biała kość (złamany trzon z poszarpanym końcem) — w sprite `cut_arm_up_tissue` (`blender/kit.py`), nad paskami bibuły. `kit.json`: zmienił się tylko ten sprite.

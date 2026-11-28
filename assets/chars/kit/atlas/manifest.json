@@ -1283,259 +1283,259 @@
       "h": 162
     },
     "body_arm_lo": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 2,
       "y": 2,
       "w": 91,
       "h": 224
     },
     "body_arm_up": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 97,
       "y": 2,
       "w": 119,
       "h": 269
     },
     "body_foot": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 220,
       "y": 2,
       "w": 161,
       "h": 68
     },
     "body_hand": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 220,
       "y": 74,
       "w": 86,
       "h": 87
     },
     "body_leg_lo": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 2,
       "y": 275,
       "w": 103,
       "h": 267
     },
     "body_leg_up": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 220,
       "y": 165,
       "w": 130,
       "h": 303
     },
     "body_pelvis": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 385,
       "y": 2,
       "w": 242,
       "h": 193
     },
     "body_torso": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 2,
       "y": 546,
       "w": 336,
       "h": 355
     },
     "cut_arm_lo": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 109,
       "y": 275,
       "w": 91,
       "h": 208
     },
     "cut_arm_lo_rim": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 354,
       "y": 199,
       "w": 96,
       "h": 74
     },
     "cut_arm_lo_tissue": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 454,
       "y": 199,
       "w": 108,
       "h": 73
     },
     "cut_arm_up": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 454,
       "y": 276,
       "w": 119,
       "h": 235
     },
     "cut_arm_up_rim": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 354,
       "y": 277,
       "w": 95,
       "h": 63
     },
     "cut_arm_up_tissue": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 342,
       "y": 472,
       "w": 102,
       "h": 76
     },
     "cut_head_edge": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 448,
       "y": 515,
       "w": 107,
       "h": 77
     },
     "cut_head_neck": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 354,
       "y": 344,
       "w": 96,
       "h": 98
     },
     "cut_head_tissue": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 342,
       "y": 596,
       "w": 144,
       "h": 97
     },
     "cut_torso": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 631,
       "y": 2,
       "w": 336,
       "h": 357
     },
     "cut_torso_edge": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 342,
       "y": 697,
       "w": 111,
       "h": 79
     },
     "cut_torso_tissue": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 342,
       "y": 780,
       "w": 144,
       "h": 90
     },
     "shield1": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 490,
       "y": 596,
       "w": 239,
       "h": 238
     },
     "shield5": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 733,
       "y": 363,
       "w": 208,
       "h": 352
     },
     "weapon_axe1": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 2,
       "y": 905,
       "w": 328,
       "h": 110
     },
     "weapon_axe2": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 342,
       "y": 874,
       "w": 313,
       "h": 111
     },
     "weapon_daggers": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 733,
       "y": 719,
       "w": 231,
       "h": 78
     },
     "wound_arm_b_lo_7": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 109,
       "y": 487,
       "w": 54,
       "h": 52
     },
     "wound_arm_b_up_2": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 310,
       "y": 74,
       "w": 67,
       "h": 51
     },
     "wound_arm_b_up_5": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 659,
       "y": 838,
       "w": 72,
       "h": 114
     },
     "wound_arm_b_up_8": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 735,
       "y": 801,
       "w": 77,
       "h": 144
     },
     "wound_arm_b_up_9": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 816,
       "y": 801,
       "w": 80,
       "h": 144
     },
     "wound_arm_f_lo_10": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 577,
       "y": 363,
       "w": 126,
       "h": 78
     },
     "wound_arm_f_lo_3": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 167,
       "y": 487,
       "w": 51,
       "h": 46
     },
     "wound_arm_f_up_3": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 577,
       "y": 445,
       "w": 85,
       "h": 88
     },
     "wound_face_2": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 735,
       "y": 949,
       "w": 51,
       "h": 62
     },
     "wound_leg_f_lo_2": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 566,
       "y": 199,
       "w": 61,
       "h": 47
     },
     "wound_leg_f_lo_4": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 666,
       "y": 445,
       "w": 61,
       "h": 137
     },
     "wound_leg_f_up_3": {
-      "page": "base-d4fd483e755a.webp",
+      "page": "base-3f0f4a08732d.webp",
       "x": 659,
       "y": 956,
       "w": 58,

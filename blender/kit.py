@@ -260,8 +260,20 @@ def cut_arm_up_rim(c):
     L(c, sl.torn(_stump(ARM_UP_CUT + 0.25, ARM_UP_CUT - 0.06, 7, 0.0, half=0.33, grow=0.03), 0.035, 15, 0.07), m, 0.0, 0.04, 'fibre')
 
 
+BONE = '#f1e8d2'       # ivory paper: the broken end of the upper arm bone
+BONE_SHADE = '#d6c6a2'
+
+
 def cut_arm_up_tissue(c):
     _shreds(c, 0.0, ARM_UP_CUT + 0.02, -1, 41, half=0.22, k=0.62, core=0.27)
+    # a little of the white bone shows between the crepe strips: a short shaft broken off in a jagged end (#332)
+    bone = sl.tex_paper('cut_bone', BONE, 'washi', 1.0, tooth=0.5)
+    shade = sl.tex_paper('cut_bone_d', BONE_SHADE, 'washi', 1.0, tooth=0.5)
+    y0, y1, x = ARM_UP_CUT + 0.02, ARM_UP_CUT - 0.3, 0.03
+    shaft = [(x - 0.075, y0), (x + 0.075, y0), (x + 0.07, y1 + 0.03), (x + 0.04, y1 - 0.02), (x + 0.01, y1 + 0.04),
+             (x - 0.03, y1 - 0.03), (x - 0.07, y1 + 0.02)]
+    L(c, list(reversed(shaft)), bone, 0.14, 0.04, 'bone')
+    L(c, list(reversed([(x - 0.075, y0), (x - 0.03, y0), (x - 0.035, y1 + 0.06), (x - 0.07, y1 + 0.03)])), shade, 0.18, 0.01, 'bone_shade')
 
 
 def cut_arm_lo(c):
