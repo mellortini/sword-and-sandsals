@@ -1,0 +1,28 @@
+/* Dialogue with choices (src/ui/dialogue.ts, #292): a parchment panel at the bottom of the screen, over the scene. */
+.dialogue {
+  position: fixed; inset: 0; z-index: 40; display: flex; align-items: flex-end; justify-content: center;
+  padding: 0 2vw 3vh; background: linear-gradient(to top, rgba(28, 16, 18, 0.55), transparent 55%);
+}
+.dialogue__panel {
+  box-sizing: border-box; width: min(96vw, 980px); max-height: 70vh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 8px; padding: 18px 24px 16px;
+  font-family: 'Alegreya', Georgia, serif; font-size: max(16px, 2.3vh); color: #3a2418;
+  background: linear-gradient(160deg, #fff8e3 0%, transparent 45%), #ecd9b0;
+  border-radius: 6px; box-shadow: inset 0 0 0 2px #a07a4f, 0 8px 0 rgba(20, 10, 12, 0.45);
+}
+.dialogue__speaker { font-family: 'Cinzel', Georgia, serif; font-weight: 800; font-size: 1.2em; letter-spacing: 0.06em; color: #5c2a1c; }
+.dialogue__result { font-weight: bold; color: #8b3324; }
+.dialogue__lines p { margin: 0 0 6px; line-height: 1.35; }
+.dialogue__lines em { color: #6b4a2e; }
+.dialogue__choices { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.dialogue__choice {
+  display: flex; gap: 10px; align-items: baseline; text-align: left; font: inherit; padding: 8px 12px; cursor: pointer;
+  border: 0; border-radius: 4px; background: #f6ecd6; color: #3a2418; box-shadow: inset 0 0 0 1.5px #b98350;
+}
+.dialogue__choice:hover, .dialogue__choice:focus-visible { background: #fff6dc; outline: 2px solid #8b3324; outline-offset: 1px; }
+.dialogue__choice[aria-disabled='true'] { opacity: 0.45; cursor: default; background: #e2d3b2; outline: none; }
+.dialogue__choice--go { align-self: flex-end; font-weight: bold; background: #9a6a2e; color: #f3e6d6; box-shadow: none; }
+.dialogue__key { font-family: 'Cinzel', Georgia, serif; font-weight: 800; color: #8b3324; min-width: 1em; }
+.dialogue__tag { font-weight: bold; color: #7a3d1c; white-space: nowrap; }
+.dialogue__problem { color: #8b3324; min-height: 0; }
+.dialogue__choice--go:hover, .dialogue__choice--go:focus-visible { background: #7d5224; color: #fff3df; }
