@@ -15,7 +15,9 @@ import { openTrophies } from './trophies';
 import { openShop } from './shop';
 import type { LookPreview } from './lookPreview';
 import { openSkillTree } from './skillTree';
+import { openTavern } from './tavern';
 import { openTemple } from './temple';
+import { QUESTS, questState } from '../core/quests';
 import { openTrainer } from './trainer';
 import { plural } from './townRules';
 import './forge.css';
@@ -67,6 +69,14 @@ export const BUILDINGS: readonly Building[] = [
     id: 'skills', name: 'Skills', purpose: 'Learn skills with skill points',
     note: (c) => ((c.skillPoints ?? 0) > 0 ? `${plural(c.skillPoints!, 'point')} to spend` : `${c.skills?.length ?? 0} learned`),
     open: openSkillTree,
+  },
+  {
+    id: 'tavern', name: 'Tavern', purpose: 'Rumours, side tasks, bets',
+    note: (c) => {
+      const ready = QUESTS.filter((q) => questState(c, q.id) === 'completed').length;
+      return ready ? `${plural(ready, 'task')} to collect` : `${c.gold} gold`;
+    },
+    open: openTavern,
   },
   { id: 'trophies', name: 'Hall of Fame', purpose: 'Your achievements and record', note: (c) => `${trophyCount(c)} earned`, open: (c) => openTrophies(c) },
 ];

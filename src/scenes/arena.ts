@@ -29,6 +29,7 @@ import type { SceneContext, SceneUpdate } from './common';
 import { openFightResult } from './fightResult';
 import { careerLoadout } from '../ui/gearRules';
 import { recordForCareer } from '../ui/achievementRules';
+import { recordQuestBout, tallyBout } from '../core/quests';
 import { showAchievements, showNotice } from '../ui/achievementToast';
 import { afterBout } from '../ui/nemesisRules';
 import { nextBout, recordLeagueWin } from '../ui/leagueRules';
@@ -232,7 +233,10 @@ export async function showArena(
           const next = nextBout(leagueWon);
           showNotice('League', `${enemy.name} is beaten`, next ? `Next on the ladder: ${next.bout.name}.` : 'Every league with fighters is cleared.');
         }
-        const fought = recordForCareer(leagueWon, { type: 'fight', id: fightId, state: outcome.state, events: outcome.events });
+        // the tavern's tasks (#65): a bout may finish one; it is paid in the tavern
+        const tasks = recordQuestBout(leagueWon, tallyBout(outcome.state, outcome.events));
+        for (const q of tasks.completed) showNotice('Tavern', `${q.title} done`, 'Collect your pay at the tavern.');
+        const fought = recordForCareer(tasks.character, { type: 'fight', id: fightId, state: outcome.state, events: outcome.events });
         // gold, XP and forge materials go to the save at once (#43); a prize weapon waits for the reward scroll
         const reward = getFightReward(outcome.state, fightId, championPrizeId(enemy.bout?.id));
         if (reward) payout = payFightReward(fought.character, reward);
