@@ -180,6 +180,36 @@ export class MissText extends Pop {
   }
 }
 
+/**
+ * A Master's technique called out (#295): its name on a long slip of old gold paper with a dark ink edge, over the
+ * fighter who uses it. Pops in like MISS, but wider and tilted the other way, so the two never read as one.
+ */
+export class TechniqueText extends Pop {
+  private slip = new Container();
+  constructor(name: string) {
+    super();
+    const word = new Text({ text: name.toUpperCase(), style: { fill: '#3a2410', fontSize: 26, fontFamily: 'Georgia', fontWeight: 'bold', letterSpacing: 3 } });
+    word.anchor.set(0.5);
+    const w = word.width / 2 + 22;
+    const shape = [-w, -20, w - 4, -24, w + 4, 18, -w + 6, 22];
+    const sh = new Graphics().poly(shape).fill(0x2a2224);
+    sh.position.set(4, 5);
+    sh.alpha = 0.45;
+    const paper = new Graphics().poly(shape).fill(0xe2b85a).stroke({ color: 0x5a3414, width: 3 });
+    const fold = new Graphics().poly([-w, -20, w - 4, -24, w - 3, -16, -w + 1, -12]).fill(0xf0d48a);
+    this.slip.addChild(halo(w + 20, 0.45), sh, paper, fold, word);
+    this.slip.rotation = 0.07;
+    this.slip.scale.set(0);
+    this.addChild(this.slip);
+  }
+  protected step() {
+    const t = this.t;
+    if (this.dead) { this.alpha -= 0.2; if (this.alpha <= 0) this.destroy(); return; }
+    this.slip.scale.set(t < 2 ? t * 0.6 : t < 4 ? 1.2 - (t - 2) * 0.1 : 1.0);
+    this.slip.rotation = 0.07 - (t < 4 ? (4 - t) * 0.03 : 0);
+  }
+}
+
 /** keeps at most one pop per fighter slot and ticks them */
 export class FxLayer extends Container {
   private slots = new Map<string, Pop>();
@@ -195,10 +225,15 @@ export class FxLayer extends Container {
   }
   /** finisher paper (#20): lies on the sand until clear(), under any pop-up shown later */
   addScraps(s: PaperScraps) { this.addChild(s); }
+  /** a cut-off limb (#332): falls, then lies on the sand until clear(), like the scraps */
+  addLimb(limb: Container & { update(dt: number): void }) { this.limbs.add(limb); this.addChild(limb); }
+  private limbs = new Set<Container & { update(dt: number): void }>();
   clear() {
     for (const p of this.slots.values()) p.fadeOut();
     this.slots.clear();
     for (const c of [...this.children]) if (c instanceof PaperScraps) c.destroy({ children: true });
+    for (const l of this.limbs) if (!l.destroyed) l.destroy({ children: true });
+    this.limbs.clear();
     this.ground.clear();
     this.status.clear();
   }
@@ -206,5 +241,6 @@ export class FxLayer extends Container {
     this.ground.update(dt);
     this.status.update(dt);
     for (const c of [...this.children]) if ((c instanceof Pop || c instanceof PaperScraps) && !c.destroyed) c.update(dt);
+    for (const l of this.limbs) if (!l.destroyed) l.update(dt);
   }
 }

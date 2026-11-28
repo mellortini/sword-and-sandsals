@@ -1513,6 +1513,15 @@ Nowa fabuła „Siódmy Krok” (decyzja Mateusza): **świat to zwykłe średnio
 
 - Arena z #272 (PR #321) zostaje w nowej fabule jako arena regionu **Kragmoor** („Kopalniany Krąg”); wielka prasa = kruszarka rudy z kopalń. Dopisane w `docs/SCENARIUSZ.md`, sekcja 2.
 
+### 2026-11-27 22:50 · Claude Code (goloburda05-hue) · #294 / 294-rhythm
+
+- Rytm i Siódmy Krok: `src/core/rhythm.ts` (zasady, czyste funkcje) + `updateRhythm` w `core/combat.ts` po każdej akcji. Obie strony mają Rytm 0–100; przy 100 następny atak ma 100% trafienia (`hitChance`, także celowane), po ataku Rytm = 0. Wartości w `RHYTHM_GAIN`.
+- ⚠️ Kontrakt core: `Fighter.rhythm?: number`, `Fighter.lastAction?: CombatAction`, zdarzenie `{ type: 'rhythm', fighter, from, to }`, `FighterSetup.rhythm?: false` (wyłącza, dla symulatora). Testy z dokładną listą zdarzeń muszą uwzględnić `rhythm` (poprawiłem `combat.test.ts`); test stylu profili AI liczy teraz bez Rytmu.
+- HUD: `src/ui/rhythmTrack.ts` — pasek „RHYTHM” z 7 śladami stóp nad paskiem tłumu, przy pełnym pulsuje + „7TH STEP”. `CombatHud.panelTop` uwzględnia nowy pasek (pasek akcji siada wyżej na telefonach).
+- Balans: nowe wiersze w `tools/balance.ts`, wyniki w `docs/BALANS.md` (Rytm daje 3–7 pkt przewagi, ~1 Siódmy Krok na walkę, profile prawie bez zmian).
+- Siódmy Krok w wariancie „pewne trafienie” (`docs/SCENARIUSZ.md` 5.2 dopuszcza ten albo „darmowa akcja + podgląd zamiaru”). Nie zrobione: „trafienie po zwiadzie” (zwiad to #306) i wzrost maks. Rytmu z technikami/poziomem (techniki to #295).
+- ⚠️ #286 (trójząb) dodaje akcję `net` w tym samym `performAction` — kto merguje drugi, ma mały konflikt w `combat.ts`/`types.ts`.
+
 ### 2026-11-28 00:27 · Claude Code (Mateusz) · first-fight-easy
 
 Pierwsza walka nowego gladiatora jest łatwa (prośba Mateusza, bez osobnego Issue).
@@ -1535,6 +1544,12 @@ Synchronizacja z main (po #325), lokalnie bez konfliktów.
 - Sprawdzone w przeglądarce na testowym zapisie: wygrana z nowicjuszem (złoto 50 → 70, dzień 1 → 2), „Next opponent” daje zwykłego przeciwnika, przegrana (bez zwoju i złota, dzień 3), champion Bronze → Escape nie zamyka zwoju z bronią, „Leave it” nie dodaje broni (złoto 70 → 105).
 - goloburda05-hue: #287 i #286 też ruszają `arena.ts` — po merge'u tego PR przy synchronizacji zostawcie `payFightReward` w miejscu `applyFightExperience`.
 
+### 2026-11-28 01:36 · Claude Code (goloburda05-hue) · #65 / 65-tavern
+
+Synchronizacja z main (po #320, #291, #43) i dopasowanie tawerny do „Siódmego Kroku” (`docs/SCENARIUSZ.md`):
+- Nazwa „The Crooked Fredi”, zakłady prowadzi Adi the Odds („Trust Adi.”), zadanie Crowd Pleaser daje Fabian the Lute. Plotki bez papierowych wątków: Fredi i pieśni, Zakon i ostatni Mistrzowie, Old Hask, Corvin Lach, mężczyzna w szarym kapturze; zabity Mistrz dopiero od aktu 2 (`story.act`). Rotacja plotek po `story.day`.
+- `save.ts`: `story` (#291) i `tavern` obok siebie. `arena.ts`: zadania tawerny liczone przed `recordForCareer`, wypłata `payFightReward` (#43) bez zmian.
+
 ### 2026-11-28 02:00 · Claude Code (Mateusz) · #45 / 45-mvp-loop
 
 Przejście całej pętli MVP. Dwie poprawki:
@@ -1545,8 +1560,42 @@ Przejście całej pętli MVP. Dwie poprawki:
 - Nowe: **dom i nocleg** (prośba Mateusza), żeby nie dało się zablokować zapisu: `core/home.ts` (`sleepAtHome`: +25% pełnego HP, 1 dzień przez `passTime(…, 'rest')`, za darmo), ekran `ui/home.ts`, `home` w `BUILDINGS` (`ui/town.ts`) i przycisk „Home” na górnym pasku miasta — bez budynku na mapie (brak sprite'a; render tylko za zgodą).
 - goloburda05-hue: #287 (tawerna) też rusza `ui/town.ts`; przy konflikcie zostają oba wpisy w `BUILDINGS`.
 - Pełne przejście w czystym Chrome (skrypt klikający jak gracz, bez zmian w zapisie): nowa postać → łatwa walka → 6 walk Bronze (broń, zbroja, trener, świątynia, 2 noce w domu) → fabuła i zwój championa → miasto. Champion pokonany, 0 przegranych w tym przebiegu; wcześniejsze przebiegi słabszej wersji bota przegrywały. W konsoli tylko 404 na `favicon.ico`.
-### 2026-11-28 01:36 · Claude Code (goloburda05-hue) · #65 / 65-tavern
 
-Synchronizacja z main (po #320, #291, #43) i dopasowanie tawerny do „Siódmego Kroku” (`docs/SCENARIUSZ.md`):
-- Nazwa „The Crooked Fredi”, zakłady prowadzi Adi the Odds („Trust Adi.”), zadanie Crowd Pleaser daje Fabian the Lute. Plotki bez papierowych wątków: Fredi i pieśni, Zakon i ostatni Mistrzowie, Old Hask, Corvin Lach, mężczyzna w szarym kapturze; zabity Mistrz dopiero od aktu 2 (`story.act`). Rotacja plotek po `story.day`.
-- `save.ts`: `story` (#291) i `tavern` obok siebie. `arena.ts`: zadania tawerny liczone przed `recordForCareer`, wypłata `payFightReward` (#43) bez zmian.
+### 2026-11-28 02:50 · Claude Code (goloburda05-hue) · #292 / 292-dialogue
+
+- Dialogi z wyborami: rdzeń `src/core/dialogue.ts` (czyste funkcje), dane `src/data/dialogues/` (rejestr `DIALOGUES` w `index.ts`), okno `src/ui/dialogue.ts` + `dialogue.css`.
+- Kontrakt danych (jak w `docs/SCENARIUSZ.md` 7): `Dialogue { id, start, nodes }`, `DialogueNode { id, speaker, lines, choices?, next? }`, `Choice { label, requires?, check?, effects?, failEffects?, next?, nextOnFail? }`. Warunki: `attribute`, `reputation`, `flag`/`noFlag`, `gold`, `item`, `ward`. Skutki: `flag`, `reputation`, `gold`, `item`, `recruit`, `loyalty`, `duelBook`. Test: 50% przy atrybucie = trudność, ±8 pkt za punkt, 5–95%; porażka też prowadzi dalej (`nextOnFail`). `*kursywa*` w kwestiach = didaskalia. `dialogueProblems()` sprawdza dane (test przechodzi po wszystkich dialogach).
+- ⚠️ Podopieczni (#301), lojalność i Księga Pojedynków (#293) jeszcze nie istnieją — na razie trzymane we flagach `ward.<id>`, `loyalty.<id>`, `book.<entry>`; te moduły mogą je przejąć.
+- Przykład: Old Hask (6.3) z 4 wyborami (umowa / [Precision %] „Show me first” / [5 gold] kolejka, raz / [Order ≥ 20] wyszarzony). Podgląd: `?view=town&dialogue=old-hask` (parametr w `scenes/town.ts`, bez ruszania `main.ts`). Każdy wybór zapisuje grę od razu. Sama próba Haska to #299.
+
+### 2026-11-28 03:10 · Claude Code (goloburda05-hue) · #295 / 295-master-techniques
+
+- Techniki Mistrzów jako akcje walki: `src/core/techniques.ts` (zasady, `TECHNIQUE_RULES`, `learnedTechniques(story)`), `src/data/masters.ts` (4 Mistrzów + `CORVIN_LACH` ze wszystkimi technikami).
+  - **Feint Step** 6 EN + 25 Rytmu: krok i cios `normal`, którego nie da się zablokować (więc bez kontry). Zasięg: broń + jeden krok.
+  - **Stone Guard** 3 + 20: blok, w którym udany blok zawsze daje kontrę.
+  - **Sand Veil** 4 + 20: pół kroku w tył, −25 pkt trafienia w ciebie do twojej tury; pudło oślepia atakującego (nowy status `blinded`, −30 pkt, 1 tura).
+  - **Burning Edge** 7 + 35: cios `normal`, który podpala (`burning`).
+- ⚠️ Kontrakt core: `CombatAction` ma 4 nowe wartości (`feint_step`, `stone_guard`, `sand_veil`, `burning_edge`) — każda mapa `Record<CombatAction, …>` musi je mieć. `FighterSetup.techniques?`, `Fighter.techniques?/stoneGuard?/veiled?`, `ActionOption.rhythmCost?`, zdarzenie `{ type: 'technique', fighter, technique, rhythm }` przed skutkami, `attack.technique?`. Koszt w Rytmie płaci się przed ciosem, więc technika nie korzysta z Siódmego Kroku. Bez Rytmu (`rhythm: false`) nie ma technik. `strikeOf(action)` w `combat.ts` mówi, jakim ciosem bije akcja.
+- Gracz zna techniki z flag fabuły `technique.<id>` (= `true`) — ❓ #296 (próby Mistrzów): ustawiajcie je przez `setFlag(story, techniqueFlag(id))`. Dev: `?view=arena&techniques=all&etechniques=all`.
+- AI: wagi technik w profilach (bestie 0); Corvin (aggressor) używa wszystkich czterech. Symulacja w `docs/BALANS.md`: techniki dają 2–5 pkt przewagi, ~0,9 użycia na walkę.
+- UI: grupa „Techniques” na pasku akcji (klawisze F, G, V, E), widoczna tylko z technikami; koszt „6 EN · 25 RH”, tooltip z % i Rytmem. Prezenter: złota karteczka z nazwą techniki obok postaci, Sand Veil sypie piaskiem.
+- Poprawka przy okazji: `.action-card[hidden]` w `actionBar.css` — karta „Net” była widoczna także bez trójzębu (CSS `display:flex` wygrywał z `hidden`).
+
+### 2026-11-28 13:15 · Claude Code (Mateusz) · #332 / 332-arm-cut-art
+
+Grafika odciętej ręki z tarczą (dokończenie #275, na tej samej zasadzie co odcięta głowa z #20):
+- Blender (`blender/kit.py`, sekcja „torn arm”): `cut_arm_up` (ramię urwane nad łokciem, zastępuje `body_arm_up`), `cut_arm_up_rim` (biały poszarpany brzeg), `cut_arm_up_tissue` (czerwona bibuła w dół); dla luźnego przedramienia `cut_arm_lo` / `_rim` / `_tissue` (bibuła w górę). `_shreds` ma nowe parametry `half`, `k`, `core` — domyślne dają dokładnie to samo co przy szyi.
+- ⚠️ `kit.json` (przez `build_kit.py`): na kościach `arm_b_lo` i `arm_b_up` nowe sloty `stump_rim` (pod ciałem) i `stump` (nad raną). `turnedLayers` (`rig/shield.ts`) układa je razem z bliższą ręką; test w `shield.test.ts` poprawiony.
+- Rig: `Look.armLoose` = rysuj TYLKO przedramię z dłonią/tarczą, z rozdartą górą. Przy `armCut` ramię dostaje kikut (body → `cut_arm_up` + sloty stump).
+- `src/ui/looseArm.ts`: `LooseArm.create(rig, renderer, floorY)` kopiuje przedramię z kukły w pozie z chwili cięcia (druga kukła z `armLoose`, narysowana raz), potem leci od ciosu, obraca się, odbija i kładzie płasko na piasku; leży do `fx.clear()`. `FxLayer.addLimb()`.
+- Prezenter: `PresenterOptions.renderer?` (arena podaje `app.renderer`); `sever()` przy gore włączonym tworzy `LooseArm`, a dopiero potem chowa rękę. Bez renderera / floorY ręka znika jak dotąd. Gore `off` bez zmian.
+
+### 2026-11-28 13:16 · Claude Code (Mateusz) · #332 / 332-arm-cut-art
+
+Kikut krwawi do końca walki (prośba Mateusza):
+- ⚠️ Core: nowy status `bleeding` (`core/status.ts`): `turns: Infinity`, 1 stack, co turę `-stumpBleed(maxHealth)` = 3% maks. HP, min. 2. Nakładany przy odcięciu ręki obok `torn`, bez odporności i bez leczenia (Staples czyści tylko `torn`). Kto robi mapy `Record<StatusKind, …>` — jest nowa wartość.
+- Wygląd: co ~1,7 s z kikuta zbiera się i spada kropla krwi (`statusBits`, klatka `blood` w `assets/fx/status.png`, `blender/status_fx.py`, dodana na końcu arkusza — reszta klatek bez zmian). `StatusFx` pokazuje ją tylko, gdy `rig.look.armCut` (przy gore off ręka zostaje, więc nic nie kapie, ale HP dalej spada).
+
+### 2026-11-28 13:18 · Claude Code (Mateusz) · #332 / 332-arm-cut-art
+
+- Z kikuta wystaje delikatnie biała kość (złamany trzon z poszarpanym końcem) — w sprite `cut_arm_up_tissue` (`blender/kit.py`), nad paskami bibuły. `kit.json`: zmienił się tylko ten sprite.

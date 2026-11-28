@@ -67,7 +67,9 @@ export class StatusFx extends Container {
   update(dt: number) {
     this.t += dt;
     for (const w of this.wearers.values()) {
-      const bits = this.frames ? statusBits(w.statuses, this.t) : [];
+      // the stump drips only where it is drawn (#332): with gore off the arm stays on and nothing drips
+      const shown = w.rig.look.armCut ? w.statuses : w.statuses.filter((s) => s.kind !== 'bleeding');
+      const bits = this.frames ? statusBits(shown, this.t) : [];
       while (w.sprites.length < bits.length) {
         const s = new Sprite();
         s.anchor.set(0.5);

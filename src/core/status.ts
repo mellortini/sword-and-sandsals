@@ -1,4 +1,4 @@
-export type StatusKind = 'torn' | 'stunned' | 'burning' | 'soaked' | 'feared' | 'taped' | 'slowed' | 'netted';
+export type StatusKind = 'torn' | 'stunned' | 'burning' | 'soaked' | 'feared' | 'taped' | 'slowed' | 'netted' | 'blinded' | 'bleeding';
 
 export interface StatusTick {
   kind: StatusKind;
@@ -26,7 +26,19 @@ const RULES: Readonly<Record<StatusKind, { turns: number; maxStacks: number }>> 
   slowed: { turns: 2, maxStacks: 1 },
   // #258: caught in a thrown net, the fighter spends the next turn getting out of it
   netted: { turns: 1, maxStacks: 1 },
+  // #295: sand in the eyes after a blow that missed the Sand Veil; the next turn's blows go wide
+  blinded: { turns: 1, maxStacks: 1 },
+  // #332: the stump of a cut-off arm bleeds every turn until the end of the bout; nothing stops it
+  bleeding: { turns: Infinity, maxStacks: 1 },
 };
+
+/** health a bleeding stump (#332) takes every turn: 3% of the maximum, at least 2 */
+export function stumpBleed(maxHealth: number): number {
+  return Math.max(2, Math.round(maxHealth * 0.03));
+}
+
+/** percentage points off the blows of a blinded fighter (#295) */
+export const BLINDED_ACCURACY_PENALTY = 30;
 
 export function applyStatus(
   statuses: readonly StatusEffect[], kind: StatusKind, resistances: StatusResistances = {},
@@ -54,10 +66,11 @@ export function statusModifiers(statuses: readonly StatusEffect[]): {
   const soaked = statuses.find((effect) => effect.kind === 'soaked')?.stacks ?? 0;
   const feared = statuses.find((effect) => effect.kind === 'feared')?.stacks ?? 0;
   const slowed = statuses.some((effect) => effect.kind === 'slowed');
+  const blinded = statuses.some((effect) => effect.kind === 'blinded');
   return {
     armourMultiplier: 1 - 0.2 * soaked,
     movementMultiplier: (1 - 0.2 * soaked) * (slowed ? 0.75 : 1),
-    accuracyPenalty: 10 * feared,
+    accuracyPenalty: 10 * feared + (blinded ? BLINDED_ACCURACY_PENALTY : 0),
   };
 }
 
@@ -68,11 +81,12 @@ export function tickStatuses(statuses: readonly StatusEffect[], health: number, 
   const soaked = statuses.some((effect) => effect.kind === 'soaked');
   const ticks: StatusTick[] = [];
   let skip = false;
-  for (const kind of ['torn', 'burning', 'taped', 'stunned', 'netted', 'soaked', 'feared', 'slowed'] as const) {
+  for (const kind of ['bleeding', 'torn', 'burning', 'taped', 'stunned', 'netted', 'soaked', 'feared', 'slowed'] as const) {
     const effect = statuses.find((entry) => entry.kind === kind);
     if (!effect || health === 0) continue;
     let delta = 0;
     if (kind === 'torn') delta = -2 * effect.stacks;
+    if (kind === 'bleeding') delta = -stumpBleed(maxHealth);
     if (kind === 'burning') delta = -(soaked ? 2 : 4) * effect.stacks;
     if (kind === 'taped') delta = 3 * effect.stacks;
     const nextHealth = Math.max(0, Math.min(maxHealth, health + delta));

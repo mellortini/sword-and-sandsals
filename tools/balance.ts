@@ -83,6 +83,7 @@ export function simulateBalance(pairs = 250) {
     const setup = { level, attributes, equipment };
     const light = { level, attributes, equipment: { weapon: equipment.weapon } };
     const shielded = { ...setup, equipment: { ...equipment, offHand: `shield${tier}` } };
+    const plain = { ...setup, rhythm: false };
     // the five armour pieces only: the armourer's shield (#273) is measured on its own below
     const cost = getShopStock('armourer', league).filter((item) => item.tier === tier && 'slot' in item)
       .reduce((total, item) => total + shopPrices(item, 5).buy, 0);
@@ -97,6 +98,10 @@ export function simulateBalance(pairs = 250) {
       // the same gladiator with the shield of its tier against one without (#273), for a guarding and an attacking style
       shieldDefender: compareContenders({ setup: shielded, profile: 'defender' }, { setup, profile: 'defender' }, pairs, victoryGold),
       shieldAggressor: compareContenders({ setup: shielded, profile: 'aggressor' }, { setup, profile: 'aggressor' }, pairs, victoryGold),
+      // Rhythm and the Seventh Step (#294): the profiles without it, and one fighter with it against the same without
+      profilesPlain: compareContenders({ setup: plain, profile: 'aggressor' }, { setup: plain, profile: 'defender' }, pairs, victoryGold),
+      rhythmAggressor: compareContenders({ setup, profile: 'aggressor' }, { setup: plain, profile: 'aggressor' }, pairs, victoryGold),
+      rhythmDefender: compareContenders({ setup, profile: 'defender' }, { setup: plain, profile: 'defender' }, pairs, victoryGold),
     };
   });
 }

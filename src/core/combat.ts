@@ -10,7 +10,10 @@ import { COMBAT_ITEMS, combatSlotOptions, consumeSlotItem, createCombatSlots } f
 import type { CombatSlotAction, CombatSlotOption } from './spells';
 import { attackDamage, attackHitChance, deriveStats, isAttack, resolveAttributes, shieldDamage } from './stats';
 import { advanceStatusDurations, applyStatus, statusModifiers, tickStatuses } from './status';
+import { actorRhythm, clampRhythm, defenderRhythm, onSeventhStep } from './rhythm';
 import type { StatusKind } from './status';
+import { isTechnique, SAND_VEIL_EVASION, SAND_VEIL_STEP, TECHNIQUE_RULES } from './techniques';
+import type { TechniqueId } from './techniques';
 import { carriesNet, combatWeapon, leavesHandForShield, weaponMove, weaponReach } from './weapons';
 import { findShield } from '../data/shields';
 import type {
@@ -42,9 +45,22 @@ const ENERGY_COSTS: Record<CombatAction, number> = {
   rest: 0,
   taunt: 2,
   net: 6,
+  feint_step: TECHNIQUE_RULES.feint_step.energy,
+  stone_guard: TECHNIQUE_RULES.stone_guard.energy,
+  sand_veil: TECHNIQUE_RULES.sand_veil.energy,
+  burning_edge: TECHNIQUE_RULES.burning_edge.energy,
 };
 
 const ACTIONS = Object.keys(ENERGY_COSTS) as CombatAction[];
+/** a fighter's techniques without repeats, in the Masters' order */
+const techniquesInOrder = (ids: readonly TechniqueId[]): TechniqueId[] =>
+  (Object.keys(TECHNIQUE_RULES) as TechniqueId[]).filter((id) => ids.includes(id));
+
+/** the blow an action strikes with: an attack itself, or the strike of an attacking technique (#295) */
+export function strikeOf(action: CombatAction): AttackKind | undefined {
+  if (isAttack(action)) return action;
+  return isTechnique(action) ? TECHNIQUE_RULES[action].strike : undefined;
+}
 export const MIN_MELEE_ENERGY = Math.min(ENERGY_COSTS.quick, ENERGY_COSTS.normal, ENERGY_COSTS.power);
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -110,6 +126,9 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     counterReady: false,
     tauntPenalty: 0,
     consecutiveMisses: 0,
+    ...(setup.rhythm !== false && { rhythm: 0 }),
+    // the Masters' techniques (#295) are paid with Rhythm: no Rhythm, no techniques
+    ...(setup.rhythm !== false && setup.techniques?.length && { techniques: techniquesInOrder(setup.techniques) }),
     crowd: { ...crowd, favour: crowd.favour + bonuses.rules.crowdStart },
     statuses: [],
     statusResistances,
@@ -181,7 +200,19 @@ export function getActionOptions(state: CombatState): ActionOption[] {
     if (energyCost > fighter.energy || !isInRange(action, active, fighter.position, distance, meleeRange, movementMultiplier)) continue;
     if (action === 'net' && !fighter.net) continue;
 
-    if (action === 'net') options.push({ action, energyCost, hitChance: netHitChance(fighter, opponent) });
+    if (isTechnique(action)) {
+      // a Master's technique (#295): known, and enough Rhythm to pay for it
+      const rhythmCost = TECHNIQUE_RULES[action].rhythm;
+      if (!fighter.techniques?.includes(action) || (fighter.rhythm ?? 0) < rhythmCost) continue;
+      const strike = TECHNIQUE_RULES[action].strike;
+      // the blow's chance after the Rhythm is spent (no Seventh Step in a technique)
+      const paid = { ...fighter, rhythm: (fighter.rhythm ?? 0) - rhythmCost };
+      options.push({
+        action, energyCost, rhythmCost,
+        ...(strike && { hitChance: hitChance(strike, paid, opponent) }),
+        ...(action === 'stone_guard' && { blockChance: blockChance(fighter) }),
+      });
+    } else if (action === 'net') options.push({ action, energyCost, hitChance: netHitChance(fighter, opponent) });
     else options.push(isAttack(action)
       ? { action, energyCost, hitChance: hitChance(action, fighter, opponent), ...(counter ? { counter: true } : {}) }
       : action === 'block' ? { action, energyCost, blockChance: blockChance(fighter) } : { action, energyCost });
@@ -204,6 +235,11 @@ function isInRange(action: CombatAction, side: FighterSide, position: number, di
       return distance <= meleeRange;
     case 'net':
       return distance <= NET_RANGE;
+    case 'burning_edge':
+      return distance <= meleeRange;
+    // the step closes in first: a blow from one step beyond reach
+    case 'feint_step':
+      return distance <= meleeRange + STEP_DISTANCE * movementMultiplier;
     default:
       return true;
   }
@@ -220,7 +256,11 @@ export function getAttackZoneOptions(state: CombatState, action: AttackKind): At
 function hitChance(kind: AttackKind, attacker: Readonly<Fighter>, defender: Readonly<Fighter>, zone?: HitZone): number {
   const { accuracyPenalty } = statusModifiers(attacker.statuses);
   const targetingPenalty = zone ? ZONE_ACCURACY_PENALTY[zone] : 0;
-  const base = attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty + accuracyPenalty + targetingPenalty);
+  // the Seventh Step (#294): the blow cannot miss
+  if (onSeventhStep(attacker.rhythm)) return 100;
+  // behind the Sand Veil (#295) the defender is harder to find
+  const veil = defender.veiled ? SAND_VEIL_EVASION : 0;
+  const base = attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty + accuracyPenalty + targetingPenalty + veil);
   return protectedHitChance(base, attacker.consecutiveMisses);
 }
 
@@ -295,6 +335,13 @@ export function performAction(state: CombatState, command: CombatAction | Target
   }
 
   changeEnergy(side, fighter, -option.energyCost, events);
+  const rhythmBefore = fighter.rhythm;
+  if (isTechnique(action)) {
+    // the technique spends its Rhythm first (#295), so a blow struck with it never rides the Seventh Step
+    const cost = option.rhythmCost ?? TECHNIQUE_RULES[action].rhythm;
+    fighter.rhythm = clampRhythm((fighter.rhythm ?? 0) - cost);
+    events.push({ type: 'technique', fighter: side, technique: action, rhythm: cost });
+  }
   switch (action) {
     case 'step_forward':
       move(side, fighter, action, fighter.position + direction * Math.min(STEP_DISTANCE * movementMultiplier, distance), events);
@@ -331,17 +378,39 @@ export function performAction(state: CombatState, command: CombatAction | Target
       events.push({ type: 'net', actor: side, target: other, hitChance: chance, hit });
       break;
     }
+    case 'feint_step':
+      // the feint draws the guard out (#295): the blow that follows cannot be blocked, so it earns no counter
+      move(side, fighter, 'step_forward', fighter.position + direction * Math.min(STEP_DISTANCE * movementMultiplier, distance), events);
+      opponent.guarding = false;
+      opponent.stoneGuard = false;
+      break;
+    case 'stone_guard':
+      fighter.guarding = true;
+      fighter.stoneGuard = true;
+      events.push({ type: 'block', fighter: side });
+      break;
+    case 'sand_veil':
+      fighter.veiled = true;
+      move(side, fighter, 'step_back', fighter.position - direction * SAND_VEIL_STEP * movementMultiplier, events);
+      break;
   }
 
   let attack: Extract<CombatEvent, { type: 'attack' }> | undefined;
-  if (isAttack(action)) {
-    const traits = weaponMove(action, fighter.weapon);
-    attack = resolveAttack(action, side, fighter, opponent, traits, roll, zone);
+  const strike = strikeOf(action);
+  if (strike) {
+    const traits = weaponMove(strike, fighter.weapon);
+    const veiled = opponent.veiled === true;
+    attack = resolveAttack(strike, side, fighter, opponent, traits, roll, zone);
     fighter.consecutiveMisses = attack.hit ? 0 : Math.min(MAX_PROTECTED_MISSES, fighter.consecutiveMisses + 1);
     if (option.counter) attack.counter = true;
+    if (isTechnique(action)) attack.technique = action;
     events.push(attack);
+    // a blow that missed the Sand Veil (#295) leaves sand in the attacker's eyes for its next turn
+    if (veiled && !attack.hit) fighter.statuses = applyStatus(fighter.statuses, 'blinded', fighter.statusResistances);
     if (attack.damage > 0 && opponent.health > 0) {
       if (traits.status) opponent.statuses = applyStatus(opponent.statuses, traits.status, opponent.statusResistances);
+      // Burning Edge (#295): the blow sets the opponent on fire
+      if (action === 'burning_edge') opponent.statuses = applyStatus(opponent.statuses, 'burning', opponent.statusResistances);
       // aimed blows: a critical to the head stuns, a hit to the legs slows
       const zoneStatus = zone === 'head' && attack.crit ? 'stunned' : zone === 'legs' ? 'slowed' : undefined;
       if (zoneStatus) opponent.statuses = applyStatus(opponent.statuses, zoneStatus, opponent.statusResistances);
@@ -359,6 +428,8 @@ export function performAction(state: CombatState, command: CombatAction | Target
     }
   }
 
+  updateRhythm(side, fighter, rhythmBefore, other, opponent, action, option.counter === true, attack, events);
+
   const previousCrowd = fighter.crowd;
   const crowd = scoreCrowdAction(previousCrowd, action, fighter.attributes.charm, attack?.hit, attack?.crit);
   fighter.crowd = crowd.standing;
@@ -371,6 +442,35 @@ export function performAction(state: CombatState, command: CombatAction | Target
   }
 
   return endTurn(fighters, side, other, rngState, events);
+}
+
+/**
+ * The Rhythm after an action (#294): the actor's decision, and the defender's dodge or critical wound. An attack made
+ * on the Seventh Step spends it: the actor starts again from 0.
+ */
+function updateRhythm(
+  side: FighterSide, fighter: Fighter, before: number | undefined, other: FighterSide, opponent: Fighter, action: CombatAction,
+  counter: boolean, attack: Extract<CombatEvent, { type: 'attack' }> | undefined, events: CombatEvent[],
+) {
+  const previous = fighter.lastAction;
+  fighter.lastAction = action;
+  if (fighter.rhythm !== undefined) {
+    // `before`: the Rhythm as the turn began; a technique (#295) has already spent its part of it
+    const from = before ?? fighter.rhythm;
+    const paid = fighter.rhythm;
+    const moved = events.some((e) => e.type === 'move' && e.fighter === side && e.kind !== 'knockback' && e.kind !== 'charge');
+    const to = attack && onSeventhStep(paid)
+      ? 0
+      : clampRhythm(paid + actorRhythm({ action, previous, counter, moved, hit: (attack?.damage ?? 0) > 0 }));
+    fighter.rhythm = to;
+    if (to !== from) events.push({ type: 'rhythm', fighter: side, from, to });
+  }
+  if (attack && opponent.rhythm !== undefined && opponent.health > 0) {
+    const from = opponent.rhythm;
+    const to = clampRhythm(from + defenderRhythm(attack));
+    opponent.rhythm = to;
+    if (to !== from) events.push({ type: 'rhythm', fighter: other, from, to });
+  }
 }
 
 function endTurn(
@@ -392,6 +492,9 @@ function startNextTurn(
   while (true) {
     const fighter = fighters[active];
     fighter.guarding = false;
+    // the techniques' stances (#295) last until the fighter's own next turn, like the guard
+    if (fighter.stoneGuard) fighter.stoneGuard = false;
+    if (fighter.veiled) fighter.veiled = false;
     const tick = tickStatuses(fighter.statuses, fighter.health, fighter.stats.maxHealth);
     fighter.health = tick.health;
     for (const effect of tick.ticks) events.push({ type: 'status', fighter: active, ...effect });
@@ -465,6 +568,8 @@ function resolveAttack(
     // A defensive stance can block an incoming strike; a skilled block may earn a free counter. Crits need an unblocked hit.
     // behind a whole shield at the full chance, with the blade alone at less (#274); the shield's state before this strike
     const blocked = hit && defender.guarding && roll() < blockChance(defender);
+    // Stone Guard (#295): a block made in it always earns the counter
+    if (blocked && defender.stoneGuard) defender.counterReady = true;
     if (blocked && !defender.counterReady) {
       const chanceToCounter = Math.min(70, counterChance(defender.attributes.guard) + defender.skillRules.counterBonus);
       if (chanceToCounter > 0 && roll() < chanceToCounter) defender.counterReady = true;
@@ -487,6 +592,8 @@ function resolveAttack(
         severed = true;
         defender.shield = { ...defender.shield!, health: 0 };
         defender.statuses = applyStatus(defender.statuses, 'torn', defender.statusResistances);
+        // and the stump keeps bleeding to the end of the bout (#332): no resistance, no cure
+        defender.statuses = applyStatus(defender.statuses, 'bleeding');
       }
     }
     if (hit) defender.guarding = false;

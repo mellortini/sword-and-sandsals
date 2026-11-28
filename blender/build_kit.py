@@ -146,9 +146,15 @@ def limb(side):
 
 LAYERS = [dict(bone='head', slot='hair', piece='back')]
 # the back hand's weapon (the second dagger, #47) sits behind that hand, like the sword behind the front one
+# slots 'stump_rim' / 'stump' = the torn shield arm (#332): the white rim under the flesh, the red crepe over it; the rig
+# draws them only on a cut arm (upper arm) or on the loose forearm, and then swaps body_arm_up / _lo for cut_arm_up / _lo
 LAYERS += [dict(bone='weapon_b', slot='weapon_b', piece='', back=True), dict(bone='hand_b', slot='body', piece='hand', back=True),
+           dict(bone='arm_b_lo', slot='stump_rim', piece='arm_lo_rim', back=True),
            dict(bone='arm_b_lo', slot='body', piece='arm_lo', back=True), dict(bone='arm_b_lo', slot='wound', piece='arm_b_lo', back=True), dict(bone='arm_b_lo', slot='armor', piece='bracer', back=True),
-           dict(bone='arm_b_up', slot='body', piece='arm_up', back=True), dict(bone='arm_b_up', slot='wound', piece='arm_b_up', back=True), dict(bone='arm_b_up', slot='shoulders', piece='', back=True)]
+           dict(bone='arm_b_lo', slot='stump', piece='arm_lo_tissue', back=True),
+           dict(bone='arm_b_up', slot='stump_rim', piece='arm_up_rim', back=True),
+           dict(bone='arm_b_up', slot='body', piece='arm_up', back=True), dict(bone='arm_b_up', slot='wound', piece='arm_b_up', back=True),
+           dict(bone='arm_b_up', slot='stump', piece='arm_up_tissue', back=True), dict(bone='arm_b_up', slot='shoulders', piece='', back=True)]
 LAYERS += limb('b') + limb('f')
 # slot 'cut' = the two halves of a torn neck, drawn only for a pose with `neck_cut` (finishers, #20)
 LAYERS += [dict(bone='torso', slot='body', piece='torso'),

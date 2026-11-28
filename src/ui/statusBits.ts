@@ -9,6 +9,7 @@
  *  - feared: sweat drops flying off the head
  *  - slowed: glue hanging from a hand and a foot
  *  - netted: the trident's rope net thrown over the chest (#258), swaying a little
+ *  - bleeding: now and then a drop of blood swells on the stump of a cut-off arm (#332) and falls to the sand
  */
 import type { StatusKind } from '../core/status';
 
@@ -44,6 +45,11 @@ const SPOTS = {
 } as const;
 
 const DROP_EVERY = 0.9;
+/** the stump drips gently (#332): one drop every BLEED_EVERY seconds, hanging for the first part of it */
+const BLEED_EVERY = 1.7;
+const BLEED_HANG = 0.55;
+/** the torn end of the upper arm (blender/kit.py ARM_UP_CUT), a little inside the crepe */
+const STUMP = { bone: 'arm_b_up', x: 0.02, y: -1.78 } as const;
 const SWEAT_EVERY = 0.75;
 const fraction = (v: number) => v - Math.floor(v);
 
@@ -90,6 +96,22 @@ export function statusBits(statuses: readonly ShownStatus[], t: number): StatusB
           });
         }
         break;
+      case 'blinded':
+        // sand in the eyes (#295): a grey-gold smear across the face
+        out.push({ frame: 'blot1', bone: 'head', x: 0.7, y: 1.5, rot: 0.3, scale: SIZE * 0.75, alpha: 0.55, multiply: true });
+        break;
+      case 'bleeding': {
+        // swells on the stump, lets go and falls faster and faster, gone before it reaches the sand
+        const p = fraction(t / BLEED_EVERY);
+        if (p < BLEED_HANG) {
+          const g = p / BLEED_HANG;
+          out.push({ ...STUMP, frame: 'blood', wy: -0.12 * g, upright: true, rot: 0, scale: SIZE * (0.25 + 0.45 * g), alpha: 1 });
+        } else {
+          const q = (p - BLEED_HANG) / (1 - BLEED_HANG);
+          out.push({ ...STUMP, frame: 'blood', wy: -0.12 - 4.2 * q * q, upright: true, rot: 0, scale: SIZE * 0.7, alpha: q < 0.8 ? 1 : (1 - q) / 0.2 });
+        }
+        break;
+      }
       case 'netted':
         out.push({ frame: 'mesh', bone: 'torso', x: 0.35, y: 1.6, rot: 0.15 + 0.04 * Math.sin(t * 2.4), scale: SIZE * 1.15, alpha: 1 });
         break;
