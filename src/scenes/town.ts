@@ -5,6 +5,8 @@ import { saveGame } from '../core/save';
 import type { SavedCharacter } from '../core/save';
 import { lookPreview } from '../ui/lookPreview';
 import { BUILDINGS, visitBuilding } from '../ui/town';
+import { openDialogue } from '../ui/dialogue';
+import { DIALOGUES } from '../data/dialogues';
 import { townNote } from '../ui/townRules';
 import { DEFAULT_LOOK } from '../rig/PaperRig';
 import { drawableLook, groundShadowTexture } from './common';
@@ -69,7 +71,8 @@ class PlaceTag extends Container {
  * pointing at a building lights it up and shows what it is for, a click (or ←/→ and Enter) opens its screen, and the
  * arena opens the leagues, from where a bout goes to the arena and back here. Gear (the pack) and the menu are
  * buttons, they have no building. Escape goes back to the title.
- * Dev: `&time=0..1` start phase, `&day=<s>` length of a day, `&freeze` stops the clock.
+ * Dev: `&time=0..1` start phase, `&day=<s>` length of a day, `&freeze` stops the clock, `&dialogue=<id>` opens a dialogue
+ * (src/data/dialogues, #292) over the town, e.g. `&dialogue=old-hask`.
  */
 export async function showTown({ app, world, params, add, kit, ui }: SceneContext) {
   const saved = await loadSavedGladiator();
@@ -173,6 +176,19 @@ export async function showTown({ app, world, params, add, kit, ui }: SceneContex
     if (act === 'gear' || act === 'home') void visit(act);
     else if (act === 'menu') location.search = '?view=title';
   });
+
+  // a dialogue asked for in the address (#292): over the town, with the saved gladiator
+  const talk = DIALOGUES[params.get('dialogue') ?? ''];
+  if (talk && gladiator) {
+    busy = true;
+    bar.hidden = true;
+    void openDialogue(gladiator, talk, saveGame).then((after) => {
+      gladiator = after;
+      hud();
+      bar.hidden = false;
+      busy = false;
+    });
+  }
 
   window.addEventListener('keydown', (e) => {
     if (busy) return;

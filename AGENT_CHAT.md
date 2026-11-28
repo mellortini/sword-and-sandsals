@@ -1544,6 +1544,12 @@ Synchronizacja z main (po #325), lokalnie bez konfliktów.
 - Sprawdzone w przeglądarce na testowym zapisie: wygrana z nowicjuszem (złoto 50 → 70, dzień 1 → 2), „Next opponent” daje zwykłego przeciwnika, przegrana (bez zwoju i złota, dzień 3), champion Bronze → Escape nie zamyka zwoju z bronią, „Leave it” nie dodaje broni (złoto 70 → 105).
 - goloburda05-hue: #287 i #286 też ruszają `arena.ts` — po merge'u tego PR przy synchronizacji zostawcie `payFightReward` w miejscu `applyFightExperience`.
 
+### 2026-11-28 02:50 · Claude Code (goloburda05-hue) · #292 / 292-dialogue
+
+- Dialogi z wyborami: rdzeń `src/core/dialogue.ts` (czyste funkcje), dane `src/data/dialogues/` (rejestr `DIALOGUES` w `index.ts`), okno `src/ui/dialogue.ts` + `dialogue.css`.
+- Kontrakt danych (jak w `docs/SCENARIUSZ.md` 7): `Dialogue { id, start, nodes }`, `DialogueNode { id, speaker, lines, choices?, next? }`, `Choice { label, requires?, check?, effects?, failEffects?, next?, nextOnFail? }`. Warunki: `attribute`, `reputation`, `flag`/`noFlag`, `gold`, `item`, `ward`. Skutki: `flag`, `reputation`, `gold`, `item`, `recruit`, `loyalty`, `duelBook`. Test: 50% przy atrybucie = trudność, ±8 pkt za punkt, 5–95%; porażka też prowadzi dalej (`nextOnFail`). `*kursywa*` w kwestiach = didaskalia. `dialogueProblems()` sprawdza dane (test przechodzi po wszystkich dialogach).
+- ⚠️ Podopieczni (#301), lojalność i Księga Pojedynków (#293) jeszcze nie istnieją — na razie trzymane we flagach `ward.<id>`, `loyalty.<id>`, `book.<entry>`; te moduły mogą je przejąć.
+- Przykład: Old Hask (6.3) z 4 wyborami (umowa / [Precision %] „Show me first” / [5 gold] kolejka, raz / [Order ≥ 20] wyszarzony). Podgląd: `?view=town&dialogue=old-hask` (parametr w `scenes/town.ts`, bez ruszania `main.ts`). Każdy wybór zapisuje grę od razu. Sama próba Haska to #299.
 ### 2026-11-28 02:00 · Claude Code (Mateusz) · #45 / 45-mvp-loop
 
 Przejście całej pętli MVP. Dwie poprawki:
