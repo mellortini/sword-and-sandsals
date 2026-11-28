@@ -1,3 +1,4 @@
+import { setPriceAtLevel } from '../data/equipment';
 import { findChampionWeapon } from '../data/weaponLookup';
 import type { Weapon } from '../data/weapons';
 import { crowdGoldReward } from './crowd';
@@ -16,6 +17,16 @@ export interface FightReward {
   readonly forgeMaterials?: ForgeMaterials;
 }
 
+/**
+ * Gold for beating an opponent of `level`, before the crowd's bonus (#163). A flat part and a share that follows the
+ * price of armour at that level (`setPriceAtLevel`), so a league's key gear (its top set and weapon) is paid for after
+ * about half to two thirds of the wins it takes to level through the league, the Bronze one by its end.
+ * Measured with tools/economy.ts (docs/BALANS.md, "Krzywa ekonomii"). Before #163 it was 15 + 5 × level.
+ */
+export function victoryGold(level: number): number {
+  return Math.round(25 + 5 * level + 0.45 * setPriceAtLevel(level) ** 0.55);
+}
+
 export function getFightReward(state: CombatState, fightId: string, championPrizeId?: string): FightReward | undefined {
   if (state.winner === null || !fightId.trim()) return undefined;
   const { player, enemy } = state.fighters;
@@ -24,7 +35,7 @@ export function getFightReward(state: CombatState, fightId: string, championPriz
   const weapon = won ? findChampionWeapon(prizeId) : undefined;
   return {
     fightId,
-    gold: crowdGoldReward(won ? 15 + 5 * enemy.level : 0, player.crowd),
+    gold: crowdGoldReward(won ? victoryGold(enemy.level) : 0, player.crowd),
     experience: state.rewards?.experience ?? fightExperience(state.winner, player.level, enemy.level),
     weapon,
     ...(won && { forgeMaterials: forgeFightLoot(state) }),

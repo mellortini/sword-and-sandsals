@@ -27,7 +27,7 @@ Przewaga pełnej zbroi szybko rośnie w tych scenariuszach. Kolejny pomiar powin
 
 ## Złoto i ceny
 
-Cena obejmuje pięć części kompletu i miecz jednego tieru przy Charm 5. Symulator zakłada bazową wypłatę `15 + 5 × poziom przeciwnika` oraz rzeczywiste premie i monety od tłumu. Wiersze używają wyników agresora przeciw obrońcy z takim samym sprzętem. Liczby walk odpowiadają startowi od zera i wydaniu wszystkich wpływów na sprzęt. Kampania może też zapewniać łup, stan początkowy złota, leczenie i inne koszty.
+Cena obejmuje pięć części kompletu i miecz jednego tieru przy Charm 5. Tabela poniżej to pomiar sprzed #163, z bazową wypłatą `15 + 5 × poziom przeciwnika` (obecna formuła: sekcja „Krzywa ekonomii”) oraz rzeczywistymi premiami i monetami od tłumu. Wiersze używają wyników agresora przeciw obrońcy z takim samym sprzętem. Liczby walk odpowiadają startowi od zera i wydaniu wszystkich wpływów na sprzęt. Kampania może też zapewniać łup, stan początkowy złota, leczenie i inne koszty.
 
 | Poziom | Cena zestawu | Złoto na wygraną | Złoto na próbę | Wygrane do zakupu | Próby do zakupu |
 | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -43,7 +43,7 @@ Ceny rosną szybciej niż wpływy z samych walk. Przed strojeniem późnych lig 
 ## Następne pomiary
 
 - Wpływ pancerza przy sąsiednich tierach. [#164](https://github.com/mellortini/sword-and-sandsals/issues/164)
-- Krzywa cen i nagród w wyższych ligach. [#163](https://github.com/mellortini/sword-and-sandsals/issues/163)
+- Krzywa cen i nagród w wyższych ligach: sekcja „Krzywa ekonomii” (#163).
 
 ## Sąsiednie tiery i mieszane zestawy (#164)
 
@@ -149,3 +149,42 @@ obrażeń na turę (agresor ~8,5 HP na użycie wobec ~6 HP szybkiego), a energia
 cios w 60% walk. Wdrożone: profil `defender` w AI mniej pasywny (więcej ataków, blok 1,2 → 1,0), mocny cios kosztuje
 11 energii (było 8) i ma celność 48 (było 55). Wynik w pełnym symulatorze: 52,6 / 52,6 / 52,8 / 54,6% (średnio 53,2%),
 obrońca z tarczą przeciw agresorowi bez tarczy 46–51%. Dotyczy to też gracza: mocny cios jest teraz droższy i mniej pewny.
+
+## Krzywa ekonomii (#163)
+
+Model kariery liga po lidze: `tools/economy.ts` (raport: `careerEconomy()`, test pilnujący krzywej: `src/core/economy.test.ts`).
+Liczy złoto startowe (50), wypłatę za wygraną z premią tłumu, leczenie w świątyni po każdej walce (także po przegranej),
+odsprzedaż kluczowego sprzętu poprzedniej ligi (30%) i miecza championa, oraz to, że przegrana nic nie płaci. **Wpisowego w grze
+nie ma** (w modelu 0). Odsetek wygranych, premia tłumu i rany pochodzą z prawdziwych walk rdzenia i AI (200 na poziom).
+
+**Kluczowy sprzęt ligi** = pełny zestaw zbroi najwyższego tieru ligi + miecz tego tieru (Charm 5). **Wygrane ligi** = wygrane z
+równymi rywalami potrzebne (XP), by przejść od pierwszego poziomu ligi do poziomu championa.
+
+**Docelowa krzywa:** kluczowy sprzęt ligi do kupienia po ok. 50–70% wygranych ligi (gracz walczy z championem już w nim),
+krótka liga Bronze (8 wygranych) — przed jej końcem.
+
+| Liga | Poziomy | Tier | Sprzęt | Wygrane ligi | Przed: zakup po | Po: zakup po wygranych (walkach) | Po: % ligi | Złoto/wygraną | Leczenie/walkę |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Bronze | 1–4 | 2 | 174 | 8 | — | 7 (14) | 88% | 55,1 | 13,7 |
+| Silver | 4–10 | 4 | 904 | 30 | — | 17 (33) | 57% | 107,1 | 15,6 |
+| Gold | 10–16 | 6 | 3 445 | 48 | 44 | 23 (44) | 48% | 164,7 | 17,0 |
+| Champion | 16–22 | 8 | 11 297 | 68 | — | 44 (84) | 65% | 230,1 | 19,3 |
+| Legend | 22–32 | 10 | 34 439 | 159 | — | 105 (206) | 66% | 345,2 | 21,0 |
+
+„—” = sprzętu nie da się kupić w trakcie ligi. Przed zmianą ceny rosły z tierem wykładniczo (×1,8–2,4), a wypłata liniowo, a
+leczenie zjadało ~40% przychodu w Bronze. Gold wychodzi niżej, bo przychodzi z oszczędnościami z Silver.
+
+**Wdrożone:** wypłata `victoryGold(poziom) = 25 + 5 × poziom + 0,45 × cena_zestawu(poziom)^0,55` (`src/core/rewards.ts`), gdzie
+`setPriceAtLevel` (`src/data/equipment.ts`) to cena zestawu najwyższego tieru dostępnego na tym poziomie, rosnąca płynnie do
+następnego tieru. Ceny sklepów, leczenia i XP bez zmian.
+
+| Poziom przeciwnika | 1 | 2 | 4 | 7 | 10 | 13 | 16 | 19 | 22 | 27 | 32 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Było | 20 | 25 | 35 | 50 | 65 | 80 | 95 | 110 | 125 | 150 | 175 |
+| Jest | 33 | 41 | 55 | 78 | 101 | 126 | 152 | 179 | 207 | 259 | 303 |
+
+**Sprzęt startowy:** 50 złota kupuje zestaw tier 1 (40) albo miecz tier 1 (19), oba razem (59) — dopiero po pierwszej wygranej.
+Pierwsza walka nowego gladiatora jest łatwa (#324), więc to wystarcza.
+
+Poza modelem: nagrody tłumu w przedmiotach, materiały kuźni (bez wartości w złocie), zaklęcia i ulepszenia kuźni, tarcze.
+

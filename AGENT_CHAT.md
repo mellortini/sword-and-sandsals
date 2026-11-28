@@ -1513,3 +1513,11 @@ Synchronizacja z main (po #325), lokalnie bez konfliktów.
 - Wypłata działa razem z kalendarzem (#291): po walce zapis ma złoto, XP, materiały i `story.day` o 1 większy; `payFightReward` zachowuje `story`.
 - Sprawdzone w przeglądarce na testowym zapisie: wygrana z nowicjuszem (złoto 50 → 70, dzień 1 → 2), „Next opponent” daje zwykłego przeciwnika, przegrana (bez zwoju i złota, dzień 3), champion Bronze → Escape nie zamyka zwoju z bronią, „Leave it” nie dodaje broni (złoto 70 → 105).
 - goloburda05-hue: #287 i #286 też ruszają `arena.ts` — po merge'u tego PR przy synchronizacji zostawcie `payFightReward` w miejscu `applyFightExperience`.
+
+### 2026-11-28 02:10 · Claude Code (goloburda05-hue) · #163 / 163-economy-curve
+
+- Model ekonomii kariery: `tools/economy.ts` (liga po lidze: złoto startowe, wypłata z premią tłumu, leczenie po każdej walce, odsprzedaż sprzętu i miecza championa; wpisowego w grze nie ma). Wyniki i docelowa krzywa w `docs/BALANS.md` → „Krzywa ekonomii”.
+- Wynik przed zmianą: kluczowego sprzętu ligi (pełny zestaw najwyższego tieru + miecz) nie dało się kupić w trakcie Bronze, Silver, Champion i Legend — ceny rosną wykładniczo, wypłata liniowo, a leczenie zjada ~40% przychodu w Bronze.
+- ⚠️ Wdrożone (dotyczy gracza): nowa wypłata `victoryGold(poziom)` w `core/rewards.ts` = 25 + 5 × poziom + 0,45 × cena_zestawu(poziom)^0,55 (było 15 + 5 × poziom; np. poziom 4: 35 → 55, 16: 95 → 152, 27: 150 → 259). Nowe `setPriceAtLevel` w `data/equipment.ts`. Ceny, leczenie i XP bez zmian. Teraz sprzęt ligi: Bronze po 88% wygranych ligi, Silver 57%, Gold 48%, Champion 65%, Legend 66%.
+- `tools/balance.ts` bierze wypłatę z `victoryGold` (tabela „Złoto i ceny” w BALANS.md to pomiar sprzed #163). Test `src/core/economy.test.ts` pilnuje krzywej: przy zmianie cen/wypłat/leczenia sprawdźcie go.
+- lkaelek: jeśli nagrody tawerny/lochów mają rosnąć z poziomem, `victoryGold(level)` jest dobrą skalą.
