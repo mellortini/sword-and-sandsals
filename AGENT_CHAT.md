@@ -1513,6 +1513,15 @@ Nowa fabuła „Siódmy Krok” (decyzja Mateusza): **świat to zwykłe średnio
 
 - Arena z #272 (PR #321) zostaje w nowej fabule jako arena regionu **Kragmoor** („Kopalniany Krąg”); wielka prasa = kruszarka rudy z kopalń. Dopisane w `docs/SCENARIUSZ.md`, sekcja 2.
 
+### 2026-11-27 22:50 · Claude Code (goloburda05-hue) · #294 / 294-rhythm
+
+- Rytm i Siódmy Krok: `src/core/rhythm.ts` (zasady, czyste funkcje) + `updateRhythm` w `core/combat.ts` po każdej akcji. Obie strony mają Rytm 0–100; przy 100 następny atak ma 100% trafienia (`hitChance`, także celowane), po ataku Rytm = 0. Wartości w `RHYTHM_GAIN`.
+- ⚠️ Kontrakt core: `Fighter.rhythm?: number`, `Fighter.lastAction?: CombatAction`, zdarzenie `{ type: 'rhythm', fighter, from, to }`, `FighterSetup.rhythm?: false` (wyłącza, dla symulatora). Testy z dokładną listą zdarzeń muszą uwzględnić `rhythm` (poprawiłem `combat.test.ts`); test stylu profili AI liczy teraz bez Rytmu.
+- HUD: `src/ui/rhythmTrack.ts` — pasek „RHYTHM” z 7 śladami stóp nad paskiem tłumu, przy pełnym pulsuje + „7TH STEP”. `CombatHud.panelTop` uwzględnia nowy pasek (pasek akcji siada wyżej na telefonach).
+- Balans: nowe wiersze w `tools/balance.ts`, wyniki w `docs/BALANS.md` (Rytm daje 3–7 pkt przewagi, ~1 Siódmy Krok na walkę, profile prawie bez zmian).
+- Siódmy Krok w wariancie „pewne trafienie” (`docs/SCENARIUSZ.md` 5.2 dopuszcza ten albo „darmowa akcja + podgląd zamiaru”). Nie zrobione: „trafienie po zwiadzie” (zwiad to #306) i wzrost maks. Rytmu z technikami/poziomem (techniki to #295).
+- ⚠️ #286 (trójząb) dodaje akcję `net` w tym samym `performAction` — kto merguje drugi, ma mały konflikt w `combat.ts`/`types.ts`.
+
 ### 2026-11-28 00:27 · Claude Code (Mateusz) · first-fight-easy
 
 Pierwsza walka nowego gladiatora jest łatwa (prośba Mateusza, bez osobnego Issue).

@@ -72,7 +72,7 @@ describe('combat options', () => {
   it('charges into melee before dealing damage and caps knockback at the boundary', () => {
     const start = createCombat(1, { position: 13 }, { position: 19 });
     const result = play(start, 'charge');
-    expect(result.events.map(({ type }) => type)).toEqual(['energy', 'move', 'attack', 'move', 'turn']);
+    expect(result.events.map(({ type }) => type)).toEqual(['energy', 'move', 'attack', 'move', 'rhythm', 'turn']);
     expect(result.events).toContainEqual({ type: 'move', fighter: 'player', kind: 'charge', from: 13, to: 18 });
     expect(result.events).toContainEqual({ type: 'move', fighter: 'enemy', kind: 'knockback', from: 19, to: 20 });
     expect(getDistance(result.state)).toBe(2);

@@ -10,6 +10,7 @@ import { COMBAT_ITEMS, combatSlotOptions, consumeSlotItem, createCombatSlots } f
 import type { CombatSlotAction, CombatSlotOption } from './spells';
 import { attackDamage, attackHitChance, deriveStats, isAttack, resolveAttributes, shieldDamage } from './stats';
 import { advanceStatusDurations, applyStatus, statusModifiers, tickStatuses } from './status';
+import { actorRhythm, clampRhythm, defenderRhythm, onSeventhStep } from './rhythm';
 import type { StatusKind } from './status';
 import { carriesNet, combatWeapon, leavesHandForShield, weaponMove, weaponReach } from './weapons';
 import { findShield } from '../data/shields';
@@ -110,6 +111,7 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     counterReady: false,
     tauntPenalty: 0,
     consecutiveMisses: 0,
+    ...(setup.rhythm !== false && { rhythm: 0 }),
     crowd: { ...crowd, favour: crowd.favour + bonuses.rules.crowdStart },
     statuses: [],
     statusResistances,
@@ -220,6 +222,8 @@ export function getAttackZoneOptions(state: CombatState, action: AttackKind): At
 function hitChance(kind: AttackKind, attacker: Readonly<Fighter>, defender: Readonly<Fighter>, zone?: HitZone): number {
   const { accuracyPenalty } = statusModifiers(attacker.statuses);
   const targetingPenalty = zone ? ZONE_ACCURACY_PENALTY[zone] : 0;
+  // the Seventh Step (#294): the blow cannot miss
+  if (onSeventhStep(attacker.rhythm)) return 100;
   const base = attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty + accuracyPenalty + targetingPenalty);
   return protectedHitChance(base, attacker.consecutiveMisses);
 }
@@ -359,6 +363,8 @@ export function performAction(state: CombatState, command: CombatAction | Target
     }
   }
 
+  updateRhythm(side, fighter, other, opponent, action, option.counter === true, attack, events);
+
   const previousCrowd = fighter.crowd;
   const crowd = scoreCrowdAction(previousCrowd, action, fighter.attributes.charm, attack?.hit, attack?.crit);
   fighter.crowd = crowd.standing;
@@ -371,6 +377,33 @@ export function performAction(state: CombatState, command: CombatAction | Target
   }
 
   return endTurn(fighters, side, other, rngState, events);
+}
+
+/**
+ * The Rhythm after an action (#294): the actor's decision, and the defender's dodge or critical wound. An attack made
+ * on the Seventh Step spends it: the actor starts again from 0.
+ */
+function updateRhythm(
+  side: FighterSide, fighter: Fighter, other: FighterSide, opponent: Fighter, action: CombatAction, counter: boolean,
+  attack: Extract<CombatEvent, { type: 'attack' }> | undefined, events: CombatEvent[],
+) {
+  const previous = fighter.lastAction;
+  fighter.lastAction = action;
+  if (fighter.rhythm !== undefined) {
+    const from = fighter.rhythm;
+    const moved = events.some((e) => e.type === 'move' && e.fighter === side && e.kind !== 'knockback' && e.kind !== 'charge');
+    const to = attack && onSeventhStep(from)
+      ? 0
+      : clampRhythm(from + actorRhythm({ action, previous, counter, moved, hit: (attack?.damage ?? 0) > 0 }));
+    fighter.rhythm = to;
+    if (to !== from) events.push({ type: 'rhythm', fighter: side, from, to });
+  }
+  if (attack && opponent.rhythm !== undefined && opponent.health > 0) {
+    const from = opponent.rhythm;
+    const to = clampRhythm(from + defenderRhythm(attack));
+    opponent.rhythm = to;
+    if (to !== from) events.push({ type: 'rhythm', fighter: other, from, to });
+  }
 }
 
 function endTurn(

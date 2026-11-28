@@ -53,9 +53,11 @@ describe('enemy AI', () => {
   it('gives the profiles their own style', () => {
     const aggressor: CombatAction[] = [];
     const defender: CombatAction[] = [];
+    // the profiles' own taste: on the Seventh Step (#294) a sure hit draws every profile to the heaviest blow
+    const plain = { rhythm: false };
     for (let seed = 1; seed <= 200; seed++) {
-      aggressor.push(...fight(seed, { player: 'aggressor', enemy: 'defender' }).picks.player);
-      defender.push(...fight(seed, { player: 'defender', enemy: 'aggressor' }).picks.player);
+      aggressor.push(...fight(seed, { player: 'aggressor', enemy: 'defender' }, plain, plain).picks.player);
+      defender.push(...fight(seed, { player: 'defender', enemy: 'aggressor' }, plain, plain).picks.player);
     }
     expect(share(aggressor, ['power', 'charge'])).toBeGreaterThan(share(defender, ['power', 'charge']));
     expect(share(defender, ['block', 'rest'])).toBeGreaterThan(share(aggressor, ['block', 'rest']));

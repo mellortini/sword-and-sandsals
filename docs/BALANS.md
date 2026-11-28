@@ -149,3 +149,22 @@ obrażeń na turę (agresor ~8,5 HP na użycie wobec ~6 HP szybkiego), a energia
 cios w 60% walk. Wdrożone: profil `defender` w AI mniej pasywny (więcej ataków, blok 1,2 → 1,0), mocny cios kosztuje
 11 energii (było 8) i ma celność 48 (było 55). Wynik w pełnym symulatorze: 52,6 / 52,6 / 52,8 / 54,6% (średnio 53,2%),
 obrońca z tarczą przeciw agresorowi bez tarczy 46–51%. Dotyczy to też gracza: mocny cios jest teraz droższy i mniej pewny.
+
+## Rytm i Siódmy Krok (#294)
+
+Rytm 0–100 rośnie od dobrych decyzji i spada od powtarzania (`src/core/rhythm.ts`): inna akcja niż poprzednia +5,
+ta sama −10, darmowa kontra +20, krok/skok zmieniający dystans +6, cios z obrażeniami +6, unik (cios przeciwnika
+chybił) +12, przyjęty krytyk −15. Przy 100 następny atak nie może chybić (blok nadal działa), a po nim Rytm spada do 0.
+Ruch obu stron, pomiar w pełnym symulatorze (250 par z zamianą stron na wiersz):
+
+| Poziom | Tier | Agresor z obrońcą: z Rytmem | bez Rytmu | Z Rytmem przeciw bez (agresorzy) | (obrońcy) | Siódmych Kroków na walkę |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 1 | 53,8% | 52,6% | 56,8% | 54,8% | 1,74 |
+| 5 | 3 | 54,4% | 52,6% | 53,0% | 53,2% | 1,21 |
+| 12 | 6 | 52,6% | 52,8% | 53,6% | 53,2% | 0,88 |
+| 25 | 9 | 55,6% | 54,6% | 55,2% | 53,0% | 0,65 |
+
+Siódme Kroki liczone dla obu stron razem (agresor kontra obrońca, 300 walk na tier). Rytm daje temu, kto go ma,
+3–7 pkt procentowych przewagi i jest rzadszy na wyższych poziomach (krótsze walki). Balans profili prawie się nie
+zmienia (+0–1,8 pkt dla agresora). Wiersze `profilesPlain`, `rhythmAggressor`, `rhythmDefender` w `tools/balance.ts`;
+`FighterSetup.rhythm: false` wyłącza Rytm.

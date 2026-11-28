@@ -40,6 +40,8 @@ export interface FighterSetup {
   weapon?: string;
   statusResistances?: StatusResistances;
   slots?: CombatSlots;
+  /** `false` fights without Rhythm (#294): the balance tools measure what it changes */
+  rhythm?: boolean;
   skills?: readonly SkillId[];
   position?: number;
 }
@@ -88,6 +90,10 @@ export interface Fighter {
   counterReady: boolean;
   tauntPenalty: number;
   consecutiveMisses: number;
+  /** Rhythm 0-100 (#294); at 100 the next attack cannot miss. Undefined = this fighter has no Rhythm */
+  rhythm?: number;
+  /** the fighter's last action, for the Rhythm's variety and repetition */
+  lastAction?: CombatAction;
   crowd: CrowdStanding;
   statuses: readonly StatusEffect[];
   statusResistances: StatusResistances;
@@ -141,6 +147,8 @@ export type CombatEvent =
       severed?: true;
     }
   | { type: 'energy'; fighter: FighterSide; from: number; to: number }
+  /** the Rhythm moved (#294); `to: 100` = the Seventh Step, a drop to 0 after an attack = the step was used */
+  | { type: 'rhythm'; fighter: FighterSide; from: number; to: number }
   | { type: 'block'; fighter: FighterSide }
   | { type: 'rest'; fighter: FighterSide; restored: number }
   | { type: 'taunt'; actor: FighterSide; target: FighterSide; penalty: number }
