@@ -169,25 +169,26 @@ def cut_torso_edge(c):
     L(c, sl.torn(_stump(3.2, 3.59, 3, NECK_X, grow=0.03), 0.035, 11, 0.07), m, 0.0, 0.04, 'fibre')
 
 
-def _shreds(c, cx, base_y, sign, seed):
-    """crepe-paper strips fanning out of the torn edge; sign +1 = standing up, -1 = hanging down"""
+def _shreds(c, cx, base_y, sign, seed, half=0.36, k=1.0, core=0.4):
+    """crepe-paper strips fanning out of the torn edge; sign +1 = standing up, -1 = hanging down.
+    `half` = half width of the fan, `k` = strip length scale, `core` = half width of the red core (an arm is thinner than a neck)"""
     import random
     rnd = random.Random(seed)
     mats = [sl.tex_paper('cut_red%d' % i, h, 'washi', 1.0, tooth=0.7) for i, h in enumerate(('#8f141c', '#c3262b', '#e0483c'))]
     for i in range(11):
         layer = i % 3
-        x = cx - 0.36 + 0.72 * ((i * 7) % 11) / 10.0
-        length = rnd.uniform(0.28, 0.62) * (1.0 if layer else 1.15)
-        w = rnd.uniform(0.07, 0.13)
+        x = cx - half + 2 * half * ((i * 7) % 11) / 10.0
+        length = rnd.uniform(0.28, 0.62) * (1.0 if layer else 1.15) * k
+        w = rnd.uniform(0.07, 0.13) * (0.5 + 0.5 * k)
         lean = (x - cx) * 0.75 + rnd.uniform(-0.1, 0.1)
         tip = (x + lean, base_y + sign * length)
         mid = (x + lean * 0.35 + rnd.uniform(-0.09, 0.09), base_y + sign * length * 0.55)
-        pts = [(x - w, base_y - sign * 0.06), (x + w, base_y - sign * 0.06), (mid[0] + w * 0.75, mid[1]),
-               (tip[0] + 0.025, tip[1]), (tip[0] - 0.025, tip[1] - sign * 0.07), (mid[0] - w * 0.75, mid[1])]
+        pts = [(x - w, base_y - sign * 0.06 * k), (x + w, base_y - sign * 0.06 * k), (mid[0] + w * 0.75, mid[1]),
+               (tip[0] + 0.025, tip[1]), (tip[0] - 0.025, tip[1] - sign * 0.07 * k), (mid[0] - w * 0.75, mid[1])]
         if sign < 0:
             pts = list(reversed(pts))
         L(c, pts, mats[layer], 0.02 + 0.05 * layer, 0.04, 'shred')
-    L(c, sl.torn(E(0.4, 0.12, cx, base_y, 32), 0.03, seed + 40, 0.07), mats[0], 0.0, 0.05, 'core')
+    L(c, sl.torn(E(core, 0.12, cx, base_y, 32), 0.03, seed + 40, 0.07), mats[0], 0.0, 0.05, 'core')
 
 
 def cut_torso_tissue(c):
@@ -208,8 +209,80 @@ def cut_head_tissue(c):
     _shreds(c, 0.0, -0.2, -1, 31)
 
 
+# ================================================================== torn arm (the shield arm cut off, #275 / #332)
+# Same paper as the neck: the upper arm ends in a torn stump just above the elbow (red crepe hanging down), the loose
+# forearm gets the other half at its top (crepe standing up). Both bones hang down from their joint, y = 0 at the joint.
+ARM_UP_CUT = -1.68     # where the upper arm is torn (its bone is 1.85 long)
+ARM_LO_CUT = -0.1      # where the loose forearm starts
+
+
+def _cut_limb(prof, y_cut, keep_above, seed):
+    """a limb outline (sl.limb_pts) clipped at y_cut, the straight cut replaced by torn teeth sticking out of the kept part;
+    keep_above = keep the part above the cut (the stump on the shoulder), else the part below (the loose forearm)"""
+    import random
+    rnd = random.Random(seed)
+    pts = sl.limb_pts(*prof)
+    inside = (lambda p: p[1] >= y_cut) if keep_above else (lambda p: p[1] <= y_cut)
+    sign = -1 if keep_above else 1
+    out = []
+    for i, a in enumerate(pts):
+        b = pts[(i + 1) % len(pts)]
+        if inside(a):
+            out.append(a)
+        if inside(a) != inside(b):
+            t = (y_cut - a[1]) / (b[1] - a[1])
+            q = (a[0] + (b[0] - a[0]) * t, y_cut)
+            out.append(q)
+            if inside(a):   # leaving the kept part: walk the torn edge across to where the outline comes back
+                for j in range(len(pts)):
+                    c_, d = pts[(i + 1 + j) % len(pts)], pts[(i + 2 + j) % len(pts)]
+                    if not inside(c_) and inside(d):
+                        x2 = c_[0] + (d[0] - c_[0]) * (y_cut - c_[1]) / (d[1] - c_[1])
+                        break
+                n = len(TEETH)
+                for k in range(1, n - 1):
+                    x = q[0] + (x2 - q[0]) * k / (n - 1)
+                    out.append((x, y_cut + sign * TEETH[k] * 0.8 + rnd.uniform(-0.02, 0.02)))
+    return out
+
+
+def cut_arm_up(c):
+    """replaces body_arm_up when the arm is cut: the upper arm without its elbow, torn above it"""
+    L(c, _cut_limb(ARM_UP, ARM_UP_CUT, True, 7), M_skin(NS['skin']), 0.0, 0.12, 'arm')
+    hi = M_skin(NS['hi'])
+    L(c, E(0.5, 0.42, 0.02, -0.12), hi, 0.12, 0.07, 'delt')
+    L(c, E(0.3, 0.42, 0.14, -0.88), hi, 0.12, 0.06, 'bicep')
+    L(c, _stump(ARM_UP_CUT + 0.3, ARM_UP_CUT - 0.02, 7, 0.0, half=0.3), M_skin(NS['lo']), 0.04, 0.08, 'stump')
+
+
+def cut_arm_up_rim(c):
+    m = sl.tex_paper('cut_fibre', FIBRE, 'washi', 1.0)
+    L(c, sl.torn(_stump(ARM_UP_CUT + 0.25, ARM_UP_CUT - 0.06, 7, 0.0, half=0.33, grow=0.03), 0.035, 15, 0.07), m, 0.0, 0.04, 'fibre')
+
+
+def cut_arm_up_tissue(c):
+    _shreds(c, 0.0, ARM_UP_CUT + 0.02, -1, 41, half=0.22, k=0.62, core=0.27)
+
+
+def cut_arm_lo(c):
+    """replaces body_arm_lo on the loose forearm: torn across just under the elbow"""
+    L(c, _cut_limb(ARM_LO, ARM_LO_CUT, False, 9), M_skin(NS['skin']), 0.0, 0.12, 'forearm')
+    L(c, _stump(ARM_LO_CUT - 0.3, ARM_LO_CUT + 0.02, 9, 0.0, half=0.31), M_skin(NS['lo']), 0.04, 0.08, 'stump')
+
+
+def cut_arm_lo_rim(c):
+    m = sl.tex_paper('cut_fibre', FIBRE, 'washi', 1.0)
+    L(c, sl.torn(_stump(ARM_LO_CUT - 0.25, ARM_LO_CUT + 0.06, 9, 0.0, half=0.34, grow=0.03), 0.035, 17, 0.07), m, 0.0, 0.04, 'fibre')
+
+
+def cut_arm_lo_tissue(c):
+    _shreds(c, 0.0, ARM_LO_CUT - 0.02, 1, 43, half=0.22, k=0.62, core=0.27)
+
+
 CUT = dict(torso_edge=(cut_torso_edge, None), torso=(cut_torso, 'skin'), torso_tissue=(cut_torso_tissue, None),
-           head_tissue=(cut_head_tissue, None), head_edge=(cut_head_edge, None), head_neck=(cut_head_neck, 'skin'))
+           head_tissue=(cut_head_tissue, None), head_edge=(cut_head_edge, None), head_neck=(cut_head_neck, 'skin'),
+           arm_up=(cut_arm_up, 'skin'), arm_up_rim=(cut_arm_up_rim, None), arm_up_tissue=(cut_arm_up_tissue, None),
+           arm_lo=(cut_arm_lo, 'skin'), arm_lo_rim=(cut_arm_lo_rim, None), arm_lo_tissue=(cut_arm_lo_tissue, None))
 
 
 # ================================================================== faces

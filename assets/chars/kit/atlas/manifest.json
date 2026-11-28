@@ -1283,807 +1283,849 @@
       "h": 162
     },
     "body_arm_lo": {
-      "page": "base-9cbca7fcb662.webp",
+      "page": "base-d4fd483e755a.webp",
       "x": 2,
       "y": 2,
       "w": 91,
       "h": 224
     },
     "body_arm_up": {
-      "page": "base-9cbca7fcb662.webp",
+      "page": "base-d4fd483e755a.webp",
       "x": 97,
       "y": 2,
       "w": 119,
       "h": 269
     },
     "body_foot": {
-      "page": "base-9cbca7fcb662.webp",
+      "page": "base-d4fd483e755a.webp",
       "x": 220,
       "y": 2,
       "w": 161,
       "h": 68
     },
     "body_hand": {
-      "page": "base-9cbca7fcb662.webp",
+      "page": "base-d4fd483e755a.webp",
       "x": 220,
       "y": 74,
       "w": 86,
       "h": 87
     },
     "body_leg_lo": {
-      "page": "base-9cbca7fcb662.webp",
+      "page": "base-d4fd483e755a.webp",
       "x": 2,
       "y": 275,
       "w": 103,
       "h": 267
     },
     "body_leg_up": {
-      "page": "base-9cbca7fcb662.webp",
+      "page": "base-d4fd483e755a.webp",
       "x": 220,
       "y": 165,
       "w": 130,
       "h": 303
     },
     "body_pelvis": {
-      "page": "base-9cbca7fcb662.webp",
+      "page": "base-d4fd483e755a.webp",
       "x": 385,
       "y": 2,
       "w": 242,
       "h": 193
     },
     "body_torso": {
-      "page": "base-9cbca7fcb662.webp",
+      "page": "base-d4fd483e755a.webp",
       "x": 2,
       "y": 546,
       "w": 336,
       "h": 355
     },
-    "cut_head_edge": {
-      "page": "base-9cbca7fcb662.webp",
+    "cut_arm_lo": {
+      "page": "base-d4fd483e755a.webp",
       "x": 109,
       "y": 275,
+      "w": 91,
+      "h": 208
+    },
+    "cut_arm_lo_rim": {
+      "page": "base-d4fd483e755a.webp",
+      "x": 354,
+      "y": 199,
+      "w": 96,
+      "h": 74
+    },
+    "cut_arm_lo_tissue": {
+      "page": "base-d4fd483e755a.webp",
+      "x": 454,
+      "y": 199,
+      "w": 108,
+      "h": 73
+    },
+    "cut_arm_up": {
+      "page": "base-d4fd483e755a.webp",
+      "x": 454,
+      "y": 276,
+      "w": 119,
+      "h": 235
+    },
+    "cut_arm_up_rim": {
+      "page": "base-d4fd483e755a.webp",
+      "x": 354,
+      "y": 277,
+      "w": 95,
+      "h": 63
+    },
+    "cut_arm_up_tissue": {
+      "page": "base-d4fd483e755a.webp",
+      "x": 342,
+      "y": 472,
+      "w": 102,
+      "h": 76
+    },
+    "cut_head_edge": {
+      "page": "base-d4fd483e755a.webp",
+      "x": 448,
+      "y": 515,
       "w": 107,
       "h": 77
     },
     "cut_head_neck": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 109,
-      "y": 356,
+      "page": "base-d4fd483e755a.webp",
+      "x": 354,
+      "y": 344,
       "w": 96,
       "h": 98
     },
     "cut_head_tissue": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 354,
-      "y": 199,
+      "page": "base-d4fd483e755a.webp",
+      "x": 342,
+      "y": 596,
       "w": 144,
       "h": 97
     },
     "cut_torso": {
-      "page": "base-9cbca7fcb662.webp",
+      "page": "base-d4fd483e755a.webp",
       "x": 631,
       "y": 2,
       "w": 336,
       "h": 357
     },
     "cut_torso_edge": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 502,
-      "y": 199,
+      "page": "base-d4fd483e755a.webp",
+      "x": 342,
+      "y": 697,
       "w": 111,
       "h": 79
     },
     "cut_torso_tissue": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 354,
-      "y": 300,
+      "page": "base-d4fd483e755a.webp",
+      "x": 342,
+      "y": 780,
       "w": 144,
       "h": 90
     },
     "shield1": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 342,
-      "y": 472,
+      "page": "base-d4fd483e755a.webp",
+      "x": 490,
+      "y": 596,
       "w": 239,
       "h": 238
     },
-    "shield10": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 585,
+    "shield5": {
+      "page": "base-d4fd483e755a.webp",
+      "x": 733,
       "y": 363,
-      "w": 244,
-      "h": 415
+      "w": 208,
+      "h": 352
     },
     "weapon_axe1": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 342,
-      "y": 782,
+      "page": "base-d4fd483e755a.webp",
+      "x": 2,
+      "y": 905,
       "w": 328,
       "h": 110
     },
     "weapon_axe2": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 2,
-      "y": 905,
+      "page": "base-d4fd483e755a.webp",
+      "x": 342,
+      "y": 874,
       "w": 313,
       "h": 111
     },
-    "weapon_axe3": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 342,
-      "y": 896,
-      "w": 317,
-      "h": 115
-    },
     "weapon_daggers": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 663,
-      "y": 896,
+      "page": "base-d4fd483e755a.webp",
+      "x": 733,
+      "y": 719,
       "w": 231,
       "h": 78
     },
     "wound_arm_b_lo_7": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 342,
-      "y": 714,
+      "page": "base-d4fd483e755a.webp",
+      "x": 109,
+      "y": 487,
       "w": 54,
       "h": 52
     },
     "wound_arm_b_up_2": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 898,
-      "y": 363,
+      "page": "base-d4fd483e755a.webp",
+      "x": 310,
+      "y": 74,
       "w": 67,
       "h": 51
     },
     "wound_arm_b_up_5": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 502,
-      "y": 282,
+      "page": "base-d4fd483e755a.webp",
+      "x": 659,
+      "y": 838,
       "w": 72,
       "h": 114
     },
     "wound_arm_b_up_8": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 833,
-      "y": 418,
+      "page": "base-d4fd483e755a.webp",
+      "x": 735,
+      "y": 801,
       "w": 77,
       "h": 144
     },
     "wound_arm_b_up_9": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 833,
-      "y": 566,
+      "page": "base-d4fd483e755a.webp",
+      "x": 816,
+      "y": 801,
       "w": 80,
       "h": 144
     },
     "wound_arm_f_lo_10": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 833,
-      "y": 714,
+      "page": "base-d4fd483e755a.webp",
+      "x": 577,
+      "y": 363,
       "w": 126,
       "h": 78
     },
     "wound_arm_f_lo_3": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 914,
-      "y": 418,
+      "page": "base-d4fd483e755a.webp",
+      "x": 167,
+      "y": 487,
       "w": 51,
       "h": 46
     },
     "wound_arm_f_up_3": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 674,
-      "y": 796,
+      "page": "base-d4fd483e755a.webp",
+      "x": 577,
+      "y": 445,
       "w": 85,
       "h": 88
     },
     "wound_face_2": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 400,
-      "y": 714,
+      "page": "base-d4fd483e755a.webp",
+      "x": 735,
+      "y": 949,
       "w": 51,
       "h": 62
     },
     "wound_leg_f_lo_2": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 833,
-      "y": 363,
+      "page": "base-d4fd483e755a.webp",
+      "x": 566,
+      "y": 199,
       "w": 61,
       "h": 47
     },
     "wound_leg_f_lo_4": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 898,
-      "y": 796,
+      "page": "base-d4fd483e755a.webp",
+      "x": 666,
+      "y": 445,
       "w": 61,
       "h": 137
     },
     "wound_leg_f_up_3": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 455,
-      "y": 714,
+      "page": "base-d4fd483e755a.webp",
+      "x": 659,
+      "y": 956,
       "w": 58,
       "h": 59
     },
-    "wound_leg_f_up_6": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 763,
-      "y": 796,
-      "w": 82,
-      "h": 95
-    },
-    "wound_torso_2": {
-      "page": "base-9cbca7fcb662.webp",
-      "x": 354,
-      "y": 394,
-      "w": 75,
-      "h": 72
+    "shield10": {
+      "page": "base-338d1a0a61a1.webp",
+      "x": 2,
+      "y": 2,
+      "w": 244,
+      "h": 415
     },
     "shield2": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 2,
+      "page": "base-338d1a0a61a1.webp",
+      "x": 250,
       "y": 2,
       "w": 251,
       "h": 251
     },
     "shield3": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 257,
-      "y": 2,
+      "page": "base-338d1a0a61a1.webp",
+      "x": 2,
+      "y": 421,
       "w": 265,
       "h": 265
     },
     "shield4": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 2,
-      "y": 271,
+      "page": "base-338d1a0a61a1.webp",
+      "x": 505,
+      "y": 2,
       "w": 280,
       "h": 280
     },
-    "shield5": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 526,
-      "y": 2,
-      "w": 208,
-      "h": 352
-    },
     "shield6": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 2,
-      "y": 555,
+      "page": "base-338d1a0a61a1.webp",
+      "x": 271,
+      "y": 257,
       "w": 216,
       "h": 365
     },
     "shield7": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 286,
-      "y": 271,
+      "page": "base-338d1a0a61a1.webp",
+      "x": 491,
+      "y": 286,
       "w": 223,
       "h": 378
     },
     "shield8": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 738,
+      "page": "base-338d1a0a61a1.webp",
+      "x": 789,
       "y": 2,
       "w": 230,
       "h": 390
     },
-    "shield9": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 513,
-      "y": 396,
-      "w": 237,
-      "h": 403
-    },
-    "weapon_gladius": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 222,
-      "y": 803,
-      "w": 359,
-      "h": 81
-    },
-    "weapon_net": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 754,
-      "y": 396,
-      "w": 168,
-      "h": 253
-    },
-    "weapon_spear1": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 2,
-      "y": 924,
-      "w": 774,
-      "h": 61
-    },
-    "weapon_sword1": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 585,
-      "y": 803,
-      "w": 329,
-      "h": 82
-    },
-    "wound_arm_f_up_9": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 222,
-      "y": 653,
-      "w": 85,
-      "h": 110
-    },
-    "wound_face_under_5": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 754,
-      "y": 653,
-      "w": 93,
-      "h": 101
-    },
-    "wound_face_under_7": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 851,
-      "y": 653,
-      "w": 116,
-      "h": 121
-    },
-    "wound_leg_b_up_10": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 311,
-      "y": 653,
-      "w": 75,
-      "h": 112
-    },
-    "wound_leg_b_up_4": {
-      "page": "base-b9eb342c5fa5.webp",
-      "x": 390,
-      "y": 653,
-      "w": 73,
-      "h": 99
-    },
     "weapon_axe10": {
-      "page": "base-c1f3d27619fa.webp",
+      "page": "base-338d1a0a61a1.webp",
       "x": 2,
-      "y": 2,
+      "y": 690,
       "w": 364,
       "h": 185
     },
+    "weapon_axe3": {
+      "page": "base-338d1a0a61a1.webp",
+      "x": 370,
+      "y": 668,
+      "w": 317,
+      "h": 115
+    },
     "weapon_axe4": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 2,
-      "y": 191,
+      "page": "base-338d1a0a61a1.webp",
+      "x": 691,
+      "y": 668,
       "w": 328,
       "h": 118
     },
     "weapon_axe5": {
-      "page": "base-c1f3d27619fa.webp",
+      "page": "base-338d1a0a61a1.webp",
       "x": 2,
-      "y": 313,
+      "y": 879,
       "w": 333,
       "h": 122
     },
     "weapon_axe6": {
-      "page": "base-c1f3d27619fa.webp",
+      "page": "base-338d1a0a61a1.webp",
       "x": 370,
-      "y": 2,
+      "y": 790,
       "w": 337,
       "h": 159
     },
+    "weapon_net": {
+      "page": "base-338d1a0a61a1.webp",
+      "x": 718,
+      "y": 396,
+      "w": 168,
+      "h": 253
+    },
+    "wound_arm_f_up_9": {
+      "page": "base-338d1a0a61a1.webp",
+      "x": 890,
+      "y": 396,
+      "w": 85,
+      "h": 110
+    },
+    "wound_face_3": {
+      "page": "base-338d1a0a61a1.webp",
+      "x": 711,
+      "y": 790,
+      "w": 161,
+      "h": 153
+    },
+    "wound_face_under_5": {
+      "page": "base-338d1a0a61a1.webp",
+      "x": 890,
+      "y": 510,
+      "w": 93,
+      "h": 101
+    },
+    "wound_face_under_7": {
+      "page": "base-338d1a0a61a1.webp",
+      "x": 876,
+      "y": 790,
+      "w": 116,
+      "h": 121
+    },
+    "wound_torso_2": {
+      "page": "base-338d1a0a61a1.webp",
+      "x": 876,
+      "y": 915,
+      "w": 75,
+      "h": 72
+    },
+    "shield9": {
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 2,
+      "y": 2,
+      "w": 237,
+      "h": 403
+    },
     "weapon_axe7": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 339,
-      "y": 191,
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 243,
+      "y": 2,
       "w": 341,
       "h": 166
     },
     "weapon_axe8": {
-      "page": "base-c1f3d27619fa.webp",
+      "page": "base-b8fe7773e8a0.webp",
       "x": 2,
-      "y": 439,
+      "y": 409,
       "w": 345,
       "h": 172
     },
     "weapon_axe9": {
-      "page": "base-c1f3d27619fa.webp",
+      "page": "base-b8fe7773e8a0.webp",
       "x": 2,
-      "y": 615,
+      "y": 585,
       "w": 360,
       "h": 178
     },
+    "weapon_gladius": {
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 588,
+      "y": 2,
+      "w": 359,
+      "h": 81
+    },
     "weapon_hammer1": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 2,
-      "y": 797,
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 366,
+      "y": 172,
       "w": 563,
       "h": 197
     },
-    "weapon_sword2": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 339,
-      "y": 361,
-      "w": 337,
-      "h": 74
-    },
-    "weapon_sword3": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 351,
-      "y": 439,
-      "w": 348,
-      "h": 80
-    },
-    "weapon_sword4": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 351,
-      "y": 523,
-      "w": 353,
-      "h": 80
-    },
-    "wound_face_10": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 711,
-      "y": 2,
-      "w": 201,
-      "h": 241
-    },
-    "wound_face_3": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 366,
-      "y": 607,
-      "w": 161,
-      "h": 153
-    },
-    "wound_face_4": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 531,
-      "y": 607,
-      "w": 167,
-      "h": 167
-    },
-    "wound_face_5": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 569,
-      "y": 778,
-      "w": 182,
-      "h": 205
-    },
-    "wound_face_6": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 708,
-      "y": 247,
-      "w": 182,
-      "h": 205
-    },
-    "wound_face_7": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 708,
-      "y": 456,
-      "w": 182,
-      "h": 205
-    },
-    "wound_leg_f_lo_10": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 755,
-      "y": 665,
-      "w": 71,
-      "h": 165
-    },
-    "wound_leg_f_lo_8": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 830,
-      "y": 665,
-      "w": 71,
-      "h": 137
-    },
-    "wound_leg_f_up_9": {
-      "page": "base-c1f3d27619fa.webp",
-      "x": 755,
-      "y": 834,
-      "w": 87,
-      "h": 136
-    },
     "weapon_hammer10": {
-      "page": "base-312f0d00e807.webp",
+      "page": "base-b8fe7773e8a0.webp",
       "x": 2,
-      "y": 2,
+      "y": 767,
       "w": 662,
       "h": 248
     },
     "weapon_hammer2": {
-      "page": "base-312f0d00e807.webp",
-      "x": 2,
-      "y": 254,
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 351,
+      "y": 373,
       "w": 552,
       "h": 191
     },
+    "weapon_sword1": {
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 366,
+      "y": 568,
+      "w": 329,
+      "h": 82
+    },
+    "weapon_sword2": {
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 588,
+      "y": 87,
+      "w": 337,
+      "h": 74
+    },
+    "weapon_sword3": {
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 366,
+      "y": 654,
+      "w": 348,
+      "h": 80
+    },
+    "wound_face_10": {
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 718,
+      "y": 568,
+      "w": 201,
+      "h": 241
+    },
+    "wound_face_4": {
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 668,
+      "y": 813,
+      "w": 167,
+      "h": 167
+    },
+    "wound_leg_b_up_10": {
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 243,
+      "y": 172,
+      "w": 75,
+      "h": 112
+    },
+    "wound_leg_b_up_4": {
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 243,
+      "y": 288,
+      "w": 73,
+      "h": 99
+    },
+    "wound_leg_f_lo_10": {
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 839,
+      "y": 813,
+      "w": 71,
+      "h": 165
+    },
+    "wound_leg_f_lo_8": {
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 951,
+      "y": 2,
+      "w": 71,
+      "h": 137
+    },
+    "wound_leg_f_up_6": {
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 933,
+      "y": 143,
+      "w": 82,
+      "h": 95
+    },
+    "wound_leg_f_up_9": {
+      "page": "base-b8fe7773e8a0.webp",
+      "x": 933,
+      "y": 242,
+      "w": 87,
+      "h": 136
+    },
     "weapon_hammer3": {
-      "page": "base-312f0d00e807.webp",
+      "page": "base-3cc871eb2e7b.webp",
       "x": 2,
-      "y": 449,
+      "y": 2,
       "w": 558,
       "h": 199
     },
     "weapon_hammer4": {
-      "page": "base-312f0d00e807.webp",
+      "page": "base-3cc871eb2e7b.webp",
       "x": 2,
-      "y": 652,
+      "y": 205,
       "w": 571,
       "h": 206
     },
-    "weapon_spear10": {
-      "page": "base-312f0d00e807.webp",
-      "x": 2,
-      "y": 862,
-      "w": 864,
-      "h": 91
-    },
-    "wound_face_8": {
-      "page": "base-312f0d00e807.webp",
-      "x": 668,
-      "y": 2,
-      "w": 182,
-      "h": 205
-    },
-    "wound_face_9": {
-      "page": "base-312f0d00e807.webp",
-      "x": 668,
-      "y": 211,
-      "w": 185,
-      "h": 241
-    },
-    "wound_torso_10": {
-      "page": "base-312f0d00e807.webp",
-      "x": 577,
-      "y": 456,
-      "w": 246,
-      "h": 244
-    },
     "weapon_hammer5": {
-      "page": "base-1280fded70de.webp",
+      "page": "base-3cc871eb2e7b.webp",
       "x": 2,
-      "y": 2,
+      "y": 415,
       "w": 576,
       "h": 213
     },
     "weapon_hammer6": {
-      "page": "base-1280fded70de.webp",
+      "page": "base-3cc871eb2e7b.webp",
       "x": 2,
-      "y": 219,
+      "y": 632,
       "w": 582,
       "h": 220
     },
-    "weapon_hammer7": {
-      "page": "base-1280fded70de.webp",
+    "weapon_spear1": {
+      "page": "base-3cc871eb2e7b.webp",
       "x": 2,
-      "y": 443,
+      "y": 856,
+      "w": 774,
+      "h": 61
+    },
+    "weapon_spear10": {
+      "page": "base-3cc871eb2e7b.webp",
+      "x": 2,
+      "y": 921,
+      "w": 864,
+      "h": 91
+    },
+    "wound_face_5": {
+      "page": "base-3cc871eb2e7b.webp",
+      "x": 588,
+      "y": 2,
+      "w": 182,
+      "h": 205
+    },
+    "wound_face_6": {
+      "page": "base-3cc871eb2e7b.webp",
+      "x": 588,
+      "y": 211,
+      "w": 182,
+      "h": 205
+    },
+    "wound_face_7": {
+      "page": "base-3cc871eb2e7b.webp",
+      "x": 582,
+      "y": 420,
+      "w": 182,
+      "h": 205
+    },
+    "wound_face_8": {
+      "page": "base-3cc871eb2e7b.webp",
+      "x": 588,
+      "y": 629,
+      "w": 182,
+      "h": 205
+    },
+    "weapon_hammer7": {
+      "page": "base-4ddeb7526a91.webp",
+      "x": 2,
+      "y": 2,
       "w": 630,
       "h": 227
     },
     "weapon_hammer8": {
-      "page": "base-1280fded70de.webp",
+      "page": "base-4ddeb7526a91.webp",
       "x": 2,
-      "y": 674,
+      "y": 233,
       "w": 637,
       "h": 234
     },
-    "weapon_spear2": {
-      "page": "base-1280fded70de.webp",
-      "x": 2,
-      "y": 912,
-      "w": 804,
-      "h": 68
-    },
-    "wound_torso_3": {
-      "page": "base-1280fded70de.webp",
-      "x": 588,
-      "y": 2,
-      "w": 187,
-      "h": 157
-    },
     "weapon_hammer9": {
-      "page": "base-def17d755fb7.webp",
+      "page": "base-4ddeb7526a91.webp",
       "x": 2,
-      "y": 2,
+      "y": 471,
       "w": 655,
       "h": 241
     },
-    "weapon_spear3": {
-      "page": "base-def17d755fb7.webp",
+    "weapon_spear2": {
+      "page": "base-4ddeb7526a91.webp",
       "x": 2,
-      "y": 247,
+      "y": 716,
+      "w": 804,
+      "h": 68
+    },
+    "weapon_spear3": {
+      "page": "base-4ddeb7526a91.webp",
+      "x": 2,
+      "y": 788,
       "w": 810,
       "h": 69
     },
     "weapon_spear4": {
-      "page": "base-def17d755fb7.webp",
+      "page": "base-4ddeb7526a91.webp",
       "x": 2,
-      "y": 320,
+      "y": 861,
       "w": 822,
       "h": 71
     },
     "weapon_spear5": {
-      "page": "base-def17d755fb7.webp",
+      "page": "base-4ddeb7526a91.webp",
       "x": 2,
-      "y": 395,
+      "y": 936,
       "w": 827,
       "h": 82
     },
-    "weapon_spear6": {
-      "page": "base-def17d755fb7.webp",
-      "x": 2,
-      "y": 481,
-      "w": 833,
-      "h": 74
-    },
-    "weapon_spear7": {
-      "page": "base-def17d755fb7.webp",
-      "x": 2,
-      "y": 559,
-      "w": 838,
-      "h": 75
-    },
-    "weapon_spear8": {
-      "page": "base-def17d755fb7.webp",
-      "x": 2,
-      "y": 638,
-      "w": 843,
-      "h": 85
-    },
-    "weapon_spear9": {
-      "page": "base-def17d755fb7.webp",
-      "x": 2,
-      "y": 727,
-      "w": 859,
-      "h": 85
-    },
-    "weapon_sword10": {
-      "page": "base-def17d755fb7.webp",
-      "x": 2,
-      "y": 816,
-      "w": 421,
-      "h": 141
-    },
-    "weapon_sword5": {
-      "page": "base-def17d755fb7.webp",
-      "x": 427,
-      "y": 816,
-      "w": 362,
-      "h": 89
-    },
-    "weapon_sword6": {
-      "page": "base-a3e861e81657.webp",
-      "x": 2,
+    "wound_face_9": {
+      "page": "base-4ddeb7526a91.webp",
+      "x": 643,
       "y": 2,
-      "w": 364,
-      "h": 89
+      "w": 185,
+      "h": 241
     },
-    "weapon_sword7": {
-      "page": "base-a3e861e81657.webp",
-      "x": 2,
-      "y": 95,
-      "w": 382,
-      "h": 125
-    },
-    "weapon_sword8": {
-      "page": "base-a3e861e81657.webp",
-      "x": 2,
-      "y": 224,
-      "w": 389,
-      "h": 87
-    },
-    "weapon_sword9": {
-      "page": "base-a3e861e81657.webp",
-      "x": 2,
-      "y": 315,
-      "w": 404,
-      "h": 125
-    },
-    "weapon_trident1": {
-      "page": "base-a3e861e81657.webp",
-      "x": 2,
-      "y": 444,
-      "w": 834,
-      "h": 96
-    },
-    "weapon_trident10": {
-      "page": "base-a3e861e81657.webp",
-      "x": 2,
-      "y": 544,
-      "w": 873,
-      "h": 127
-    },
-    "weapon_trident2": {
-      "page": "base-a3e861e81657.webp",
-      "x": 2,
-      "y": 675,
-      "w": 813,
-      "h": 115
-    },
-    "weapon_trident3": {
-      "page": "base-a3e861e81657.webp",
-      "x": 2,
-      "y": 794,
-      "w": 818,
-      "h": 117
+    "wound_torso_3": {
+      "page": "base-4ddeb7526a91.webp",
+      "x": 833,
+      "y": 2,
+      "w": 187,
+      "h": 157
     },
     "wound_torso_4": {
-      "page": "base-a3e861e81657.webp",
-      "x": 388,
-      "y": 2,
+      "page": "base-4ddeb7526a91.webp",
+      "x": 643,
+      "y": 247,
       "w": 230,
       "h": 181
     },
     "wound_torso_5": {
-      "page": "base-a3e861e81657.webp",
-      "x": 622,
-      "y": 2,
+      "page": "base-4ddeb7526a91.webp",
+      "x": 661,
+      "y": 432,
       "w": 230,
       "h": 223
     },
-    "wound_torso_7": {
-      "page": "base-a3e861e81657.webp",
-      "x": 410,
-      "y": 229,
-      "w": 246,
-      "h": 201
-    },
-    "weapon_trident4": {
-      "page": "base-8997fc0d63ea.webp",
+    "weapon_spear6": {
+      "page": "base-74b53d645f70.webp",
       "x": 2,
       "y": 2,
+      "w": 833,
+      "h": 74
+    },
+    "weapon_spear7": {
+      "page": "base-74b53d645f70.webp",
+      "x": 2,
+      "y": 80,
+      "w": 838,
+      "h": 75
+    },
+    "weapon_spear8": {
+      "page": "base-74b53d645f70.webp",
+      "x": 2,
+      "y": 159,
+      "w": 843,
+      "h": 85
+    },
+    "weapon_spear9": {
+      "page": "base-74b53d645f70.webp",
+      "x": 2,
+      "y": 248,
+      "w": 859,
+      "h": 85
+    },
+    "weapon_sword10": {
+      "page": "base-74b53d645f70.webp",
+      "x": 2,
+      "y": 337,
+      "w": 421,
+      "h": 141
+    },
+    "weapon_sword4": {
+      "page": "base-74b53d645f70.webp",
+      "x": 427,
+      "y": 337,
+      "w": 353,
+      "h": 80
+    },
+    "weapon_sword5": {
+      "page": "base-74b53d645f70.webp",
+      "x": 2,
+      "y": 482,
+      "w": 362,
+      "h": 89
+    },
+    "weapon_sword6": {
+      "page": "base-74b53d645f70.webp",
+      "x": 368,
+      "y": 482,
+      "w": 364,
+      "h": 89
+    },
+    "weapon_sword7": {
+      "page": "base-74b53d645f70.webp",
+      "x": 2,
+      "y": 575,
+      "w": 382,
+      "h": 125
+    },
+    "weapon_sword8": {
+      "page": "base-74b53d645f70.webp",
+      "x": 388,
+      "y": 575,
+      "w": 389,
+      "h": 87
+    },
+    "weapon_sword9": {
+      "page": "base-74b53d645f70.webp",
+      "x": 2,
+      "y": 704,
+      "w": 404,
+      "h": 125
+    },
+    "weapon_trident1": {
+      "page": "base-74b53d645f70.webp",
+      "x": 2,
+      "y": 833,
+      "w": 834,
+      "h": 96
+    },
+    "weapon_trident10": {
+      "page": "base-f50eaa45a0fd.webp",
+      "x": 2,
+      "y": 2,
+      "w": 873,
+      "h": 127
+    },
+    "weapon_trident2": {
+      "page": "base-f50eaa45a0fd.webp",
+      "x": 2,
+      "y": 133,
+      "w": 813,
+      "h": 115
+    },
+    "weapon_trident3": {
+      "page": "base-f50eaa45a0fd.webp",
+      "x": 2,
+      "y": 252,
+      "w": 818,
+      "h": 117
+    },
+    "weapon_trident4": {
+      "page": "base-f50eaa45a0fd.webp",
+      "x": 2,
+      "y": 373,
       "w": 830,
       "h": 118
     },
     "weapon_trident5": {
-      "page": "base-8997fc0d63ea.webp",
+      "page": "base-f50eaa45a0fd.webp",
       "x": 2,
-      "y": 124,
+      "y": 495,
       "w": 836,
       "h": 120
     },
     "weapon_trident6": {
-      "page": "base-8997fc0d63ea.webp",
+      "page": "base-f50eaa45a0fd.webp",
       "x": 2,
-      "y": 248,
+      "y": 619,
       "w": 841,
       "h": 121
     },
     "weapon_trident7": {
-      "page": "base-8997fc0d63ea.webp",
+      "page": "base-f50eaa45a0fd.webp",
       "x": 2,
-      "y": 373,
+      "y": 744,
       "w": 846,
       "h": 123
     },
     "weapon_trident8": {
-      "page": "base-8997fc0d63ea.webp",
+      "page": "base-f50eaa45a0fd.webp",
       "x": 2,
-      "y": 500,
+      "y": 871,
       "w": 852,
       "h": 124
     },
     "weapon_trident9": {
-      "page": "base-8997fc0d63ea.webp",
+      "page": "base-9c2acff05db6.webp",
       "x": 2,
-      "y": 628,
+      "y": 2,
       "w": 868,
       "h": 126
     },
-    "wound_torso_6": {
-      "page": "base-8997fc0d63ea.webp",
+    "wound_torso_10": {
+      "page": "base-9c2acff05db6.webp",
       "x": 2,
-      "y": 758,
+      "y": 132,
+      "w": 246,
+      "h": 244
+    },
+    "wound_torso_6": {
+      "page": "base-9c2acff05db6.webp",
+      "x": 252,
+      "y": 132,
       "w": 246,
       "h": 223
     },
+    "wound_torso_7": {
+      "page": "base-9c2acff05db6.webp",
+      "x": 502,
+      "y": 132,
+      "w": 246,
+      "h": 201
+    },
     "wound_torso_8": {
-      "page": "base-d6dd81daacc8.webp",
+      "page": "base-9c2acff05db6.webp",
       "x": 2,
-      "y": 2,
+      "y": 380,
       "w": 246,
       "h": 236
     },
     "wound_torso_9": {
-      "page": "base-d6dd81daacc8.webp",
-      "x": 2,
-      "y": 242,
+      "page": "base-9c2acff05db6.webp",
+      "x": 252,
+      "y": 359,
       "w": 246,
       "h": 236
     }

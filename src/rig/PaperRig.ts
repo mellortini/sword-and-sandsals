@@ -53,6 +53,8 @@ export interface Look {
   shield?: number;
   /** the shield arm was cut off at the elbow in this bout (#275): no forearm, hand or shield; never saved */
   armCut?: boolean;
+  /** draw ONLY that cut-off forearm, torn at its top (#332): the piece that falls on the sand; never saved */
+  armLoose?: boolean;
   /** damage stage 1-10 (#284), 1/undefined = unhurt; follows the health in a bout, never saved */
   wounds?: number;
   /** the trident's net was thrown in this bout (#258): the other hand is empty; never saved */
@@ -181,9 +183,13 @@ export class Kit {
   /** sprite key for a layer under a look (null = nothing drawn) */
   resolve(layer: KitJson['layers'][number], look: Look): string | null {
     if (look.armCut && CUT_ARM_BONES.has(layer.bone)) return null;
+    if (look.armLoose && !CUT_ARM_BONES.has(layer.bone)) return null;
     const p = layer.piece;
+    // the torn halves (#332): the stump on the upper arm of a cut arm, the other half on the loose forearm
+    const torn = (look.armCut && layer.bone === 'arm_b_up') || (look.armLoose && layer.bone === 'arm_b_lo');
     switch (layer.slot) {
-      case 'body': return `body_${p}`;
+      case 'stump': case 'stump_rim': return torn ? `cut_${p}` : null;
+      case 'body': return torn ? `cut_${p}` : `body_${p}`;
       case 'cut': return `cut_${p}`;
       case 'wound': return woundSprite(this.json.wounds, p, look.wounds);
       case 'face': return `face${look.face}_${p}`;
