@@ -1,3 +1,32 @@
+/* Town top bar (src/scenes/town.ts): paper plaque with the gladiator, a gold plaque like the vendor's counter, wooden buttons. */
+.town-bar {
+  position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 5; box-sizing: border-box; max-width: calc(100vw - 20px);
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; width: max-content; padding: 7px 10px 9px 18px;
+  font-family: 'Alegreya', Georgia, serif; color: #3a2320;
+  background: linear-gradient(160deg, #fbeecb 0%, #eed39c 55%, #ddb878 100%);
+  border: 2px solid #6b3d16; border-radius: 8px; box-shadow: 0 4px 0 rgba(30, 14, 10, 0.4);
+}
+/* the bar steps aside while a building's screen is open; display: flex would otherwise beat the hidden attribute */
+.town-bar[hidden], .town-bar [hidden] { display: none; }
+.town-bar__who { display: flex; align-items: baseline; gap: 8px; margin-right: 6px; white-space: nowrap; }
+.town-bar__who b { font-family: 'Cinzel', Georgia, serif; font-weight: 800; font-size: 19px; letter-spacing: 0.04em; color: #5c2a1c; }
+.town-bar__who small { font-style: italic; font-size: 15px; color: #7a5a3a; }
+.town-bar__gold {
+  display: flex; align-items: center; gap: 7px; margin-right: 6px; padding: 3px 14px 3px 8px;
+  font-family: 'Cinzel', Georgia, serif; font-weight: 800; font-size: 18px; color: #4a2a14;
+  border: 2px solid #6b3d16; border-radius: 6px; background: linear-gradient(180deg, #ffe08a 0%, #f2b640 60%, #db9426 100%);
+}
+.town-bar__gold i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #9b5f14; background: radial-gradient(circle at 40% 35%, #fff2b0, #e9a92c 70%); }
+.town-bar__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.town-bar button {
+  min-height: 34px; padding: 4px 16px; cursor: pointer; font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: 15px;
+  letter-spacing: 0.05em; color: #fff3d8; background: linear-gradient(180deg, #8a5a34 0%, #6b3d16 100%);
+  border: 2px solid #4a2a14; border-radius: 6px; box-shadow: 0 3px 0 rgba(30, 14, 10, 0.4);
+}
+.town-bar button:hover { filter: brightness(1.14); }
+.town-bar button:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(30, 14, 10, 0.4); }
+.town-bar button:focus-visible { outline: 3px solid #fff0d0; outline-offset: 2px; }
+
 /* Town panel (src/ui/town.ts): one paper card per building; panel from forge.css. */
 .town__panel { width: min(96vw, 860px); }
 .town__gold { margin-left: auto; color: #e8be4c; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; }

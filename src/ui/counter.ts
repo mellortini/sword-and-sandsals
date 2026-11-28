@@ -58,6 +58,7 @@ export class Counter {
     this.root = document.createElement('div');
     this.root.className = `counter counter--${o.building}`;
     this.root.style.setProperty('--room', `url("${roomUrl(room)}")`);
+    if (o.building === 'weaponsmith') this.root.style.setProperty('--weapon-card', `url("${import.meta.env.BASE_URL}ui/weapon-card.jpg")`);
     this.root.setAttribute('role', 'dialog');
     this.root.setAttribute('aria-modal', 'true');
     this.root.setAttribute('aria-label', o.title);

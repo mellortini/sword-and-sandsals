@@ -1,0 +1,32 @@
+/* The paper poster screens (src/ui/posterStage.ts): the stage over the arena, the post, the torn sheet and its nails. */
+
+/* a scene that puts nothing into #ui should not leave its empty dark box in the corner */
+#ui:empty { display: none; }
+
+.poster-stage {
+  position: fixed; left: 0; top: 0; width: 1280px; height: 720px; transform-origin: 0 0; overflow: hidden;
+  z-index: 4; pointer-events: none; font-family: 'Alegreya', Georgia, serif; color: #3a2418;
+}
+.poster-post {
+  position: absolute; top: -20px; width: 62px; height: 780px;
+  background: linear-gradient(90deg, #5c3a22 0 18%, #80522f 18% 74%, #684227 74%); box-shadow: 10px 0 12px rgba(30, 12, 5, 0.35);
+}
+.poster { position: absolute; pointer-events: auto; filter: drop-shadow(10px 14px 8px rgba(30, 12, 5, 0.45)); }
+.poster__sheet {
+  position: absolute; inset: 0; background: var(--paper, none) 0 0 / 360px, #ecdfc0; background-blend-mode: multiply;
+  clip-path: polygon(0% 0.2%, 5.6% 0.4%, 11.1% 0.3%, 16.7% 0.5%, 22.2% 0.5%, 27.8% 0.1%, 33.3% 0%, 38.9% 0.7%, 44.4% 0.2%, 50% 0.2%,
+    55.6% 0.8%, 61.1% 0.4%, 66.7% 0.7%, 72.2% 0.4%, 77.8% 0.5%, 83.3% 0.1%, 88.9% 0.5%, 94.4% 0.7%, 100% 0.4%, 99.4% 5.6%, 99.5% 11.1%,
+    99.9% 16.7%, 99.4% 22.2%, 99.5% 27.8%, 99.8% 33.3%, 100% 38.9%, 99.3% 44.4%, 99.6% 50%, 99.4% 55.6%, 99.3% 61.1%, 99.4% 66.7%,
+    99.3% 72.2%, 99.7% 77.8%, 99.4% 83.3%, 99.6% 88.9%, 99.3% 94.4%, 100% 99.3%, 94.4% 99.9%, 88.9% 99.9%, 83.3% 99.8%, 77.8% 99.2%,
+    72.2% 99.7%, 66.7% 99.5%, 61.1% 99.8%, 55.6% 99.6%, 50% 99.7%, 44.4% 99.7%, 38.9% 99.5%, 33.3% 99.5%, 27.8% 99.3%, 22.2% 99.5%,
+    16.7% 99.3%, 11.1% 99.3%, 5.6% 99.2%, 0% 99.5%, 0.1% 94.4%, 0.7% 88.9%, 0.8% 83.3%, 0.7% 77.8%, 0.5% 72.2%, 0.6% 66.7%, 0.2% 61.1%,
+    0.7% 55.6%, 0.5% 50%, 0.2% 44.4%, 0.1% 38.9%, 0.7% 33.3%, 0.8% 27.8%, 0.1% 22.2%, 0.6% 16.7%, 0.3% 11.1%, 0.1% 5.6%);
+}
+.poster__print { position: absolute; inset: 0; display: flex; flex-direction: column; text-align: center; }
+.poster__print p, .poster__print h1, .poster__print h2 { margin: 0; }
+.poster__nail {
+  position: absolute; top: 20px; width: 20px; height: 20px; border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, #b9bcc2, #4a4c55 70%); box-shadow: 2px 4px 3px rgba(30, 15, 5, 0.45);
+}
+.poster__nail--left { left: 26px; }
+.poster__nail--right { right: 26px; }

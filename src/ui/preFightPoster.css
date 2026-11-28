@@ -1,0 +1,54 @@
+/* Pre-fight screen (src/ui/preFightPoster.ts): the comparison on the fight poster (posterStage.css). */
+.bout-stage .poster-post { left: 617px; width: 46px; }
+.bout-poster { left: 394px; top: 12px; width: 492px; height: 602px; transform: rotate(-0.7deg); }
+.bout-poster__print { padding: 22px 34px 0; }
+.bout-poster__kicker { font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: 14px; letter-spacing: 0.34em; text-transform: uppercase; color: #8b3324; }
+.bout-poster__print h1 {
+  margin: 4px 0 0; font-family: 'Cinzel', Georgia, serif; font-weight: 900; font-size: 32px; line-height: 1.05; text-transform: uppercase; color: #8a261c;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.bout-poster__against { font-style: italic; font-size: 19px; line-height: 1.15; color: #6b4a2a; }
+.bout-poster__note { font-style: italic; font-size: 15px; line-height: 1.25; color: #8b3324; }
+.bout-poster table { width: 100%; margin-top: 10px; border-collapse: collapse; table-layout: fixed; border-top: 3px solid #5c3a24; }
+.bout-poster tr { border-bottom: 1px solid rgba(92, 58, 36, 0.28); }
+.bout-poster td, .bout-poster th { height: 30px; padding: 0; }
+/* the line about a feud takes two lines of the sheet: the table gives them back */
+.bout-stage--note .bout-poster td, .bout-stage--note .bout-poster th { height: 27px; }
+.bout-poster th { width: 46%; font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; color: #6b4a2a; }
+.bout-poster__value { font-family: 'Cinzel', Georgia, serif; font-weight: 800; font-size: 19px; color: #8a7458; }
+.bout-poster__value--better span { padding: 1px 12px; color: #3a2010; background: #f0c45c; clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 6px 100%, 0 50%); }
+
+/* ---------------------------------------------------------------- the opponent's line */
+.bout-quote {
+  position: absolute; left: 936px; top: 62px; box-sizing: border-box; width: 316px; margin: 0; padding: 12px 18px; text-align: left; color: #3a2320;
+  background: #fffbf1; border: 3px solid #3a2320; border-radius: 16px; box-shadow: 4px 6px 0 rgba(30, 16, 18, 0.35);
+}
+.bout-quote::after {
+  content: ''; position: absolute; left: 22%; bottom: -17px; width: 30px; height: 30px; background: #fffbf1;
+  border-right: 3px solid #3a2320; border-bottom: 3px solid #3a2320; transform: skewX(-20deg) rotate(32deg) skewX(-6deg);
+  clip-path: polygon(0 58%, 100% 0, 100% 100%, 0 100%);
+}
+.bout-quote p { margin: 0; font-size: 18px; line-height: 1.28; }
+.bout-quote cite { display: block; margin-top: 5px; font-family: 'Cinzel', Georgia, serif; font-style: normal; font-weight: 700; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #8b3324; }
+
+/* ---------------------------------------------------------------- the prize and the two ways on */
+.bout-prize, .bout-back {
+  background: var(--paper, none) 0 0 / 360px, #ecdfc0; background-blend-mode: multiply; border: 2px solid #6b3d16; border-radius: 8px;
+  box-shadow: 0 5px 0 rgba(40, 20, 10, 0.4);
+}
+.bout-prize { position: absolute; left: 944px; top: 636px; display: flex; align-items: center; gap: 12px; padding: 8px 16px; }
+.bout-prize img { width: 70px; transform: rotate(-14deg); filter: drop-shadow(2px 4px 3px rgba(40, 20, 10, 0.35)); }
+.bout-prize span { font-style: italic; font-size: 14px; line-height: 1.3; color: #6b4a2a; white-space: nowrap; }
+.bout-prize b { display: block; font-family: 'Cinzel', Georgia, serif; font-style: normal; font-weight: 800; font-size: 15px; color: #5c2a1c; }
+.bout-actions button { position: absolute; cursor: pointer; pointer-events: auto; font-family: 'Cinzel', Georgia, serif; text-transform: uppercase; }
+/* tall enough to hit with a thumb when the whole stage shrinks to a phone held sideways */
+.bout-back { left: 270px; top: 630px; width: 186px; height: 74px; font-weight: 900; font-size: 24px; color: #3a2418; }
+.bout-fight {
+  left: 490px; top: 628px; width: 300px; height: 78px; border: 0; font-weight: 900; font-size: 36px; letter-spacing: 0.08em; color: #fff4da;
+  background: #9d2f20; clip-path: polygon(0 0, 100% 0, 95% 50%, 100% 100%, 0 100%, 5% 50%); filter: drop-shadow(0 6px 0 rgba(40, 10, 6, 0.45));
+}
+.bout-actions button:hover { filter: brightness(1.12); }
+.bout-actions button:active { transform: translateY(2px); }
+.bout-back:focus-visible { outline: 4px solid #fff0d0; outline-offset: 2px; }
+/* the ribbon is cut out by clip-path, which would cut an outline off too: the focus ring is drawn inside it */
+.bout-fight:focus-visible { outline: 3px solid #fff0d0; outline-offset: -8px; }

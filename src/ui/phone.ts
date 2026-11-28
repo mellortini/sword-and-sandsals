@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import './phone.css';
+import './scrollbars.css';
 
 /**
  * Phone support (#19): touch-friendly page styles and the "turn your device" card shown in portrait on touch screens.
