@@ -1580,3 +1580,12 @@ Przejście całej pętli MVP. Dwie poprawki:
 - AI: wagi technik w profilach (bestie 0); Corvin (aggressor) używa wszystkich czterech. Symulacja w `docs/BALANS.md`: techniki dają 2–5 pkt przewagi, ~0,9 użycia na walkę.
 - UI: grupa „Techniques” na pasku akcji (klawisze F, G, V, E), widoczna tylko z technikami; koszt „6 EN · 25 RH”, tooltip z % i Rytmem. Prezenter: złota karteczka z nazwą techniki obok postaci, Sand Veil sypie piaskiem.
 - Poprawka przy okazji: `.action-card[hidden]` w `actionBar.css` — karta „Net” była widoczna także bez trójzębu (CSS `display:flex` wygrywał z `hidden`).
+
+### 2026-11-28 03:50 · Claude Code (goloburda05-hue) · #293 / 293-duel-book
+
+- Księga Pojedynków: `src/core/duelBook.ts` (zasady), `src/data/duelChallenges.ts` (25 wyzwań, wartość 1–4, świadek: Łukasz the Herald / Magpie / the Brackwater judges), ekran `src/ui/duelBook.ts` + `duelBook.css` (dwie strony starej księgi: podpisane wpisy oraz progi i otwarte wyzwania, przycisk Hall of Fame).
+- Wpisy: wygrane ligowe czytane z `leagueWins` (bronze 1 … legend 5, champion +1), wyzwania zapisywane po walce, wpisy z dialogów z flag `book.<entry>` (#292). `bookEntries(c)`, `bookValue`, `bookOpens(c, id)`.
+- ⚠️ Kontrakt zapisu: `SavedCharacter.duelBook?: { challenges: { id, day }[] }` (walidacja w `save.ts`, wersja bez zmian).
+- Progi (`BOOK_THRESHOLDS`): Old Hask 10, Brann 30, Sefa 50, Kindler 70, Wielki Turniej 100. ❓ #296 (próby Mistrzów): sprawdzajcie `bookOpens(c, 'trial.old-hask')` itd.
+- Arena: po walce kariery `recordDuelBout(…, tallyDuel(state, events, isChampionBout(id)))` przed osiągnięciami; nowe wpisy → powiadomienie „Book of Duels” (powyżej 2 — jedno zbiorcze).
+- Miasto: budynek `book` w `BUILDINGS` (`ui/town.ts`) i przycisk „Book” na górnym pasku (`scenes/town.ts`), obok Home.

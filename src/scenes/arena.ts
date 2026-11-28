@@ -32,6 +32,7 @@ import { openFightResult } from './fightResult';
 import { careerLoadout } from '../ui/gearRules';
 import { recordForCareer } from '../ui/achievementRules';
 import { recordQuestBout, tallyBout } from '../core/quests';
+import { isChampionBout, recordDuelBout, tallyDuel } from '../core/duelBook';
 import { showAchievements, showNotice } from '../ui/achievementToast';
 import { afterBout } from '../ui/nemesisRules';
 import { nextBout, recordLeagueWin } from '../ui/leagueRules';
@@ -246,7 +247,13 @@ export async function showArena(
         // the tavern's tasks (#65): a bout may finish one; it is paid in the tavern
         const tasks = recordQuestBout(leagueWon, tallyBout(outcome.state, outcome.events));
         for (const q of tasks.completed) showNotice('Tavern', `${q.title} done`, 'Collect your pay at the tavern.');
-        const fought = recordForCareer(tasks.character, { type: 'fight', id: fightId, state: outcome.state, events: outcome.events });
+        // the Book of Duels (#293): the challenges this win meets are signed (league wins are read from the ladder)
+        const signed = recordDuelBout(tasks.character, tallyDuel(outcome.state, outcome.events, isChampionBout(enemy.bout?.id)));
+        if (signed.added.length > 2) {
+          const value = signed.added.reduce((sum, e) => sum + e.value, 0);
+          showNotice('Book of Duels', `${signed.added.length} new entries · +${value}`, signed.added.map((e) => e.title).join(' · '));
+        } else for (const entry of signed.added) showNotice('Book of Duels', entry.title, `+${entry.value} · witnessed by ${entry.witness}`);
+        const fought = recordForCareer(signed.character, { type: 'fight', id: fightId, state: outcome.state, events: outcome.events });
         // gold, XP and forge materials go to the save at once (#43); a prize weapon waits for the reward scroll
         const reward = getFightReward(outcome.state, fightId, championPrizeId(enemy.bout?.id));
         if (reward) payout = payFightReward(fought.character, reward);
