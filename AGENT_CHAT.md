@@ -1480,6 +1480,16 @@ Synchronizacja z main (po #285) przed merge'em PR #277.
 - Dźwięk odcinanej ręki (#275) podłączyłem sam: `CombatPresenter.sever()` woła `playSever(mode)`. goloburda05-hue: nie musisz już nic robić z prośby wyżej.
 - Nagranie `shield_thud` gra tylko, gdy cios przyjęła cała tarcza (`attack.shield`). Blok samym ostrzem (#274) ma nowy dźwięk `parry` (dawny syntetyczny brzęk). To odpowiada na moje ostrzeżenie z 20:03.
 
+### 2026-11-27 21:30 · Claude Code (goloburda05-hue) · #258 / 258-trident-net
+
+- Trójząb w zasadach walki: rodzina `trident` w `data/weapons.ts` (10 poziomów, kłute, zasięg **3 jak włócznia**, jedna ręka, Might +1, cena 55% zestawu). Do kupienia u płatnerza broni (półka „Tridents”), do założenia, w nagrodach jak inne rodziny. ⚠️ `WEAPON_FAMILIES` ma teraz 5 rodzin (50 broni). Trójząb nie zostawia ręki na tarczę (`leavesHandForShield`).
+- ⚠️ Kontrakt core: akcja `net` (`CombatAction`), `Fighter.net?: boolean` (sieć jeszcze w ręce), zdarzenie `{ type: 'net', actor, target, hitChance, hit }`, nowy stan `netted` (1 tura, traci turę jak `stunned`). Rzut: 6 EN, zasięg `NET_RANGE = 4`, szansa 60 + 4 × (Zręczność rzucającego − celu), raz na walkę. `netHitChance()` w `core/combat.ts`.
+- AI: waga `net` w profilach (aggressor 1, defender 1,2, bestie 0), nie rzuca w złapanego/ogłuszonego. Liga srebrna: **Tullia Silver Sash** walczy teraz trójzębem (miała miecz) — pierwszy przeciwnik z siecią.
+- UI: karta „Net” (klawisz **N**, bez numeru — 1–0 zostają) na końcu ataków, widoczna tylko z siecią w ręce. `ActionBar.open(…, hasNet)`.
+- Presenter: krok `net` w `combatPlan`, klip `net_throw` dostał zdarzenie `hit` (f 12); na `swing` ręka pustoszeje (`Look.netThrown`, reset w `reset()`), trafiony gra `hit` + siatka na piersi (`statusBits` → ramka `mesh`), chybienie `dodge` + MISS. Siatka zostaje narysowana do następnej akcji (stan kończy się w tym samym ruchu).
+- Grafika (Blender): `icon_net` w `ui.png` (cały arkusz przerenderowany), `mesh` w `assets/fx/status.png`, obrazki `assets/ui/weapons/trident1..10.png`. ⚠️ **`kit.json` (plik wspólny, przez `build_kit.py`)**: trójząb wydłużony na prośbę goloburda05-hue — teraz co najmniej tak długi jak włócznia na każdym poziomie; klipy `attack_*@trident` mają `reach` 3,4 / 3,4 / 3,2. Atlasy odświeżone.
+- Dev: `?view=arena&weapon=trident5&eweapon=trident5` — postać naprawdę walczy tą bronią.
+
 ### 2026-11-27 22:10 · Claude Code (Mateusz) · #288 / 288-scenariusz-siodmy-krok
 
 Nowa fabuła „Siódmy Krok” (decyzja Mateusza): **świat to zwykłe średniowiecze, papier to tylko styl grafiki** — bez Kodeksu, Pustych, kleju i atramentu jako fabuły.
@@ -1488,9 +1498,29 @@ Nowa fabuła „Siódmy Krok” (decyzja Mateusza): **świat to zwykłe średnio
 - Zamknięte jako zastąpione: #70, #71, #72, #86. Przepisane: #60 (lew i niedźwiedź), #61 (boss z 2. fazą), #67 Kragmoor, #68 mapa, #69 Red Sands.
 - ⚠️ Wszyscy: nowe teksty w grze piszcie już bez papierowego świata (nazwy z sekcji 2 SCENARIUSZ.md). Identyfikatory i nazwy techniczne grafiki (`PaperRig`, cień papieru) zostają.
 
+### 2026-11-27 22:10 · Claude Code (goloburda05-hue) · #65 / 65-tavern
+
+- Tawerna „The Blotted Cup”: nowy budynek `tavern` w `BUILDINGS` (`ui/town.ts`) — klikalny w mieście (był już w `town.json`). Ekran `ui/tavern.ts` + `tavern.css` w ramie `dressRoom` (bez sprzedawcy i bez własnego pokoju — tło `training`; jak będzie NPC/pokój tawerny, wystarczy wpis w `VENDOR_AT` / `ROOM_AT`).
+- Logika w `core/quests.ts` (testy w `quests.test.ts`):
+  - plotki o wymazanych (`tavernRumours`): 2 na raz, zmieniają się co walkę, mroczniejsze odblokowują wygrane w ligach;
+  - 3 zadania poboczne: Open Guard (wygraj bez bloku), Crowd Pleaser (przychylność ≥ 80 na koniec), Quick Work (≤ 8 własnych akcji). Przyjmuje się w tawernie, wykonuje w arenie, nagroda 40 + 10 × poziom złota do odebrania w tawernie;
+  - zakłady na walkę dwóch NPC: stawka 10/25/50, kurs z siły (prowizja domu 10%, min. ×1,2), walka rozgrywana od razu przez rdzeń + AI (`fightBet`). Karta stała do czasu zakładu (nie da się „przewijać” par).
+- ⚠️ Kontrakt zapisu: `SavedCharacter.tavern?: { accepted, completed, claimed, bets }` (walidacja w `save.ts`). Wersja zapisu bez zmian (pole opcjonalne).
+- Arena (`scenes/arena.ts`): po walce kariery `recordQuestBout(tallyBout(...))` przed osiągnięciami; ukończone zadanie → powiadomienie „Tavern”.
+- Każda akcja w tawernie zapisuje grę od razu (przegranego zakładu nie cofnie „Later”), więc ekran ma tylko Leave.
+
 ### 2026-11-27 22:30 · Claude Code (Mateusz) · #288 / 288-scenariusz-siodmy-krok
 
 - Arena z #272 (PR #321) zostaje w nowej fabule jako arena regionu **Kragmoor** („Kopalniany Krąg”); wielka prasa = kruszarka rudy z kopalń. Dopisane w `docs/SCENARIUSZ.md`, sekcja 2.
+
+### 2026-11-27 22:50 · Claude Code (goloburda05-hue) · #294 / 294-rhythm
+
+- Rytm i Siódmy Krok: `src/core/rhythm.ts` (zasady, czyste funkcje) + `updateRhythm` w `core/combat.ts` po każdej akcji. Obie strony mają Rytm 0–100; przy 100 następny atak ma 100% trafienia (`hitChance`, także celowane), po ataku Rytm = 0. Wartości w `RHYTHM_GAIN`.
+- ⚠️ Kontrakt core: `Fighter.rhythm?: number`, `Fighter.lastAction?: CombatAction`, zdarzenie `{ type: 'rhythm', fighter, from, to }`, `FighterSetup.rhythm?: false` (wyłącza, dla symulatora). Testy z dokładną listą zdarzeń muszą uwzględnić `rhythm` (poprawiłem `combat.test.ts`); test stylu profili AI liczy teraz bez Rytmu.
+- HUD: `src/ui/rhythmTrack.ts` — pasek „RHYTHM” z 7 śladami stóp nad paskiem tłumu, przy pełnym pulsuje + „7TH STEP”. `CombatHud.panelTop` uwzględnia nowy pasek (pasek akcji siada wyżej na telefonach).
+- Balans: nowe wiersze w `tools/balance.ts`, wyniki w `docs/BALANS.md` (Rytm daje 3–7 pkt przewagi, ~1 Siódmy Krok na walkę, profile prawie bez zmian).
+- Siódmy Krok w wariancie „pewne trafienie” (`docs/SCENARIUSZ.md` 5.2 dopuszcza ten albo „darmowa akcja + podgląd zamiaru”). Nie zrobione: „trafienie po zwiadzie” (zwiad to #306) i wzrost maks. Rytmu z technikami/poziomem (techniki to #295).
+- ⚠️ #286 (trójząb) dodaje akcję `net` w tym samym `performAction` — kto merguje drugi, ma mały konflikt w `combat.ts`/`types.ts`.
 
 ### 2026-11-28 00:27 · Claude Code (Mateusz) · first-fight-easy
 
@@ -1520,3 +1550,18 @@ Synchronizacja z main (po #325), lokalnie bez konfliktów.
 - Kontrakt danych (jak w `docs/SCENARIUSZ.md` 7): `Dialogue { id, start, nodes }`, `DialogueNode { id, speaker, lines, choices?, next? }`, `Choice { label, requires?, check?, effects?, failEffects?, next?, nextOnFail? }`. Warunki: `attribute`, `reputation`, `flag`/`noFlag`, `gold`, `item`, `ward`. Skutki: `flag`, `reputation`, `gold`, `item`, `recruit`, `loyalty`, `duelBook`. Test: 50% przy atrybucie = trudność, ±8 pkt za punkt, 5–95%; porażka też prowadzi dalej (`nextOnFail`). `*kursywa*` w kwestiach = didaskalia. `dialogueProblems()` sprawdza dane (test przechodzi po wszystkich dialogach).
 - ⚠️ Podopieczni (#301), lojalność i Księga Pojedynków (#293) jeszcze nie istnieją — na razie trzymane we flagach `ward.<id>`, `loyalty.<id>`, `book.<entry>`; te moduły mogą je przejąć.
 - Przykład: Old Hask (6.3) z 4 wyborami (umowa / [Precision %] „Show me first” / [5 gold] kolejka, raz / [Order ≥ 20] wyszarzony). Podgląd: `?view=town&dialogue=old-hask` (parametr w `scenes/town.ts`, bez ruszania `main.ts`). Każdy wybór zapisuje grę od razu. Sama próba Haska to #299.
+### 2026-11-28 02:00 · Claude Code (Mateusz) · #45 / 45-mvp-loop
+
+Przejście całej pętli MVP. Dwie poprawki:
+- Blokada gry: po przegranej gladiator miał 0 HP, kolejne walki zaczynał z 1 HP, a świątynia kosztuje ~20 złota. Bez złota nie było wyjścia (w symulacji: kupno sprzętu przed leczeniem → ~48% prób utykało). Teraz po przegranej wraca do 50% HP za darmo (`recoverFromDefeat` w `core/temple.ts`, wybór Mateusza). Po poprawce symulacja (3 style zakupów × 600 prób) przechodzi ligę Bronze w 100% przy limicie 15 przegranych.
+- Po wygranej walce ligowej „Next opponent” prowadzi do następnego rywala z drabinki (wcześniej losował kopię pokonanego). `src/scenes/arena.ts`.
+- goloburda05-hue: #287 i #286 też ruszają `arena.ts` — przy synchronizacji zostawcie `recoverFromDefeat` przy zapisie po walce i blok `ladder` przed `choice === 'next'`.
+- Zauważone, poza zakresem MVP: drabinka (`ui/leagueRules.ts` `LEAGUES`) pokazuje ligi od Silver wzwyż jako puste, choć `PULPPORT_LEAGUES` ma ich zawodników.
+- Nowe: **dom i nocleg** (prośba Mateusza), żeby nie dało się zablokować zapisu: `core/home.ts` (`sleepAtHome`: +25% pełnego HP, 1 dzień przez `passTime(…, 'rest')`, za darmo), ekran `ui/home.ts`, `home` w `BUILDINGS` (`ui/town.ts`) i przycisk „Home” na górnym pasku miasta — bez budynku na mapie (brak sprite'a; render tylko za zgodą).
+- goloburda05-hue: #287 (tawerna) też rusza `ui/town.ts`; przy konflikcie zostają oba wpisy w `BUILDINGS`.
+- Pełne przejście w czystym Chrome (skrypt klikający jak gracz, bez zmian w zapisie): nowa postać → łatwa walka → 6 walk Bronze (broń, zbroja, trener, świątynia, 2 noce w domu) → fabuła i zwój championa → miasto. Champion pokonany, 0 przegranych w tym przebiegu; wcześniejsze przebiegi słabszej wersji bota przegrywały. W konsoli tylko 404 na `favicon.ico`.
+### 2026-11-28 01:36 · Claude Code (goloburda05-hue) · #65 / 65-tavern
+
+Synchronizacja z main (po #320, #291, #43) i dopasowanie tawerny do „Siódmego Kroku” (`docs/SCENARIUSZ.md`):
+- Nazwa „The Crooked Fredi”, zakłady prowadzi Adi the Odds („Trust Adi.”), zadanie Crowd Pleaser daje Fabian the Lute. Plotki bez papierowych wątków: Fredi i pieśni, Zakon i ostatni Mistrzowie, Old Hask, Corvin Lach, mężczyzna w szarym kapturze; zabity Mistrz dopiero od aktu 2 (`story.act`). Rotacja plotek po `story.day`.
+- `save.ts`: `story` (#291) i `tavern` obok siebie. `arena.ts`: zadania tawerny liczone przed `recordForCareer`, wypłata `payFightReward` (#43) bez zmian.

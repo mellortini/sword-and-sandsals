@@ -1,4 +1,4 @@
-export type StatusKind = 'torn' | 'stunned' | 'burning' | 'soaked' | 'feared' | 'taped' | 'slowed';
+export type StatusKind = 'torn' | 'stunned' | 'burning' | 'soaked' | 'feared' | 'taped' | 'slowed' | 'netted';
 
 export interface StatusTick {
   kind: StatusKind;
@@ -24,6 +24,8 @@ const RULES: Readonly<Record<StatusKind, { turns: number; maxStacks: number }>> 
   feared: { turns: 2, maxStacks: 2 },
   taped: { turns: 3, maxStacks: 3 },
   slowed: { turns: 2, maxStacks: 1 },
+  // #258: caught in a thrown net, the fighter spends the next turn getting out of it
+  netted: { turns: 1, maxStacks: 1 },
 };
 
 export function applyStatus(
@@ -66,7 +68,7 @@ export function tickStatuses(statuses: readonly StatusEffect[], health: number, 
   const soaked = statuses.some((effect) => effect.kind === 'soaked');
   const ticks: StatusTick[] = [];
   let skip = false;
-  for (const kind of ['torn', 'burning', 'taped', 'stunned', 'soaked', 'feared', 'slowed'] as const) {
+  for (const kind of ['torn', 'burning', 'taped', 'stunned', 'netted', 'soaked', 'feared', 'slowed'] as const) {
     const effect = statuses.find((entry) => entry.kind === kind);
     if (!effect || health === 0) continue;
     let delta = 0;
@@ -74,7 +76,7 @@ export function tickStatuses(statuses: readonly StatusEffect[], health: number, 
     if (kind === 'burning') delta = -(soaked ? 2 : 4) * effect.stacks;
     if (kind === 'taped') delta = 3 * effect.stacks;
     const nextHealth = Math.max(0, Math.min(maxHealth, health + delta));
-    const skipped = kind === 'stunned';
+    const skipped = kind === 'stunned' || kind === 'netted';
     ticks.push({ kind, healthDelta: nextHealth - health, turnsRemaining: effect.turns - 1, skipped });
     health = nextHealth;
     skip ||= skipped;

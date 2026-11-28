@@ -159,7 +159,7 @@ export async function showTown({ app, world, params, add, kit, ui }: SceneContex
   const bar = document.createElement('div');
   bar.className = 'town-bar';
   bar.innerHTML = `<span class="town-bar__who"></span>
-    <button type="button" data-act="gear">Gear</button><button type="button" data-act="menu">Menu</button>`;
+    <button type="button" data-act="home">Home</button><button type="button" data-act="gear">Gear</button><button type="button" data-act="menu">Menu</button>`;
   Object.assign(bar.style, {
     position: 'fixed', top: '12px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '12px', alignItems: 'center',
     padding: '8px 16px', background: 'rgba(246,236,214,0.92)', border: '2px solid #b98350', borderRadius: '10px',
@@ -173,7 +173,7 @@ export async function showTown({ app, world, params, add, kit, ui }: SceneContex
   hud();
   bar.addEventListener('click', (e) => {
     const act = (e.target as HTMLElement).closest('button')?.dataset.act;
-    if (act === 'gear') void visit('gear');
+    if (act === 'gear' || act === 'home') void visit(act);
     else if (act === 'menu') location.search = '?view=title';
   });
 

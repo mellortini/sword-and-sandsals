@@ -11,7 +11,7 @@ import type { CombatWeapon } from './weapons';
 export type FighterSide = 'player' | 'enemy';
 export type AttackKind = 'quick' | 'normal' | 'power' | 'charge';
 export type MoveKind = 'step_forward' | 'step_back' | 'jump' | 'charge' | 'knockback';
-export type CombatAction = AttackKind | Exclude<MoveKind, 'knockback'> | 'block' | 'rest' | 'taunt';
+export type CombatAction = AttackKind | Exclude<MoveKind, 'knockback'> | 'block' | 'rest' | 'taunt' | 'net';
 
 export interface Attributes {
   might: number;
@@ -40,6 +40,8 @@ export interface FighterSetup {
   weapon?: string;
   statusResistances?: StatusResistances;
   slots?: CombatSlots;
+  /** `false` fights without Rhythm (#294): the balance tools measure what it changes */
+  rhythm?: boolean;
   skills?: readonly SkillId[];
   position?: number;
 }
@@ -79,6 +81,8 @@ export interface Fighter {
   weapon?: CombatWeapon;
   /** a shield in the off hand; a two-handed weapon (spear, hammer) leaves no hand for one */
   shield?: FighterShield;
+  /** the trident's net still in the other hand (#258): one throw a bout, then the trident fights alone */
+  net?: boolean;
   position: number;
   health: number;
   energy: number;
@@ -86,6 +90,10 @@ export interface Fighter {
   counterReady: boolean;
   tauntPenalty: number;
   consecutiveMisses: number;
+  /** Rhythm 0-100 (#294); at 100 the next attack cannot miss. Undefined = this fighter has no Rhythm */
+  rhythm?: number;
+  /** the fighter's last action, for the Rhythm's variety and repetition */
+  lastAction?: CombatAction;
   crowd: CrowdStanding;
   statuses: readonly StatusEffect[];
   statusResistances: StatusResistances;
@@ -104,7 +112,7 @@ export interface CombatState {
 export interface ActionOption {
   action: CombatAction;
   energyCost: number;
-  /** Percentage from 5 to 100 for attacks. */
+  /** Percentage from 5 to 100 for attacks; for the net throw (#258), the chance to catch the opponent. */
   hitChance?: number;
   /** Percentage to block a landed strike, for the Block action (#274): lower without a whole shield. */
   blockChance?: number;
@@ -139,9 +147,13 @@ export type CombatEvent =
       severed?: true;
     }
   | { type: 'energy'; fighter: FighterSide; from: number; to: number }
+  /** the Rhythm moved (#294); `to: 100` = the Seventh Step, a drop to 0 after an attack = the step was used */
+  | { type: 'rhythm'; fighter: FighterSide; from: number; to: number }
   | { type: 'block'; fighter: FighterSide }
   | { type: 'rest'; fighter: FighterSide; restored: number }
   | { type: 'taunt'; actor: FighterSide; target: FighterSide; penalty: number }
+  /** the trident's net thrown (#258); `hit` = the target is caught (`netted`) and loses its next turn */
+  | { type: 'net'; actor: FighterSide; target: FighterSide; hitChance: number; hit: boolean }
   | { type: 'crowd_gift'; fighter: FighterSide; gift: CrowdGift; amount: number }
   | ({ type: 'status'; fighter: FighterSide } & StatusTick)
   | { type: 'slot'; actor: FighterSide; target: FighterSide; slot: number; item: CombatItemId; healthDelta: number }

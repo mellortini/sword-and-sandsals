@@ -22,3 +22,6 @@
   .temple__remedies { grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .temple__heal { flex-wrap: wrap; padding: 6px 10px; }
 }
+
+/* the home screen (#45) has one action: centred, not in the two columns of Later and Keep */
+.home .forge__actions { grid-template-columns: 1fr; width: min(100%, 220px); }

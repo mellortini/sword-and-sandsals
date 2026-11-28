@@ -10,8 +10,9 @@ import { COMBAT_ITEMS, combatSlotOptions, consumeSlotItem, createCombatSlots } f
 import type { CombatSlotAction, CombatSlotOption } from './spells';
 import { attackDamage, attackHitChance, deriveStats, isAttack, resolveAttributes, shieldDamage } from './stats';
 import { advanceStatusDurations, applyStatus, statusModifiers, tickStatuses } from './status';
+import { actorRhythm, clampRhythm, defenderRhythm, onSeventhStep } from './rhythm';
 import type { StatusKind } from './status';
-import { combatWeapon, leavesHandForShield, weaponMove, weaponReach } from './weapons';
+import { carriesNet, combatWeapon, leavesHandForShield, weaponMove, weaponReach } from './weapons';
 import { findShield } from '../data/shields';
 import type {
   ActionOption, ActionResult, AttackKind, AttackStrike, CombatAction, CombatEvent, CombatState,
@@ -23,6 +24,11 @@ export { DEFAULT_WEAPON_REACH as MELEE_RANGE } from './weapons';
 const CHARGE_RANGE = 8;
 const STEP_DISTANCE = 1.6;
 const KNOCKBACK_DISTANCE = 2;
+/** how far the trident's net flies (#258), in logical units beyond contact */
+export const NET_RANGE = 4;
+/** the net's chance before Agility, and the points one point of Agility over the target adds */
+const NET_BASE_CHANCE = 60;
+const NET_PER_AGILITY = 4;
 
 const ENERGY_COSTS: Record<CombatAction, number> = {
   step_forward: 1,
@@ -36,6 +42,7 @@ const ENERGY_COSTS: Record<CombatAction, number> = {
   block: 2,
   rest: 0,
   taunt: 2,
+  net: 6,
 };
 
 const ACTIONS = Object.keys(ENERGY_COSTS) as CombatAction[];
@@ -96,6 +103,7 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     armourByZone: { head: zoneArmour.head + zoneBonus, torso: zoneArmour.torso + zoneBonus, legs: zoneArmour.legs + zoneBonus },
     weapon,
     ...(shieldItem && { shield: { id: shieldItem.id, tier: shieldItem.tier, health: shieldItem.health, maxHealth: shieldItem.health } }),
+    ...(carriesNet(weapon) && { net: true }),
     position: roundPosition(position),
     health: Math.min(health, stats.maxHealth),
     energy: stats.maxEnergy,
@@ -103,6 +111,7 @@ function createFighter(setup: FighterSetup, defaultName: string, defaultPosition
     counterReady: false,
     tauntPenalty: 0,
     consecutiveMisses: 0,
+    ...(setup.rhythm !== false && { rhythm: 0 }),
     crowd: { ...crowd, favour: crowd.favour + bonuses.rules.crowdStart },
     statuses: [],
     statusResistances,
@@ -172,8 +181,10 @@ export function getActionOptions(state: CombatState): ActionOption[] {
     const movement = action === 'step_forward' || action === 'step_back' || action === 'jump' || action === 'charge';
     const energyCost = counter ? 0 : Math.max(0, ENERGY_COSTS[action] - (movement ? fighter.skillRules.moveDiscount : 0));
     if (energyCost > fighter.energy || !isInRange(action, active, fighter.position, distance, meleeRange, movementMultiplier)) continue;
+    if (action === 'net' && !fighter.net) continue;
 
-    options.push(isAttack(action)
+    if (action === 'net') options.push({ action, energyCost, hitChance: netHitChance(fighter, opponent) });
+    else options.push(isAttack(action)
       ? { action, energyCost, hitChance: hitChance(action, fighter, opponent), ...(counter ? { counter: true } : {}) }
       : action === 'block' ? { action, energyCost, blockChance: blockChance(fighter) } : { action, energyCost });
   }
@@ -193,6 +204,8 @@ function isInRange(action: CombatAction, side: FighterSide, position: number, di
     case 'normal':
     case 'power':
       return distance <= meleeRange;
+    case 'net':
+      return distance <= NET_RANGE;
     default:
       return true;
   }
@@ -209,8 +222,21 @@ export function getAttackZoneOptions(state: CombatState, action: AttackKind): At
 function hitChance(kind: AttackKind, attacker: Readonly<Fighter>, defender: Readonly<Fighter>, zone?: HitZone): number {
   const { accuracyPenalty } = statusModifiers(attacker.statuses);
   const targetingPenalty = zone ? ZONE_ACCURACY_PENALTY[zone] : 0;
+  // the Seventh Step (#294): the blow cannot miss
+  if (onSeventhStep(attacker.rhythm)) return 100;
   const base = attackHitChance(kind, attacker.stats, defender.stats, attacker.tauntPenalty + accuracyPenalty + targetingPenalty);
   return protectedHitChance(base, attacker.consecutiveMisses);
+}
+
+/**
+ * Chance (percentage points) that the thrown net catches the target (#258): a nimbler thrower catches more often, a
+ * nimbler target slips it. A taunt or fear spoils the throw like a blow. A raised guard does not stop a net.
+ */
+export function netHitChance(thrower: Readonly<Fighter>, target: Readonly<Fighter>): number {
+  const { accuracyPenalty } = statusModifiers(thrower.statuses);
+  const chance = NET_BASE_CHANCE + NET_PER_AGILITY * (thrower.attributes.agility - target.attributes.agility)
+    - thrower.tauntPenalty - accuracyPenalty;
+  return Math.max(5, Math.min(95, chance));
 }
 
 export function getCombatSlotOptions(state: CombatState): CombatSlotOption[] {
@@ -300,6 +326,15 @@ export function performAction(state: CombatState, command: CombatAction | Target
       opponent.tauntPenalty = fighter.stats.tauntPenalty;
       events.push({ type: 'taunt', actor: side, target: other, penalty: opponent.tauntPenalty });
       break;
+    case 'net': {
+      // one net a bout (#258): thrown, caught or not, it is gone and the trident fights alone
+      const chance = option.hitChance ?? 0;
+      const hit = roll() < chance;
+      fighter.net = false;
+      if (hit) opponent.statuses = applyStatus(opponent.statuses, 'netted', opponent.statusResistances);
+      events.push({ type: 'net', actor: side, target: other, hitChance: chance, hit });
+      break;
+    }
   }
 
   let attack: Extract<CombatEvent, { type: 'attack' }> | undefined;
@@ -328,6 +363,8 @@ export function performAction(state: CombatState, command: CombatAction | Target
     }
   }
 
+  updateRhythm(side, fighter, other, opponent, action, option.counter === true, attack, events);
+
   const previousCrowd = fighter.crowd;
   const crowd = scoreCrowdAction(previousCrowd, action, fighter.attributes.charm, attack?.hit, attack?.crit);
   fighter.crowd = crowd.standing;
@@ -340,6 +377,33 @@ export function performAction(state: CombatState, command: CombatAction | Target
   }
 
   return endTurn(fighters, side, other, rngState, events);
+}
+
+/**
+ * The Rhythm after an action (#294): the actor's decision, and the defender's dodge or critical wound. An attack made
+ * on the Seventh Step spends it: the actor starts again from 0.
+ */
+function updateRhythm(
+  side: FighterSide, fighter: Fighter, other: FighterSide, opponent: Fighter, action: CombatAction, counter: boolean,
+  attack: Extract<CombatEvent, { type: 'attack' }> | undefined, events: CombatEvent[],
+) {
+  const previous = fighter.lastAction;
+  fighter.lastAction = action;
+  if (fighter.rhythm !== undefined) {
+    const from = fighter.rhythm;
+    const moved = events.some((e) => e.type === 'move' && e.fighter === side && e.kind !== 'knockback' && e.kind !== 'charge');
+    const to = attack && onSeventhStep(from)
+      ? 0
+      : clampRhythm(from + actorRhythm({ action, previous, counter, moved, hit: (attack?.damage ?? 0) > 0 }));
+    fighter.rhythm = to;
+    if (to !== from) events.push({ type: 'rhythm', fighter: side, from, to });
+  }
+  if (attack && opponent.rhythm !== undefined && opponent.health > 0) {
+    const from = opponent.rhythm;
+    const to = clampRhythm(from + defenderRhythm(attack));
+    opponent.rhythm = to;
+    if (to !== from) events.push({ type: 'rhythm', fighter: other, from, to });
+  }
 }
 
 function endTurn(
