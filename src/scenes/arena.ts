@@ -5,7 +5,7 @@ import { passTime } from '../core/story';
 import type { TargetedAttack } from '../core/hitZones';
 import { saveGame } from '../core/save';
 import type { CombatSlotAction } from '../core/spells';
-import { settleTempleCombat, templeCombatSlots } from '../core/temple';
+import { recoverFromDefeat, settleTempleCombat, templeCombatSlots } from '../core/temple';
 import type { SavedCharacter } from '../core/save';
 import type { Attributes, CombatAction, EquipmentLoadout, FighterSide } from '../core/types';
 import type { Look } from '../rig/PaperRig';
@@ -32,6 +32,7 @@ import { recordForCareer } from '../ui/achievementRules';
 import { showAchievements, showNotice } from '../ui/achievementToast';
 import { afterBout } from '../ui/nemesisRules';
 import { nextBout, recordLeagueWin } from '../ui/leagueRules';
+import { boutUrl } from '../ui/leagues';
 import { sceneAfter } from '../data/story';
 import type { StoryScene } from '../data/story';
 import { playStory } from '../ui/storyPlayer';
@@ -207,7 +208,9 @@ export async function showArena(
       if (career) {
         // health after the bout and the potions left (#191) go to the save with the XP
         // and a bout takes a day of the story calendar (#291)
-        const settled = passTime(settleTempleCombat(career, outcome.state.fighters.player), 'fight');
+        const afterSand = settleTempleCombat(career, outcome.state.fighters.player);
+        // a defeat leaves half health (#45), so the next bout can always be fought
+        const settled = passTime(outcome.state.winner === 'enemy' ? recoverFromDefeat(afterSand) : afterSand, 'fight');
         // achievements (#203): the bout first, then the level it ended on; the result screen keeps working on `after`
         const fightId = `${Date.now().toString(36)}-${seed}`;
         // the nemesis (#209): a victor becomes one, beating it ends the feud; a rematch fights the updated one
@@ -254,6 +257,12 @@ export async function showArena(
       if (choice === 'leave') {
         // a career fight goes back to the town (#30); a quick bout to the title
         location.search = career ? '?view=town' : '?view=title';
+        return;
+      }
+      // after a won league bout "Next opponent" is the next fighter on the ladder (#45)
+      const ladder = choice === 'next' && enemy.bout && career && outcome.state.winner === 'player' ? nextBout(career) : undefined;
+      if (ladder) {
+        location.search = boutUrl(ladder.bout.id);
         return;
       }
       if (choice === 'next') {

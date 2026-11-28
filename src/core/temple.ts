@@ -37,6 +37,19 @@ export function buyTempleRemedy(character: SavedCharacter, id: TempleRemedy): Te
   return { ok: true, character: updated, price };
 }
 
+/** The share of full health a beaten gladiator is back to when leaving the sand (#45). */
+export const DEFEAT_RECOVERY = 0.5;
+
+/**
+ * A beaten gladiator is patched up to half health for free. Without it a loss with an empty purse locked the game:
+ * every later bout started at 1 HP, so there was no way to earn the temple's price. The rest still costs gold.
+ */
+export function recoverFromDefeat(character: SavedCharacter): SavedCharacter {
+  const { health, maxHealth } = templeHealingQuote(character);
+  const floor = Math.ceil(maxHealth * DEFEAT_RECOVERY);
+  return health < floor ? { ...character, health: floor } : character;
+}
+
 export function templeCombatSlots(inventory: readonly string[]): CombatSlots {
   const potion = (id: TempleRemedy) => {
     const quantity = inventory.filter((item) => item === id).length;

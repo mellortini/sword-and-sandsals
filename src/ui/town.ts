@@ -1,9 +1,11 @@
 /// <reference types="vite/client" />
 import type { SavedCharacter } from '../core/save';
+import { sleepQuote } from '../core/home';
 import { templeHealingQuote } from '../core/temple';
 import { openEnchanter } from './enchanter';
 import { openForge } from './forge';
 import { openGear } from './gear';
+import { openHome } from './home';
 import { openLeagues } from './leagues';
 import { ladderNote } from './leagueRules';
 import { careerLoadout } from './gearRules';
@@ -50,6 +52,11 @@ export const BUILDINGS: readonly Building[] = [
     id: 'temple', name: 'Glue Temple', purpose: 'Mend wounds, buy remedies',
     note: (c) => { const { health, maxHealth } = templeHealingQuote(c); return health < maxHealth ? `wounded · ${health} / ${maxHealth} HP` : 'no wounds'; },
     open: openTemple,
+  },
+  {
+    id: 'home', name: 'Home', purpose: 'Sleep off your wounds for free',
+    note: (c) => { const { health, maxHealth, day } = sleepQuote(c); return health < maxHealth ? `day ${day} · wounded` : `day ${day} · rested`; },
+    open: openHome,
   },
   {
     id: 'trainer', name: 'Trainer', purpose: 'Place points, reset training',
