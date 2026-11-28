@@ -1589,3 +1589,9 @@ Grafika odciętej ręki z tarczą (dokończenie #275, na tej samej zasadzie co o
 - Rig: `Look.armLoose` = rysuj TYLKO przedramię z dłonią/tarczą, z rozdartą górą. Przy `armCut` ramię dostaje kikut (body → `cut_arm_up` + sloty stump).
 - `src/ui/looseArm.ts`: `LooseArm.create(rig, renderer, floorY)` kopiuje przedramię z kukły w pozie z chwili cięcia (druga kukła z `armLoose`, narysowana raz), potem leci od ciosu, obraca się, odbija i kładzie płasko na piasku; leży do `fx.clear()`. `FxLayer.addLimb()`.
 - Prezenter: `PresenterOptions.renderer?` (arena podaje `app.renderer`); `sever()` przy gore włączonym tworzy `LooseArm`, a dopiero potem chowa rękę. Bez renderera / floorY ręka znika jak dotąd. Gore `off` bez zmian.
+
+### 2026-11-28 13:16 · Claude Code (Mateusz) · #332 / 332-arm-cut-art
+
+Kikut krwawi do końca walki (prośba Mateusza):
+- ⚠️ Core: nowy status `bleeding` (`core/status.ts`): `turns: Infinity`, 1 stack, co turę `-stumpBleed(maxHealth)` = 3% maks. HP, min. 2. Nakładany przy odcięciu ręki obok `torn`, bez odporności i bez leczenia (Staples czyści tylko `torn`). Kto robi mapy `Record<StatusKind, …>` — jest nowa wartość.
+- Wygląd: co ~1,7 s z kikuta zbiera się i spada kropla krwi (`statusBits`, klatka `blood` w `assets/fx/status.png`, `blender/status_fx.py`, dodana na końcu arkusza — reszta klatek bez zmian). `StatusFx` pokazuje ją tylko, gdy `rig.look.armCut` (przy gore off ręka zostaje, więc nic nie kapie, ale HP dalej spada).

@@ -49,4 +49,15 @@ describe('status effects on the fighters (#50)', () => {
     const drop = (t: number) => statusBits([{ kind: 'soaked', stacks: 1 }], t).find((b) => b.frame === 'drop')!.wy!;
     expect(drop(0.5)).toBeLessThan(drop(0.2));
   });
+
+  it('drips gently from the stump of a cut-off arm (#332): one drop, swelling, then falling', () => {
+    const at = (t: number) => statusBits([{ kind: 'bleeding', stacks: 1 }], t);
+    for (const t of [0, 0.4, 1.0, 1.5]) {
+      const bits = at(t);
+      expect(bits).toHaveLength(1);
+      expect(bits[0]).toMatchObject({ frame: 'blood', bone: 'arm_b_up', upright: true });
+    }
+    expect(at(0.8)[0].scale).toBeGreaterThan(at(0.1)[0].scale);
+    expect(at(1.6)[0].wy!).toBeLessThan(at(1.1)[0].wy!);
+  });
 });
