@@ -3,6 +3,7 @@ import type { Texture } from 'pixi.js';
 import { startMusic } from '../audio/music';
 import { saveGame } from '../core/save';
 import type { SavedCharacter } from '../core/save';
+import { addFonts } from '../ui/counter';
 import { lookPreview } from '../ui/lookPreview';
 import { BUILDINGS, visitBuilding } from '../ui/town';
 import { openDialogue } from '../ui/dialogue';
@@ -158,16 +159,17 @@ export async function showTown({ app, world, params, add, kit, ui }: SceneContex
   ui.innerHTML = '';
   const bar = document.createElement('div');
   bar.className = 'town-bar';
-  bar.innerHTML = `<span class="town-bar__who"></span>
+  bar.innerHTML = `<span class="town-bar__who"><b></b><small></small></span>
+    <span class="town-bar__gold"><i aria-hidden="true"></i><b></b><span class="town-bar__sr">gold</span></span>
     <button type="button" data-act="home">Home</button><button type="button" data-act="gear">Gear</button><button type="button" data-act="menu">Menu</button>`;
-  Object.assign(bar.style, {
-    position: 'fixed', top: '12px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '12px', alignItems: 'center',
-    padding: '8px 16px', background: 'rgba(246,236,214,0.92)', border: '2px solid #b98350', borderRadius: '10px',
-    fontFamily: 'Georgia, serif', color: '#3a2320', fontSize: '18px', zIndex: '5',
-  });
+  addFonts();
   document.body.append(bar);
   const hud = () => {
-    bar.querySelector('.town-bar__who')!.textContent = gladiator ? `${gladiator.name} · level ${gladiator.level} · ${gladiator.gold} gold` : 'Preview';
+    bar.querySelector('.town-bar__who b')!.textContent = gladiator ? gladiator.name : 'Preview';
+    bar.querySelector('.town-bar__who small')!.textContent = gladiator ? `level ${gladiator.level}` : '';
+    const gold = bar.querySelector<HTMLElement>('.town-bar__gold')!;
+    gold.hidden = !gladiator;
+    gold.querySelector('b')!.textContent = gladiator ? String(gladiator.gold) : '';
     bar.title = gladiator ? townNote(gladiator) : '';
   };
   hud();

@@ -190,8 +190,6 @@ SWORDS = {t: globals()[f'sword{t}'] for t in range(1, 11)}
 # Two-handed weapons: where the BACK hand holds the haft, in weapon-bone units (front hand = origin).
 # build_kit writes it into kit.json (sprite 'grip2'); PaperRig bends the back arm to reach it.
 GRIP2 = {'spear': (-1.8, 0.0), 'hammer': (-1.5, 0.0)}
-# set by weapon_icons.py: builders may change proportions for the shop pictures (never for the kit)
-ICON = False
 
 
 # Same tier ladder as the swords. The axe and hammer are held at the end of the haft, the spear on the shaft
@@ -310,8 +308,6 @@ def spear(t):
         k = 0.88 + 0.03 * t
         x0, x1 = -2.4, 4.73 + 0.01 * t   # held at the butt end: ~6.6 units ahead of the front hand
         grips = (0.0, GRIP2['spear'][0])
-        if ICON:   # shop picture: a short shaft, so the head is big enough to see
-            x0, x1, grips = -1.2, 2.3 + 0.01 * t, (0.0,)
         w = 0.18
         _haft(c, t, x0, x1 + 0.1, w, grips=grips)
         _butt(c, t, x0, w)
@@ -411,8 +407,6 @@ def trident(t):
         k = 0.9 + 0.025 * t
         # #258: as long as a spear (the prongs reach past its point), still held in one hand
         x0, x1 = -2.4, 5.15 + 0.03 * t
-        if ICON:   # shop picture: a shorter shaft, so the prongs are big enough to see
-            x0, x1 = -1.2, 2.6 + 0.01 * t
         w = 0.16
         _haft(c, t, x0, x1, w)
         _butt(c, t, x0, w)

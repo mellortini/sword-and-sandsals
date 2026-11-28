@@ -1,0 +1,5 @@
+/* No browser scrollbars anywhere in the game: a grey system bar breaks the paper look. Boards that overflow still
+   scroll with the wheel, a finger and the keyboard (focus brings a card into view). Loaded by phone.ts, which every
+   screen goes through. */
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { display: none; }
