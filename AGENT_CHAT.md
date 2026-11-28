@@ -1544,12 +1544,12 @@ Synchronizacja z main (po #325), lokalnie bez konfliktów.
 - Sprawdzone w przeglądarce na testowym zapisie: wygrana z nowicjuszem (złoto 50 → 70, dzień 1 → 2), „Next opponent” daje zwykłego przeciwnika, przegrana (bez zwoju i złota, dzień 3), champion Bronze → Escape nie zamyka zwoju z bronią, „Leave it” nie dodaje broni (złoto 70 → 105).
 - goloburda05-hue: #287 i #286 też ruszają `arena.ts` — po merge'u tego PR przy synchronizacji zostawcie `payFightReward` w miejscu `applyFightExperience`.
 
-### 2026-11-28 02:50 · Claude Code (goloburda05-hue) · #292 / 292-dialogue
+### 2026-11-28 01:36 · Claude Code (goloburda05-hue) · #65 / 65-tavern
 
-- Dialogi z wyborami: rdzeń `src/core/dialogue.ts` (czyste funkcje), dane `src/data/dialogues/` (rejestr `DIALOGUES` w `index.ts`), okno `src/ui/dialogue.ts` + `dialogue.css`.
-- Kontrakt danych (jak w `docs/SCENARIUSZ.md` 7): `Dialogue { id, start, nodes }`, `DialogueNode { id, speaker, lines, choices?, next? }`, `Choice { label, requires?, check?, effects?, failEffects?, next?, nextOnFail? }`. Warunki: `attribute`, `reputation`, `flag`/`noFlag`, `gold`, `item`, `ward`. Skutki: `flag`, `reputation`, `gold`, `item`, `recruit`, `loyalty`, `duelBook`. Test: 50% przy atrybucie = trudność, ±8 pkt za punkt, 5–95%; porażka też prowadzi dalej (`nextOnFail`). `*kursywa*` w kwestiach = didaskalia. `dialogueProblems()` sprawdza dane (test przechodzi po wszystkich dialogach).
-- ⚠️ Podopieczni (#301), lojalność i Księga Pojedynków (#293) jeszcze nie istnieją — na razie trzymane we flagach `ward.<id>`, `loyalty.<id>`, `book.<entry>`; te moduły mogą je przejąć.
-- Przykład: Old Hask (6.3) z 4 wyborami (umowa / [Precision %] „Show me first” / [5 gold] kolejka, raz / [Order ≥ 20] wyszarzony). Podgląd: `?view=town&dialogue=old-hask` (parametr w `scenes/town.ts`, bez ruszania `main.ts`). Każdy wybór zapisuje grę od razu. Sama próba Haska to #299.
+Synchronizacja z main (po #320, #291, #43) i dopasowanie tawerny do „Siódmego Kroku” (`docs/SCENARIUSZ.md`):
+- Nazwa „The Crooked Fredi”, zakłady prowadzi Adi the Odds („Trust Adi.”), zadanie Crowd Pleaser daje Fabian the Lute. Plotki bez papierowych wątków: Fredi i pieśni, Zakon i ostatni Mistrzowie, Old Hask, Corvin Lach, mężczyzna w szarym kapturze; zabity Mistrz dopiero od aktu 2 (`story.act`). Rotacja plotek po `story.day`.
+- `save.ts`: `story` (#291) i `tavern` obok siebie. `arena.ts`: zadania tawerny liczone przed `recordForCareer`, wypłata `payFightReward` (#43) bez zmian.
+
 ### 2026-11-28 02:00 · Claude Code (Mateusz) · #45 / 45-mvp-loop
 
 Przejście całej pętli MVP. Dwie poprawki:
@@ -1560,8 +1560,10 @@ Przejście całej pętli MVP. Dwie poprawki:
 - Nowe: **dom i nocleg** (prośba Mateusza), żeby nie dało się zablokować zapisu: `core/home.ts` (`sleepAtHome`: +25% pełnego HP, 1 dzień przez `passTime(…, 'rest')`, za darmo), ekran `ui/home.ts`, `home` w `BUILDINGS` (`ui/town.ts`) i przycisk „Home” na górnym pasku miasta — bez budynku na mapie (brak sprite'a; render tylko za zgodą).
 - goloburda05-hue: #287 (tawerna) też rusza `ui/town.ts`; przy konflikcie zostają oba wpisy w `BUILDINGS`.
 - Pełne przejście w czystym Chrome (skrypt klikający jak gracz, bez zmian w zapisie): nowa postać → łatwa walka → 6 walk Bronze (broń, zbroja, trener, świątynia, 2 noce w domu) → fabuła i zwój championa → miasto. Champion pokonany, 0 przegranych w tym przebiegu; wcześniejsze przebiegi słabszej wersji bota przegrywały. W konsoli tylko 404 na `favicon.ico`.
-### 2026-11-28 01:36 · Claude Code (goloburda05-hue) · #65 / 65-tavern
 
-Synchronizacja z main (po #320, #291, #43) i dopasowanie tawerny do „Siódmego Kroku” (`docs/SCENARIUSZ.md`):
-- Nazwa „The Crooked Fredi”, zakłady prowadzi Adi the Odds („Trust Adi.”), zadanie Crowd Pleaser daje Fabian the Lute. Plotki bez papierowych wątków: Fredi i pieśni, Zakon i ostatni Mistrzowie, Old Hask, Corvin Lach, mężczyzna w szarym kapturze; zabity Mistrz dopiero od aktu 2 (`story.act`). Rotacja plotek po `story.day`.
-- `save.ts`: `story` (#291) i `tavern` obok siebie. `arena.ts`: zadania tawerny liczone przed `recordForCareer`, wypłata `payFightReward` (#43) bez zmian.
+### 2026-11-28 02:50 · Claude Code (goloburda05-hue) · #292 / 292-dialogue
+
+- Dialogi z wyborami: rdzeń `src/core/dialogue.ts` (czyste funkcje), dane `src/data/dialogues/` (rejestr `DIALOGUES` w `index.ts`), okno `src/ui/dialogue.ts` + `dialogue.css`.
+- Kontrakt danych (jak w `docs/SCENARIUSZ.md` 7): `Dialogue { id, start, nodes }`, `DialogueNode { id, speaker, lines, choices?, next? }`, `Choice { label, requires?, check?, effects?, failEffects?, next?, nextOnFail? }`. Warunki: `attribute`, `reputation`, `flag`/`noFlag`, `gold`, `item`, `ward`. Skutki: `flag`, `reputation`, `gold`, `item`, `recruit`, `loyalty`, `duelBook`. Test: 50% przy atrybucie = trudność, ±8 pkt za punkt, 5–95%; porażka też prowadzi dalej (`nextOnFail`). `*kursywa*` w kwestiach = didaskalia. `dialogueProblems()` sprawdza dane (test przechodzi po wszystkich dialogach).
+- ⚠️ Podopieczni (#301), lojalność i Księga Pojedynków (#293) jeszcze nie istnieją — na razie trzymane we flagach `ward.<id>`, `loyalty.<id>`, `book.<entry>`; te moduły mogą je przejąć.
+- Przykład: Old Hask (6.3) z 4 wyborami (umowa / [Precision %] „Show me first” / [5 gold] kolejka, raz / [Order ≥ 20] wyszarzony). Podgląd: `?view=town&dialogue=old-hask` (parametr w `scenes/town.ts`, bez ruszania `main.ts`). Każdy wybór zapisuje grę od razu. Sama próba Haska to #299.
