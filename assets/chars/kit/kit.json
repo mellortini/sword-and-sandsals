@@ -3141,100 +3141,100 @@
    "tint": null
   },
   "weapon_trident1": {
-   "w": 595,
+   "w": 834,
    "h": 96,
    "pivot": [
-    164.97,
+    245.97,
     49.32
    ],
    "tint": null,
    "offhand": "weapon_net"
   },
   "weapon_trident2": {
-   "w": 572,
+   "w": 813,
    "h": 115,
    "pivot": [
-    146.7,
+    227.7,
     57.64
    ],
    "tint": null,
    "offhand": "weapon_net"
   },
   "weapon_trident3": {
-   "w": 577,
+   "w": 818,
    "h": 117,
    "pivot": [
-    146.7,
+    227.7,
     58.88
    ],
    "tint": null,
    "offhand": "weapon_net"
   },
   "weapon_trident4": {
-   "w": 588,
+   "w": 830,
    "h": 118,
    "pivot": [
-    153.9,
+    234.9,
     59.11
    ],
    "tint": null,
    "offhand": "weapon_net"
   },
   "weapon_trident5": {
-   "w": 593,
+   "w": 836,
    "h": 120,
    "pivot": [
-    153.9,
+    234.9,
     60.35
    ],
    "tint": null,
    "offhand": "weapon_net"
   },
   "weapon_trident6": {
-   "w": 597,
+   "w": 841,
    "h": 121,
    "pivot": [
-    153.9,
+    234.9,
     60.58
    ],
    "tint": null,
    "offhand": "weapon_net"
   },
   "weapon_trident7": {
-   "w": 602,
+   "w": 846,
    "h": 123,
    "pivot": [
-    153.9,
+    234.9,
     61.82
    ],
    "tint": null,
    "offhand": "weapon_net"
   },
   "weapon_trident8": {
-   "w": 606,
+   "w": 852,
    "h": 124,
    "pivot": [
-    153.9,
+    234.9,
     62.05
    ],
    "tint": null,
    "offhand": "weapon_net"
   },
   "weapon_trident9": {
-   "w": 621,
+   "w": 868,
    "h": 126,
    "pivot": [
-    164.71,
+    245.71,
     63.29
    ],
    "tint": null,
    "offhand": "weapon_net"
   },
   "weapon_trident10": {
-   "w": 626,
+   "w": 873,
    "h": 127,
    "pivot": [
-    164.71,
+    245.71,
     63.52
    ],
    "tint": null,

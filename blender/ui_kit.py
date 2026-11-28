@@ -183,6 +183,30 @@ def mini_flask():
 
 badge('item', mini_flask)
 
+
+def badge_net():
+    """the trident's net (#258): a flung rope mesh - big diamond gaps, thin brown ropes, lead weights on the hem"""
+    c = sl.new_coll('net')
+    lay(c, pc.ellipse_pts(1.0, 1.0, 72), KRAFT_DK, 0.0, h=0.05)
+    lay(c, sl.torn(pc.ellipse_pts(0.93, 0.93, 48), amp=0.015, seed=3, step=0.06), KRAFT, 0.06, h=0.04)
+    lay(c, sl.torn(pc.ellipse_pts(0.8, 0.8, 48), amp=0.012, seed=6, step=0.06), CREAM, 0.12, h=0.04)
+    outline = pc.xf(pc.blob_pts(0.6, 0.52, 0.08, 5, n=48), -0.04, -0.06, math.radians(-20))
+    holes = []
+    step, r = 0.2, 0.086
+    for i in range(-5, 6):
+        for j in range(-6, 7):
+            cx, cy = i * step + (j % 2) * step / 2, j * step / 2
+            if math.hypot((cx + 0.04) / 0.5, (cy + 0.06) / 0.42) < 1.0:
+                holes.append(list(reversed([(cx + r, cy), (cx, cy + r), (cx - r, cy), (cx, cy - r)])))
+    lay(c, outline, WOOD_DK, 0.2, h=0.04, holes=holes)
+    for i, d in enumerate((195, 235, 275, 315, 150)):
+        a = math.radians(d)
+        lay(c, pc.xf(pc.ellipse_pts(0.075, 0.075, 16), -0.04 + 0.6 * math.cos(a), -0.06 + 0.5 * math.sin(a)), INK, 0.3 + i * 0.05, h=0.04)
+    SPRITES['icon_net'] = (c, ICON_PPU)
+
+
+badge_net()
+
 # ---------------------------------------------------------------- flasks (four sprites with one frame)
 FLASK_PPU = 64.0
 FX0, FY0, FX1, FY1 = -1.05, -1.25, 1.05, 1.75     # shared frame

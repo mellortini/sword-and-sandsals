@@ -14,7 +14,7 @@ describe('shop transactions', () => {
     expect(bronze).toHaveLength(12);   // two tiers of five armour pieces and a shield (#273)
     expect(bronze.every((item) => ('slot' in item || item.id.startsWith('shield')) && item.tier <= 2)).toBe(true);
     const legend = getShopStock('weaponsmith', 'legend');
-    expect(legend).toHaveLength(40);
+    expect(legend).toHaveLength(50);
     expect(legend.every((item) => 'family' in item)).toBe(true);
     expect(legend.some((item) => item.tier === 10)).toBe(true);
   });

@@ -8,6 +8,7 @@
  *  - torn: torn flaps in the paper (one per stack)
  *  - feared: sweat drops flying off the head
  *  - slowed: glue hanging from a hand and a foot
+ *  - netted: the trident's rope net thrown over the chest (#258), swaying a little
  */
 import type { StatusKind } from '../core/status';
 
@@ -88,6 +89,9 @@ export function statusBits(statuses: readonly ShownStatus[], t: number): StatusB
             upright: true, rot: side * (0.4 + p), scale: SIZE * 0.85, alpha: 1 - p,
           });
         }
+        break;
+      case 'netted':
+        out.push({ frame: 'mesh', bone: 'torso', x: 0.35, y: 1.6, rot: 0.15 + 0.04 * Math.sin(t * 2.4), scale: SIZE * 1.15, alpha: 1 });
         break;
       case 'slowed':
         for (const [bone, x, y, i] of [['hand_f', 0.05, -0.7, 0], ['foot_f', 0.5, -0.55, 1]] as const) {

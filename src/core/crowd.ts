@@ -23,6 +23,7 @@ const ACTION_FAVOUR: Readonly<Record<CombatAction, number>> = {
   block: 0,
   rest: -3,
   taunt: 6,
+  net: 5,
 };
 
 export function createCrowdStanding(seed: number): CrowdStanding {

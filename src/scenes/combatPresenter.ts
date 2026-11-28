@@ -101,6 +101,8 @@ export class CombatPresenter {
       // a shield broken in the last bout is whole again (#273), and a cut-off arm is back (#275)
       const shield = state.fighters[side].shield;
       if (a.rig.look.armCut) void a.rig.setLook({ armCut: false });
+      // and the trident's net is back in hand (#258)
+      if (a.rig.look.netThrown) void a.rig.setLook({ netThrown: false });
       if (shield && a.rig.look.shield !== shield.tier) void a.rig.setLook({ shield: shield.tier });
       a.home.x = screenX(this.o.layout, side, state.fighters[side].position);
       a.play('idle', { blend: 0 });
@@ -133,7 +135,10 @@ export class CombatPresenter {
       }
       // the crowd reacts once the action has played out; a bouquet's health is already in `after`
       const gifts = events.filter((e): e is CrowdGiftEvent => e.type === 'crowd_gift');
-      this.showStatuses(after);
+      // a net (#258) costs the caught fighter the turn inside this same action, so the core's state no longer has it:
+      // it stays drawn on them until the next action
+      const caught = new Set(events.flatMap((e) => (e.type === 'status' && e.kind === 'netted' ? [e.fighter] : [])));
+      this.showStatuses(after, caught);
       this.showCrowd(after, gifts);
       this.emit(gifts.length ? gifts : undefined);
     } finally {
@@ -150,8 +155,11 @@ export class CombatPresenter {
     for (const g of gifts) fx.throw(g.gift, g.gift === 'coin' ? 3 : 1, this.o.fighters[g.fighter].rig.view.x, this.o.floorY);
   }
 
-  private showStatuses(state: CombatState) {
-    for (const side of ['player', 'enemy'] as const) this.o.fx.status.set(side, state.fighters[side].statuses);
+  private showStatuses(state: CombatState, netted: ReadonlySet<FighterSide> = new Set()) {
+    for (const side of ['player', 'enemy'] as const) {
+      const statuses = state.fighters[side].statuses;
+      this.o.fx.status.set(side, netted.has(side) ? [...statuses, { kind: 'netted', turns: 0, stacks: 1 }] : statuses);
+    }
   }
 
   /** the bodies show the health the bars show (#284); with gore off they stay unmarked */
@@ -295,6 +303,34 @@ export class CombatPresenter {
         // a raised guard is held (`guard`, looping) until a blow's reaction or the end of the guard lowers it (#273)
         await this.clip(fighters[step.side], step.clip, step.clip === 'guard_up' ? { then: 'guard' } : {});
         return;
+      case 'net': {
+        // the net leaves the hand on the swing and drops over the target on the hit frame (#258); the `netted` status
+        // shows on the target's body when the action ends (statusFx)
+        const thrower = fighters[step.side];
+        const target = fighters[step.target];
+        let reaction: Promise<void> = Promise.resolve();
+        await this.clip(thrower, 'net_throw', {
+          onEvent: (e) => {
+            if (e.type === 'swing') void thrower.rig.setLook({ netThrown: true });
+            if (e.type !== 'hit') return;
+            if (this.o.sound) playFoley(step.hit ? 'hit' : 'miss');
+            if (!step.hit) {
+              const h = this.head(step.target);
+              this.o.fx.show(step.target === 'player' ? 'p' : 'e', new MissText(), h.x + 34 * target.rig.facing, h.y);
+            }
+            if (step.hit && this.shown) {
+              // the net lands: drawn on the target from this frame (#258)
+              const s = this.shown[step.target].statuses;
+              this.o.fx.status.set(step.target, [...s, { kind: 'netted', turns: 1, stacks: 1 }]);
+            }
+            reaction = this.clip(target, step.hit ? 'hit' : 'dodge');
+          },
+        });
+        // a clip without the hit frame (an older kit) still empties the hand
+        if (!thrower.rig.look.netThrown) void thrower.rig.setLook({ netThrown: true });
+        await reaction;
+        return;
+      }
       case 'item':
         // no own clip or pop-up yet: the user pauses as when resting and the target's bar moves when it ends
         await this.clip(fighters[step.side], step.side === step.target ? 'rest' : 'taunt');

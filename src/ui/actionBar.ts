@@ -29,6 +29,7 @@ const ACTION_INFO = {
   block: { label: 'Block', description: 'Take a defensive stance against the next attack. A shield blocks far more often than the blade alone.' },
   rest: { label: 'Rest', description: 'Recover energy for later turns.' },
   taunt: { label: 'Taunt', description: 'Distract the opponent before their next action.' },
+  net: { label: 'Net', description: 'Throw the net: a caught opponent loses the next turn. One net per fight; Agility helps it land.' },
 } satisfies Record<CombatAction, { label: string; description: string }>;
 
 /** What each combat-slot item does, for its card's tooltip (numbers from core/spells.ts). */
@@ -40,6 +41,12 @@ const ITEM_INFO: Readonly<Record<CombatSlotOption['id'], string>> = {
   drench: 'Soak the opponent.',
 };
 const UNAVAILABLE_TEXT = { energy: 'Not enough energy.', arcana: 'Needs more Arcana.' } as const;
+
+/**
+ * The trident's net (#258) has a card of its own at the end of the attacks, shown only while the fighter still holds
+ * the net. It has no number (they stay 1–0 for the ten cards above): key N.
+ */
+export const NET_KEY = 'N';
 
 /** Keyboard key of the n-th card: 1–9, then 0. */
 export const cardKey = (index: number) => String((index + 1) % 10);
@@ -114,6 +121,11 @@ export class ActionBar {
       const row = document.createElement('div');
       row.className = 'action-bar__row';
       for (const action of group.actions) row.append(this.makeCard(action, index++));
+      if (group.title === 'Attack') {
+        const net = this.makeCard('net', index, NET_KEY);
+        net.hidden = true;
+        row.append(net);
+      }
       box.append(title, row);
       this.element.append(box);
     }
@@ -144,10 +156,12 @@ export class ActionBar {
 
   /**
    * The player's turn: these options can be picked, every other card is faded. `slots` are the items in the combat
-   * slots; an unavailable one (energy, Arcana) is shown faded with the reason.
+   * slots; an unavailable one (energy, Arcana) is shown faded with the reason. `hasNet`: the fighter still holds the
+   * trident's net (#258), so its card is on the bar (faded when the opponent is out of reach).
    */
-  open(options: readonly ActionOption[], slots: readonly CombatSlotOption[] = [], aim?: AimInfo) {
+  open(options: readonly ActionOption[], slots: readonly CombatSlotOption[] = [], aim?: AimInfo, hasNet = false) {
     this.options = new Map(options.map((o) => [o.action, o]));
+    this.cards.get('net')!.hidden = !hasNet && !this.options.has('net');
     this.aimInfo = aim;
     this.fillAim();
     for (const [action, card] of this.cards) this.fill(card, action, this.options.get(action));
@@ -189,14 +203,14 @@ export class ActionBar {
     this.element.remove();
   }
 
-  private makeCard(action: CombatAction, index: number) {
+  private makeCard(action: CombatAction, index: number, key = cardKey(index)) {
     const { label, description } = ACTION_INFO[action];
     const card = document.createElement('button');
     card.type = 'button';
     card.className = 'action-card';
     card.dataset.action = action;
     card.style.setProperty('--tilt', `${[-1.2, 0.8, -0.4, 1, -0.8, 0.5, -1, 0.7, -0.5, 1.1][index % 10]}deg`);
-    card.innerHTML = `<span class="action-card__key" aria-hidden="true">${cardKey(index)}</span>`
+    card.innerHTML = `<span class="action-card__key" aria-hidden="true">${key}</span>`
       + `<span class="action-card__icon" data-icon="icon_${action}" aria-hidden="true" hidden></span>`
       + `<span class="action-card__label">${label}</span>`
       + '<span class="action-card__cost"></span><span class="action-card__stamp" aria-hidden="true"></span>';
@@ -325,6 +339,13 @@ export class ActionBar {
   private readonly onKey = (e: KeyboardEvent) => {
     if (this.element.inert || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.target instanceof HTMLElement && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    if (e.key.toLowerCase() === NET_KEY.toLowerCase()) {
+      if (this.options.has('net')) {
+        e.preventDefault();
+        this.pick('net');
+      }
+      return;
+    }
     const aim = AIMS.find((a) => AIM_INFO[a].key.toLowerCase() === e.key.toLowerCase());
     if (aim) {
       e.preventDefault();
