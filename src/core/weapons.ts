@@ -39,9 +39,17 @@ export function combatWeapon(id?: string): CombatWeapon | undefined {
   return { ...weapon, id, damage: weapon.damage + level, ...(enchantment && { enchantment }) };
 }
 
-/** Spears and hammers take both hands (sprite `grip2`, #36): no hand is left for a shield. A dagger is one-handed. */
+/**
+ * Spears and hammers take both hands (sprite `grip2`, #36): no hand is left for a shield. A dagger is one-handed.
+ * The trident's other hand holds the net (#258).
+ */
 export function leavesHandForShield(weapon?: CombatWeapon): boolean {
-  return weapon?.family !== 'spear' && weapon?.family !== 'hammer';
+  return weapon?.family !== 'spear' && weapon?.family !== 'hammer' && weapon?.family !== 'trident';
+}
+
+/** a trident comes to the bout with a net in the other hand (#258), thrown once */
+export function carriesNet(weapon?: CombatWeapon): boolean {
+  return weapon?.family === 'trident';
 }
 
 export function weaponReach(weapon?: CombatWeapon): number {

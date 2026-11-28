@@ -29,7 +29,8 @@ sl.setup(samples=SAMPLES, world_strength=0.46, sun_strength=3.7)
 weapons.ICON = True
 
 jobs = {}
-for fam, table in (('sword', weapons.SWORDS), ('axe', weapons.AXES), ('spear', weapons.SPEARS), ('hammer', weapons.HAMMERS)):
+for fam, table in (('sword', weapons.SWORDS), ('axe', weapons.AXES), ('spear', weapons.SPEARS), ('hammer', weapons.HAMMERS),
+                   ('trident', weapons.TRIDENTS)):
     for t, fn in table.items():     # the families the weaponsmith sells
         jobs[f'{fam}{t}'] = fn
 

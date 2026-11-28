@@ -24,7 +24,7 @@ const REASON_TEXT: Readonly<Record<string, string>> = {
 };
 
 /** what hangs on the weaponsmith's wall, and the armourer's mannequin parts, in plain words */
-const FAMILY_LABEL: Readonly<Record<string, string>> = { sword: 'Swords', axe: 'Axes', spear: 'Spears', hammer: 'Hammers' };
+const FAMILY_LABEL: Readonly<Record<string, string>> = { sword: 'Swords', axe: 'Axes', spear: 'Spears', hammer: 'Hammers', trident: 'Tridents' };
 const SLOT_LABEL: Readonly<Record<EquipSlot | 'shield', string>> = { helmet: 'Helmet', shoulders: 'Shoulders', armor: 'Cuirass', greaves: 'Greaves', boots: 'Boots', shield: 'Shield' };
 /** the armourer's mannequin parts: the five armour slots and the shield (#273) */
 const ARMOURER_PARTS = [...EQUIP_SLOTS, 'shield'] as const;

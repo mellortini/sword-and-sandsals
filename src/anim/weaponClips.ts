@@ -165,7 +165,7 @@ export const WEAPON_CLIPS: Clip[] = [
     ],
   },
   // ------------------------------------------------------------------ trident + net (#254): one-handed thrusts from further away
-  // than a sword (the prongs reach ~1.5 units past a sword's point), and the net thrown from the back hand
+  // than a sword (#258: as long as a spear, the prongs reach ~3.4 units past a sword's point), and the net thrown from the back hand
   {
     name: 'idle@trident', length: 60, loop: true,
     keys: [
@@ -175,7 +175,7 @@ export const WEAPON_CLIPS: Clip[] = [
     ],
   },
   {
-    name: 'attack_quick@trident', length: 12, reach: 1.5,
+    name: 'attack_quick@trident', length: 12, reach: 3.4,
     events: [{ f: 1, type: 'hit' }],
     keys: [
       { f: 0, x: 0.15, ease: 'step', pose: { torso: 4, arm_f_up: 4, arm_f_lo: 104, blade: 6 } },
@@ -185,7 +185,7 @@ export const WEAPON_CLIPS: Clip[] = [
     ],
   },
   {
-    name: 'attack_normal@trident', length: 16, reach: 1.5,
+    name: 'attack_normal@trident', length: 16, reach: 3.4,
     events: [{ f: 2, type: 'hit' }],
     keys: [
       { f: 0, x: 0.1, ease: 'step', pose: { torso: 8, head: 2, arm_f_up: -10, arm_f_lo: 110, blade: 4, arm_b_up: 30, blade_b: 20 } },
@@ -196,7 +196,7 @@ export const WEAPON_CLIPS: Clip[] = [
   },
   {
     // raised over the head, prongs forward, then driven down at the collarbone with the whole body
-    name: 'attack_power@trident', length: 26, reach: 1.3,
+    name: 'attack_power@trident', length: 26, reach: 3.2,
     events: [{ f: 5, type: 'swing' }, { f: 7, type: 'hit' }],
     keys: [
       { f: 0, pose: TRIDENT_READY },
@@ -207,9 +207,10 @@ export const WEAPON_CLIPS: Clip[] = [
     ],
   },
   {
-    // the net: swung back low, then flung forward and up over the enemy (the net stays in hand: the cast is the gesture)
+    // the net: swung back low, then flung forward and up over the enemy; it leaves the hand on `swing` (#258: the
+    // presenter empties the hand there) and lands on the target on `hit`
     name: 'net_throw@trident', length: 24,
-    events: [{ f: 9, type: 'swing' }],
+    events: [{ f: 9, type: 'swing' }, { f: 12, type: 'hit' }],
     keys: [
       { f: 0, pose: TRIDENT_READY },
       { f: 6, x: -0.1, ease: 'out', pose: { torso: 12, head: 4, arm_b_up: -70, arm_b_lo: 20, hand_b: 0, blade_b: 40, arm_f_up: 20, arm_f_lo: 70 } },

@@ -1480,6 +1480,16 @@ Synchronizacja z main (po #285) przed merge'em PR #277.
 - Dźwięk odcinanej ręki (#275) podłączyłem sam: `CombatPresenter.sever()` woła `playSever(mode)`. goloburda05-hue: nie musisz już nic robić z prośby wyżej.
 - Nagranie `shield_thud` gra tylko, gdy cios przyjęła cała tarcza (`attack.shield`). Blok samym ostrzem (#274) ma nowy dźwięk `parry` (dawny syntetyczny brzęk). To odpowiada na moje ostrzeżenie z 20:03.
 
+### 2026-11-27 21:30 · Claude Code (goloburda05-hue) · #258 / 258-trident-net
+
+- Trójząb w zasadach walki: rodzina `trident` w `data/weapons.ts` (10 poziomów, kłute, zasięg **3 jak włócznia**, jedna ręka, Might +1, cena 55% zestawu). Do kupienia u płatnerza broni (półka „Tridents”), do założenia, w nagrodach jak inne rodziny. ⚠️ `WEAPON_FAMILIES` ma teraz 5 rodzin (50 broni). Trójząb nie zostawia ręki na tarczę (`leavesHandForShield`).
+- ⚠️ Kontrakt core: akcja `net` (`CombatAction`), `Fighter.net?: boolean` (sieć jeszcze w ręce), zdarzenie `{ type: 'net', actor, target, hitChance, hit }`, nowy stan `netted` (1 tura, traci turę jak `stunned`). Rzut: 6 EN, zasięg `NET_RANGE = 4`, szansa 60 + 4 × (Zręczność rzucającego − celu), raz na walkę. `netHitChance()` w `core/combat.ts`.
+- AI: waga `net` w profilach (aggressor 1, defender 1,2, bestie 0), nie rzuca w złapanego/ogłuszonego. Liga srebrna: **Tullia Silver Sash** walczy teraz trójzębem (miała miecz) — pierwszy przeciwnik z siecią.
+- UI: karta „Net” (klawisz **N**, bez numeru — 1–0 zostają) na końcu ataków, widoczna tylko z siecią w ręce. `ActionBar.open(…, hasNet)`.
+- Presenter: krok `net` w `combatPlan`, klip `net_throw` dostał zdarzenie `hit` (f 12); na `swing` ręka pustoszeje (`Look.netThrown`, reset w `reset()`), trafiony gra `hit` + siatka na piersi (`statusBits` → ramka `mesh`), chybienie `dodge` + MISS. Siatka zostaje narysowana do następnej akcji (stan kończy się w tym samym ruchu).
+- Grafika (Blender): `icon_net` w `ui.png` (cały arkusz przerenderowany), `mesh` w `assets/fx/status.png`, obrazki `assets/ui/weapons/trident1..10.png`. ⚠️ **`kit.json` (plik wspólny, przez `build_kit.py`)**: trójząb wydłużony na prośbę goloburda05-hue — teraz co najmniej tak długi jak włócznia na każdym poziomie; klipy `attack_*@trident` mają `reach` 3,4 / 3,4 / 3,2. Atlasy odświeżone.
+- Dev: `?view=arena&weapon=trident5&eweapon=trident5` — postać naprawdę walczy tą bronią.
+
 ### 2026-11-27 22:10 · Claude Code (Mateusz) · #288 / 288-scenariusz-siodmy-krok
 
 Nowa fabuła „Siódmy Krok” (decyzja Mateusza): **świat to zwykłe średniowiecze, papier to tylko styl grafiki** — bez Kodeksu, Pustych, kleju i atramentu jako fabuły.

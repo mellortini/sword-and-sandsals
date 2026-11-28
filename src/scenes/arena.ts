@@ -89,7 +89,8 @@ const pause = (sec: number) => new Promise<void>((r) => setTimeout(r, sec * 1000
  * The arena fight (#12): the player picks from the action bar (#147), the opponent's AI (#6) answers after a short pause,
  * CombatPresenter animates every action and the HUD follows. The menu opens only when the player's action can be chosen,
  * never during an animation. At 0 HP the result screen offers a rematch or the way back to the title.
- * Pre-fight passes the two gladiators it showed; a direct visit (`?view=arena[&tier=N][&ai=aggressor|defender][&shield=N][&eshield=N]`) uses random ones.
+ * Pre-fight passes the two gladiators it showed; a direct visit (`?view=arena[&tier=N][&ai=aggressor|defender][&shield=N][&eshield=N]
+ * [&weapon=id][&eweapon=id]`) uses random ones.
  */
 export async function showArena(
   context: SceneContext, fighters?: readonly [ArenaFighter, ArenaFighter], options: ArenaOptions = {},
@@ -105,7 +106,13 @@ export async function showArena(
   const tp = params.get('tier');
   const tier = tp ? +tp : undefined;
   // a direct visit may hand out shields (#273): `&shield=3&eshield=6` (the look's shield becomes a real one in the bout)
-  const shieldOf = (key: string) => (params.has(key) ? { shield: +params.get(key)! } : {});
+  const shieldOf = (key: string) => ({
+    ...(params.has(key) && { shield: +params.get(key)! }),
+    // and weapons (#258): `&weapon=trident5&eweapon=sword3`
+    ...(params.has(key.replace('shield', 'weapon')) && { weapon: params.get(key.replace('shield', 'weapon'))! }),
+  });
+  /** a direct visit's `&weapon=` / `&eweapon=` is the weapon really fought with, not only shown */
+  const devLoadout = (look: Look, key: string) => ({ ...loadoutFromLook(look), ...(params.has(key) && { weapon: look.weapon }) });
   // &might=17&emight=5: try fighters of different Might (and so of different height)
   const mightOf = (key: string) => (params.has(key) ? { attributes: { might: Math.max(0, Math.floor(+params.get(key)!) || 0) } } : {});
   const [player, firstEnemy]: readonly [ArenaFighter, ArenaFighter] = fighters ?? [
@@ -159,7 +166,7 @@ export async function showArena(
     choose = resolve;
     // aimed attacks (#195): the zone chances of this turn and the opponent's armour per zone
     const zones = (['quick', 'normal', 'power'] as const).flatMap((a) => getAttackZoneOptions(state, a));
-    menu.open(options, slots, { zones, armour: state.fighters.enemy.armourByZone });
+    menu.open(options, slots, { zones, armour: state.fighters.enemy.armourByZone }, state.fighters.player.net === true);
   });
 
   ui.innerHTML = '<a href="?view=title">title</a> · <a href="?view=prefight">new opponent</a> · '
@@ -182,13 +189,13 @@ export async function showArena(
           name: player.name, attributes: career?.attributes ?? player.attributes,
           level: career?.level ?? player.level,
           // the saved gladiator fights with the gear screen's gear (#197): weapon, forge levels, enchantments
-          equipment: career ? careerLoadout(career) : loadoutFromLook(player.look),
+          equipment: career ? careerLoadout(career) : devLoadout(player.look, 'weapon'),
           // skills learned on the skill screen (#54) work in the fight
           skills: career?.skills,
           // health carries over between bouts and potions from the temple sit in the combat slots (#191)
           ...(career && { health: boutStartHealth(career.health), slots: templeCombatSlots(career.inventory) }),
         },
-        { name: enemy.name, attributes: enemy.attributes, level: enemy.level, equipment: enemy.equipment ?? loadoutFromLook(enemy.look) });
+        { name: enemy.name, attributes: enemy.attributes, level: enemy.level, equipment: enemy.equipment ?? devLoadout(enemy.look, 'eweapon') });
       presenter.reset(start);
       menu.setVisible(true);
       fighting = true;

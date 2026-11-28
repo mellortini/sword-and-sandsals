@@ -26,6 +26,7 @@ const WEAPON_WEIGHT: Readonly<Record<WeaponFamily, number>> = {
   axe: 1.5,
   spear: 1.5,
   hammer: 2,
+  trident: 1.5,
 };
 
 export function equipItem(inventory: Inventory, id: string, character: EquipRequirements, hand: HandSlot = 'weapon'): InventoryChange {
